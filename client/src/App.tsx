@@ -47,6 +47,13 @@ function App() {
     correctDecisions: 0,
     totalDecisions: 0
   });
+  const [verificationProgress, setVerificationProgress] = useState({
+    accountLookedUp: false,
+    nameVerified: false,
+    dobVerified: false,
+    signatureCompared: false,
+    transactionProcessed: false
+  });
   const [bankDatabase] = useState<Record<string, BankRecord>>({
     "720997541": {
       name: "Jennifer M. Rodriguez",
@@ -471,9 +478,12 @@ function App() {
         setTimeout(() => typeMessage(`ON FILE: ${fileNameValue}`), 300);
         setTimeout(() => {
           const match = value.toUpperCase() === fileNameValue.toUpperCase();
-          typeMessage(`RESULT: ${match ? 'NAME MATCHED' : 'NAME MISMATCH - VERIFY DOCUMENT'}`);
+          typeMessage(`RESULT: ${match ? '✓ NAME MATCHED' : '✗ NAME MISMATCH - VERIFY DOCUMENT'}`);
           if (!match) playGlitchTone();
-          else playDataBeep();
+          else {
+            playDataBeep();
+            setVerificationProgress(prev => ({ ...prev, nameVerified: true }));
+          }
         }, 600);
         break;
 
@@ -483,9 +493,12 @@ function App() {
         setTimeout(() => typeMessage(`ON FILE: ${fileDobValue}`), 300);
         setTimeout(() => {
           const match = value === fileDobValue;
-          typeMessage(`RESULT: ${match ? 'DOB MATCHED' : 'DOB MISMATCH - VERIFY DOCUMENT'}`);
+          typeMessage(`RESULT: ${match ? '✓ DOB MATCHED' : '✗ DOB MISMATCH - VERIFY DOCUMENT'}`);
           if (!match) playGlitchTone();
-          else playDataBeep();
+          else {
+            playDataBeep();
+            setVerificationProgress(prev => ({ ...prev, dobVerified: true }));
+          }
         }, 600);
         break;
 
@@ -526,6 +539,9 @@ function App() {
     setTimeout(() => typeMessage(`SIGNATURE ON FILE: ${accountRecord.signature}`), 300);
     setTimeout(() => typeMessage('VISUALLY COMPARE WITH DOCUMENT SIGNATURE'), 600);
     setTimeout(() => typeMessage('TYPE APPROVE or REJECT based on comparison'), 900);
+    setTimeout(() => {
+      setVerificationProgress(prev => ({ ...prev, signatureCompared: true }));
+    }, 1200);
     playDataBeep();
   };
 
@@ -682,6 +698,9 @@ function App() {
         setTimeout(() => typeMessage(`BALANCE: $${record.balance}`), 2400);
         setTimeout(() => typeMessage(`STATUS: ${record.accountStatus}`), 2800);
         setTimeout(() => typeMessage('=== END RECORD ==='), 3200);
+        setTimeout(() => {
+          setVerificationProgress(prev => ({ ...prev, accountLookedUp: true }));
+        }, 3500);
       } else {
         typeMessage('ACCOUNT NOT FOUND');
         playGlitchTone();
@@ -1099,7 +1118,7 @@ function App() {
             </div>
           )}
 
-          {/* Manual Verification Instructions */}
+          {/* Manual Verification Progress */}
           {currentCustomer && (
             <div style={{
               background: 'rgba(0, 50, 0, 0.3)',
@@ -1108,15 +1127,28 @@ function App() {
               marginBottom: '8px',
               borderRadius: '4px'
             }}>
-              <h5 style={{ margin: '0 0 8px 0', color: '#ffaa00', fontSize: '14px' }}>⚠ MANUAL VERIFICATION REQUIRED</h5>
-              <div style={{ fontSize: '12px', color: '#ffcc00', lineHeight: '1.4' }}>
-                <div>1. LOOKUP {currentCustomer.accountNumber}</div>
-                <div>2. Open documents (tap document below)</div>
-                <div>3. VERIFY NAME {currentCustomer.name}</div>
-                <div>4. VERIFY DOB [from ID document]</div>
-                <div>5. COMPARE SIGNATURE</div>
-                <div>6. PROCESS {currentCustomer.transactionType} {currentCustomer.requestedAmount}</div>
-                <div style={{ color: '#ff6666', fontWeight: 'bold' }}>
+              <h5 style={{ margin: '0 0 8px 0', color: '#ffaa00', fontSize: '14px' }}>⚠ MANUAL VERIFICATION CHECKLIST</h5>
+              <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
+                <div style={{ color: verificationProgress.accountLookedUp ? '#00ff00' : '#ffcc00' }}>
+                  {verificationProgress.accountLookedUp ? '✓' : '1.'} LOOKUP {currentCustomer.accountNumber}
+                </div>
+                <div style={{ color: '#aaaaaa' }}>2. Open documents (tap document below)</div>
+                <div style={{ color: verificationProgress.nameVerified ? '#00ff00' : '#ffcc00' }}>
+                  {verificationProgress.nameVerified ? '✓' : '3.'} VERIFY NAME [from customer documents]
+                </div>
+                <div style={{ color: verificationProgress.dobVerified ? '#00ff00' : '#ffcc00' }}>
+                  {verificationProgress.dobVerified ? '✓' : '4.'} VERIFY DOB [from ID document]
+                </div>
+                <div style={{ color: verificationProgress.signatureCompared ? '#00ff00' : '#ffcc00' }}>
+                  {verificationProgress.signatureCompared ? '✓' : '5.'} COMPARE SIGNATURE
+                </div>
+                <div style={{ color: verificationProgress.transactionProcessed ? '#00ff00' : '#ffcc00' }}>
+                  {verificationProgress.transactionProcessed ? '✓' : '6.'} PROCESS {currentCustomer.transactionType} {currentCustomer.requestedAmount}
+                </div>
+                <div style={{ 
+                  color: (verificationProgress.accountLookedUp && verificationProgress.signatureCompared) ? '#ff6666' : '#666666', 
+                  fontWeight: 'bold' 
+                }}>
                   7. TYPE: APPROVE or REJECT
                 </div>
               </div>
