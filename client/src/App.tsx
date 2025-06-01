@@ -663,12 +663,19 @@ function App() {
       </div>
       
       {/* Main Content Area */}
-      <div style={{ display: 'flex', flex: 1, gap: '8px', minHeight: 0 }}>
-        {/* Customer Area - 35% */}
+      <div style={{ 
+        display: 'flex', 
+        flex: 1, 
+        gap: '4px', 
+        minHeight: 0,
+        flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+      }}>
+        {/* Customer Area */}
         <div style={{
-          width: '35%',
+          width: window.innerWidth < 768 ? '100%' : '35%',
+          height: window.innerWidth < 768 ? '25vh' : 'auto',
           border: '2px solid #00ff00',
-          padding: '12px',
+          padding: '8px',
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
