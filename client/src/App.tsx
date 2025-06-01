@@ -571,11 +571,41 @@ function App() {
     }, 1000);
   };
 
-  // Command processing
+  // Command processing with shortcuts
   const processCommand = (command: string) => {
     const parts = command.trim().toUpperCase().split(' ');
-    const action = parts[0];
-    const parameter = parts.slice(1).join(' ');
+    let action = parts[0];
+    let parameter = parts.slice(1).join(' ');
+    
+    // Handle shortcuts
+    switch (action) {
+      case 'L':
+        action = 'LOOKUP';
+        break;
+      case 'VN':
+        action = 'VERIFY';
+        parameter = 'NAME ' + parameter;
+        break;
+      case 'VD':
+        action = 'VERIFY';
+        parameter = 'DOB ' + parameter;
+        break;
+      case 'CS':
+        action = 'COMPARE';
+        parameter = 'SIGNATURE';
+        break;
+      case 'P':
+        action = 'PROCESS';
+        break;
+      case 'A':
+        action = 'APPROVE';
+        parameter = '';
+        break;
+      case 'R':
+        action = 'REJECT';
+        parameter = '';
+        break;
+    }
     
     setTerminalOutput(prev => [...prev, `BANK> ${command}`]);
     playTerminalEnter();
@@ -1204,32 +1234,35 @@ function App() {
 
           {/* Terminal Command Input */}
           <div style={{
-            background: 'rgba(0, 50, 0, 0.5)',
-            border: '2px solid #00aa00',
-            padding: '12px',
-            marginTop: '8px',
-            borderRadius: '4px'
+            background: 'rgba(0, 80, 0, 0.6)',
+            border: '3px solid #00ff00',
+            padding: '16px',
+            marginTop: '12px',
+            borderRadius: '8px',
+            boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)'
           }}>
             <div style={{
-              fontSize: '12px',
-              color: '#00cc00',
-              marginBottom: '6px',
-              fontWeight: 'bold'
+              fontSize: '14px',
+              color: '#ffff00',
+              marginBottom: '8px',
+              fontWeight: 'bold',
+              textAlign: 'center'
             }}>
-              MANUAL COMMANDS: LOOKUP [account] | VERIFY NAME [name] | VERIFY DOB [date] | COMPARE SIGNATURE | APPROVE | REJECT
+              SHORTCUTS: L [account] | VN [name] | VD [date] | CS | P [type] [amount] | A | R
             </div>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              background: '#001800',
-              border: '2px solid #00ff00',
-              padding: '10px',
-              borderRadius: '4px'
+              background: '#001100',
+              border: '3px solid #00ff00',
+              padding: '16px',
+              borderRadius: '6px',
+              minHeight: '20px'
             }}>
               <span style={{ 
-                marginRight: '10px', 
+                marginRight: '12px', 
                 color: '#00ff88', 
-                fontSize: '16px',
+                fontSize: '20px',
                 fontWeight: 'bold'
               }}>
                 BANK&gt;
@@ -1243,12 +1276,14 @@ function App() {
                   background: 'transparent',
                   border: 'none',
                   color: '#00ff00',
-                  fontFamily: 'inherit',
-                  fontSize: '16px',
+                  fontFamily: 'Courier New, monospace',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
                   outline: 'none',
-                  textShadow: '0 0 2px #00ff00'
+                  textShadow: '0 0 3px #00ff00',
+                  padding: '4px 0'
                 }}
-                placeholder="Type commands here..."
+                placeholder="Type commands or shortcuts..."
               />
             </div>
           </div>
