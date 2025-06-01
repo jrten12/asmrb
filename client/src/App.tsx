@@ -93,8 +93,83 @@ function App() {
   };
 
   const playSound = (type: string) => {
-    // Sound effect placeholder
-    console.log("Playing sound:", type);
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      const createTone = (frequency: number, duration: number, volume: number = 0.1) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + duration);
+      };
+
+      switch (type) {
+        case 'keypress':
+          createTone(800, 0.1, 0.05);
+          break;
+        case 'button_click':
+          createTone(1200, 0.15, 0.1);
+          setTimeout(() => createTone(900, 0.1, 0.05), 50);
+          break;
+        case 'customer_approach':
+          createTone(600, 0.3, 0.08);
+          setTimeout(() => createTone(700, 0.2, 0.06), 150);
+          break;
+        case 'database_lookup':
+          createTone(1000, 0.2, 0.06);
+          setTimeout(() => createTone(1100, 0.15, 0.04), 100);
+          setTimeout(() => createTone(1200, 0.1, 0.03), 200);
+          break;
+        case 'approve':
+          createTone(800, 0.2, 0.08);
+          setTimeout(() => createTone(1000, 0.3, 0.1), 200);
+          break;
+        case 'reject':
+          createTone(400, 0.4, 0.1);
+          setTimeout(() => createTone(350, 0.3, 0.08), 200);
+          break;
+        case 'processing':
+          createTone(900, 0.15, 0.06);
+          setTimeout(() => createTone(950, 0.15, 0.05), 150);
+          setTimeout(() => createTone(1000, 0.2, 0.07), 300);
+          break;
+        case 'stamp':
+          createTone(300, 0.05, 0.15);
+          setTimeout(() => createTone(250, 0.1, 0.1), 50);
+          break;
+        case 'paper_rustle':
+          createTone(1500, 0.03, 0.02);
+          setTimeout(() => createTone(1400, 0.02, 0.015), 30);
+          setTimeout(() => createTone(1600, 0.025, 0.018), 60);
+          break;
+        case 'cash_count':
+          for (let i = 0; i < 5; i++) {
+            setTimeout(() => createTone(400 + i * 50, 0.08, 0.04), i * 120);
+          }
+          break;
+        case 'drawer_open':
+          createTone(200, 0.3, 0.08);
+          setTimeout(() => createTone(180, 0.2, 0.06), 150);
+          break;
+        case 'receipt_print':
+          for (let i = 0; i < 8; i++) {
+            setTimeout(() => createTone(2000, 0.02, 0.03), i * 25);
+          }
+          break;
+        default:
+          createTone(500, 0.1, 0.05);
+      }
+    } catch (error) {
+      console.log("Audio not available:", error);
+    }
   };
 
   const resetVerificationState = () => {
@@ -151,15 +226,22 @@ function App() {
       if (transactionPart.startsWith('WIRE ')) {
         const amount = transactionPart.replace('WIRE ', '');
         setTerminalOutput(prev => [...prev, "> " + command, "Processing wire transfer: $" + amount, "International routing confirmed", "Processing..."]);
+        playSound('processing');
+        setTimeout(() => playSound('receipt_print'), 500);
       } else if (transactionPart.startsWith('DEPOSIT ')) {
         const amount = transactionPart.replace('DEPOSIT ', '');
         setVerificationState(prev => ({...prev, balanceConfirmed: true}));
         setTerminalOutput(prev => [...prev, "> " + command, "Processing deposit: $" + amount, "Funds available for immediate use"]);
+        playSound('cash_count');
+        setTimeout(() => playSound('drawer_open'), 800);
       } else if (transactionPart.startsWith('WITHDRAWAL ')) {
         const amount = transactionPart.replace('WITHDRAWAL ', '');
         setTerminalOutput(prev => [...prev, "> " + command, "Processing withdrawal: $" + amount, "Sufficient funds confirmed"]);
+        playSound('processing');
+        setTimeout(() => playSound('cash_count'), 400);
+        setTimeout(() => playSound('drawer_open'), 800);
       }
-      playSound('processing');
+      setVerificationState(prev => ({...prev, balanceConfirmed: true}));
     } else if (cmd === 'APPROVE') {
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
@@ -177,10 +259,13 @@ function App() {
       
       setTerminalOutput(prev => [...prev, "> " + command, "Transaction APPROVED", "All verifications complete", "Processing payment..."]);
       playSound('approve');
+      setTimeout(() => playSound('stamp'), 300);
+      setTimeout(() => playSound('receipt_print'), 600);
       setTimeout(() => {
         setCurrentCustomer(null);
         resetVerificationState();
         setTerminalOutput(prev => [...prev, "Customer served. Next customer please."]);
+        playSound('paper_rustle');
       }, 2000);
     } else if (cmd === 'REJECT') {
       setTerminalOutput(prev => [...prev, "> " + command, "Transaction REJECTED", "Fraud detected or insufficient documentation"]);
@@ -499,8 +584,10 @@ function App() {
             
             <button
               onClick={() => {
-                handleCommand('LOOKUP');
-                playSound('button_click');
+                if (currentCustomer) {
+                  handleCommand('LOOKUP ' + currentCustomer.accountNumber);
+                  playSound('button_click');
+                }
               }}
               disabled={!currentCustomer}
               style={{
