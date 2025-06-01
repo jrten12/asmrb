@@ -136,33 +136,8 @@ function App() {
   };
 
   const playStampSound = async () => {
-    await initAudio();
-    if (!audioContextRef.current) return;
-    
-    try {
-      const oscillator = audioContextRef.current.createOscillator();
-      const gainNode = audioContextRef.current.createGain();
-      const filter = audioContextRef.current.createBiquadFilter();
-      
-      oscillator.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
-      
-      oscillator.frequency.setValueAtTime(120, audioContextRef.current.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(60, audioContextRef.current.currentTime + 0.2);
-      oscillator.type = 'square';
-      
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(300, audioContextRef.current.currentTime);
-      
-      gainNode.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.5);
-      
-      oscillator.start();
-      oscillator.stop(audioContextRef.current.currentTime + 0.5);
-    } catch (e) {
-      console.log('Audio error:', e);
-    }
+    // Disabled old sound system - sounds will be added later
+    console.log('Stamp sound triggered');
   };
 
   const playRejectBuzzSound = async () => {
@@ -283,9 +258,7 @@ function App() {
     const typeInterval = setInterval(() => {
       if (i < text.length) {
         outputElement.textContent += text.charAt(i);
-        if (Math.random() > 0.7) {
-          playTypingSound();
-        }
+        // Removed old typing sound that was causing arcade pinging
         i++;
         
         setTerminalOutput(prev => {
@@ -784,9 +757,9 @@ function App() {
               <h5 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>VERIFICATION ACTIONS</h5>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                 <button
-                  onClick={async () => {
-                    await initAudio();
-                    playMagneticClickSound();
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     compareField('NAME');
                   }}
                   style={{
@@ -907,9 +880,10 @@ function App() {
           }}>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button
-                onClick={async () => {
-                  await initAudio();
-                  playStampSound();
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('APPROVE clicked');
                   approveTransaction();
                 }}
                 disabled={!currentCustomer}
@@ -929,9 +903,10 @@ function App() {
                 APPROVE
               </button>
               <button
-                onClick={async () => {
-                  await initAudio();
-                  playRejectBuzzSound();
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('REJECT clicked');
                   rejectTransaction();
                 }}
                 disabled={!currentCustomer}
@@ -951,9 +926,10 @@ function App() {
                 REJECT
               </button>
               <button
-                onClick={async () => {
-                  await initAudio();
-                  playMagneticClickSound();
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('NEXT clicked');
                   loadNextCustomer();
                 }}
                 style={{
