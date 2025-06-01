@@ -1,0 +1,41 @@
+
+Build a complete, working browser game called “Teller’s Window” using React.js (with Canvas or SVG as needed) for crisp, retro 2D graphics, designed for iOS and the App Store.
+
+Core gameplay loop:
+	1.	Customers approach with a specific request (deposit, withdraw, transfer, etc.) and present a transaction slip, ID, bank book, and a handwritten signature on the slip.
+	2.	The player must:
+	•	Click and “inspect” all documents, which animate and play satisfying ASMR sounds (paper shuffle, stamping, typing, etc.).
+	•	Type commands into a terminal input at the bottom (e.g., LOOKUP 12345, APPROVE 12345, REJECT 12345), which triggers real, varied retro keyboard and system sounds.
+	•	Upon lookup, display a green-screen customer profile (with photo, DOB, account #, and an on-file signature image).
+	•	Player can visually compare the customer-provided signature image and the on-file signature image before making a decision.
+	•	Some signatures should be forgeries, some legit, with enough variety for replayability.
+	•	The player must also check all doc info (name, account, DOB, etc.) and approve or reject accordingly.
+	3.	Each customer has a randomized persona (name, face, signature, transaction need, sometimes errors/curveballs like mismatched or missing docs, suspicious transfers, fake signatures, or pleas for exceptions).
+	4.	If the player makes a mistake (lets fraud through, rejects legit, enters wrong info, or takes too long), play a clear retro “error” sound and increment mistake counter. Supervisor appears with warnings after too many mistakes.
+	5.	Progressively harder shifts: More doc types, tougher fraud, and new “curveball” scenarios.
+
+UI/UX and Style:
+	•	True CRT/terminal look: monochrome green/amber text, scanlines, subtle screen flicker.
+	•	All documents and UI elements in retro pixel or vector style. Animations for flipping docs, stamping, etc.
+	•	Command line input always present, supports Tab/Enter navigation, blinking cursor.
+	•	Full-screen, immersive design (no browser feel).
+
+Sound Design:
+	•	ASMR-level, varied retro sounds:
+	•	Typewriter keys (randomized per keypress)
+	•	Stamp/approval sound (deep, satisfying)
+	•	Dot-matrix printer for receipts
+	•	Drawer open/close (echoey metal)
+	•	Paper shuffle for switching/inspecting docs
+	•	System beep/buzzer for mistakes
+	•	Background CRT hum
+	•	Use high-quality open-source/free sound files or generate them in code.
+
+Other Requirements:
+	•	Modular code (React components), clean separation of game logic, assets, and sound.
+	•	Include multiple real signature images for both on-file and customer-submitted (drawn or SVG-generated for demo, no stock photos).
+	•	README explaining how to add more customers, signatures, or sounds.
+	•	Do not include multiplayer, social, or network features.
+	•	No filler text, commentary, or TODOs. Output working code only.
+
+If image or sound assets are needed, use inline SVG for signature images and embed royalty-free sound as base64 or fetch from freesound.org with direct URLs.
