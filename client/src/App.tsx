@@ -135,36 +135,37 @@ function App() {
     }
   };
 
-  // ASMR stamp sound - heavy thud
+  // Heavy stamp thud for document approval
   const playApprovalStamp = () => {
-    console.log('ASMR stamp sound');
+    console.log('Heavy stamp sound');
     if (audioContextRef.current) {
       try {
-        // Create heavy stamp thud sound
-        const noise = audioContextRef.current.createBufferSource();
-        const buffer = audioContextRef.current.createBuffer(1, 4410, audioContextRef.current.sampleRate);
-        const output = buffer.getChannelData(0);
-        
-        for (let i = 0; i < 4410; i++) {
-          output[i] = (Math.random() * 2 - 1) * Math.exp(-i / 1000) * 0.3;
-        }
-        
-        noise.buffer = buffer;
+        // Create deep mechanical stamp sound
+        const osc1 = audioContextRef.current.createOscillator();
+        const osc2 = audioContextRef.current.createOscillator();
         const gain = audioContextRef.current.createGain();
-        const lowpass = audioContextRef.current.createBiquadFilter();
+        const filter = audioContextRef.current.createBiquadFilter();
         
-        lowpass.type = 'lowpass';
-        lowpass.frequency.setValueAtTime(200, audioContextRef.current.currentTime);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(150, audioContextRef.current.currentTime);
         
-        noise.connect(lowpass);
-        lowpass.connect(gain);
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
         gain.connect(audioContextRef.current.destination);
         
-        gain.gain.setValueAtTime(0.4, audioContextRef.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.5);
+        osc1.frequency.setValueAtTime(60, audioContextRef.current.currentTime);
+        osc2.frequency.setValueAtTime(45, audioContextRef.current.currentTime);
+        osc1.type = 'square';
+        osc2.type = 'triangle';
         
-        noise.start();
-        noise.stop(audioContextRef.current.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.4);
+        
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioContextRef.current.currentTime + 0.4);
+        osc2.stop(audioContextRef.current.currentTime + 0.4);
       } catch (e) {}
     }
   };
@@ -203,36 +204,20 @@ function App() {
 
 
   const playSoftClick = () => {
-    console.log('ASMR paper rustle');
+    console.log('Soft button click');
     if (audioContextRef.current) {
       try {
-        // Create realistic paper rustling sound
-        const noise = audioContextRef.current.createBufferSource();
-        const buffer = audioContextRef.current.createBuffer(1, 2205, audioContextRef.current.sampleRate);
-        const output = buffer.getChannelData(0);
-        
-        for (let i = 0; i < 2205; i++) {
-          const decay = Math.exp(-i / 800);
-          output[i] = (Math.random() * 2 - 1) * decay * 0.15;
-        }
-        
-        noise.buffer = buffer;
+        // Simple button click
+        const osc = audioContextRef.current.createOscillator();
         const gain = audioContextRef.current.createGain();
-        const bandpass = audioContextRef.current.createBiquadFilter();
-        
-        bandpass.type = 'bandpass';
-        bandpass.frequency.setValueAtTime(2000, audioContextRef.current.currentTime);
-        bandpass.Q.setValueAtTime(3, audioContextRef.current.currentTime);
-        
-        noise.connect(bandpass);
-        bandpass.connect(gain);
+        osc.connect(gain);
         gain.connect(audioContextRef.current.destination);
-        
-        gain.gain.setValueAtTime(0.2, audioContextRef.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
-        
-        noise.start();
-        noise.stop(audioContextRef.current.currentTime + 0.3);
+        osc.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.1);
       } catch (e) {}
     }
   };
@@ -325,34 +310,29 @@ function App() {
   };
 
   const playKeyClick = () => {
-    // ASMR mechanical keyboard click
+    // Mechanical keyboard typing sound
     if (audioContextRef.current) {
       try {
-        // Create two-stage key click (press and release)
-        const noise1 = audioContextRef.current.createBufferSource();
-        const buffer1 = audioContextRef.current.createBuffer(1, 441, audioContextRef.current.sampleRate);
-        const output1 = buffer1.getChannelData(0);
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        const filter = audioContextRef.current.createBiquadFilter();
         
-        for (let i = 0; i < 441; i++) {
-          output1[i] = (Math.random() * 2 - 1) * Math.exp(-i / 100) * 0.1;
-        }
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1200 + Math.random() * 400, audioContextRef.current.currentTime);
+        filter.Q.setValueAtTime(5, audioContextRef.current.currentTime);
         
-        noise1.buffer = buffer1;
-        const gain1 = audioContextRef.current.createGain();
-        const highpass = audioContextRef.current.createBiquadFilter();
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContextRef.current.destination);
         
-        highpass.type = 'highpass';
-        highpass.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+        osc.frequency.setValueAtTime(2000, audioContextRef.current.currentTime);
+        osc.type = 'square';
         
-        noise1.connect(highpass);
-        highpass.connect(gain1);
-        gain1.connect(audioContextRef.current.destination);
+        gain.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.05);
         
-        gain1.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
-        gain1.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
-        
-        noise1.start();
-        noise1.stop(audioContextRef.current.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.05);
       } catch (e) {}
     }
   };
@@ -466,47 +446,9 @@ function App() {
     };
   };
 
-  // Enhanced terminal typing with sound and proper word wrapping
+  // Simple terminal typing without fragmentation
   const typeMessage = (text: string) => {
-    // Split long lines to prevent overflow
-    const maxLineLength = 50;
-    const words = text.split(' ');
-    let currentLine = '';
-    const lines = [];
-    
-    for (const word of words) {
-      if ((currentLine + ' ' + word).length > maxLineLength && currentLine.length > 0) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = currentLine ? currentLine + ' ' + word : word;
-      }
-    }
-    if (currentLine) lines.push(currentLine);
-    
-    // Type each line
-    lines.forEach((line, lineIndex) => {
-      setTimeout(() => {
-        let i = 0;
-        const outputElement = document.createElement('div');
-        setTerminalOutput(prev => [...prev, '']);
-        
-        const typeInterval = setInterval(() => {
-          if (i < line.length) {
-            outputElement.textContent += line.charAt(i);
-            i++;
-            
-            setTerminalOutput(prev => {
-              const newOutput = [...prev];
-              newOutput[newOutput.length - 1] = outputElement.textContent || '';
-              return newOutput;
-            });
-          } else {
-            clearInterval(typeInterval);
-          }
-        }, 25);
-      }, lineIndex * 200);
-    });
+    setTerminalOutput(prev => [...prev, text]);
   };
 
   const checkDocuments = () => {
@@ -1410,34 +1352,56 @@ function App() {
             </div>
           </div>
 
-          {/* Command Input (smaller) */}
+          {/* Enhanced Command Input */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: '#001100',
-            border: '1px solid #004400',
-            padding: '8px',
-            fontSize: '14px',
+            background: 'rgba(0, 50, 0, 0.5)',
+            border: '2px solid #00aa00',
+            padding: '12px',
             marginTop: '8px',
-            minHeight: '36px'
+            borderRadius: '4px'
           }}>
-            <span style={{ marginRight: '8px', color: '#00ff00', fontSize: '14px' }}>CMD&gt;</span>
-            <input
-              ref={inputRef}
-              type="text"
-              style={{
-                flex: 1,
-                background: 'transparent',
-                border: 'none',
-                color: '#00ff00',
-                fontFamily: 'inherit',
-                fontSize: '14px',
-                outline: 'none'
-              }}
-              onKeyDown={handleKeyDown}
-              autoComplete="off"
-              placeholder="Optional commands..."
-            />
+            <div style={{
+              fontSize: '12px',
+              color: '#00cc00',
+              marginBottom: '6px',
+              fontWeight: 'bold'
+            }}>
+              TYPE COMMAND: LOOKUP 910332874 | VERIFY NAME | VERIFY SIGNATURE | APPROVE | REJECT
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: '#001800',
+              border: '2px solid #00ff00',
+              padding: '10px',
+              borderRadius: '4px'
+            }}>
+              <span style={{ 
+                marginRight: '10px', 
+                color: '#00ff88', 
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}>
+                BANK&gt;
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#00ff00',
+                  fontFamily: 'inherit',
+                  fontSize: '16px',
+                  outline: 'none',
+                  textShadow: '0 0 2px #00ff00'
+                }}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+                placeholder="Type account number or command..."
+              />
+            </div>
           </div>
         </div>
       </div>
