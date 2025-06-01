@@ -27,11 +27,12 @@ function App() {
   ]);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [verificationState, setVerificationState] = useState({
-    signatureChecked: false,
     accountLookedUp: false,
-    destinationVerified: false,
-    balanceConfirmed: false,
-    identityVerified: false
+    nameVerified: false,
+    dobVerified: false,
+    addressVerified: false,
+    signatureCompared: false,
+    transactionProcessed: false
   });
   const [signatureModal, setSignatureModal] = useState<{isOpen: boolean, signature: string}>({isOpen: false, signature: ''});
   const [selectedTransactionType, setSelectedTransactionType] = useState<string>('');
@@ -174,11 +175,12 @@ function App() {
 
   const resetVerificationState = () => {
     setVerificationState({
-      signatureChecked: false,
       accountLookedUp: false,
-      destinationVerified: false,
-      balanceConfirmed: false,
-      identityVerified: false
+      nameVerified: false,
+      dobVerified: false,
+      addressVerified: false,
+      signatureCompared: false,
+      transactionProcessed: false
     });
   };
 
@@ -190,81 +192,101 @@ function App() {
       const customer = generateCustomer();
       setCurrentCustomer(customer);
       resetVerificationState();
-      setTerminalOutput(prev => [...prev, "> " + command, "Customer " + customer.name + " approaching window...", "Transaction Type: " + customer.transactionType]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Customer " + customer.name + " approaching window...", "REQUEST: " + customer.transactionType + " $" + customer.requestedAmount, "Please verify identity before processing."]);
       console.log("Generated customer:", customer);
       playSound('customer_approach');
     } else if (cmd === 'LOOKUP' || cmd.startsWith('LOOKUP ')) {
       if (cmd === 'LOOKUP') {
-        setTerminalOutput(prev => [...prev, "> " + command, "LOOKUP initiated.", "Enter: LOOKUP [account_number]"]);
+        setTerminalOutput(prev => [...prev, "> " + command, "Enter account number to verify:", "Usage: LOOKUP [account_number]"]);
       } else {
         const accountNum = cmd.replace('LOOKUP ', '');
-        const isCorrectAccount = currentCustomer && accountNum === currentCustomer.accountNumber;
-        
-        if (isCorrectAccount) {
-          setVerificationState(prev => ({...prev, accountLookedUp: true, identityVerified: true}));
-          setTerminalOutput(prev => [...prev, "> " + command, "Looking up account: " + accountNum, "✓ ACCOUNT VERIFIED - Customer match confirmed", "Name: " + currentCustomer.name, "SIGNATURE ON FILE: [Type SHOW SIGNATURE to view]", "Balance: $" + Math.floor(Math.random() * 50000)]);
-          playSound('database_lookup');
-        } else {
-          setTerminalOutput(prev => [...prev, "> " + command, "Looking up account: " + accountNum, "⚠ ACCOUNT MISMATCH - Check customer documents", "Entered: " + accountNum, "Customer Account: " + (currentCustomer?.accountNumber || 'UNKNOWN')]);
-          playSound('error');
+        if (!currentCustomer) {
+          setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+          return;
         }
+        
+        setVerificationState(prev => ({...prev, accountLookedUp: true}));
+        setTerminalOutput(prev => [...prev, "> " + command, "Database lookup for account: " + accountNum, "Name on file: " + currentCustomer.name, "DOB on file: 1985-03-15", "Address: 123 Main Street, Springfield, IL", "Account status: ACTIVE", "Current balance: $" + Math.floor(Math.random() * 50000), "", "Use VERIFY commands to check customer data"]);
+        playSound('database_lookup');
       }
-    } else if (cmd === 'SHOW SIGNATURE') {
-      if (currentCustomer) {
-        const signature = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature || 'No signature';
-        setSignatureModal({isOpen: true, signature: signature as string});
-        setVerificationState(prev => ({...prev, signatureChecked: true}));
-        setTerminalOutput(prev => [...prev, "> " + command, "Displaying signature for comparison..."]);
-        playSound('modal_open');
+    } else if (cmd.startsWith('VERIFY NAME ')) {
+      const enteredName = cmd.replace('VERIFY NAME ', '');
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
       }
-    } else if (cmd.startsWith('SET DESTINATION ')) {
-      const destination = cmd.replace('SET DESTINATION ', '');
-      setVerificationState(prev => ({...prev, destinationVerified: true}));
-      setTerminalOutput(prev => [...prev, "> " + command, "Destination account set: " + destination, "Destination verified and active"]);
-      playSound('destination_set');
-    } else if (cmd.startsWith('SEND ') && cmd.includes(' TO ')) {
-      const parts = cmd.split(' TO ');
-      const amountPart = parts[0].replace('SEND ', '');
-      const destination = parts[1];
-      setTerminalOutput(prev => [...prev, "> " + command, "Wire transfer prepared:", "Amount: " + amountPart, "Destination: " + destination, "Ready for processing"]);
-      playSound('wire_prepared');
+      
+      const isMatch = enteredName.toUpperCase() === currentCustomer.name.toUpperCase();
+      if (isMatch) {
+        setVerificationState(prev => ({...prev, nameVerified: true}));
+        setTerminalOutput(prev => [...prev, "> " + command, "✓ NAME VERIFIED: " + enteredName, "Customer name matches system records"]);
+        playSound('database_lookup');
+      } else {
+        setTerminalOutput(prev => [...prev, "> " + command, "✗ NAME MISMATCH:", "Entered: " + enteredName, "System: " + currentCustomer.name, "FRAUD ALERT: Name does not match"]);
+        playSound('error');
+      }
+    } else if (cmd.startsWith('VERIFY DOB ')) {
+      const enteredDOB = cmd.replace('VERIFY DOB ', '');
+      const systemDOB = "1985-03-15";
+      
+      if (enteredDOB === systemDOB) {
+        setVerificationState(prev => ({...prev, dobVerified: true}));
+        setTerminalOutput(prev => [...prev, "> " + command, "✓ DOB VERIFIED: " + enteredDOB, "Date of birth matches system records"]);
+        playSound('database_lookup');
+      } else {
+        setTerminalOutput(prev => [...prev, "> " + command, "✗ DOB MISMATCH:", "Entered: " + enteredDOB, "System: " + systemDOB, "FRAUD ALERT: Date of birth does not match"]);
+        playSound('error');
+      }
+    } else if (cmd === 'COMPARE SIGNATURE') {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      const signature = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature || 'No signature';
+      setSignatureModal({isOpen: true, signature: signature as string});
+      setVerificationState(prev => ({...prev, signatureCompared: true}));
+      setTerminalOutput(prev => [...prev, "> " + command, "Displaying signatures for comparison...", "Compare customer signature with system signature"]);
+      playSound('paper_rustle');
     } else if (cmd.startsWith('PROCESS ')) {
       const transactionPart = cmd.replace('PROCESS ', '');
-      if (transactionPart.startsWith('WIRE ')) {
-        const amount = transactionPart.replace('WIRE ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing wire transfer: $" + amount, "International routing confirmed", "Processing..."]);
-        playSound('processing');
-        setTimeout(() => playSound('receipt_print'), 500);
-      } else if (transactionPart.startsWith('DEPOSIT ')) {
+      
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      setVerificationState(prev => ({...prev, transactionProcessed: true}));
+      
+      if (transactionPart.startsWith('DEPOSIT ')) {
         const amount = transactionPart.replace('DEPOSIT ', '');
-        setVerificationState(prev => ({...prev, balanceConfirmed: true}));
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing deposit: $" + amount, "Funds available for immediate use"]);
+        setTerminalOutput(prev => [...prev, "> " + command, "Processing deposit: $" + amount, "Transaction prepared for approval"]);
         playSound('cash_count');
-        setTimeout(() => playSound('drawer_open'), 800);
       } else if (transactionPart.startsWith('WITHDRAWAL ')) {
         const amount = transactionPart.replace('WITHDRAWAL ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing withdrawal: $" + amount, "Sufficient funds confirmed"]);
+        setTerminalOutput(prev => [...prev, "> " + command, "Processing withdrawal: $" + amount, "Transaction prepared for approval"]);
+        playSound('cash_count');
+      } else if (transactionPart.startsWith('WIRE ')) {
+        const amount = transactionPart.replace('WIRE ', '');
+        setTerminalOutput(prev => [...prev, "> " + command, "Processing wire transfer: $" + amount, "International routing confirmed", "Transaction prepared for approval"]);
         playSound('processing');
-        setTimeout(() => playSound('cash_count'), 400);
-        setTimeout(() => playSound('drawer_open'), 800);
       }
-      setVerificationState(prev => ({...prev, balanceConfirmed: true}));
     } else if (cmd === 'APPROVE') {
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
       }
       
-      const required = getRequiredVerifications(currentCustomer.transactionType);
+      const required = ['accountLookedUp', 'nameVerified', 'dobVerified', 'signatureCompared', 'transactionProcessed'];
       const missing = required.filter(req => !verificationState[req as keyof typeof verificationState]);
       
       if (missing.length > 0) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Missing verifications:", ...missing.map(m => "- " + m.replace(/([A-Z])/g, ' $1').toUpperCase())]);
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Cannot approve without verification:", ...missing.map(m => "- " + m.replace(/([A-Z])/g, ' $1').toUpperCase())]);
         playSound('error');
         return;
       }
       
-      setTerminalOutput(prev => [...prev, "> " + command, "Transaction APPROVED", "All verifications complete", "Processing payment..."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "TRANSACTION APPROVED", "All verifications complete", "Processing payment..."]);
       playSound('approve');
       setTimeout(() => playSound('stamp'), 300);
       setTimeout(() => playSound('receipt_print'), 600);
@@ -275,36 +297,26 @@ function App() {
         playSound('paper_rustle');
       }, 2000);
     } else if (cmd === 'REJECT') {
-      setTerminalOutput(prev => [...prev, "> " + command, "Transaction REJECTED", "Fraud detected or insufficient documentation"]);
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      setTerminalOutput(prev => [...prev, "> " + command, "TRANSACTION REJECTED", "Customer dismissed"]);
       playSound('reject');
       setTimeout(() => {
         setCurrentCustomer(null);
         resetVerificationState();
-        setTerminalOutput(prev => [...prev, "Customer dismissed. Next customer please."]);
-      }, 2000);
+        setTerminalOutput(prev => [...prev, "Next customer please."]);
+      }, 1500);
     } else if (cmd === 'HELP') {
-      setTerminalOutput(prev => [...prev, "> " + command, "Available commands:", "LOOKUP [account] - Verify account", "SHOW SIGNATURE - View signature", "SET DESTINATION [account] - Set wire destination", "SEND [amount] TO [account] - Prepare wire", "PROCESS WIRE/DEPOSIT/WITHDRAWAL [amount]", "APPROVE - Approve transaction", "REJECT - Reject transaction"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Manual Verification Commands:", "LOOKUP [account_number] - Get system data", "VERIFY NAME [full_name] - Check name", "VERIFY DOB [YYYY-MM-DD] - Check date of birth", "COMPARE SIGNATURE - View signatures", "PROCESS [DEPOSIT/WITHDRAWAL/WIRE] [amount]", "APPROVE - Approve after all verifications", "REJECT - Reject transaction"]);
     } else {
-      setTerminalOutput(prev => [...prev, "> " + command, "Command processed"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Unknown command. Type HELP for available commands."]);
     }
   };
 
-  const getRequiredVerifications = (transactionType: Customer['transactionType']) => {
-    switch (transactionType) {
-      case 'WIRE_TRANSFER':
-        return ['signatureChecked', 'accountLookedUp', 'destinationVerified', 'identityVerified'];
-      case 'WITHDRAWAL':
-        return ['signatureChecked', 'accountLookedUp', 'balanceConfirmed', 'identityVerified'];
-      case 'DEPOSIT':
-        return ['signatureChecked', 'accountLookedUp', 'identityVerified'];
-      case 'ACCOUNT_UPDATE':
-        return ['signatureChecked', 'accountLookedUp', 'identityVerified'];
-      case 'INQUIRY':
-        return ['accountLookedUp', 'identityVerified'];
-      default:
-        return ['accountLookedUp'];
-    }
-  };
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && inputRef.current) {
@@ -455,8 +467,10 @@ function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px' }}>
                 <button
                   onClick={() => {
-                    handleCommand('PROCESS DEPOSIT ' + (currentCustomer?.requestedAmount || ''));
-                    playSound('button_click');
+                    if (inputRef.current) {
+                      inputRef.current.value = 'VERIFY NAME ';
+                      inputRef.current.focus();
+                    }
                   }}
                   style={{
                     background: 'rgba(0, 60, 0, 0.6)',
@@ -469,12 +483,14 @@ function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  DEPOSIT
+                  VERIFY NAME
                 </button>
                 <button
                   onClick={() => {
-                    handleCommand('PROCESS WITHDRAWAL ' + (currentCustomer?.requestedAmount || ''));
-                    playSound('button_click');
+                    if (inputRef.current) {
+                      inputRef.current.value = 'VERIFY DOB ';
+                      inputRef.current.focus();
+                    }
                   }}
                   style={{
                     background: 'rgba(60, 60, 0, 0.6)',
@@ -487,12 +503,14 @@ function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  WITHDRAW
+                  VERIFY DOB
                 </button>
                 <button
                   onClick={() => {
-                    handleCommand('PROCESS WIRE ' + (currentCustomer?.requestedAmount || ''));
-                    playSound('button_click');
+                    if (inputRef.current) {
+                      inputRef.current.value = 'COMPARE SIGNATURE';
+                      inputRef.current.focus();
+                    }
                   }}
                   style={{
                     background: 'rgba(0, 0, 60, 0.6)',
@@ -505,12 +523,14 @@ function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  WIRE
+                  SIGNATURE
                 </button>
                 <button
                   onClick={() => {
-                    handleCommand('SHOW SIGNATURE');
-                    playSound('button_click');
+                    if (inputRef.current) {
+                      inputRef.current.value = 'PROCESS ' + (currentCustomer?.transactionType || '') + ' ';
+                      inputRef.current.focus();
+                    }
                   }}
                   style={{
                     background: 'rgba(60, 0, 60, 0.6)',
@@ -523,7 +543,7 @@ function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  SIGNATURE
+                  PROCESS
                 </button>
               </div>
             </div>
@@ -541,24 +561,20 @@ function App() {
               <div style={{ fontSize: '12px', marginBottom: '4px', color: '#ffaa00' }}>VERIFICATION STATUS:</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', fontSize: '10px' }}>
                 <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.accountLookedUp ? '✓' : '○'} ACCOUNT
+                  {verificationState.accountLookedUp ? '✓' : '○'} LOOKUP
                 </div>
-                <div style={{ color: verificationState.signatureChecked ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.signatureChecked ? '✓' : '○'} SIGNATURE
+                <div style={{ color: verificationState.nameVerified ? '#00ff00' : '#ffaa00' }}>
+                  {verificationState.nameVerified ? '✓' : '○'} NAME
                 </div>
-                <div style={{ color: verificationState.identityVerified ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.identityVerified ? '✓' : '○'} IDENTITY
+                <div style={{ color: verificationState.dobVerified ? '#00ff00' : '#ffaa00' }}>
+                  {verificationState.dobVerified ? '✓' : '○'} DOB
                 </div>
-                {currentCustomer.transactionType === 'WIRE_TRANSFER' && (
-                  <div style={{ color: verificationState.destinationVerified ? '#00ff00' : '#ffaa00' }}>
-                    {verificationState.destinationVerified ? '✓' : '○'} DESTINATION
-                  </div>
-                )}
-                {currentCustomer.transactionType === 'WITHDRAWAL' && (
-                  <div style={{ color: verificationState.balanceConfirmed ? '#00ff00' : '#ffaa00' }}>
-                    {verificationState.balanceConfirmed ? '✓' : '○'} BALANCE
-                  </div>
-                )}
+                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#ffaa00' }}>
+                  {verificationState.signatureCompared ? '✓' : '○'} SIGNATURE
+                </div>
+                <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#ffaa00' }}>
+                  {verificationState.transactionProcessed ? '✓' : '○'} PROCESS
+                </div>
               </div>
             </div>
           )}

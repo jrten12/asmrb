@@ -1,0 +1,44 @@
+Rebuild the core process logic so that the game operates as a manual fraud detection simulation, where the player must perform all critical actions by typing commands, comparing documents, and verifying identity before processing any transaction. Buttons should assist—not automate—the experience. Do not bypass verification steps, automate approval, or auto-trigger any actions.
+	1.	When a new customer is called, the game should:
+
+	•	Load the customer’s request (deposit, wire, withdrawal, etc.)
+	•	Display their name, account number, request type, and amount at the top
+	•	Load relevant documents into the DOCUMENTS PROVIDED area
+	•	Do nothing else until the player begins verifying data
+
+	2.	The player must manually:
+
+	•	Open the documents
+	•	Read the name, address, DOB, and signature
+	•	Use typed commands to compare those fields against what’s in the system
+
+	3.	Typed command examples:
+
+	•	LOOKUP 407464311 → brings up system data for that customer
+	•	VERIFY NAME Sarah L. Williams
+	•	VERIFY DOB 1985-03-15
+	•	COMPARE SIGNATURE (pulls up side-by-side signatures)
+	•	PROCESS DEPOSIT 4388
+	•	APPROVE or REJECT
+
+No automatic matching or validating should happen unless the player issues the command. The system should wait for the input and give a clear response (e.g., ✔ NAME MATCHED, ✖ DOB DOES NOT MATCH).
+	4.	Buttons must only serve as shortcuts to assist typing—not bypass it:
+
+	•	Tapping “LOOKUP ACCOUNT” should autofill the terminal with LOOKUP  and focus the input field
+	•	Tapping “APPROVE” or “REJECT” should only work after all required fields are manually verified
+	•	“NEXT CUSTOMER” should reset everything only after a decision is made
+
+	5.	Sounds must only play:
+
+	•	When a typed command is submitted (with a clean ASMR-style tone)
+	•	When a document is opened (paper shuffle)
+	•	When APPROVE or REJECT is issued (stamp or buzz)
+Do not play sounds when buttons are tapped unless they’re executing an actual system action
+
+	6.	The game must never allow:
+
+	•	Approving a transaction before manual identity verification
+	•	Triggering fraud detection without comparison
+	•	Advancing to the next customer unless the player completed or rejected the current request
+
+This is a simulation of a teller performing manual fraud detection. The player must do the work—no automation, no passive checking. The system is just a tool. Restore full player control, ensure all logic flows through typed input, and make the buttons act only as helpers—not decision-makers.
