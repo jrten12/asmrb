@@ -100,38 +100,37 @@ function App() {
     }
   };
 
-  const playPaperRustleSound = async () => {
-    await initAudio();
-    if (!audioContextRef.current) return;
-    
-    try {
-      const whiteNoise = audioContextRef.current.createBufferSource();
-      const buffer = audioContextRef.current.createBuffer(1, 2205, audioContextRef.current.sampleRate);
-      const output = buffer.getChannelData(0);
-      
-      for (let i = 0; i < 2205; i++) {
-        output[i] = (Math.random() * 2 - 1) * 0.08;
-      }
-      
-      whiteNoise.buffer = buffer;
-      const gainNode = audioContextRef.current.createGain();
-      const filter = audioContextRef.current.createBiquadFilter();
-      
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1200, audioContextRef.current.currentTime);
-      filter.Q.setValueAtTime(0.8, audioContextRef.current.currentTime);
-      
-      whiteNoise.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(audioContextRef.current.destination);
-      
-      gainNode.gain.setValueAtTime(0.12, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.25);
-      
-      whiteNoise.start();
-      whiteNoise.stop(audioContextRef.current.currentTime + 0.25);
-    } catch (e) {
-      console.log('Audio error:', e);
+  const playPaperRustleSound = () => {
+    // Paper shuffle/rustle for document opening
+    if (audioContextRef.current) {
+      try {
+        const noise = audioContextRef.current.createBufferSource();
+        const buffer = audioContextRef.current.createBuffer(1, 1764, audioContextRef.current.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        for (let i = 0; i < 1764; i++) {
+          const envelope = Math.exp(-i / 500);
+          output[i] = (Math.random() * 2 - 1) * envelope * 0.15;
+        }
+        
+        noise.buffer = buffer;
+        const gain = audioContextRef.current.createGain();
+        const filter = audioContextRef.current.createBiquadFilter();
+        
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1800, audioContextRef.current.currentTime);
+        filter.Q.setValueAtTime(2, audioContextRef.current.currentTime);
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        
+        gain.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.2);
+        
+        noise.start();
+        noise.stop(audioContextRef.current.currentTime + 0.2);
+      } catch (e) {}
     }
   };
 
@@ -451,6 +450,85 @@ function App() {
     setTerminalOutput(prev => [...prev, text]);
   };
 
+  const verifyField = (field: string, value: string) => {
+    if (!currentCustomer) {
+      typeMessage('No customer present');
+      playGlitchTone();
+      return;
+    }
+
+    const accountRecord = bankDatabase[currentCustomer.accountNumber];
+    if (!accountRecord) {
+      typeMessage('Account record not loaded. Use LOOKUP first.');
+      playGlitchTone();
+      return;
+    }
+    
+    switch (field.toUpperCase()) {
+      case 'NAME':
+        const fileNameValue = accountRecord.name;
+        typeMessage(`VERIFYING NAME: ${value}`);
+        setTimeout(() => typeMessage(`ON FILE: ${fileNameValue}`), 300);
+        setTimeout(() => {
+          const match = value.toUpperCase() === fileNameValue.toUpperCase();
+          typeMessage(`RESULT: ${match ? 'NAME MATCHED' : 'NAME MISMATCH - VERIFY DOCUMENT'}`);
+          if (!match) playGlitchTone();
+          else playDataBeep();
+        }, 600);
+        break;
+
+      case 'DOB':
+        const fileDobValue = accountRecord.dob;
+        typeMessage(`VERIFYING DOB: ${value}`);
+        setTimeout(() => typeMessage(`ON FILE: ${fileDobValue}`), 300);
+        setTimeout(() => {
+          const match = value === fileDobValue;
+          typeMessage(`RESULT: ${match ? 'DOB MATCHED' : 'DOB MISMATCH - VERIFY DOCUMENT'}`);
+          if (!match) playGlitchTone();
+          else playDataBeep();
+        }, 600);
+        break;
+
+      case 'ADDRESS':
+        const fileAddressValue = accountRecord.address;
+        typeMessage(`VERIFYING ADDRESS: ${value}`);
+        setTimeout(() => typeMessage(`ON FILE: ${fileAddressValue}`), 300);
+        setTimeout(() => {
+          const match = value.toUpperCase().includes(fileAddressValue.toUpperCase()) || 
+                       fileAddressValue.toUpperCase().includes(value.toUpperCase());
+          typeMessage(`RESULT: ${match ? 'ADDRESS MATCHED' : 'ADDRESS MISMATCH - VERIFY DOCUMENT'}`);
+          if (!match) playGlitchTone();
+          else playDataBeep();
+        }, 600);
+        break;
+
+      default:
+        typeMessage('Invalid field. Use NAME, DOB, or ADDRESS');
+        playGlitchTone();
+    }
+  };
+
+  const compareSignature = () => {
+    if (!currentCustomer) {
+      typeMessage('No customer present');
+      playGlitchTone();
+      return;
+    }
+
+    const accountRecord = bankDatabase[currentCustomer.accountNumber];
+    if (!accountRecord) {
+      typeMessage('Account record not loaded. Use LOOKUP first.');
+      playGlitchTone();
+      return;
+    }
+
+    typeMessage('COMPARING SIGNATURES...');
+    setTimeout(() => typeMessage(`SIGNATURE ON FILE: ${accountRecord.signature}`), 300);
+    setTimeout(() => typeMessage('VISUALLY COMPARE WITH DOCUMENT SIGNATURE'), 600);
+    setTimeout(() => typeMessage('TYPE APPROVE or REJECT based on comparison'), 900);
+    playDataBeep();
+  };
+
   const checkDocuments = () => {
     if (!currentCustomer) {
       typeMessage('No customer present');
@@ -506,16 +584,18 @@ function App() {
           }
           break;
         case 'VERIFY':
-          if (parameter === 'NAME') {
-            compareField('NAME');
-          } else if (parameter === 'DOB') {
-            compareField('DOB');
-          } else if (parameter === 'SIGNATURE') {
-            compareField('SIGNATURE');
-          } else if (parameter && !isNaN(parseInt(parameter))) {
-            verifyAmount(parseInt(parameter));
+          const verifyParts = parameter.split(' ');
+          const fieldType = verifyParts[0];
+          const fieldValue = verifyParts.slice(1).join(' ');
+          
+          if (fieldType === 'NAME' && fieldValue) {
+            verifyField('NAME', fieldValue);
+          } else if (fieldType === 'DOB' && fieldValue) {
+            verifyField('DOB', fieldValue);
+          } else if (fieldType === 'ADDRESS' && fieldValue) {
+            verifyField('ADDRESS', fieldValue);
           } else {
-            typeMessage('ERROR: Specify NAME, DOB, SIGNATURE, or amount');
+            typeMessage('ERROR: Use VERIFY NAME [name] | VERIFY DOB [date] | VERIFY ADDRESS [address]');
             playGlitchTone();
           }
           break;
@@ -542,19 +622,29 @@ function App() {
           }
           break;
         case 'WITHDRAW':
-          if (parameter && !isNaN(parseInt(parameter))) {
-            typeMessage(`WITHDRAWAL TRANSACTION: $${parameter}`);
-            playDataBeep();
+        case 'PROCESS':
+          if (parameter.startsWith('WITHDRAWAL') || parameter.startsWith('DEPOSIT') || parameter.startsWith('TRANSFER')) {
+            const parts = parameter.split(' ');
+            const type = parts[0];
+            const amount = parts[1];
+            if (amount && !isNaN(parseInt(amount))) {
+              typeMessage(`PROCESSING ${type}: $${amount}`);
+              typeMessage(`VERIFY ACCOUNT BALANCE AND AUTHORIZATION`);
+              playDataBeep();
+            } else {
+              typeMessage('ERROR: Specify amount - PROCESS WITHDRAWAL 500');
+              playGlitchTone();
+            }
           } else {
-            typeMessage('ERROR: Specify withdrawal amount');
+            typeMessage('ERROR: Use PROCESS WITHDRAWAL/DEPOSIT/TRANSFER [amount]');
             playGlitchTone();
           }
           break;
-        case 'CHECK':
-          if (parameter === 'FORM') {
-            checkDocuments();
+        case 'COMPARE':
+          if (parameter === 'SIGNATURE') {
+            compareSignature();
           } else {
-            typeMessage('ERROR: Use CHECK FORM to scan documents');
+            typeMessage('ERROR: Use COMPARE SIGNATURE');
             playGlitchTone();
           }
           break;
@@ -1366,7 +1456,7 @@ function App() {
               marginBottom: '6px',
               fontWeight: 'bold'
             }}>
-              TYPE COMMAND: LOOKUP 910332874 | VERIFY NAME | VERIFY SIGNATURE | APPROVE | REJECT
+              MANUAL COMMANDS: LOOKUP [account] | VERIFY NAME [name] | VERIFY DOB [date] | COMPARE SIGNATURE | APPROVE | REJECT
             </div>
             <div style={{
               display: 'flex',

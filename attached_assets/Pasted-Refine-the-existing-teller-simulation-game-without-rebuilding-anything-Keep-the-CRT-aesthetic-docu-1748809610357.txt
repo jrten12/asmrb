@@ -1,0 +1,29 @@
+Refine the existing teller simulation game without rebuilding anything. Keep the CRT aesthetic, document system, customer queue, and overall structure intact. This is a functionality and interaction pass only.
+
+The game must remove all automatic verification. The system should not check or confirm any customer data by itself. The player (teller) must manually review the form submitted by the customer, then type each piece of information into the terminal to verify it against the bank’s records. No data should be processed or matched unless the player explicitly types a command.
+
+The customer’s form must contain their name, account number, date of birth, address, signature, transaction type, and amount. The player should be required to manually input this info using commands like:
+
+LOOKUP [account number]
+VERIFY NAME [name]
+VERIFY DOB [date]
+VERIFY ADDRESS [address]
+COMPARE SIGNATURE
+PROCESS WITHDRAWAL [amount]
+APPROVE
+REJECT
+NEXT
+
+The system should respond in the CRT terminal log with confirmations or mismatches. Example responses might include: “NAME MATCHED,” “DOB MISMATCH – VERIFY DOCUMENT,” “SIGNATURE ON FILE: [show value],” or “ACCOUNT NOT FOUND.”
+
+The APPROVE, REJECT, and NEXT buttons must work correctly and update the game state, score, and customer queue. Pressing them must not cause the screen to shift or bug out. Each must trigger a distinct, appropriate sound and visible log message confirming the action.
+
+All commands should be typed into a fixed terminal input bar at the bottom of the screen, with a blinking cursor and a scrolling log above it. The interface must allow the player to keep the form and bank terminal visible together, or toggle between them easily, especially on mobile.
+
+Replace the broken or arcade-style sound system with immersive, ASMR-style effects. Every action must have a unique, short, satisfying sound: typing triggers soft mechanical key clicks; entering a valid command triggers a clean confirmation ping; invalid entries play a glitchy buzz; approving a transaction plays a deep stamp sound; rejections trigger a low error tone; opening a document triggers a paper shuffle; opening a signature triggers a pen scratch.
+
+Each sound must be connected to its specific action, work on iOS and mobile browsers, and never loop or override other sounds. No shared audio between commands.
+
+Ensure that all text and elements are easily readable and touch-accessible on mobile screens. The layout must be adjusted so that customer data, typed commands, and document content never cover or interfere with one another.
+
+Do not rebuild any logic. This is a refinement pass that hands full control over verification and processing to the player, making them responsible for typing every piece of information into the system, just like an old-school bank teller terminal.
