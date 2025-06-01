@@ -934,12 +934,23 @@ function App() {
         playTerminalEnter();
         processCommand(command);
         e.currentTarget.value = '';
+        // Scroll input back into view on mobile
+        setTimeout(() => {
+          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
       }
     } else if (e.key.length === 1) {
       // Play key click for every character typed
       await initAudio();
       playKeyClick();
     }
+  };
+
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Ensure input stays visible when keyboard appears
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 300);
   };
 
   const handleDocumentClick = async (index: number) => {
@@ -1212,7 +1223,10 @@ function App() {
             padding: '16px',
             marginTop: '12px',
             borderRadius: '8px',
-            boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)'
+            boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)',
+            position: 'sticky',
+            bottom: '0px',
+            zIndex: 1000
           }}>
             <div style={{
               fontSize: '14px',
@@ -1244,6 +1258,7 @@ function App() {
                 ref={inputRef}
                 type="text"
                 onKeyDown={handleKeyDown}
+                onFocus={handleInputFocus}
                 style={{
                   flex: 1,
                   background: 'transparent',
@@ -1256,7 +1271,7 @@ function App() {
                   textShadow: '0 0 3px #00ff00',
                   padding: '4px 0'
                 }}
-                placeholder="Type commands or shortcuts..."
+                placeholder="Type commands here..."
               />
             </div>
           </div>
