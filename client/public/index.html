@@ -5,151 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teller's Window - 1980s Bank Simulation</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Courier Prime', monospace;
+            font-family: 'Courier New', monospace;
             background: #000;
             color: #00ff00;
             overflow: hidden;
-            user-select: none;
         }
         
-        .crt-container {
-            position: relative;
+        .bank-terminal {
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(ellipse at center, #111 0%, #000 70%);
+            background: radial-gradient(circle, #002200 0%, #000 100%);
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .crt-screen {
-            width: 95%;
-            height: 95%;
-            background: #001100;
-            border: 3px solid #333;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.1);
-        }
-        
-        .scanlines {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 255, 0, 0.03) 2px,
-                rgba(0, 255, 0, 0.03) 4px
-            );
-            pointer-events: none;
-            animation: flicker 0.15s infinite linear alternate;
-        }
-        
-        @keyframes flicker {
-            0% { opacity: 1; }
-            100% { opacity: 0.97; }
-        }
-        
-        .game-interface {
-            display: flex;
-            height: 100%;
+            flex-direction: column;
             padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #00ff00;
+            padding: 10px;
+            background: rgba(0, 50, 0, 0.3);
+        }
+        
+        .game-area {
+            display: flex;
+            flex: 1;
             gap: 20px;
         }
         
-        .customer-area {
+        .customer-window {
             flex: 1;
-            background: rgba(0, 50, 0, 0.3);
-            border: 2px solid #004400;
+            border: 2px solid #00ff00;
             padding: 15px;
-            border-radius: 8px;
+            background: rgba(0, 40, 0, 0.2);
         }
         
-        .terminal-area {
+        .terminal-window {
             flex: 1;
-            background: rgba(0, 50, 0, 0.3);
-            border: 2px solid #004400;
+            border: 2px solid #00ff00;
             padding: 15px;
-            border-radius: 8px;
+            background: rgba(0, 40, 0, 0.2);
             display: flex;
             flex-direction: column;
         }
         
-        .customer-info {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(0, 100, 0, 0.1);
-            border: 1px solid #006600;
-            border-radius: 4px;
-        }
-        
-        .documents-area {
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        .document {
-            background: rgba(0, 80, 0, 0.2);
-            border: 1px solid #008800;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .document:hover {
-            background: rgba(0, 120, 0, 0.3);
-            border-color: #00aa00;
-        }
-        
-        .document.selected {
-            background: rgba(0, 150, 0, 0.4);
-            border-color: #00ff00;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-        }
-        
         .terminal-output {
             flex: 1;
-            background: rgba(0, 30, 0, 0.5);
-            border: 1px solid #003300;
-            padding: 15px;
+            background: #001100;
+            border: 1px solid #004400;
+            padding: 10px;
             overflow-y: auto;
+            margin-bottom: 10px;
             font-size: 14px;
             line-height: 1.4;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-        
-        .terminal-input-area {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 30, 0, 0.5);
-            border: 1px solid #003300;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        .prompt {
-            color: #00ff00;
-            margin-right: 10px;
         }
         
         .terminal-input {
+            display: flex;
+            align-items: center;
+            background: #001100;
+            border: 1px solid #004400;
+            padding: 8px;
+        }
+        
+        .prompt {
+            margin-right: 10px;
+            color: #00ff00;
+        }
+        
+        .input-field {
             flex: 1;
             background: transparent;
             border: none;
@@ -160,12 +88,11 @@
         }
         
         .cursor {
-            display: inline-block;
             width: 8px;
             height: 16px;
             background: #00ff00;
-            margin-left: 5px;
             animation: blink 1s infinite;
+            margin-left: 5px;
         }
         
         @keyframes blink {
@@ -173,427 +100,329 @@
             51%, 100% { opacity: 0; }
         }
         
-        .status-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 50, 0, 0.8);
-            padding: 8px 20px;
-            font-size: 12px;
-            border-top: 1px solid #004400;
+        .customer-info {
+            background: rgba(0, 60, 0, 0.3);
+            border: 1px solid #006600;
+            padding: 10px;
+            margin-bottom: 15px;
         }
         
-        .help-text {
-            font-size: 11px;
-            color: #008800;
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(0, 40, 0, 0.3);
-            border-radius: 4px;
-        }
-        
-        .signature-display {
-            background: rgba(0, 60, 0, 0.2);
+        .document {
+            background: rgba(0, 50, 0, 0.2);
+            border: 1px solid #005500;
             padding: 8px;
             margin: 5px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .document:hover {
+            background: rgba(0, 80, 0, 0.4);
+        }
+        
+        .document.selected {
+            background: rgba(0, 120, 0, 0.5);
+            border-color: #00aa00;
+        }
+        
+        .status-bar {
+            background: rgba(0, 60, 0, 0.8);
             border: 1px solid #006600;
-            border-radius: 4px;
-            font-style: italic;
-        }
-        
-        .transaction-result {
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 4px;
+            padding: 8px;
+            margin-top: 10px;
             text-align: center;
-            font-weight: bold;
-        }
-        
-        .success {
-            background: rgba(0, 150, 0, 0.3);
-            border: 2px solid #00aa00;
-            color: #00ff00;
-        }
-        
-        .error {
-            background: rgba(150, 0, 0, 0.3);
-            border: 2px solid #aa0000;
-            color: #ff4444;
         }
     </style>
 </head>
 <body>
-    <div class="crt-container">
-        <div class="crt-screen">
-            <div class="scanlines"></div>
+    <div class="bank-terminal">
+        <div class="header">
+            <h2>FIRST NATIONAL BANK - TELLER STATION #3</h2>
+            <div>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
+        </div>
+        
+        <div class="game-area">
+            <div class="customer-window">
+                <h3>CUSTOMER WINDOW</h3>
+                <div class="customer-info" id="customer-info">
+                    <div>Waiting for next customer...</div>
+                </div>
+                
+                <h4>DOCUMENTS PROVIDED:</h4>
+                <div id="documents-area"></div>
+            </div>
             
-            <div class="game-interface">
-                <!-- Customer/Documents Area -->
-                <div class="customer-area">
-                    <div class="customer-info" id="customer-info">
-                        <h3>CURRENT CUSTOMER</h3>
-                        <div id="customer-details">Waiting for next customer...</div>
-                    </div>
-                    
-                    <div class="documents-area">
-                        <h4>DOCUMENTS PROVIDED:</h4>
-                        <div id="documents-list"></div>
+            <div class="terminal-window">
+                <h3>BANK TERMINAL</h3>
+                <div class="terminal-output" id="terminal">
+                    <div style="color: #00ff00;">
+                        ========================================<br>
+                        FIRST NATIONAL BANK SYSTEM v2.1<br>
+                        TELLER AUTHENTICATION: APPROVED<br>
+                        FRAUD DETECTION: ACTIVE<br>
+                        ========================================<br><br>
+                        SYSTEM READY - AWAITING CUSTOMER<br>
+                        Type HELP for commands
                     </div>
                 </div>
                 
-                <!-- Terminal Area -->
-                <div class="terminal-area">
-                    <div class="terminal-output" id="terminal-output">
-                        <div style="color: #00ff00; font-weight: bold;">
-                            ═══════════════════════════════════════════════════════════════════════
-                            ║                    FIRST NATIONAL BANK TERMINAL                    ║
-                            ║                         TELLER STATION #3                         ║
-                            ║                        SYSTEM VERSION 2.1                         ║
-                            ═══════════════════════════════════════════════════════════════════════
-                        </div>
-                        <br>
-                        <div>TERMINAL READY - AWAITING CUSTOMER</div>
-                        <div>Type HELP for available commands</div>
-                    </div>
-                    
-                    <div class="terminal-input-area">
-                        <span class="prompt">TELLER></span>
-                        <input type="text" class="terminal-input" id="terminal-input" 
-                               placeholder="Enter command..." autocomplete="off">
-                        <span class="cursor"></span>
-                    </div>
-                    
-                    <div class="help-text">
-                        COMMANDS: PROCESS | EXAMINE [doc] | LOOKUP [account] | VERIFY [amount] | ENTER [data] | APPROVE | REJECT | HELP
-                    </div>
+                <div class="terminal-input">
+                    <span class="prompt">BANK></span>
+                    <input type="text" class="input-field" id="command-input" autocomplete="off">
+                    <span class="cursor"></span>
                 </div>
             </div>
-            
-            <div class="status-bar">
-                <span id="game-status">Score: 0 | Transactions: 0 | Time: 08:30:00</span>
-            </div>
+        </div>
+        
+        <div class="status-bar" id="status">
+            Score: 0 | Transactions: 0 | Accuracy: 100% | Time: 08:30:00
         </div>
     </div>
 
     <script>
-        // Sound system
-        const sounds = {};
+        // Enhanced sound system with real typewriter sounds
+        const soundContext = new (window.AudioContext || window.webkitAudioContext)();
         
-        function initSounds() {
-            const soundFiles = {
-                typewriter: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
-                stamp: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
-                receipt: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
-                drawer: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
-                buzzer: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
-                paperShuffle: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD=='
-            };
+        function createTypewriterSound(frequency = 800, duration = 0.1) {
+            const oscillator = soundContext.createOscillator();
+            const gainNode = soundContext.createGain();
             
-            Object.keys(soundFiles).forEach(name => {
-                sounds[name] = new Audio(soundFiles[name]);
-                sounds[name].volume = 0.3;
-            });
+            oscillator.connect(gainNode);
+            gainNode.connect(soundContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency + Math.random() * 200, soundContext.currentTime);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.1, soundContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, soundContext.currentTime + duration);
+            
+            oscillator.start(soundContext.currentTime);
+            oscillator.stop(soundContext.currentTime + duration);
         }
         
-        function playSound(soundName) {
-            if (sounds[soundName]) {
-                sounds[soundName].currentTime = 0;
-                sounds[soundName].play().catch(() => {}); // Ignore autoplay restrictions
-            }
+        function playStampSound() {
+            const oscillator = soundContext.createOscillator();
+            const gainNode = soundContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(soundContext.destination);
+            
+            oscillator.frequency.setValueAtTime(200, soundContext.currentTime);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.3, soundContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, soundContext.currentTime + 0.3);
+            
+            oscillator.start();
+            oscillator.stop(soundContext.currentTime + 0.3);
         }
+        
+        function playBuzzerSound() {
+            const oscillator = soundContext.createOscillator();
+            const gainNode = soundContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(soundContext.destination);
+            
+            oscillator.frequency.setValueAtTime(150, soundContext.currentTime);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.2, soundContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, soundContext.currentTime + 0.5);
+            
+            oscillator.start();
+            oscillator.stop(soundContext.currentTime + 0.5);
+        }
+        
+        // Customer and banking data
+        const firstNames = ['John', 'Mary', 'Robert', 'Patricia', 'James', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica', 'Thomas', 'Sarah', 'Christopher', 'Karen', 'Charles', 'Nancy', 'Daniel', 'Lisa', 'Matthew', 'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra', 'Donald', 'Donna', 'Steven', 'Carol', 'Paul', 'Ruth', 'Andrew', 'Sharon', 'Joshua', 'Michelle'];
+        
+        const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores'];
+        
+        const streets = ['Main St', 'Oak Ave', 'Pine St', 'Elm Dr', 'Cedar Ln', 'Maple Rd', 'Birch St', 'Willow Ave', 'Cherry St', 'Poplar Dr'];
+        
+        // Bank database
+        let bankDatabase = {};
         
         // Game state
         let gameState = {
             currentCustomer: null,
-            currentCustomerIndex: 0,
             score: 0,
             transactions: 0,
-            selectedDocument: null,
-            systemDatabase: {} // Will hold customer records
+            correctDecisions: 0,
+            totalDecisions: 0,
+            selectedDocument: null
         };
         
-        // Customer database - what's on file in the bank system
-        const customerDatabase = {
-            '123456789': {
-                name: 'Mary Johnson',
-                dob: '1982-07-22',
-                address: '123 Oak Street, Springfield',
-                photo: '[Photo: Woman, brown hair, glasses, age 42]',
-                signature: 'Mary Johnson',
-                balance: 1850,
-                accountStatus: 'ACTIVE'
-            },
-            '987654321': {
-                name: 'Robert Wilson',
-                dob: '1975-03-15', 
-                address: '456 Pine Avenue, Springfield',
-                photo: '[Photo: Man, dark hair, beard, age 49]',
-                signature: 'Robert Wilson',
-                balance: 12500,
-                accountStatus: 'ACTIVE'
-            },
-            '555777888': {
-                name: 'Sarah Davis',
-                dob: '1990-11-08',
-                address: '789 Elm Drive, Springfield',
-                photo: '[Photo: Woman, blonde hair, no glasses, age 34]',
-                signature: 'Sarah Davis',
-                balance: 3200,
-                accountStatus: 'ACTIVE'
-            }
-        };
-        
-        // Transaction requirements by type
-        const transactionRequirements = {
-            'WITHDRAWAL': ['TRANSACTION_FORM', 'ID', 'SIGNATURE'],
-            'DEPOSIT': ['TRANSACTION_FORM', 'ID', 'SIGNATURE'],
-            'WIRE_TRANSFER': ['WIRE_FORM', 'ID', 'PASSPORT', 'SIGNATURE'],
-            'ACCOUNT_OPENING': ['APPLICATION', 'ID', 'PROOF_OF_ADDRESS', 'INITIAL_DEPOSIT', 'SIGNATURE'],
-            'CASHIERS_CHECK': ['CHECK_REQUEST', 'ID', 'SIGNATURE', 'PAYMENT']
-        };
-        
-        // Customer name pools for random generation
-        const firstNames = ['Mary', 'Robert', 'Sarah', 'John', 'Lisa', 'Michael', 'Jennifer', 'David', 'Jessica', 'William', 'Ashley', 'Richard', 'Amanda', 'Joseph', 'Stephanie', 'Thomas', 'Melissa', 'Christopher', 'Nicole', 'Daniel', 'Elizabeth', 'Matthew', 'Helen', 'Anthony', 'Sandra', 'Mark', 'Donna', 'Donald', 'Carol', 'Steven', 'Ruth', 'Kenneth', 'Sharon', 'Paul', 'Michelle', 'Joshua', 'Laura', 'Kevin', 'Sarah', 'Brian', 'Kimberly'];
-        const lastNames = ['Johnson', 'Wilson', 'Davis', 'Miller', 'Anderson', 'Taylor', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen', 'Young', 'Hernandez', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Gonzalez', 'Nelson', 'Carter', 'Mitchell', 'Perez', 'Roberts', 'Turner', 'Phillips'];
-        const streets = ['Oak Street', 'Pine Avenue', 'Elm Drive', 'Maple Road', 'Cedar Lane', 'Birch Court', 'Willow Way', 'Cherry Street', 'Poplar Avenue', 'Spruce Drive'];
-        const transactionTypes = ['WITHDRAWAL', 'DEPOSIT', 'WIRE_TRANSFER', 'CASHIERS_CHECK'];
-        
-        function generateRandomCustomer() {
+        // Generate random customer with potential fraud
+        function generateCustomer() {
             const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
             const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-            const fullName = `${firstName} ${lastName}`;
-            const accountNumber = generateAccountNumber();
-            const street = streets[Math.floor(Math.random() * streets.length)];
+            const name = `${firstName} ${lastName}`;
+            const accountNumber = String(Math.floor(Math.random() * 900000000) + 100000000);
+            
+            // Generate real address
             const streetNumber = Math.floor(Math.random() * 9999) + 1;
+            const street = streets[Math.floor(Math.random() * streets.length)];
             const address = `${streetNumber} ${street}, Springfield`;
             
-            // Generate DOB (age 18-80)
+            // Generate DOB
             const currentYear = new Date().getFullYear();
-            const birthYear = currentYear - (Math.floor(Math.random() * 62) + 18);
+            const birthYear = currentYear - (Math.floor(Math.random() * 50) + 21);
             const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
             const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
             const dob = `${birthYear}-${month}-${day}`;
             
+            // Transaction types
+            const transactionTypes = ['WITHDRAWAL', 'DEPOSIT', 'WIRE TRANSFER', 'CASHIERS CHECK'];
             const transactionType = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
-            const amount = generateTransactionAmount(transactionType);
             
-            // Create signature variations
-            const correctSignature = fullName;
-            const fraudSignatures = [
-                fullName + ' Jr',
-                firstName + ' ' + lastName.slice(0, -1) + 'n',
-                firstName.slice(0, 1) + '. ' + lastName,
-                fullName + ' Sr',
+            let amount;
+            switch (transactionType) {
+                case 'WITHDRAWAL':
+                    amount = Math.floor(Math.random() * 2000) + 50;
+                    break;
+                case 'DEPOSIT':
+                    amount = Math.floor(Math.random() * 5000) + 100;
+                    break;
+                case 'WIRE TRANSFER':
+                    amount = Math.floor(Math.random() * 25000) + 1000;
+                    break;
+                case 'CASHIERS CHECK':
+                    amount = Math.floor(Math.random() * 10000) + 500;
+                    break;
+            }
+            
+            // Generate signature variations
+            const correctSignature = name;
+            const signatureVariations = [
+                name + ' Jr',
+                firstName + ' ' + lastName.slice(0, -1) + 'z',
+                firstName.charAt(0) + '. ' + lastName,
+                name + ' Sr',
                 firstName + ' ' + lastName + ' II'
             ];
             
-            // 30% chance of fraud
+            // Fraud probability (30% chance)
             const isFraud = Math.random() < 0.3;
-            const hasSignatureFraud = isFraud && Math.random() < 0.6;
-            const hasAmountFraud = isFraud && Math.random() < 0.5;
-            const hasAccountFraud = isFraud && Math.random() < 0.4;
+            const fraudType = isFraud ? Math.floor(Math.random() * 3) : -1; // 0=signature, 1=amount, 2=account
             
-            // Add to database if not exists
-            if (!customerDatabase[accountNumber]) {
-                customerDatabase[accountNumber] = {
-                    name: fullName,
-                    dob: dob,
-                    address: address,
-                    photo: `[Photo: ${firstName}, age ${currentYear - birthYear}]`,
-                    signature: correctSignature,
-                    balance: Math.floor(Math.random() * 50000) + 1000,
-                    accountStatus: 'ACTIVE'
-                };
-            }
-            
-            return {
-                name: fullName,
-                transactionType: transactionType,
-                requestedAmount: amount,
-                requestedAccount: accountNumber,
-                documents: generateDocuments(fullName, accountNumber, address, dob, transactionType, amount, {
-                    hasSignatureFraud,
-                    hasAmountFraud,
-                    hasAccountFraud,
-                    fraudSignature: hasSignatureFraud ? fraudSignatures[Math.floor(Math.random() * fraudSignatures.length)] : correctSignature,
-                    correctSignature
-                })
+            // Store in bank database
+            bankDatabase[accountNumber] = {
+                name: name,
+                dob: dob,
+                address: address,
+                signature: correctSignature,
+                balance: Math.floor(Math.random() * 50000) + 1000,
+                photo: `[Photo of ${firstName}, ${currentYear - birthYear} years old]`,
+                accountStatus: 'ACTIVE'
             };
-        }
-        
-        function generateAccountNumber() {
-            return String(Math.floor(Math.random() * 900000000) + 100000000);
-        }
-        
-        function generateTransactionAmount(type) {
-            switch (type) {
-                case 'WITHDRAWAL':
-                    return Math.floor(Math.random() * 2000) + 50;
-                case 'DEPOSIT':
-                    return Math.floor(Math.random() * 5000) + 100;
-                case 'WIRE_TRANSFER':
-                    return Math.floor(Math.random() * 25000) + 1000;
-                case 'CASHIERS_CHECK':
-                    return Math.floor(Math.random() * 10000) + 500;
-                default:
-                    return 100;
-            }
-        }
-        
-        function generateDocuments(name, accountNumber, address, dob, transactionType, amount, fraudInfo) {
-            const licenseNumber = 'DL-' + Math.floor(Math.random() * 99999).toString().padStart(5, '0');
-            const passportNumber = 'US-' + Math.floor(Math.random() * 99999999).toString().padStart(8, '0');
             
+            // Generate documents with potential fraud
             const documents = [];
             
             // Transaction form
-            if (transactionType === 'WIRE_TRANSFER') {
-                documents.push({
-                    id: 'WIRE',
-                    type: 'WIRE_FORM',
-                    title: 'Wire Transfer Request',
-                    content: {
-                        fromAccount: fraudInfo.hasAccountFraud ? generateAccountNumber() : accountNumber,
-                        toAccount: generateAccountNumber(),
-                        amount: fraudInfo.hasAmountFraud ? amount + Math.floor(Math.random() * 500) + 50 : amount,
-                        recipientName: 'Business Payment Recipient',
-                        purpose: 'Invoice Payment',
-                        senderName: name,
-                        date: '2024-06-01'
-                    }
-                });
-            } else {
-                documents.push({
-                    id: 'FORM',
-                    type: 'TRANSACTION_FORM',
-                    title: `${transactionType.replace('_', ' ').toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Form`,
-                    content: {
-                        customerName: name,
-                        accountNumber: fraudInfo.hasAccountFraud ? generateAccountNumber() : accountNumber,
-                        transactionType: transactionType,
-                        amount: fraudInfo.hasAmountFraud ? amount + Math.floor(Math.random() * 500) + 50 : amount,
-                        date: '2024-06-01',
-                        customerSignature: fraudInfo.fraudSignature
-                    }
-                });
+            let formSignature = correctSignature;
+            let formAmount = amount;
+            let formAccount = accountNumber;
+            
+            if (fraudType === 0) { // Signature fraud
+                formSignature = signatureVariations[Math.floor(Math.random() * signatureVariations.length)];
+            } else if (fraudType === 1) { // Amount fraud
+                formAmount = amount + Math.floor(Math.random() * 500) + 50;
+            } else if (fraudType === 2) { // Account fraud
+                formAccount = String(Math.floor(Math.random() * 900000000) + 100000000);
             }
             
-            // Driver's License
             documents.push({
-                id: 'ID',
-                type: 'ID',
-                title: 'Driver\'s License',
-                content: {
-                    name: name,
-                    dob: dob,
-                    address: address,
-                    licenseNumber: licenseNumber,
-                    expirationDate: '2026-12-31'
+                type: 'TRANSACTION_FORM',
+                title: `${transactionType} REQUEST FORM`,
+                data: {
+                    customerName: name,
+                    accountNumber: formAccount,
+                    transactionType: transactionType,
+                    amount: formAmount,
+                    signature: formSignature,
+                    date: '2024-06-01'
                 }
             });
             
-            // Passport for wire transfers
-            if (transactionType === 'WIRE_TRANSFER') {
+            // ID Document
+            documents.push({
+                type: 'DRIVERS_LICENSE',
+                title: 'DRIVERS LICENSE',
+                data: {
+                    name: name,
+                    dob: dob,
+                    address: address,
+                    licenseNumber: 'DL-' + Math.floor(Math.random() * 99999).toString().padStart(5, '0'),
+                    expiration: '2026-12-31'
+                }
+            });
+            
+            // Additional documents for wire transfers
+            if (transactionType === 'WIRE TRANSFER') {
                 documents.push({
-                    id: 'PASSPORT',
                     type: 'PASSPORT',
-                    title: 'U.S. Passport',
-                    content: {
+                    title: 'US PASSPORT',
+                    data: {
                         name: name,
                         dob: dob,
-                        passportNumber: passportNumber,
-                        issuedDate: '2020-01-15',
-                        expirationDate: '2030-01-15'
+                        passportNumber: 'US' + Math.floor(Math.random() * 99999999).toString().padStart(8, '0'),
+                        issued: '2020-01-01',
+                        expiration: '2030-01-01'
                     }
                 });
             }
             
             // Signature card
             documents.push({
-                id: 'SIG',
                 type: 'SIGNATURE',
-                title: 'Signature Verification',
-                content: {
-                    signature: fraudInfo.fraudSignature
+                title: 'SIGNATURE VERIFICATION',
+                data: {
+                    signature: formSignature
                 }
             });
             
-            return documents;
+            return {
+                name: name,
+                accountNumber: accountNumber,
+                transactionType: transactionType,
+                requestedAmount: amount,
+                documents: documents,
+                isFraud: isFraud,
+                fraudType: fraudType
+            };
         }
         
-        // Generate random customers
-        let customers = [];
-        for (let i = 0; i < 20; i++) {
-            customers.push(generateRandomCustomer());
-        }
-        
-        // Initialize game
-        function initGame() {
-            initSounds();
-            loadNextCustomer();
-            setupEventListeners();
-        }
-        
-        function setupEventListeners() {
-            const terminalInput = document.getElementById('terminal-input');
+        // Display customer
+        function showCustomer() {
+            const customer = generateCustomer();
+            gameState.currentCustomer = customer;
             
-            terminalInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    const command = this.value.trim().toUpperCase();
-                    if (command) {
-                        playSound('typewriter');
-                        processCommand(command);
-                        this.value = '';
-                    }
-                }
-            });
-            
-            // Auto-focus terminal
-            terminalInput.focus();
-        }
-        
-        function loadNextCustomer() {
-            if (gameState.currentCustomerIndex >= customers.length) {
-                // Generate more customers
-                for (let i = 0; i < 10; i++) {
-                    customers.push(generateRandomCustomer());
-                }
-            }
-            
-            gameState.currentCustomer = customers[gameState.currentCustomerIndex];
-            displayCustomer();
-            playSound('drawer');
-            typewriterEffect(`NEW CUSTOMER APPROACHING WINDOW`, () => {
-                typewriterEffect(`Customer states: "I need to process a ${gameState.currentCustomer.transactionType.replace('_', ' ').toLowerCase()}"`);
-            });
-        }
-        
-        function displayCustomer() {
-            const customer = gameState.currentCustomer;
-            const customerDetails = document.getElementById('customer-details');
-            const documentsList = document.getElementById('documents-list');
-            
-            // Display customer info
-            customerDetails.innerHTML = `
+            const customerInfo = document.getElementById('customer-info');
+            customerInfo.innerHTML = `
                 <strong>CUSTOMER:</strong> ${customer.name}<br>
-                <strong>REQUEST:</strong> ${customer.transactionType.replace('_', ' ')}<br>
+                <strong>REQUEST:</strong> ${customer.transactionType}<br>
                 <strong>AMOUNT:</strong> $${customer.requestedAmount}<br>
-                <strong>ACCOUNT:</strong> ${customer.requestedAccount}
+                <strong>ACCOUNT:</strong> ${customer.accountNumber}
             `;
             
-            // Display documents
-            documentsList.innerHTML = '';
+            const docsArea = document.getElementById('documents-area');
+            docsArea.innerHTML = '';
+            
             customer.documents.forEach((doc, index) => {
                 const docDiv = document.createElement('div');
                 docDiv.className = 'document';
-                docDiv.innerHTML = `
-                    <strong>${doc.title}</strong><br>
-                    <small>Type: ${doc.type}</small>
-                `;
+                docDiv.innerHTML = `<strong>${doc.title}</strong><br><small>Click to select</small>`;
                 docDiv.onclick = () => selectDocument(index);
-                documentsList.appendChild(docDiv);
+                docsArea.appendChild(docDiv);
             });
+            
+            typeMessage('NEW CUSTOMER APPROACHING WINDOW');
+            setTimeout(() => {
+                typeMessage(`Customer requests: "${customer.transactionType} of $${customer.requestedAmount}"`);
+            }, 1000);
         }
         
         function selectDocument(index) {
@@ -604,381 +433,262 @@
             document.querySelectorAll('.document')[index].classList.add('selected');
             gameState.selectedDocument = index;
             
-            playSound('paperShuffle');
-            addTerminalOutput(`Document selected: ${gameState.currentCustomer.documents[index].title}`);
+            createTypewriterSound(600, 0.2);
+            typeMessage(`Document selected: ${gameState.currentCustomer.documents[index].title}`);
         }
         
+        // Typewriter effect with sounds
+        function typeMessage(text, callback) {
+            const terminal = document.getElementById('terminal');
+            const newLine = document.createElement('div');
+            terminal.appendChild(newLine);
+            
+            let i = 0;
+            const typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    newLine.textContent += text.charAt(i);
+                    if (Math.random() > 0.6) { // Random typing sounds
+                        createTypewriterSound();
+                    }
+                    i++;
+                } else {
+                    clearInterval(typeInterval);
+                    if (callback) callback();
+                }
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 30 + Math.random() * 40);
+        }
+        
+        // Command processing
         function processCommand(command) {
-            const parts = command.split(' ');
+            const parts = command.trim().toUpperCase().split(' ');
             const action = parts[0];
             const parameter = parts.slice(1).join(' ');
             
-            typewriterEffect(`TELLER> ${command}`, () => {
-                switch (action) {
-                    case 'EXAMINE':
-                        examineDocument(parameter);
-                        break;
-                    case 'LOOKUP':
-                        lookupAccount(parameter);
-                        break;
-                    case 'VERIFY':
-                        verifyAmount(parameter);
-                        break;
-                    case 'PROCESS':
-                        processTransactionForm(parameter);
-                        break;
-                    case 'ENTER':
-                        enterFormData(parameter);
-                        break;
-                    case 'APPROVE':
-                        approveTransaction();
-                        break;
-                    case 'REJECT':
-                        rejectTransaction();
-                        break;
-                    case 'HELP':
-                        showHelp();
-                        break;
-                    default:
-                        typewriterEffect('UNKNOWN COMMAND. Type HELP for available commands.', () => {
-                            playSound('buzzer');
-                        });
-                }
-            });
-        }
-        
-        function examineDocument(docType) {
-            if (!gameState.currentCustomer) {
-                typewriterEffect('No customer present.');
-                return;
-            }
-            
-            let docIndex = -1;
-            if (docType) {
-                // Find by type
-                docIndex = gameState.currentCustomer.documents.findIndex(doc => 
-                    doc.type === docType || doc.id === docType
-                );
-            } else if (gameState.selectedDocument !== null) {
-                // Use selected document
-                docIndex = gameState.selectedDocument;
-            }
-            
-            if (docIndex === -1) {
-                typewriterEffect('Document not found or not selected.', () => {
-                    playSound('buzzer');
-                });
-                return;
-            }
-            
-            const doc = gameState.currentCustomer.documents[docIndex];
-            playSound('paperShuffle');
-            
-            typewriterEffect(`=== EXAMINING: ${doc.title} ===`, () => {
-                // Display document contents with typewriter effect
-                const entries = Object.entries(doc.content);
-                let entryIndex = 0;
-                
-                function typeNextEntry() {
-                    if (entryIndex < entries.length) {
-                        const [key, value] = entries[entryIndex];
-                        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                        typewriterEffect(`${label}: ${value}`, () => {
-                            entryIndex++;
-                            setTimeout(typeNextEntry, 100);
-                        });
-                    } else {
-                        typewriterEffect('=== END DOCUMENT ===');
-                    }
-                }
-                
-                setTimeout(typeNextEntry, 200);
-            });
-        }
-        
-        function processTransactionForm(formType) {
-            if (!gameState.currentCustomer) {
-                typewriterEffect('No customer present.');
-                return;
-            }
-            
-            typewriterEffect('PROCESSING TRANSACTION FORM...', () => {
-                playSound('typewriter');
+            typeMessage(`BANK> ${command}`, () => {
                 setTimeout(() => {
-                    const form = gameState.currentCustomer.documents.find(d => d.type.includes('FORM'));
-                    if (form) {
-                        typewriterEffect('=== TRANSACTION REQUEST ===', () => {
-                            Object.entries(form.content).forEach(([key, value], index) => {
-                                setTimeout(() => {
-                                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                                    typewriterEffect(`${label}: ${value}`);
-                                }, index * 300);
-                            });
-                            
-                            setTimeout(() => {
-                                typewriterEffect('=== END FORM ===', () => {
-                                    typewriterEffect('Use LOOKUP [account] to verify customer information');
-                                });
-                            }, Object.keys(form.content).length * 300 + 500);
-                        });
-                    } else {
-                        typewriterEffect('No transaction form found.', () => {
-                            playSound('buzzer');
-                        });
+                    switch (action) {
+                        case 'LOOKUP':
+                            if (parameter) {
+                                lookupAccount(parameter);
+                            } else {
+                                typeMessage('ERROR: Specify account number');
+                                playBuzzerSound();
+                            }
+                            break;
+                        case 'EXAMINE':
+                            if (parameter) {
+                                examineDocument(parameter);
+                            } else if (gameState.selectedDocument !== null) {
+                                examineDocument('SELECTED');
+                            } else {
+                                typeMessage('ERROR: Specify document type or select document');
+                                playBuzzerSound();
+                            }
+                            break;
+                        case 'VERIFY':
+                            if (parameter) {
+                                verifyAmount(parseInt(parameter));
+                            } else {
+                                typeMessage('ERROR: Specify amount to verify');
+                                playBuzzerSound();
+                            }
+                            break;
+                        case 'APPROVE':
+                            approveTransaction();
+                            break;
+                        case 'REJECT':
+                            rejectTransaction();
+                            break;
+                        case 'HELP':
+                            showHelp();
+                            break;
+                        case 'NEXT':
+                            showCustomer();
+                            break;
+                        default:
+                            typeMessage('UNKNOWN COMMAND. Type HELP for available commands.');
+                            playBuzzerSound();
                     }
-                }, 800);
-            });
-        }
-        
-        function enterFormData(data) {
-            if (!data) {
-                typewriterEffect('Please specify data to enter.');
-                return;
-            }
-            
-            playSound('typewriter');
-            typewriterEffect(`ENTERING: ${data}`, () => {
-                setTimeout(() => {
-                    typewriterEffect('Data entered into system.', () => {
-                        playSound('receipt');
-                    });
-                }, 500);
+                }, 200);
             });
         }
         
         function lookupAccount(accountNumber) {
-            if (!accountNumber) {
-                addTerminalOutput('Please specify account number.');
-                playSound('buzzer');
+            typeMessage('Accessing bank database...');
+            
+            setTimeout(() => {
+                const record = bankDatabase[accountNumber];
+                if (record) {
+                    typeMessage('=== CUSTOMER RECORD ===');
+                    setTimeout(() => typeMessage(`NAME: ${record.name}`), 300);
+                    setTimeout(() => typeMessage(`DOB: ${record.dob}`), 600);
+                    setTimeout(() => typeMessage(`ADDRESS: ${record.address}`), 900);
+                    setTimeout(() => typeMessage(`PHOTO: ${record.photo}`), 1200);
+                    setTimeout(() => typeMessage(`SIGNATURE ON FILE: ${record.signature}`), 1500);
+                    setTimeout(() => typeMessage(`BALANCE: $${record.balance}`), 1800);
+                    setTimeout(() => typeMessage(`STATUS: ${record.accountStatus}`), 2100);
+                    setTimeout(() => typeMessage('=== END RECORD ==='), 2400);
+                } else {
+                    typeMessage('ACCOUNT NOT FOUND');
+                    playBuzzerSound();
+                }
+            }, 800);
+        }
+        
+        function examineDocument(docType) {
+            if (!gameState.currentCustomer) {
+                typeMessage('No customer present');
                 return;
             }
             
-            // Simulate typing each character of the account number lookup
-            addTerminalOutput('Accessing customer database...');
-            typewriterEffect(`ACCOUNT LOOKUP: ${accountNumber}`, () => {
+            let doc;
+            if (docType === 'SELECTED' && gameState.selectedDocument !== null) {
+                doc = gameState.currentCustomer.documents[gameState.selectedDocument];
+            } else {
+                doc = gameState.currentCustomer.documents.find(d => 
+                    d.type === docType || d.title.includes(docType)
+                );
+            }
+            
+            if (!doc) {
+                typeMessage('Document not found');
+                playBuzzerSound();
+                return;
+            }
+            
+            createTypewriterSound(400, 0.3);
+            typeMessage(`=== EXAMINING: ${doc.title} ===`);
+            
+            let delay = 400;
+            Object.entries(doc.data).forEach(([key, value]) => {
                 setTimeout(() => {
-                    const customerRecord = customerDatabase[accountNumber];
-                    if (customerRecord) {
-                        typewriterEffect('=== CUSTOMER RECORD ===', () => {
-                            typewriterEffect(`NAME: ${customerRecord.name}`, () => {
-                                typewriterEffect(`DOB: ${customerRecord.dob}`, () => {
-                                    typewriterEffect(`ADDRESS: ${customerRecord.address}`, () => {
-                                        typewriterEffect(`PHOTO: ${customerRecord.photo}`, () => {
-                                            typewriterEffect(`SIGNATURE ON FILE: ${customerRecord.signature}`, () => {
-                                                typewriterEffect(`CURRENT BALANCE: $${customerRecord.balance}`, () => {
-                                                    typewriterEffect(`ACCOUNT STATUS: ${customerRecord.accountStatus}`, () => {
-                                                        typewriterEffect('=== END RECORD ===');
-                                                    });
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    } else {
-                        typewriterEffect('ACCOUNT NOT FOUND IN SYSTEM', () => {
-                            playSound('buzzer');
-                        });
-                    }
-                }, 500);
+                    const label = key.replace(/([A-Z])/g, ' $1').toUpperCase();
+                    typeMessage(`${label}: ${value}`);
+                }, delay);
+                delay += 300;
             });
-        }
-        
-        function typewriterEffect(text, callback = null) {
-            const output = document.getElementById('terminal-output');
-            const newLine = document.createElement('div');
-            output.appendChild(newLine);
             
-            let i = 0;
-            const typingInterval = setInterval(() => {
-                if (i < text.length) {
-                    newLine.textContent += text.charAt(i);
-                    if (Math.random() > 0.7) { // Random typing sounds
-                        playSound('typewriter');
-                    }
-                    i++;
-                } else {
-                    clearInterval(typingInterval);
-                    if (callback) callback();
-                }
-            }, 50 + Math.random() * 50); // Variable typing speed
-            
-            output.scrollTop = output.scrollHeight;
+            setTimeout(() => typeMessage('=== END DOCUMENT ==='), delay);
         }
         
         function verifyAmount(amount) {
-            if (!amount) {
-                typewriterEffect('Please specify amount to verify.');
-                return;
-            }
+            typeMessage(`VERIFYING AMOUNT: $${amount}`);
+            createTypewriterSound(600, 0.5);
             
-            const numAmount = parseFloat(amount.replace('$', ''));
-            typewriterEffect(`VERIFYING AMOUNT: $${numAmount}`, () => {
-                playSound('typewriter');
-                setTimeout(() => {
-                    typewriterEffect('Amount verification complete.', () => {
-                        playSound('stamp');
-                    });
-                }, 1000);
-            });
+            setTimeout(() => {
+                typeMessage('Amount verification complete');
+                playStampSound();
+            }, 1000);
         }
         
         function approveTransaction() {
             if (!gameState.currentCustomer) {
-                typewriterEffect('No customer present.');
+                typeMessage('No customer present');
                 return;
             }
             
-            playSound('stamp');
-            typewriterEffect('TRANSACTION APPROVED', () => {
-                typewriterEffect('Processing...', () => {
-                    setTimeout(() => {
-                        const isCorrect = validateTransaction();
-                        if (isCorrect) {
-                            gameState.score += 100;
-                            typewriterEffect('✓ CORRECT APPROVAL', () => {
-                                playSound('receipt');
-                            });
-                        } else {
-                            gameState.score -= 50;
-                            typewriterEffect('✗ INCORRECT APPROVAL - FRAUD DETECTED BY SUPERVISOR', () => {
-                                playSound('buzzer');
-                            });
-                        }
-                        
-                        setTimeout(completeTransaction, 1000);
-                    }, 2000);
-                });
-            });
+            playStampSound();
+            typeMessage('TRANSACTION APPROVED');
+            typeMessage('Processing...');
+            
+            setTimeout(() => {
+                const customer = gameState.currentCustomer;
+                const isCorrect = !customer.isFraud;
+                
+                gameState.transactions++;
+                gameState.totalDecisions++;
+                
+                if (isCorrect) {
+                    gameState.score += 100;
+                    gameState.correctDecisions++;
+                    typeMessage('✓ CORRECT DECISION - Valid transaction approved');
+                } else {
+                    gameState.score -= 50;
+                    typeMessage('✗ INCORRECT DECISION - Fraudulent transaction approved!');
+                    playBuzzerSound();
+                }
+                
+                updateStatus();
+                setTimeout(() => {
+                    typeMessage('Customer leaves. Type NEXT for next customer.');
+                }, 2000);
+            }, 2000);
         }
         
         function rejectTransaction() {
             if (!gameState.currentCustomer) {
-                typewriterEffect('No customer present.');
+                typeMessage('No customer present');
                 return;
             }
             
-            playSound('buzzer');
-            typewriterEffect('TRANSACTION REJECTED', () => {
-                typewriterEffect('Notifying supervisor...', () => {
-                    setTimeout(() => {
-                        const isCorrect = !validateTransaction(); // Correct if transaction was actually invalid
-                        if (isCorrect) {
-                            gameState.score += 100;
-                            typewriterEffect('✓ CORRECT REJECTION');
-                        } else {
-                            gameState.score -= 50;
-                            typewriterEffect('✗ INCORRECT REJECTION - VALID TRANSACTION DENIED');
-                        }
-                        
-                        setTimeout(completeTransaction, 1000);
-                    }, 2000);
-                });
-            });
-        }
-        
-        function validateTransaction() {
-            const customer = gameState.currentCustomer;
-            const account = customer.requestedAccount;
-            const dbRecord = customerDatabase[account];
-            
-            if (!dbRecord) return false;
-            
-            // Check various fraud indicators
-            let isValid = true;
-            
-            // Find documents
-            const form = customer.documents.find(d => d.type.includes('FORM'));
-            const id = customer.documents.find(d => d.type === 'ID');
-            const signature = customer.documents.find(d => d.type === 'SIGNATURE');
-            
-            // Check name matches
-            if (id && id.content.name !== dbRecord.name) isValid = false;
-            
-            // Check DOB matches
-            if (id && id.content.dob !== dbRecord.dob) isValid = false;
-            
-            // Check signature matches
-            if (signature && signature.content.signature !== dbRecord.signature) isValid = false;
-            
-            // Check amounts match between request and form
-            if (form && form.content.amount !== customer.requestedAmount) isValid = false;
-            
-            // Check account numbers match
-            if (form && form.content.accountNumber && form.content.accountNumber !== customer.requestedAccount) isValid = false;
-            
-            return isValid;
-        }
-        
-        function completeTransaction() {
-            gameState.transactions++;
-            gameState.currentCustomerIndex++;
+            playBuzzerSound();
+            typeMessage('TRANSACTION REJECTED');
+            typeMessage('Notifying security...');
             
             setTimeout(() => {
-                typewriterEffect('Customer leaves window.', () => {
-                    typewriterEffect('='.repeat(50), () => {
-                        setTimeout(loadNextCustomer, 1000);
-                    });
-                });
-            }, 3000);
-            
-            updateStatus();
-        }
-        
-        function updateStatus() {
-            const statusEl = document.getElementById('game-status');
-            const time = new Date().toLocaleTimeString();
-            statusEl.textContent = `Score: ${gameState.score} | Transactions: ${gameState.transactions} | Time: ${time}`;
-        }
-        
-        function endGame() {
-            addTerminalOutput('='.repeat(50));
-            addTerminalOutput('END OF SHIFT');
-            addTerminalOutput(`Final Score: ${gameState.score}`);
-            addTerminalOutput(`Transactions Processed: ${gameState.transactions}`);
-            
-            if (gameState.score >= 200) {
-                addTerminalOutput('EXCELLENT WORK - PROMOTION RECOMMENDED');
-            } else if (gameState.score >= 100) {
-                addTerminalOutput('GOOD WORK - MEETS EXPECTATIONS');
-            } else {
-                addTerminalOutput('POOR PERFORMANCE - ADDITIONAL TRAINING REQUIRED');
-            }
+                const customer = gameState.currentCustomer;
+                const isCorrect = customer.isFraud;
+                
+                gameState.transactions++;
+                gameState.totalDecisions++;
+                
+                if (isCorrect) {
+                    gameState.score += 100;
+                    gameState.correctDecisions++;
+                    typeMessage('✓ CORRECT DECISION - Fraudulent transaction rejected');
+                } else {
+                    gameState.score -= 50;
+                    typeMessage('✗ INCORRECT DECISION - Valid transaction rejected!');
+                }
+                
+                updateStatus();
+                setTimeout(() => {
+                    typeMessage('Customer leaves. Type NEXT for next customer.');
+                }, 2000);
+            }, 2000);
         }
         
         function showHelp() {
-            typewriterEffect('=== TELLER COMMANDS ===', () => {
-                typewriterEffect('PROCESS - Process customer transaction form', () => {
-                    typewriterEffect('EXAMINE [document_type] - Examine specific document', () => {
-                        typewriterEffect('LOOKUP [account_number] - Look up customer in database', () => {
-                            typewriterEffect('VERIFY [amount] - Verify transaction amount', () => {
-                                typewriterEffect('ENTER [data] - Enter data into terminal', () => {
-                                    typewriterEffect('APPROVE - Approve the transaction', () => {
-                                        typewriterEffect('REJECT - Reject the transaction', () => {
-                                            typewriterEffect('HELP - Show this help', () => {
-                                                typewriterEffect('=== Document Types ===', () => {
-                                                    typewriterEffect('FORM, ID, PASSPORT, SIGNATURE');
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+            typeMessage('=== BANK TELLER COMMANDS ===');
+            setTimeout(() => typeMessage('LOOKUP [account] - Look up customer in database'), 200);
+            setTimeout(() => typeMessage('EXAMINE [document] - Examine document details'), 400);
+            setTimeout(() => typeMessage('VERIFY [amount] - Verify transaction amount'), 600);
+            setTimeout(() => typeMessage('APPROVE - Approve the transaction'), 800);
+            setTimeout(() => typeMessage('REJECT - Reject the transaction'), 1000);
+            setTimeout(() => typeMessage('NEXT - Load next customer'), 1200);
+            setTimeout(() => typeMessage('HELP - Show this help'), 1400);
         }
         
-        function addTerminalOutput(text) {
-            const output = document.getElementById('terminal-output');
-            output.innerHTML += '<br>' + text;
-            output.scrollTop = output.scrollHeight;
+        function updateStatus() {
+            const accuracy = gameState.totalDecisions > 0 ? 
+                Math.round((gameState.correctDecisions / gameState.totalDecisions) * 100) : 100;
+            
+            document.getElementById('status').textContent = 
+                `Score: ${gameState.score} | Transactions: ${gameState.transactions} | Accuracy: ${accuracy}% | Time: ${new Date().toLocaleTimeString()}`;
         }
         
-        // Start the game
-        initGame();
+        // Initialize game
+        document.getElementById('command-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value;
+                if (command.trim()) {
+                    processCommand(command);
+                    this.value = '';
+                }
+            }
+        });
+        
+        // Auto-focus input
+        document.getElementById('command-input').focus();
+        
+        // Start with first customer
+        setTimeout(() => {
+            showCustomer();
+        }, 2000);
+        
+        // Update status every second
+        setInterval(updateStatus, 1000);
     </script>
 </body>
 </html>
