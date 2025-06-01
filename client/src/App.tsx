@@ -577,35 +577,8 @@ function App() {
     let action = parts[0];
     let parameter = parts.slice(1).join(' ');
     
-    // Handle shortcuts
-    switch (action) {
-      case 'L':
-        action = 'LOOKUP';
-        break;
-      case 'VN':
-        action = 'VERIFY';
-        parameter = 'NAME ' + parameter;
-        break;
-      case 'VD':
-        action = 'VERIFY';
-        parameter = 'DOB ' + parameter;
-        break;
-      case 'CS':
-        action = 'COMPARE';
-        parameter = 'SIGNATURE';
-        break;
-      case 'P':
-        action = 'PROCESS';
-        break;
-      case 'A':
-        action = 'APPROVE';
-        parameter = '';
-        break;
-      case 'R':
-        action = 'REJECT';
-        parameter = '';
-        break;
-    }
+    // Remove confusing shortcuts - use full commands only
+    // Players should type the actual banking commands
     
     setTerminalOutput(prev => [...prev, `BANK> ${command}`]);
     playTerminalEnter();
@@ -1248,7 +1221,7 @@ function App() {
               fontWeight: 'bold',
               textAlign: 'center'
             }}>
-              SHORTCUTS: L [account] | VN [name] | VD [date] | CS | P [type] [amount] | A | R
+              SHORTCUTS: LOOKUP | VERIFY NAME | VERIFY DOB | COMPARE SIGNATURE | PROCESS | APPROVE | REJECT
             </div>
             <div style={{
               display: 'flex',
