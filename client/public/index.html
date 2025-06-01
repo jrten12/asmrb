@@ -258,7 +258,7 @@
                     <span class="cursor"></span>
                 </div>
                 <div class="help-panel">
-                    Commands: EXAMINE [ID/SLIP/BOOK/SIG] | PROCESS | REJECT | VERIFY [amount] | HELP
+                    Commands: EXAMINE [ID/SLIP/BOOK/SIG] | LOOKUP [account] | APPROVE [account] | REJECT [account] | VERIFY [amount] | HELP
                 </div>
             </div>
         </div>
@@ -301,8 +301,8 @@
                     docs: [
                         { id: 'ID', type: 'ID CARD', name: 'Mary Johnson', detail: 'ID: 54321 | DOB: 1982-07-22', valid: true },
                         { id: 'BOOK', type: 'BANK BOOK', name: 'Mary Johnson', detail: 'Account: 123456789 | Balance: $1,800', valid: true },
-                        { id: 'SLIP', type: 'TRANSACTION SLIP', name: 'Mary Johnson', detail: 'WITHDRAWAL $250 from 123456789', valid: false, error: 'Amount mismatch!' },
-                        { id: 'SIG', type: 'SIGNATURE', name: 'Mary Johnson', detail: 'Customer signature', signature: generateSignature('mary_johnson_fake'), valid: false, error: 'Signature does not match' }
+                        { id: 'SLIP', type: 'TRANSACTION SLIP', name: 'Mary Johnson', detail: 'WITHDRAWAL $250 from 123456789', valid: false },
+                        { id: 'SIG', type: 'SIGNATURE', name: 'Mary Johnson', detail: 'Customer signature', signature: generateSignature('mary_johnson_fake'), valid: false }
                     ]
                 },
                 {
@@ -661,12 +661,10 @@
                 playSound('paperShuffle');
                 selectDoc(customer.docs.indexOf(doc));
                 addTerminalOutput(`EXAMINING ${doc.type}: ${doc.detail}`);
-                if (doc.error) {
-                    addTerminalOutput(`WARNING: ${doc.error}`);
-                    flashScreen('error');
-                } else {
-                    addTerminalOutput('Document appears valid.');
-                    flashScreen('success');
+                
+                // Show signature comparison if examining signature
+                if (doc.type === 'SIGNATURE') {
+                    showSignatureComparison(customer);
                 }
             } else {
                 addTerminalOutput('DOCUMENT NOT FOUND');
@@ -674,27 +672,71 @@
             }
         }
 
+        function showSignatureComparison(customer) {
+            const customerSig = customer.docs.find(d => d.type === 'SIGNATURE');
+            if (customerSig) {
+                addTerminalOutput('--- SIGNATURE COMPARISON ---');
+                addTerminalOutput('CUSTOMER PROVIDED:');
+                addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customerSig.signature}</div>`);
+                addTerminalOutput('ON FILE:');
+                addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customer.onFileSignature}</div>`);
+                addTerminalOutput('--- END COMPARISON ---');
+            }
+        }
+
+        function lookupCustomer(accountNumber) {
+            const customer = gameData.currentCustomer;
+            if (!customer) return;
+            
+            playSound('receipt');
+            addTerminalOutput('--- CUSTOMER PROFILE LOOKUP ---');
+            addTerminalOutput(`ACCOUNT: ${customer.accountNumber}`);
+            addTerminalOutput(`NAME: ${customer.name}`);
+            addTerminalOutput(`DOB: ${customer.dob}`);
+            addTerminalOutput('PHOTO ON FILE:');
+            addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customer.customerPhoto}</div>`);
+            addTerminalOutput('SIGNATURE ON FILE:');
+            addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customer.onFileSignature}</div>`);
+            addTerminalOutput('--- END PROFILE ---');
+        }
+
+        function approveTransaction(accountNumber) {
+            const customer = gameData.currentCustomer;
+            if (!customer || customer.accountNumber !== accountNumber) {
+                addTerminalOutput('ACCOUNT NUMBER MISMATCH');
+                playSound('buzzer');
+                return;
+            }
+            processTransaction();
+        }
+
+        function rejectTransactionWithAccount(accountNumber) {
+            const customer = gameData.currentCustomer;
+            if (!customer || customer.accountNumber !== accountNumber) {
+                addTerminalOutput('ACCOUNT NUMBER MISMATCH');
+                playSound('buzzer');
+                return;
+            }
+            rejectTransaction();
+        }
+
         function verifyAmount(amount) {
             const customer = gameData.currentCustomer;
             if (!customer) return;
             
-            if (amount === customer.amount) {
-                addTerminalOutput(`AMOUNT VERIFIED: $${amount} matches request`);
-                playSound('stamp');
-                flashScreen('success');
-            } else {
-                addTerminalOutput(`AMOUNT MISMATCH: Expected $${customer.amount}, got $${amount}`);
-                playSound('buzzer');
-                flashScreen('error');
-            }
+            addTerminalOutput(`VERIFYING AMOUNT: $${amount}`);
+            playSound('stamp');
+            // Player must determine if this matches the transaction themselves
         }
 
         function showHelp() {
             addTerminalOutput('=== AVAILABLE COMMANDS ===');
             addTerminalOutput('EXAMINE [ID/SLIP/BOOK/SIG] - Examine document');
+            addTerminalOutput('LOOKUP [account] - Lookup customer profile');
             addTerminalOutput('VERIFY [amount] - Verify transaction amount');
-            addTerminalOutput('PROCESS - Approve transaction');
-            addTerminalOutput('REJECT - Reject transaction');
+            addTerminalOutput('APPROVE [account] - Approve transaction');
+            addTerminalOutput('REJECT [account] - Reject transaction');
+            addTerminalOutput('PROCESS - Quick approve without account');
             addTerminalOutput('HELP - Show this help');
         }
 
@@ -723,8 +765,7 @@
                     playSound('paperShuffle');
                     selectDoc(i);
                 };
-                div.innerHTML = `<h4>${doc.type}</h4><p>${doc.name}</p><p>${doc.detail}</p>` + 
-                               (doc.error ? `<p style="color: #ff0000;">ERROR: ${doc.error}</p>` : '');
+                div.innerHTML = `<h4>${doc.type}</h4><p>${doc.name}</p><p>${doc.detail}</p>`;
                 docsEl.appendChild(div);
             });
             
