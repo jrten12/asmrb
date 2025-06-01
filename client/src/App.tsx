@@ -947,10 +947,27 @@ function App() {
   };
 
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Ensure input stays visible when keyboard appears
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 300);
+    // Keep input visible on mobile
+    if (window.innerWidth < 768) {
+      const element = e.target as HTMLInputElement;
+      element.style.position = 'fixed';
+      element.style.bottom = '10px';
+      element.style.left = '10px';
+      element.style.right = '10px';
+      element.style.zIndex = '2000';
+    }
+  };
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Reset input position
+    if (window.innerWidth < 768) {
+      const element = e.target as HTMLInputElement;
+      element.style.position = '';
+      element.style.bottom = '';
+      element.style.left = '';
+      element.style.right = '';
+      element.style.zIndex = '';
+    }
   };
 
   const handleDocumentClick = async (index: number) => {
@@ -1038,7 +1055,7 @@ function App() {
         {/* Customer Area */}
         <div style={{
           width: window.innerWidth < 768 ? '100%' : '35%',
-          height: window.innerWidth < 768 ? '25vh' : 'auto',
+          height: window.innerWidth < 768 ? '35vh' : 'auto',
           border: '2px solid #00ff00',
           padding: '8px',
           background: 'rgba(0, 40, 0, 0.2)',
@@ -1258,6 +1275,7 @@ function App() {
                 type="text"
                 onKeyDown={handleKeyDown}
                 onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
                 style={{
                   flex: 1,
                   background: 'transparent',
