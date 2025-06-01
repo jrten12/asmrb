@@ -22,7 +22,7 @@ function App() {
     "FIRST NATIONAL BANK SYSTEM v2.1",
     "TELLER AUTHENTICATION: APPROVED",
     "",
-    "Type NEXT to call customer"
+    "Tap CALL CUSTOMER to begin"
   ]);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +42,7 @@ function App() {
         title: "Driver's License",
         data: {
           name: name,
-          licenseNumber: `DL-${Math.floor(10000 + Math.random() * 90000)}`,
+          licenseNumber: "DL-" + Math.floor(10000 + Math.random() * 90000),
           dateOfBirth: "1985-03-15",
           address: "123 Main Street, Springfield, IL 62701"
         }
@@ -83,12 +83,33 @@ function App() {
     if (cmd === 'NEXT') {
       const customer = generateCustomer();
       setCurrentCustomer(customer);
-      setTerminalOutput(prev => [...prev, `> ${command}`, `Customer ${customer.name} approaching window...`]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Customer " + customer.name + " approaching window..."]);
       console.log("Generated customer:", customer);
+    } else if (cmd === 'LOOKUP') {
+      setTerminalOutput(prev => [...prev, "> " + command, "LOOKUP initiated.", "Enter account number to verify:"]);
+      if (inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.placeholder = "Type account number...";
+      }
+    } else if (cmd.includes(' ') && cmd.split(' ')[0] === 'LOOKUP') {
+      const accountNum = cmd.split(' ')[1];
+      setTerminalOutput(prev => [...prev, "> " + command, "Looking up account: " + accountNum, "Account found - Customer verified"]);
+    } else if (cmd === 'APPROVE') {
+      setTerminalOutput(prev => [...prev, "> " + command, "Transaction APPROVED", "Processing payment..."]);
+      setTimeout(() => {
+        setCurrentCustomer(null);
+        setTerminalOutput(prev => [...prev, "Customer served. Next customer please."]);
+      }, 2000);
+    } else if (cmd === 'REJECT') {
+      setTerminalOutput(prev => [...prev, "> " + command, "Transaction REJECTED", "Fraud detected or insufficient funds"]);
+      setTimeout(() => {
+        setCurrentCustomer(null);
+        setTerminalOutput(prev => [...prev, "Customer dismissed. Next customer please."]);
+      }, 2000);
     } else if (cmd === 'HELP') {
-      setTerminalOutput(prev => [...prev, `> ${command}`, "Available commands:", "NEXT - Call next customer", "LOOKUP - Check account", "APPROVE - Approve transaction", "REJECT - Reject transaction"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Available commands:", "NEXT - Call next customer", "LOOKUP - Check account", "APPROVE - Approve transaction", "REJECT - Reject transaction"]);
     } else {
-      setTerminalOutput(prev => [...prev, `> ${command}`, "Command executed"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Command executed"]);
     }
   };
 
@@ -98,6 +119,7 @@ function App() {
       if (command.trim()) {
         handleCommand(command);
         inputRef.current.value = '';
+        inputRef.current.placeholder = "Enter command...";
       }
     }
   };
@@ -119,7 +141,7 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* Customer Information - Top Priority */}
+      {/* Customer Information */}
       {currentCustomer ? (
         <div style={{
           textAlign: 'center',
@@ -149,7 +171,7 @@ function App() {
           borderRadius: '4px'
         }}>
           <h1 style={{ margin: 0, fontSize: '20px', color: '#888888' }}>NO CUSTOMER PRESENT</h1>
-          <div style={{ fontSize: '14px', color: '#00aaff' }}>Type NEXT to call customer</div>
+          <div style={{ fontSize: '14px', color: '#00aaff' }}>Tap CALL CUSTOMER to begin</div>
         </div>
       )}
 
@@ -218,25 +240,6 @@ function App() {
         }}>
           <h3 style={{ margin: '0 0 12px 0', color: '#00ff00' }}>TERMINAL</h3>
           
-          {/* Terminal Output */}
-          <div style={{
-            flex: 1,
-            background: '#000000',
-            border: '1px solid #00ff00',
-            padding: '8px',
-            borderRadius: '2px',
-            overflow: 'auto',
-            marginBottom: '8px',
-            fontSize: '14px',
-            fontFamily: 'monospace'
-          }}>
-            {terminalOutput.map((line, index) => (
-              <div key={index} style={{ marginBottom: '2px' }}>
-                {line}
-              </div>
-            ))}
-          </div>
-
           {/* Command Buttons */}
           <div style={{
             display: 'grid',
@@ -314,6 +317,25 @@ function App() {
             >
               REJECT
             </button>
+          </div>
+
+          {/* Terminal Output */}
+          <div style={{
+            flex: 1,
+            background: '#000000',
+            border: '1px solid #00ff00',
+            padding: '8px',
+            borderRadius: '2px',
+            overflow: 'auto',
+            marginBottom: '8px',
+            fontSize: '14px',
+            fontFamily: 'monospace'
+          }}>
+            {terminalOutput.map((line, index) => (
+              <div key={index} style={{ marginBottom: '2px' }}>
+                {line}
+              </div>
+            ))}
           </div>
 
           {/* Terminal Input */}
