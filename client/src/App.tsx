@@ -646,6 +646,7 @@ function App() {
             if (amount && !isNaN(parseInt(amount))) {
               typeMessage(`PROCESSING ${type}: $${amount}`);
               typeMessage(`VERIFY ACCOUNT BALANCE AND AUTHORIZATION`);
+              setVerificationProgress(prev => ({ ...prev, transactionProcessed: true }));
               playDataBeep();
             } else {
               typeMessage('ERROR: Specify amount - PROCESS WITHDRAWAL 500');
