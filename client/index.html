@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/generated-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Teller's Window" />
     <title>Teller's Window - 1980s Bank Simulation</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap');
@@ -15,6 +18,18 @@
         font-family: 'Share Tech Mono', monospace;
         overflow: hidden;
         cursor: none;
+        height: 100vh;
+        height: -webkit-fill-available;
+        touch-action: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      #root {
+        height: 100vh;
+        height: -webkit-fill-available;
+        width: 100vw;
       }
       
       canvas {

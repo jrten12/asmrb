@@ -202,7 +202,7 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
     render();
   }, [gameState]);
   
-  // Handle mouse events
+  // Handle touch and mouse events
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -215,10 +215,27 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
       };
     }
     
+    function handleTouch(e: TouchEvent) {
+      e.preventDefault();
+      console.log('Touch detected:', e.type);
+      const rect = canvas!.getBoundingClientRect();
+      const touch = e.touches[0] || e.changedTouches[0];
+      if (touch) {
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        console.log('Touch coordinates:', x, y, 'Game phase:', gameState.phase);
+        handleInteraction(x, y);
+      }
+    }
+    
     function handleClick(e: MouseEvent) {
       const rect = canvas!.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+      handleInteraction(x, y);
+    }
+    
+    function handleInteraction(x: number, y: number) {
       
       if (gameState.phase === 'intro') {
         // Start game - click anywhere on the intro screen
@@ -268,12 +285,17 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
       }
     }
     
+    // Add both mouse and touch events
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('touchstart', handleTouch);
+    canvas.addEventListener('touchend', handleTouch);
     
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('touchstart', handleTouch);
+      canvas.removeEventListener('touchend', handleTouch);
     };
   }, [gameState, onDocumentClick, onProcessClick, onRejectClick]);
   
