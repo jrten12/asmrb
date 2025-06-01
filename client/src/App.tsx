@@ -504,14 +504,22 @@ function App() {
     }, 1000);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       const command = e.currentTarget.value;
       if (command.trim()) {
+        await initAudio(); // Initialize audio on first interaction
         processCommand(command);
         e.currentTarget.value = '';
       }
     }
+  };
+
+  const handleDocumentClick = async (index: number) => {
+    await initAudio();
+    setSelectedDocument(index);
+    createTypewriterSound(600, 0.2);
+    typeMessage(`Document selected: ${currentCustomer?.documents[index].title}`);
   };
 
   useEffect(() => {
@@ -535,32 +543,38 @@ function App() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      padding: '20px'
+      padding: '10px',
+      overflow: 'hidden'
     }}>
       <div style={{
         textAlign: 'center',
-        marginBottom: '20px',
+        marginBottom: '10px',
         border: '2px solid #00ff00',
-        padding: '10px',
-        background: 'rgba(0, 50, 0, 0.3)'
+        padding: '8px',
+        background: 'rgba(0, 50, 0, 0.3)',
+        fontSize: '14px'
       }}>
-        <h2>FIRST NATIONAL BANK - TELLER STATION #3</h2>
+        <h3 style={{ margin: 0 }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
         <div>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
       </div>
       
-      <div style={{ display: 'flex', flex: 1, gap: '20px' }}>
+      <div style={{ display: 'flex', flex: 1, gap: '10px', minHeight: 0 }}>
         <div style={{
           flex: 1,
           border: '2px solid #00ff00',
-          padding: '15px',
-          background: 'rgba(0, 40, 0, 0.2)'
+          padding: '10px',
+          background: 'rgba(0, 40, 0, 0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}>
-          <h3>CUSTOMER WINDOW</h3>
+          <h4 style={{ margin: '0 0 10px 0' }}>CUSTOMER WINDOW</h4>
           <div style={{
             background: 'rgba(0, 60, 0, 0.3)',
             border: '1px solid #006600',
-            padding: '10px',
-            marginBottom: '15px'
+            padding: '8px',
+            marginBottom: '10px',
+            fontSize: '12px'
           }}>
             {currentCustomer ? (
               <>
@@ -574,23 +588,24 @@ function App() {
             )}
           </div>
           
-          <h4>DOCUMENTS PROVIDED:</h4>
-          <div>
+          <h5 style={{ margin: '0 0 8px 0' }}>DOCUMENTS PROVIDED:</h5>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
             {currentCustomer?.documents.map((doc, index) => (
               <div
                 key={index}
                 style={{
                   background: selectedDocument === index ? 'rgba(0, 120, 0, 0.5)' : 'rgba(0, 50, 0, 0.2)',
                   border: selectedDocument === index ? '1px solid #00aa00' : '1px solid #005500',
-                  padding: '8px',
-                  margin: '5px 0',
+                  padding: '6px',
+                  margin: '3px 0',
                   cursor: 'pointer',
-                  transition: 'background 0.2s'
+                  transition: 'background 0.2s',
+                  fontSize: '11px'
                 }}
-                onClick={() => setSelectedDocument(index)}
+                onClick={() => handleDocumentClick(index)}
               >
                 <strong>{doc.title}</strong><br/>
-                <small>Click to select</small>
+                <small>Click to select - Type EXAMINE to view details</small>
               </div>
             ))}
           </div>
@@ -599,21 +614,22 @@ function App() {
         <div style={{
           flex: 1,
           border: '2px solid #00ff00',
-          padding: '15px',
+          padding: '10px',
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}>
-          <h3>BANK TERMINAL</h3>
+          <h4 style={{ margin: '0 0 10px 0' }}>BANK TERMINAL</h4>
           <div style={{
             flex: 1,
             background: '#001100',
             border: '1px solid #004400',
-            padding: '10px',
+            padding: '8px',
             overflowY: 'auto',
-            marginBottom: '10px',
-            fontSize: '14px',
-            lineHeight: '1.4'
+            marginBottom: '8px',
+            fontSize: '12px',
+            lineHeight: '1.3'
           }}>
             {terminalOutput.map((line, index) => (
               <div key={index}>{line}</div>
@@ -625,9 +641,10 @@ function App() {
             alignItems: 'center',
             background: '#001100',
             border: '1px solid #004400',
-            padding: '8px'
+            padding: '6px',
+            fontSize: '12px'
           }}>
-            <span style={{ marginRight: '10px', color: '#00ff00' }}>BANK&gt;</span>
+            <span style={{ marginRight: '8px', color: '#00ff00' }}>BANK&gt;</span>
             <input
               ref={inputRef}
               type="text"
@@ -637,12 +654,22 @@ function App() {
                 border: 'none',
                 color: '#00ff00',
                 fontFamily: 'inherit',
-                fontSize: '14px',
+                fontSize: '12px',
                 outline: 'none'
               }}
               onKeyDown={handleKeyDown}
               autoComplete="off"
+              placeholder="Type commands here..."
             />
+          </div>
+          
+          <div style={{
+            fontSize: '10px',
+            color: '#00aa00',
+            marginTop: '5px',
+            padding: '3px'
+          }}>
+            COMMANDS: HELP | LOOKUP [account] | EXAMINE [doc] | VERIFY [amount] | APPROVE | REJECT | NEXT
           </div>
         </div>
       </div>
@@ -650,9 +677,10 @@ function App() {
       <div style={{
         background: 'rgba(0, 60, 0, 0.8)',
         border: '1px solid #006600',
-        padding: '8px',
-        marginTop: '10px',
-        textAlign: 'center'
+        padding: '5px',
+        marginTop: '5px',
+        textAlign: 'center',
+        fontSize: '11px'
       }}>
         Score: {gameState.score} | Transactions: {gameState.transactions} | Accuracy: {accuracy}% | Time: {new Date().toLocaleTimeString()}
       </div>
