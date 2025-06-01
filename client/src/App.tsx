@@ -1139,35 +1139,41 @@ function App() {
       bottom: 0,
       boxSizing: 'border-box'
     }}>
-      {/* Header */}
-      <div style={{
-        textAlign: 'center',
-        marginBottom: '4px',
-        border: '1px solid #00ff00',
-        padding: '6px',
-        background: 'rgba(0, 50, 0, 0.3)',
-        fontSize: '14px',
-        flexShrink: 0
-      }}>
-        <h3 style={{ margin: 0, fontSize: '16px' }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
-        <div style={{ fontSize: '12px' }}>FRAUD DETECTION ENABLED</div>
-      </div>
-
-      {/* Status Bar */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: '4px',
-        padding: '4px 8px',
-        background: 'rgba(0, 40, 0, 0.3)',
-        border: '1px solid #00ff00',
-        fontSize: '12px',
-        flexShrink: 0
-      }}>
-        <span>SCORE: {gameState.score}</span>
-        <span>TRANSACTIONS: {gameState.transactions}</span>
-        <span>ACCURACY: {accuracy}%</span>
-      </div>
+      {/* Customer Information - Top Priority */}
+      {currentCustomer && currentCustomer.name ? (
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '8px',
+          border: '3px solid #ffff00',
+          padding: '12px',
+          background: 'rgba(255, 255, 0, 0.1)',
+          fontSize: '16px',
+          flexShrink: 0
+        }}>
+          <h2 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#ffff00' }}>
+            CUSTOMER: {currentCustomer.name}
+          </h2>
+          <div style={{ color: '#ffffff', marginBottom: '4px' }}>
+            ACCOUNT: {currentCustomer.accountNumber}
+          </div>
+          <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '18px' }}>
+            REQUEST: {currentCustomer.transactionType} ${currentCustomer.requestedAmount}
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '8px',
+          border: '2px solid #00ff00',
+          padding: '12px',
+          background: 'rgba(0, 50, 0, 0.3)',
+          fontSize: '16px',
+          flexShrink: 0
+        }}>
+          <h2 style={{ margin: 0, fontSize: '18px', color: '#888888' }}>NO CUSTOMER PRESENT</h2>
+          <div style={{ fontSize: '14px', color: '#00aaff' }}>Type NEXT to call customer</div>
+        </div>
+      )}
       
       {/* Main Content Area */}
       <div style={{ 
@@ -1312,112 +1318,9 @@ function App() {
           gap: '12px',
           flex: '1'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h4 style={{ margin: '0', fontSize: '16px' }}>BANK TERMINAL</h4>
-            <button
-              onClick={() => setShowCommands(!showCommands)}
-              style={{
-                background: 'rgba(0, 80, 0, 0.6)',
-                border: '1px solid #00aa00',
-                color: '#00ff00',
-                padding: '4px 8px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                borderRadius: '3px'
-              }}
-            >
-              {showCommands ? 'HIDE COMMANDS' : 'SHOW COMMANDS'}
-            </button>
-          </div>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
 
-          {/* Tappable Command Shortcuts */}
-          {showCommands && (
-            <div style={{
-              background: 'rgba(0, 60, 0, 0.4)',
-              border: '1px solid #00aa00',
-              padding: '8px',
-              borderRadius: '4px',
-              fontSize: '11px',
-              color: '#00cc00'
-            }}>
-              <strong style={{ marginBottom: '4px', display: 'block' }}>TAP TO AUTO-FILL:</strong>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                {['LOOKUP', 'VERIFY NAME', 'VERIFY DOB', 'VERIFY ADDRESS', 'COMPARE SIGNATURE', 'PROCESS WITHDRAWAL', 'PROCESS DEPOSIT', 'APPROVE', 'REJECT', 'NEXT'].map(cmd => (
-                  <button
-                    key={cmd}
-                    onClick={() => {
-                      if (inputRef.current) {
-                        inputRef.current.value = cmd + ' ';
-                        inputRef.current.focus();
-                      }
-                      playSoftClick();
-                    }}
-                    style={{
-                      background: 'rgba(0, 80, 0, 0.6)',
-                      border: '1px solid #00aa00',
-                      color: '#00ff00',
-                      padding: '2px 6px',
-                      fontSize: '10px',
-                      cursor: 'pointer',
-                      borderRadius: '2px',
-                      outline: 'none'
-                    }}
-                  >
-                    {cmd}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* Account Summary - Only shows after LOOKUP */}
-          {currentCustomer && accountData && (
-            <div style={{
-              background: 'rgba(0, 60, 0, 0.4)',
-              border: '1px solid #006600',
-              padding: '8px',
-              borderRadius: '4px'
-            }}>
-              <h5 style={{ margin: '0 0 4px 0', color: '#00ff00', fontSize: '13px' }}>ACCOUNT SUMMARY</h5>
-              <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
-                <strong>NAME:</strong> {accountData.name}<br/>
-                <strong>DOB:</strong> {accountData.dob}<br/>
-                <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}<br/>
-                <strong>BALANCE:</strong> ${accountData.balance}
-              </div>
-            </div>
-          )}
-
-          {/* Compact Verification Progress */}
-          {currentCustomer && (
-            <div style={{
-              background: 'rgba(0, 50, 0, 0.3)',
-              border: '1px solid #ffaa00',
-              padding: '6px',
-              borderRadius: '4px'
-            }}>
-              <div style={{ fontSize: '11px', lineHeight: '1.2', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2px' }}>
-                <div style={{ color: verificationProgress.accountLookedUp ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.accountLookedUp ? '✓' : '○'} LOOKUP
-                </div>
-                <div style={{ color: verificationProgress.nameVerified ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.nameVerified ? '✓' : '○'} NAME
-                </div>
-                <div style={{ color: verificationProgress.dobVerified ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.dobVerified ? '✓' : '○'} DOB
-                </div>
-                <div style={{ color: verificationProgress.addressVerified ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.addressVerified ? '✓' : '○'} ADDRESS
-                </div>
-                <div style={{ color: verificationProgress.signatureCompared ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.signatureCompared ? '✓' : '○'} SIGNATURE
-                </div>
-                <div style={{ color: verificationProgress.transactionProcessed ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.transactionProcessed ? '✓' : '○'} PROCESS
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Unified Terminal Display and Input */}
           <div style={{
