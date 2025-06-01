@@ -277,19 +277,26 @@ function App() {
       )}
 
       {/* Main Content */}
-      <div style={{ display: 'flex', flex: 1, gap: '12px', minHeight: 0 }}>
+      <div style={{ 
+        display: 'flex', 
+        flex: 1, 
+        gap: '8px', 
+        minHeight: 0,
+        flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+      }}>
         
         {/* Documents Section */}
         <div style={{
           flex: 1,
           background: 'rgba(0, 30, 0, 0.4)',
           border: '2px solid #00ff00',
-          padding: '12px',
+          padding: '8px',
           borderRadius: '4px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          minHeight: window.innerWidth < 768 ? '200px' : 'auto'
         }}>
-          <h3 style={{ margin: '0 0 12px 0', color: '#00ff00' }}>DOCUMENTS PROVIDED</h3>
+          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: '14px' }}>DOCUMENTS PROVIDED</h3>
           
           {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
             <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -334,12 +341,13 @@ function App() {
           flex: 1,
           background: 'rgba(0, 30, 0, 0.4)',
           border: '2px solid #00ff00',
-          padding: '12px',
+          padding: '8px',
           borderRadius: '4px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          minHeight: window.innerWidth < 768 ? '300px' : 'auto'
         }}>
-          <h3 style={{ margin: '0 0 12px 0', color: '#00ff00' }}>TERMINAL</h3>
+          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: '14px' }}>TERMINAL</h3>
           
           {/* Transaction Type Selector */}
           {currentCustomer && (
@@ -354,10 +362,7 @@ function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px' }}>
                 <button
                   onClick={() => {
-                    if (inputRef.current) {
-                      inputRef.current.value = 'PROCESS DEPOSIT ';
-                      inputRef.current.focus();
-                    }
+                    handleCommand('PROCESS DEPOSIT ' + (currentCustomer?.requestedAmount || ''));
                     playSound('button_click');
                   }}
                   style={{
@@ -375,10 +380,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
-                    if (inputRef.current) {
-                      inputRef.current.value = 'PROCESS WITHDRAWAL ';
-                      inputRef.current.focus();
-                    }
+                    handleCommand('PROCESS WITHDRAWAL ' + (currentCustomer?.requestedAmount || ''));
                     playSound('button_click');
                   }}
                   style={{
@@ -396,10 +398,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
-                    if (inputRef.current) {
-                      inputRef.current.value = 'PROCESS WIRE ';
-                      inputRef.current.focus();
-                    }
+                    handleCommand('PROCESS WIRE ' + (currentCustomer?.requestedAmount || ''));
                     playSound('button_click');
                   }}
                   style={{
@@ -417,10 +416,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
-                    if (inputRef.current) {
-                      inputRef.current.value = 'SHOW SIGNATURE';
-                      handleCommand('SHOW SIGNATURE');
-                    }
+                    handleCommand('SHOW SIGNATURE');
                     playSound('button_click');
                   }}
                   style={{
