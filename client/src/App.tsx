@@ -845,33 +845,39 @@ function App() {
       width: '100vw',
       display: 'flex',
       flexDirection: 'column',
-      padding: '8px',
+      padding: '4px',
       overflow: 'hidden',
-      minHeight: '100vh',
-      position: 'relative'
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      boxSizing: 'border-box'
     }}>
       {/* Header */}
       <div style={{
         textAlign: 'center',
-        marginBottom: '8px',
-        border: '2px solid #00ff00',
-        padding: '12px',
+        marginBottom: '4px',
+        border: '1px solid #00ff00',
+        padding: '6px',
         background: 'rgba(0, 50, 0, 0.3)',
-        fontSize: '18px'
+        fontSize: '14px',
+        flexShrink: 0
       }}>
-        <h3 style={{ margin: 0, fontSize: '20px' }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
-        <div style={{ fontSize: '16px' }}>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
+        <h3 style={{ margin: 0, fontSize: '16px' }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
+        <div style={{ fontSize: '12px' }}>FRAUD DETECTION ENABLED</div>
       </div>
 
       {/* Status Bar */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        marginBottom: '8px',
-        padding: '8px',
+        marginBottom: '4px',
+        padding: '4px 8px',
         background: 'rgba(0, 40, 0, 0.3)',
         border: '1px solid #00ff00',
-        fontSize: '14px'
+        fontSize: '12px',
+        flexShrink: 0
       }}>
         <span>SCORE: {gameState.score}</span>
         <span>TRANSACTIONS: {gameState.transactions}</span>
@@ -910,10 +916,21 @@ function App() {
           }}>
             {currentCustomer ? (
               <>
+                <div style={{ 
+                  background: 'rgba(255, 255, 0, 0.1)', 
+                  padding: '6px', 
+                  marginBottom: '4px',
+                  border: '1px solid #ffff00',
+                  borderRadius: '3px'
+                }}>
+                  <strong style={{ color: '#ffff00' }}>TRANSACTION REQUEST:</strong><br/>
+                  <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                    {currentCustomer.transactionType} ${currentCustomer.requestedAmount}
+                  </span>
+                </div>
                 <strong>CUSTOMER:</strong> {currentCustomer.name}<br/>
-                <strong>REQUEST:</strong> {currentCustomer.transactionType}<br/>
-                <strong>AMOUNT:</strong> ${currentCustomer.requestedAmount}<br/>
-                <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}
+                <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}<br/>
+                <strong>STATUS:</strong> <span style={{ color: '#ffaa00' }}>AWAITING VERIFICATION</span>
               </>
             ) : (
               <div>Click NEXT for customer...</div>
