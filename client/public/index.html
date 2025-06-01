@@ -6,14 +6,51 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Teller's Window</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap');
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: 'Courier New', monospace; 
+            font-family: 'Share Tech Mono', 'Courier New', monospace; 
             background: #001100; 
             color: #00ff00; 
             height: 100vh; 
             overflow: hidden;
             touch-action: manipulation;
+            position: relative;
+        }
+        
+        /* CRT Effects */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 1000;
+            animation: flicker 0.15s infinite linear;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 1; }
+            98% { opacity: 1; }
+            99% { opacity: 0.98; }
+            100% { opacity: 1; }
+        }
+        
+        .screen-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 0, 0.05) 0%, transparent 70%);
+            pointer-events: none;
         }
         .game-container { 
             height: 100vh; 
@@ -54,6 +91,12 @@
             justify-content: space-between; 
         }
         .customer { padding: 20px; border-bottom: 2px solid #00ff00; }
+        .main-content { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+        }
         .documents { flex: 1; padding: 20px; overflow-y: auto; }
         .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .document { 
@@ -62,14 +105,112 @@
             cursor: pointer; 
             background: rgba(0, 100, 0, 0.1); 
             min-height: 100px;
+            transition: all 0.3s ease;
+            transform: perspective(1000px) rotateY(0deg);
         }
-        .document:active { background: rgba(255, 255, 0, 0.2); border-color: #ffff00; }
-        .document.selected { background: rgba(255, 255, 0, 0.2); border-color: #ffff00; }
-        .document.error { border-color: #ff0000; background: rgba(255, 0, 0, 0.1); }
-        .actions { display: flex; gap: 15px; }
-        .action-btn { flex: 1; padding: 20px; font-size: 1.2rem; font-family: inherit; border: 2px solid; cursor: pointer; }
-        .process { background: #00ff00; color: #000000; border-color: #00ff00; }
-        .reject { background: #ff0000; color: #ffffff; border-color: #ff0000; }
+        .document:hover { 
+            transform: perspective(1000px) rotateY(-5deg);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .document.selected { 
+            background: rgba(255, 255, 0, 0.2); 
+            border-color: #ffff00;
+            transform: perspective(1000px) rotateY(-10deg);
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+        }
+        .document.error { 
+            border-color: #ff0000; 
+            background: rgba(255, 0, 0, 0.1);
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+        }
+        
+        /* Terminal Interface */
+        .terminal {
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #00ff00;
+            padding: 15px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .terminal-output {
+            flex: 1;
+            margin-bottom: 10px;
+            max-height: 60px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+        
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        
+        .prompt {
+            color: #00ff00;
+            margin-right: 8px;
+        }
+        
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex: 1;
+            text-transform: uppercase;
+        }
+        
+        .cursor {
+            display: inline-block;
+            background: #00ff00;
+            width: 8px;
+            height: 16px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Flash feedback */
+        .flash-success {
+            animation: flash-green 0.5s ease-out;
+        }
+        
+        .flash-error {
+            animation: flash-red 0.5s ease-out;
+        }
+        
+        @keyframes flash-green {
+            0% { background-color: rgba(0, 255, 0, 0.3); }
+            100% { background-color: transparent; }
+        }
+        
+        @keyframes flash-red {
+            0% { background-color: rgba(255, 0, 0, 0.3); }
+            100% { background-color: transparent; }
+        }
+        
+        /* Help panel */
+        .help-panel {
+            font-size: 0.8rem;
+            color: #88ff88;
+            margin-top: 10px;
+            border-top: 1px solid #004400;
+            padding-top: 10px;
+        }
         @media (max-width: 768px) { 
             h1 { font-size: 2rem; } 
             .doc-grid { grid-template-columns: 1fr; } 
@@ -101,15 +242,31 @@
             <p>REQUEST: <span id="request">Loading...</span></p>
         </div>
         
-        <div class="documents">
-            <h3>EXAMINE DOCUMENTS</h3>
-            <div class="doc-grid" id="docs"></div>
-            <div class="actions">
-                <button class="action-btn process" onclick="processTransaction()">PROCESS</button>
-                <button class="action-btn reject" onclick="rejectTransaction()">REJECT</button>
+        <div class="main-content">
+            <div class="documents">
+                <h3>EXAMINE DOCUMENTS - Click or type EXAMINE [ID/SLIP/BOOK/SIG]</h3>
+                <div class="doc-grid" id="docs"></div>
+            </div>
+            
+            <div class="terminal">
+                <div class="terminal-output" id="terminal-output">
+                    TERMINAL READY. Type HELP for commands.
+                </div>
+                <div class="terminal-input-line">
+                    <span class="prompt">></span>
+                    <input type="text" class="terminal-input" id="terminal-input" placeholder="Enter command..." autocomplete="off">
+                    <span class="cursor"></span>
+                </div>
+                <div class="help-panel">
+                    Commands: EXAMINE [ID/SLIP/BOOK/SIG] | PROCESS | REJECT | VERIFY [amount] | HELP
+                </div>
             </div>
         </div>
     </div>
+    
+    <!-- CRT Effects -->
+    <div class="crt-overlay"></div>
+    <div class="screen-glow"></div>
 
     <script>
         let gameData = {
@@ -119,32 +276,330 @@
                 {
                     name: 'John Smith',
                     request: 'DEPOSIT $500',
+                    amount: 500,
+                    type: 'DEPOSIT',
                     docs: [
-                        { type: 'ID CARD', name: 'John Smith', detail: 'ID: 12345', valid: true },
-                        { type: 'BANK BOOK', name: 'John Smith', detail: 'Account: 987654', valid: true },
-                        { type: 'SLIP', name: 'John Smith', detail: 'DEPOSIT $500', valid: true },
-                        { type: 'SIGNATURE', name: 'John Smith', detail: 'Valid signature', valid: true }
+                        { id: 'ID', type: 'ID CARD', name: 'John Smith', detail: 'ID: 12345', valid: true },
+                        { id: 'BOOK', type: 'BANK BOOK', name: 'John Smith', detail: 'Account: 987654', valid: true },
+                        { id: 'SLIP', type: 'SLIP', name: 'John Smith', detail: 'DEPOSIT $500', valid: true },
+                        { id: 'SIG', type: 'SIGNATURE', name: 'John Smith', detail: 'Valid signature', valid: true }
                     ]
                 },
                 {
                     name: 'Mary Johnson',
                     request: 'WITHDRAWAL $200',
+                    amount: 200,
+                    type: 'WITHDRAWAL',
                     docs: [
-                        { type: 'ID CARD', name: 'Mary Johnson', detail: 'ID: 54321', valid: true },
-                        { type: 'BANK BOOK', name: 'Mary Johnson', detail: 'Account: 123456', valid: true },
-                        { type: 'SLIP', name: 'Mary Johnson', detail: 'WITHDRAWAL $250', valid: false, error: 'Amount mismatch!' },
-                        { type: 'SIGNATURE', name: 'Mary Johnson', detail: 'Invalid signature', valid: false, error: 'Signature does not match' }
+                        { id: 'ID', type: 'ID CARD', name: 'Mary Johnson', detail: 'ID: 54321', valid: true },
+                        { id: 'BOOK', type: 'BANK BOOK', name: 'Mary Johnson', detail: 'Account: 123456', valid: true },
+                        { id: 'SLIP', type: 'SLIP', name: 'Mary Johnson', detail: 'WITHDRAWAL $250', valid: false, error: 'Amount mismatch!' },
+                        { id: 'SIG', type: 'SIGNATURE', name: 'Mary Johnson', detail: 'Invalid signature', valid: false, error: 'Signature does not match' }
                     ]
                 }
             ],
             currentCustomer: null,
-            selectedDoc: null
+            selectedDoc: null,
+            sounds: {}
         };
 
+        // Sound Effects System
+        function initSounds() {
+            const soundFiles = {
+                typing: createTypingSound(),
+                receipt: createReceiptSound(),
+                stamp: createStampSound(),
+                drawer: createDrawerSound(),
+                buzzer: createBuzzerSound(),
+                paperShuffle: createPaperShuffleSound()
+            };
+            
+            gameData.sounds = soundFiles;
+        }
+
+        // Sound synthesis functions
+        function createTypingSound() {
+            return function() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800 + Math.random() * 400, audioContext.currentTime);
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.05);
+            };
+        }
+
+        function createReceiptSound() {
+            return function() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const noise = audioContext.createBufferSource();
+                const noiseBuffer = audioContext.createBuffer(1, 0.3 * audioContext.sampleRate, audioContext.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    output[i] = Math.random() * 0.1;
+                }
+                
+                noise.buffer = noiseBuffer;
+                noise.connect(audioContext.destination);
+                noise.start();
+                noise.stop(audioContext.currentTime + 0.3);
+            };
+        }
+
+        function createStampSound() {
+            return function() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            };
+        }
+
+        function createDrawerSound() {
+            return function() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                oscillator.type = 'sawtooth';
+                
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            };
+        }
+
+        function createBuzzerSound() {
+            return function() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + 0.4);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.6);
+            };
+        }
+
+        function createPaperShuffleSound() {
+            return function() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const noise = audioContext.createBufferSource();
+                const noiseBuffer = audioContext.createBuffer(1, 0.2 * audioContext.sampleRate, audioContext.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                for (let i = 0; i < noiseBuffer.length; i++) {
+                    output[i] = (Math.random() * 2 - 1) * 0.05;
+                }
+                
+                const filter = audioContext.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.setValueAtTime(2000, audioContext.currentTime);
+                
+                noise.buffer = noiseBuffer;
+                noise.connect(filter);
+                filter.connect(audioContext.destination);
+                noise.start();
+                noise.stop(audioContext.currentTime + 0.2);
+            };
+        }
+
+        function playSound(soundName) {
+            try {
+                if (gameData.sounds[soundName]) {
+                    gameData.sounds[soundName]();
+                }
+            } catch (e) {
+                console.log('Sound playback not available');
+            }
+        }
+
         function startGame() {
+            initSounds();
+            playSound('drawer');
             document.getElementById('intro').style.display = 'none';
             document.getElementById('game').style.display = 'flex';
             loadCustomer();
+            setupTerminal();
+        }
+
+        function setupTerminal() {
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                playSound('typing');
+                
+                if (e.key === 'Enter') {
+                    const command = e.target.value.trim().toUpperCase();
+                    e.target.value = '';
+                    processCommand(command);
+                }
+                
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    // Tab completion logic
+                    const partial = e.target.value.toUpperCase();
+                    const commands = ['EXAMINE', 'PROCESS', 'REJECT', 'VERIFY', 'HELP'];
+                    const match = commands.find(cmd => cmd.startsWith(partial));
+                    if (match) {
+                        e.target.value = match + ' ';
+                    }
+                }
+            });
+            
+            // Focus on terminal input
+            terminalInput.focus();
+        }
+
+        function processCommand(command) {
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            // Add command to output
+            terminalOutput.innerHTML += `<br>> ${command}`;
+            
+            const parts = command.split(' ');
+            const action = parts[0];
+            const target = parts[1];
+            
+            switch (action) {
+                case 'EXAMINE':
+                    if (target) {
+                        examineDocument(target);
+                    } else {
+                        addTerminalOutput('ERROR: Specify document (ID/SLIP/BOOK/SIG)');
+                        playSound('buzzer');
+                    }
+                    break;
+                    
+                case 'PROCESS':
+                    processTransaction();
+                    break;
+                    
+                case 'REJECT':
+                    rejectTransaction();
+                    break;
+                    
+                case 'VERIFY':
+                    if (target) {
+                        verifyAmount(parseInt(target));
+                    } else {
+                        addTerminalOutput('ERROR: Specify amount to verify');
+                        playSound('buzzer');
+                    }
+                    break;
+                    
+                case 'HELP':
+                    showHelp();
+                    break;
+                    
+                default:
+                    addTerminalOutput('UNKNOWN COMMAND. Type HELP for available commands.');
+                    playSound('buzzer');
+            }
+            
+            // Scroll to bottom
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function addTerminalOutput(text) {
+            const terminalOutput = document.getElementById('terminal-output');
+            terminalOutput.innerHTML += `<br>${text}`;
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function examineDocument(docType) {
+            const customer = gameData.currentCustomer;
+            if (!customer) return;
+            
+            const doc = customer.docs.find(d => d.id === docType);
+            if (doc) {
+                playSound('paperShuffle');
+                selectDoc(customer.docs.indexOf(doc));
+                addTerminalOutput(`EXAMINING ${doc.type}: ${doc.detail}`);
+                if (doc.error) {
+                    addTerminalOutput(`WARNING: ${doc.error}`);
+                    flashScreen('error');
+                } else {
+                    addTerminalOutput('Document appears valid.');
+                    flashScreen('success');
+                }
+            } else {
+                addTerminalOutput('DOCUMENT NOT FOUND');
+                playSound('buzzer');
+            }
+        }
+
+        function verifyAmount(amount) {
+            const customer = gameData.currentCustomer;
+            if (!customer) return;
+            
+            if (amount === customer.amount) {
+                addTerminalOutput(`AMOUNT VERIFIED: $${amount} matches request`);
+                playSound('stamp');
+                flashScreen('success');
+            } else {
+                addTerminalOutput(`AMOUNT MISMATCH: Expected $${customer.amount}, got $${amount}`);
+                playSound('buzzer');
+                flashScreen('error');
+            }
+        }
+
+        function showHelp() {
+            addTerminalOutput('=== AVAILABLE COMMANDS ===');
+            addTerminalOutput('EXAMINE [ID/SLIP/BOOK/SIG] - Examine document');
+            addTerminalOutput('VERIFY [amount] - Verify transaction amount');
+            addTerminalOutput('PROCESS - Approve transaction');
+            addTerminalOutput('REJECT - Reject transaction');
+            addTerminalOutput('HELP - Show this help');
+        }
+
+        function flashScreen(type) {
+            const gameArea = document.getElementById('game');
+            gameArea.classList.add(type === 'success' ? 'flash-success' : 'flash-error');
+            setTimeout(() => {
+                gameArea.classList.remove('flash-success', 'flash-error');
+            }, 500);
         }
 
         function loadCustomer() {
@@ -160,11 +615,17 @@
             customer.docs.forEach((doc, i) => {
                 const div = document.createElement('div');
                 div.className = 'document' + (doc.valid ? '' : ' error');
-                div.onclick = () => selectDoc(i);
+                div.onclick = () => {
+                    playSound('paperShuffle');
+                    selectDoc(i);
+                };
                 div.innerHTML = `<h4>${doc.type}</h4><p>${doc.name}</p><p>${doc.detail}</p>` + 
                                (doc.error ? `<p style="color: #ff0000;">ERROR: ${doc.error}</p>` : '');
                 docsEl.appendChild(div);
             });
+            
+            addTerminalOutput(`NEW CUSTOMER: ${customer.name} - ${customer.request}`);
+            addTerminalOutput('Type EXAMINE [ID/SLIP/BOOK/SIG] to inspect documents');
         }
 
         function selectDoc(index) {
@@ -178,10 +639,15 @@
             if (hasErrors) {
                 gameData.mistakes++;
                 gameData.score -= 50;
-                alert('MISTAKE! Transaction had errors but was processed!');
+                addTerminalOutput('TRANSACTION PROCESSED WITH ERRORS - MISTAKE!');
+                playSound('buzzer');
+                flashScreen('error');
             } else {
                 gameData.score += 100;
-                alert('SUCCESS! Transaction processed correctly!');
+                addTerminalOutput('TRANSACTION PROCESSED SUCCESSFULLY');
+                playSound('stamp');
+                playSound('receipt');
+                flashScreen('success');
             }
             updateGame();
         }
@@ -190,11 +656,15 @@
             const hasErrors = gameData.currentCustomer.docs.some(doc => !doc.valid);
             if (hasErrors) {
                 gameData.score += 150;
-                alert('GOOD CATCH! Fraudulent transaction rejected!');
+                addTerminalOutput('FRAUDULENT TRANSACTION REJECTED - GOOD CATCH!');
+                playSound('stamp');
+                flashScreen('success');
             } else {
                 gameData.mistakes++;
                 gameData.score -= 25;
-                alert('MISTAKE! Valid transaction was rejected!');
+                addTerminalOutput('VALID TRANSACTION REJECTED - MISTAKE!');
+                playSound('buzzer');
+                flashScreen('error');
             }
             updateGame();
         }
@@ -202,7 +672,11 @@
         function updateGame() {
             document.getElementById('score').textContent = gameData.score;
             document.getElementById('mistakes').textContent = gameData.mistakes;
-            setTimeout(loadCustomer, 1500);
+            addTerminalOutput('--- Transaction Complete ---');
+            setTimeout(() => {
+                loadCustomer();
+                document.getElementById('terminal-input').focus();
+            }, 2000);
         }
 
         // Touch handling
