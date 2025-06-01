@@ -802,6 +802,12 @@ function App() {
         processCommand(command);
         e.currentTarget.value = '';
       }
+    } else {
+      // Play key click sound for typing
+      if (Math.random() > 0.7) {
+        await initAudio();
+        playKeyClick();
+      }
     }
   };
 
