@@ -464,30 +464,47 @@ function App() {
     };
   };
 
-  // Enhanced terminal typing with sound
+  // Enhanced terminal typing with sound and proper word wrapping
   const typeMessage = (text: string) => {
-    let i = 0;
-    const outputElement = document.createElement('div');
-    setTerminalOutput(prev => [...prev, '']);
+    // Split long lines to prevent overflow
+    const maxLineLength = 50;
+    const words = text.split(' ');
+    let currentLine = '';
+    const lines = [];
     
-    const typeInterval = setInterval(() => {
-      if (i < text.length) {
-        outputElement.textContent += text.charAt(i);
-        // Add subtle key click sound occasionally
-        if (Math.random() > 0.8) {
-          playKeyClick();
-        }
-        i++;
-        
-        setTerminalOutput(prev => {
-          const newOutput = [...prev];
-          newOutput[newOutput.length - 1] = outputElement.textContent || '';
-          return newOutput;
-        });
+    for (const word of words) {
+      if ((currentLine + ' ' + word).length > maxLineLength && currentLine.length > 0) {
+        lines.push(currentLine);
+        currentLine = word;
       } else {
-        clearInterval(typeInterval);
+        currentLine = currentLine ? currentLine + ' ' + word : word;
       }
-    }, 30 + Math.random() * 40);
+    }
+    if (currentLine) lines.push(currentLine);
+    
+    // Type each line
+    lines.forEach((line, lineIndex) => {
+      setTimeout(() => {
+        let i = 0;
+        const outputElement = document.createElement('div');
+        setTerminalOutput(prev => [...prev, '']);
+        
+        const typeInterval = setInterval(() => {
+          if (i < line.length) {
+            outputElement.textContent += line.charAt(i);
+            i++;
+            
+            setTerminalOutput(prev => {
+              const newOutput = [...prev];
+              newOutput[newOutput.length - 1] = outputElement.textContent || '';
+              return newOutput;
+            });
+          } else {
+            clearInterval(typeInterval);
+          }
+        }, 25);
+      }, lineIndex * 200);
+    });
   };
 
   const checkDocuments = () => {
@@ -847,15 +864,14 @@ function App() {
       const command = e.currentTarget.value;
       if (command.trim()) {
         await initAudio();
+        playTerminalEnter();
         processCommand(command);
         e.currentTarget.value = '';
       }
-    } else {
-      // Play key click sound for typing
-      if (Math.random() > 0.7) {
-        await initAudio();
-        playKeyClick();
-      }
+    } else if (e.key.length === 1) {
+      // Play key click for every character typed
+      await initAudio();
+      playKeyClick();
     }
   };
 
