@@ -106,51 +106,72 @@ function App() {
         
         oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
         gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
         
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + duration);
       };
 
+      const createNoise = (duration: number, volume: number = 0.05) => {
+        const bufferSize = audioContext.sampleRate * duration;
+        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        
+        const source = audioContext.createBufferSource();
+        const gainNode = audioContext.createGain();
+        
+        source.buffer = buffer;
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        
+        source.start(audioContext.currentTime);
+      };
+
       switch (type) {
         case 'keypress':
-          // Realistic mechanical keyboard click sound
-          createTone(1200, 0.02, 0.06);
-          setTimeout(() => createTone(800, 0.015, 0.04), 8);
+          // Soft, satisfying keyboard click
+          createTone(1800, 0.008, 0.03);
+          createNoise(0.003, 0.008);
+          setTimeout(() => createTone(1200, 0.006, 0.02), 2);
           break;
         case 'button_click':
-          createTone(1200, 0.12, 0.08);
-          setTimeout(() => createTone(900, 0.08, 0.04), 40);
+          createTone(1200, 0.08, 0.1);
+          setTimeout(() => createTone(800, 0.06, 0.08), 30);
           break;
         case 'terminal_confirm':
-          createTone(1100, 0.15, 0.06);
-          setTimeout(() => createTone(1300, 0.1, 0.04), 80);
+          createTone(1400, 0.12, 0.1);
+          setTimeout(() => createTone(1600, 0.08, 0.06), 60);
           break;
         case 'customer_approach':
           createTone(600, 0.3, 0.08);
           setTimeout(() => createTone(700, 0.2, 0.06), 150);
           break;
         case 'database_lookup':
-          createTone(1000, 0.2, 0.06);
-          setTimeout(() => createTone(1100, 0.15, 0.04), 100);
-          setTimeout(() => createTone(1200, 0.1, 0.03), 200);
+          createTone(1000, 0.15, 0.08);
+          setTimeout(() => createTone(1100, 0.12, 0.06), 80);
+          setTimeout(() => createTone(1200, 0.1, 0.04), 160);
           break;
         case 'approve':
-          createTone(800, 0.15, 0.08);
-          setTimeout(() => createTone(1000, 0.25, 0.1), 150);
+          createTone(880, 0.2, 0.1);
+          setTimeout(() => createTone(1100, 0.3, 0.12), 100);
           break;
         case 'reject':
-          createTone(400, 0.25, 0.08);
-          setTimeout(() => createTone(350, 0.2, 0.06), 150);
+          createTone(220, 0.3, 0.1);
+          setTimeout(() => createTone(180, 0.25, 0.08), 150);
           break;
         case 'stamp':
-          createTone(300, 0.05, 0.12);
-          setTimeout(() => createTone(250, 0.08, 0.08), 40);
+          createNoise(0.05, 0.15);
+          createTone(200, 0.08, 0.1);
           break;
         case 'paper_rustle':
-          createTone(1500, 0.03, 0.02);
-          setTimeout(() => createTone(1400, 0.02, 0.015), 30);
-          setTimeout(() => createTone(1600, 0.025, 0.018), 60);
+          createNoise(0.2, 0.04);
           break;
         default:
           createTone(500, 0.1, 0.05);
@@ -223,16 +244,16 @@ function App() {
       playSound('database_lookup');
       setTimeout(() => {
         if (currentCustomer.isFraud) {
-          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "*** NO RECORD FOUND ***", "Name '" + enteredName + "' not in customer database", "POSSIBLE FRAUD - INVESTIGATE FURTHER"]);
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== FRAUD ALERT ==========", "*** NO CUSTOMER RECORD FOUND ***", "Name: '" + enteredName + "'", "SYSTEM STATUS: NOT IN DATABASE", "RECOMMENDATION: REJECT IMMEDIATELY", "SECURITY FLAG: POTENTIAL IDENTITY THEFT", "===============================", ""]);
           playSound('reject');
         } else {
           const isMatch = enteredName.toUpperCase() === currentCustomer.name.toUpperCase();
           if (isMatch) {
             setVerificationState(prev => ({...prev, nameVerified: true}));
-            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✓ NAME VERIFIED: " + enteredName, "Customer record found - identity confirmed"]);
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION SUCCESS ==========", "✓ CUSTOMER NAME VERIFIED", "Input: " + enteredName, "System: " + currentCustomer.name, "STATUS: IDENTITY CONFIRMED", "NEXT STEP: VERIFY DATE OF BIRTH", "=======================================", ""]);
             playSound('approve');
           } else {
-            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✗ NAME MISMATCH", "Entered: " + enteredName, "Expected: " + currentCustomer.name, "VERIFICATION FAILED"]);
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION FAILED ==========", "✗ NAME DOES NOT MATCH RECORDS", "You entered: " + enteredName, "System shows: " + currentCustomer.name, "STATUS: IDENTITY NOT CONFIRMED", "ACTION: RE-CHECK CUSTOMER DOCUMENTS", "====================================", ""]);
             playSound('reject');
           }
         }
@@ -255,14 +276,14 @@ function App() {
         const systemDOB = currentCustomer.documents.find(d => d.data.dateOfBirth)?.data.dateOfBirth || "1985-03-15";
         
         if (currentCustomer.isFraud) {
-          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "*** NO RECORD FOUND ***", "Date of birth '" + enteredDOB + "' not in customer database", "POSSIBLE FRAUD - INVESTIGATE FURTHER"]);
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== FRAUD ALERT ==========", "*** NO DATE OF BIRTH RECORD ***", "DOB: '" + enteredDOB + "'", "SYSTEM STATUS: NOT IN DATABASE", "RECOMMENDATION: REJECT TRANSACTION", "SECURITY FLAG: FRAUDULENT IDENTITY", "==============================", ""]);
           playSound('reject');
         } else if (enteredDOB === systemDOB) {
           setVerificationState(prev => ({...prev, dobVerified: true}));
-          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✓ DOB VERIFIED: " + enteredDOB, "Date of birth matches customer records"]);
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION SUCCESS ==========", "✓ DATE OF BIRTH VERIFIED", "Input: " + enteredDOB, "System: " + systemDOB, "STATUS: DOB CONFIRMED", "NEXT STEP: COMPARE SIGNATURE", "=======================================", ""]);
           playSound('approve');
         } else {
-          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✗ DOB MISMATCH", "Entered: " + enteredDOB, "Expected: " + systemDOB, "VERIFICATION FAILED"]);
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION FAILED ==========", "✗ DATE OF BIRTH MISMATCH", "You entered: " + enteredDOB, "System shows: " + systemDOB, "STATUS: DOB NOT CONFIRMED", "ACTION: RE-CHECK CUSTOMER ID", "====================================", ""]);
           playSound('reject');
         }
       }, 1000);
