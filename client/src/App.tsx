@@ -1099,215 +1099,26 @@ function App() {
             </div>
           )}
 
-          {/* Panel 2: Verification Actions */}
+          {/* Manual Verification Instructions */}
           {currentCustomer && (
             <div style={{
               background: 'rgba(0, 50, 0, 0.3)',
-              border: '2px solid #005500',
+              border: '2px solid #ffaa00',
               padding: '12px',
               marginBottom: '8px',
               borderRadius: '4px'
             }}>
-              <h5 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>VERIFICATION ACTIONS</h5>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                <button
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      compareField('NAME');
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      compareField('NAME');
-                    });
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 0, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px',
-                    minHeight: '40px',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'manipulation'
-                  }}
-                >
-                  Compare Name
-                </button>
-                <button
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      compareField('DOB');
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      compareField('DOB');
-                    });
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 0, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px',
-                    minHeight: '40px',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'manipulation'
-                  }}
-                >
-                  Compare DOB
-                </button>
-                <button
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      compareField('SIGNATURE');
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      compareField('SIGNATURE');
-                    });
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 0, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px',
-                    minHeight: '40px',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'manipulation'
-                  }}
-                >
-                  Compare Signature
-                </button>
-                <button
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      verifyAmount(currentCustomer.requestedAmount);
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      verifyAmount(currentCustomer.requestedAmount);
-                    });
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 0, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px',
-                    minHeight: '40px',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'manipulation'
-                  }}
-                >
-                  Verify Amount
-                </button>
-                <button
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      lookupAccount(currentCustomer.accountNumber);
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      lookupAccount(currentCustomer.accountNumber);
-                    });
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 0, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px',
-                    minHeight: '40px',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'manipulation'
-                  }}
-                >
-                  Lookup Account
-                </button>
-                <button
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      examineDocument('SELECTED');
-                    });
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    initAudio().then(() => {
-                      playSoftClick();
-                      examineDocument('SELECTED');
-                    });
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 0, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px',
-                    minHeight: '40px',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    touchAction: 'manipulation'
-                  }}
-                >
-                  Examine Doc
-                </button>
+              <h5 style={{ margin: '0 0 8px 0', color: '#ffaa00', fontSize: '14px' }}>⚠ MANUAL VERIFICATION REQUIRED</h5>
+              <div style={{ fontSize: '12px', color: '#ffcc00', lineHeight: '1.4' }}>
+                <div>1. LOOKUP {currentCustomer.accountNumber}</div>
+                <div>2. Open documents (tap document below)</div>
+                <div>3. VERIFY NAME {currentCustomer.name}</div>
+                <div>4. VERIFY DOB [from ID document]</div>
+                <div>5. COMPARE SIGNATURE</div>
+                <div>6. PROCESS {currentCustomer.transactionType} {currentCustomer.requestedAmount}</div>
+                <div style={{ color: '#ff6666', fontWeight: 'bold' }}>
+                  7. TYPE: APPROVE or REJECT
+                </div>
               </div>
             </div>
           )}
