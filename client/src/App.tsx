@@ -190,9 +190,20 @@ function App() {
           return;
         }
         
-        setVerificationState(prev => ({...prev, accountLookedUp: true}));
-        setTerminalOutput(prev => [...prev, "> " + command, "Database lookup for account: " + accountNum, "Name on file: " + currentCustomer.name, "DOB on file: 1985-03-15", "Address: 123 Main Street, Springfield, IL", "Account status: ACTIVE", "Current balance: $" + Math.floor(Math.random() * 50000), "", "Use VERIFY commands to check customer data"]);
         playSound('database_lookup');
+        setTimeout(() => {
+          if (currentCustomer.isFraud) {
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "*** ACCOUNT NOT FOUND ***", "Account number " + accountNum + " does not exist", "POSSIBLE FRAUD - REJECT TRANSACTION"]);
+            playSound('reject');
+          } else if (accountNum === currentCustomer.accountNumber) {
+            setVerificationState(prev => ({...prev, accountLookedUp: true}));
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✓ ACCOUNT VERIFIED: " + accountNum, "Name on file: " + currentCustomer.name, "DOB on file: 1985-03-15", "Address: 123 Main Street, Springfield, IL", "Account status: ACTIVE", "Current balance: $" + Math.floor(Math.random() * 50000), "", "Account verification complete"]);
+            playSound('approve');
+          } else {
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✗ ACCOUNT MISMATCH", "Entered: " + accountNum, "Expected: " + currentCustomer.accountNumber, "VERIFICATION FAILED"]);
+            playSound('reject');
+          }
+        }, 1200);
       }
     } else if (cmd.startsWith('VERIFY NAME ')) {
       const enteredName = cmd.replace('VERIFY NAME ', '');
@@ -201,27 +212,46 @@ function App() {
         return;
       }
       
-      const isMatch = enteredName.toUpperCase() === currentCustomer.name.toUpperCase();
-      if (isMatch) {
-        setVerificationState(prev => ({...prev, nameVerified: true}));
-        setTerminalOutput(prev => [...prev, "> " + command, "✓ NAME VERIFIED: " + enteredName, "Customer name matches system records"]);
-        playSound('database_lookup');
-      } else {
-        setTerminalOutput(prev => [...prev, "> " + command, "✗ NAME MISMATCH:", "Entered: " + enteredName, "System: " + currentCustomer.name, "FRAUD ALERT: Name does not match"]);
-        playSound('error');
-      }
+      playSound('database_lookup');
+      setTimeout(() => {
+        if (currentCustomer.isFraud) {
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "*** NO RECORD FOUND ***", "Name '" + enteredName + "' not in customer database", "POSSIBLE FRAUD - INVESTIGATE FURTHER"]);
+          playSound('reject');
+        } else {
+          const isMatch = enteredName.toUpperCase() === currentCustomer.name.toUpperCase();
+          if (isMatch) {
+            setVerificationState(prev => ({...prev, nameVerified: true}));
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✓ NAME VERIFIED: " + enteredName, "Customer record found - identity confirmed"]);
+            playSound('approve');
+          } else {
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✗ NAME MISMATCH", "Entered: " + enteredName, "Expected: " + currentCustomer.name, "VERIFICATION FAILED"]);
+            playSound('reject');
+          }
+        }
+      }, 1000);
     } else if (cmd.startsWith('VERIFY DOB ')) {
       const enteredDOB = cmd.replace('VERIFY DOB ', '');
-      const systemDOB = "1985-03-15";
-      
-      if (enteredDOB === systemDOB) {
-        setVerificationState(prev => ({...prev, dobVerified: true}));
-        setTerminalOutput(prev => [...prev, "> " + command, "✓ DOB VERIFIED: " + enteredDOB, "Date of birth matches system records"]);
-        playSound('database_lookup');
-      } else {
-        setTerminalOutput(prev => [...prev, "> " + command, "✗ DOB MISMATCH:", "Entered: " + enteredDOB, "System: " + systemDOB, "FRAUD ALERT: Date of birth does not match"]);
-        playSound('error');
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
       }
+      
+      playSound('database_lookup');
+      setTimeout(() => {
+        const systemDOB = currentCustomer.documents.find(d => d.data.dateOfBirth)?.data.dateOfBirth || "1985-03-15";
+        
+        if (currentCustomer.isFraud) {
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "*** NO RECORD FOUND ***", "Date of birth '" + enteredDOB + "' not in customer database", "POSSIBLE FRAUD - INVESTIGATE FURTHER"]);
+          playSound('reject');
+        } else if (enteredDOB === systemDOB) {
+          setVerificationState(prev => ({...prev, dobVerified: true}));
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✓ DOB VERIFIED: " + enteredDOB, "Date of birth matches customer records"]);
+          playSound('approve');
+        } else {
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✗ DOB MISMATCH", "Entered: " + enteredDOB, "Expected: " + systemDOB, "VERIFICATION FAILED"]);
+          playSound('reject');
+        }
+      }, 1000);
     } else if (cmd === 'COMPARE SIGNATURE') {
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
@@ -383,56 +413,53 @@ function App() {
         flexDirection: 'column'
       }}>
         
-        {/* Documents Section - Always Visible and Fixed */}
+        {/* Documents Section - Clean and Compact */}
         <div style={{
-          background: 'rgba(0, 40, 0, 0.9)',
-          border: '3px solid #ffff00',
-          padding: '16px',
-          borderRadius: '6px',
-          marginBottom: '12px',
-          height: '280px',
-          overflowY: 'auto',
-          position: 'relative',
-          zIndex: 10
+          background: 'rgba(0, 40, 0, 0.95)',
+          border: '2px solid #ffff00',
+          padding: '12px',
+          borderRadius: '4px',
+          marginBottom: '10px',
+          height: '220px',
+          overflowY: 'auto'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#ffff00', fontSize: '20px', textAlign: 'center' }}>📄 CUSTOMER DOCUMENTS</h3>
+          <div style={{ color: '#ffff00', fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            CUSTOMER DOCUMENTS
+          </div>
           
-          {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? 
-            currentCustomer.documents.map((doc, index) => (
-              <div
-                key={index}
-                style={{
-                  background: 'rgba(255, 255, 0, 0.15)',
-                  border: '3px solid #ffff00',
-                  padding: '20px',
-                  margin: '8px 0',
-                  borderRadius: '8px'
-                }}
-              >
-                <div style={{ fontSize: '22px', color: '#ffff00', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>
-                  {doc.title}
-                </div>
-                <div style={{ fontSize: '18px', lineHeight: '1.6' }}>
+          {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {currentCustomer.documents.map((doc, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: 'rgba(255, 255, 0, 0.1)',
+                    border: '1px solid #ffff00',
+                    padding: '10px',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <div style={{ color: '#ffff00', fontSize: '14px', fontWeight: 'bold', marginBottom: '6px' }}>
+                    {doc.title}
+                  </div>
                   {Object.entries(doc.data).map(([key, value]) => (
-                    <div key={key} style={{ marginBottom: '8px', padding: '4px 0', borderBottom: '1px solid rgba(255,255,0,0.3)' }}>
-                      <span style={{ color: '#00ffff', fontWeight: 'bold', fontSize: '16px' }}>{key.toUpperCase()}:</span>{' '}
-                      <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '20px' }}>{value}</span>
+                    <div key={key} style={{ fontSize: '13px', marginBottom: '3px' }}>
+                      <span style={{ color: '#00cccc' }}>{key.toUpperCase()}:</span>{' '}
+                      <span style={{ color: '#ffffff', fontWeight: 'bold' }}>{value}</span>
                     </div>
                   ))}
                 </div>
-              </div>
-            ))
-          : (
+              ))}
+            </div>
+          ) : (
             <div style={{
               textAlign: 'center',
-              color: '#ffaa00',
-              padding: '40px',
-              fontSize: '18px',
-              border: '2px dashed #ffaa00',
-              borderRadius: '8px'
+              color: '#999999',
+              padding: '30px',
+              fontSize: '14px'
             }}>
-              No customer documents available<br/>
-              <span style={{ fontSize: '14px' }}>Use NEXT command to call customer</span>
+              No customer present<br/>
+              <span style={{ color: '#ffaa00' }}>Type NEXT to call customer</span>
             </div>
           )}
         </div>
@@ -464,19 +491,21 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'VERIFY NAME ';
+                    if (inputRef.current && currentCustomer) {
+                      const customerName = currentCustomer.documents.find(d => d.data.name)?.data.name || '';
+                      inputRef.current.value = `VERIFY NAME ${customerName}`;
                       inputRef.current.focus();
                     }
                   }}
+                  disabled={!currentCustomer}
                   style={{
-                    background: 'rgba(0, 60, 0, 0.6)',
+                    background: currentCustomer ? 'rgba(0, 60, 0, 0.8)' : 'rgba(30, 30, 30, 0.5)',
                     border: '1px solid #00aa00',
-                    color: '#00ff00',
-                    padding: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '2px',
+                    color: currentCustomer ? '#00ff00' : '#666666',
+                    padding: '8px',
+                    fontSize: '11px',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    borderRadius: '3px',
                     fontFamily: 'monospace'
                   }}
                 >
@@ -485,19 +514,21 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'VERIFY DOB ';
+                    if (inputRef.current && currentCustomer) {
+                      const dob = currentCustomer.documents.find(d => d.data.dateOfBirth)?.data.dateOfBirth || '';
+                      inputRef.current.value = `VERIFY DOB ${dob}`;
                       inputRef.current.focus();
                     }
                   }}
+                  disabled={!currentCustomer}
                   style={{
-                    background: 'rgba(60, 60, 0, 0.6)',
+                    background: currentCustomer ? 'rgba(60, 60, 0, 0.8)' : 'rgba(30, 30, 30, 0.5)',
                     border: '1px solid #aaaa00',
-                    color: '#ffff00',
-                    padding: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '2px',
+                    color: currentCustomer ? '#ffff00' : '#666666',
+                    padding: '8px',
+                    fontSize: '11px',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    borderRadius: '3px',
                     fontFamily: 'monospace'
                   }}
                 >
@@ -511,14 +542,15 @@ function App() {
                       inputRef.current.focus();
                     }
                   }}
+                  disabled={!currentCustomer}
                   style={{
-                    background: 'rgba(0, 0, 60, 0.6)',
+                    background: currentCustomer ? 'rgba(0, 0, 60, 0.8)' : 'rgba(30, 30, 30, 0.5)',
                     border: '1px solid #0088ff',
-                    color: '#00aaff',
-                    padding: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '2px',
+                    color: currentCustomer ? '#00aaff' : '#666666',
+                    padding: '8px',
+                    fontSize: '11px',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    borderRadius: '3px',
                     fontFamily: 'monospace'
                   }}
                 >
@@ -527,19 +559,20 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'PROCESS ' + (currentCustomer?.transactionType || '') + ' ';
+                    if (inputRef.current && currentCustomer) {
+                      inputRef.current.value = `PROCESS ${currentCustomer.transactionType} ${currentCustomer.requestedAmount}`;
                       inputRef.current.focus();
                     }
                   }}
+                  disabled={!currentCustomer}
                   style={{
-                    background: 'rgba(60, 0, 60, 0.6)',
+                    background: currentCustomer ? 'rgba(60, 0, 60, 0.8)' : 'rgba(30, 30, 30, 0.5)',
                     border: '1px solid #aa00aa',
-                    color: '#ff00ff',
-                    padding: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '2px',
+                    color: currentCustomer ? '#ff00ff' : '#666666',
+                    padding: '8px',
+                    fontSize: '11px',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    borderRadius: '3px',
                     fontFamily: 'monospace'
                   }}
                 >
