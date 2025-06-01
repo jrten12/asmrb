@@ -1114,7 +1114,8 @@ function App() {
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          minHeight: '0',
+          flex: '1'
         }}>
           <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
           
@@ -1193,8 +1194,8 @@ function App() {
             fontWeight: 'bold',
             color: '#00ff00',
             textShadow: '0 0 2px #00ff00',
-            minHeight: '200px',
-            maxHeight: '300px'
+            minHeight: '180px',
+            maxHeight: '220px'
           }}>
             {terminalOutput.length === 0 && (
               <div style={{ 
@@ -1221,12 +1222,10 @@ function App() {
             background: 'rgba(0, 80, 0, 0.6)',
             border: '3px solid #00ff00',
             padding: '16px',
-            marginTop: '12px',
+            marginTop: '8px',
+            marginBottom: '8px',
             borderRadius: '8px',
-            boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)',
-            position: 'sticky',
-            bottom: '0px',
-            zIndex: 1000
+            boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)'
           }}>
             <div style={{
               fontSize: '14px',
