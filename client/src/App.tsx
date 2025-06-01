@@ -573,15 +573,20 @@ function App() {
 
   const loadNextCustomer = () => {
     console.log('Loading next customer...');
-    const customer = generateCustomer();
-    console.log('Generated customer:', customer);
-    setCurrentCustomer(customer);
-    setSelectedDocument(null);
-    
-    typeMessage('NEW CUSTOMER APPROACHING WINDOW');
-    setTimeout(() => {
-      typeMessage(`Customer requests: "${customer.transactionType} of $${customer.requestedAmount}"`);
-    }, 1000);
+    try {
+      const customer = generateCustomer();
+      console.log('Generated customer:', customer);
+      setCurrentCustomer(customer);
+      setSelectedDocument(null);
+      
+      typeMessage('NEW CUSTOMER APPROACHING WINDOW');
+      setTimeout(() => {
+        typeMessage(`Customer requests: "${customer.transactionType} of $${customer.requestedAmount}"`);
+      }, 1000);
+    } catch (error) {
+      console.error('Error generating customer:', error);
+      typeMessage('ERROR: Could not generate customer');
+    }
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -681,16 +686,16 @@ function App() {
           flexDirection: 'column',
           overflow: 'hidden'
         }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>CUSTOMER WINDOW</h4>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>CUSTOMER WINDOW</h4>
           
           {/* Customer Info */}
           <div style={{
             background: 'rgba(0, 60, 0, 0.3)',
             border: '1px solid #006600',
-            padding: '12px',
-            marginBottom: '12px',
-            fontSize: '14px',
-            lineHeight: '1.4'
+            padding: '8px',
+            marginBottom: '8px',
+            fontSize: '12px',
+            lineHeight: '1.3'
           }}>
             {currentCustomer ? (
               <>
@@ -700,7 +705,7 @@ function App() {
                 <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}
               </>
             ) : (
-              <div>Waiting for next customer...</div>
+              <div>Click NEXT for customer...</div>
             )}
           </div>
           
@@ -730,17 +735,17 @@ function App() {
           </div>
         </div>
         
-        {/* Terminal Area - 65% */}
+        {/* Terminal Area */}
         <div style={{
-          width: '65%',
+          width: window.innerWidth < 768 ? '100%' : '65%',
           border: '2px solid #00ff00',
-          padding: '12px',
+          padding: '8px',
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
         }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
           
           {/* Panel 1: Account Summary */}
           {currentCustomer && bankDatabase[currentCustomer.accountNumber] && (
