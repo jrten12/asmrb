@@ -265,7 +265,7 @@
                     </div>
                     
                     <div class="help-text">
-                        COMMANDS: EXAMINE [doc] | LOOKUP [account] | VERIFY [amount] | APPROVE | REJECT | HELP
+                        COMMANDS: PROCESS | EXAMINE [doc] | LOOKUP [account] | VERIFY [amount] | ENTER [data] | APPROVE | REJECT | HELP
                     </div>
                 </div>
             </div>
@@ -353,144 +353,180 @@
             'CASHIERS_CHECK': ['CHECK_REQUEST', 'ID', 'SIGNATURE', 'PAYMENT']
         };
         
-        // Customers with their requests and provided documents
-        const customers = [
-            {
-                name: 'Mary Johnson',
-                transactionType: 'WITHDRAWAL',
-                requestedAmount: 200,
-                requestedAccount: '123456789',
-                documents: [
-                    {
-                        id: 'FORM',
-                        type: 'TRANSACTION_FORM',
-                        title: 'Withdrawal Request Form',
-                        content: {
-                            customerName: 'Mary Johnson',
-                            accountNumber: '123456789',
-                            transactionType: 'WITHDRAWAL',
-                            amount: 250, // Intentional discrepancy!
-                            date: '2024-06-01',
-                            customerSignature: 'Mary Johnson'
-                        }
-                    },
-                    {
-                        id: 'ID',
-                        type: 'ID',
-                        title: 'Driver\'s License',
-                        content: {
-                            name: 'Mary Johnson',
-                            dob: '1982-07-22',
-                            address: '123 Oak Street, Springfield',
-                            licenseNumber: 'DL-54321',
-                            expirationDate: '2026-07-22'
-                        }
-                    },
-                    {
-                        id: 'SIG',
-                        type: 'SIGNATURE',
-                        title: 'Signature Card',
-                        content: {
-                            signature: 'Mary Johnson Fraudulent' // Intentional mismatch!
-                        }
-                    }
-                ]
-            },
-            {
-                name: 'Robert Wilson',
-                transactionType: 'WIRE_TRANSFER',
-                requestedAmount: 5000,
-                requestedAccount: '987654321',
-                targetAccount: '555123456',
-                documents: [
-                    {
-                        id: 'WIRE',
-                        type: 'WIRE_FORM',
-                        title: 'Wire Transfer Request',
-                        content: {
-                            fromAccount: '987654321',
-                            toAccount: '555123456',
-                            amount: 5000,
-                            recipientName: 'Business Solutions Inc',
-                            purpose: 'Invoice Payment',
-                            senderName: 'Robert Wilson',
-                            date: '2024-06-01'
-                        }
-                    },
-                    {
-                        id: 'ID',
-                        type: 'ID',
-                        title: 'Driver\'s License',
-                        content: {
-                            name: 'Robert Wilson',
-                            dob: '1975-03-15',
-                            address: '456 Pine Avenue, Springfield',
-                            licenseNumber: 'DL-12345'
-                        }
-                    },
-                    {
-                        id: 'PASSPORT',
-                        type: 'PASSPORT',
-                        title: 'U.S. Passport',
-                        content: {
-                            name: 'Robert Wilson',
-                            dob: '1975-03-15',
-                            passportNumber: 'US-98765432',
-                            issuedDate: '2020-01-15',
-                            expirationDate: '2030-01-15'
-                        }
-                    },
-                    {
-                        id: 'SIG',
-                        type: 'SIGNATURE',
-                        title: 'Signature Verification',
-                        content: {
-                            signature: 'Robert Wilson'
-                        }
-                    }
-                ]
-            },
-            {
-                name: 'Sarah Davis',
-                transactionType: 'DEPOSIT',
-                requestedAmount: 1200,
-                requestedAccount: '555777888',
-                documents: [
-                    {
-                        id: 'FORM',
-                        type: 'TRANSACTION_FORM',
-                        title: 'Deposit Form',
-                        content: {
-                            customerName: 'Sarah Davis',
-                            accountNumber: '555777889', // Wrong account number!
-                            transactionType: 'DEPOSIT',
-                            amount: 1200,
-                            depositType: 'CHECK',
-                            date: '2024-06-01'
-                        }
-                    },
-                    {
-                        id: 'ID',
-                        type: 'ID',
-                        title: 'Driver\'s License',
-                        content: {
-                            name: 'Sarah Davis',
-                            dob: '1990-11-08',
-                            address: '789 Elm Drive, Springfield',
-                            licenseNumber: 'DL-77788'
-                        }
-                    },
-                    {
-                        id: 'SIG',
-                        type: 'SIGNATURE',
-                        title: 'Signature Card',
-                        content: {
-                            signature: 'Sarah Davis'
-                        }
-                    }
-                ]
+        // Customer name pools for random generation
+        const firstNames = ['Mary', 'Robert', 'Sarah', 'John', 'Lisa', 'Michael', 'Jennifer', 'David', 'Jessica', 'William', 'Ashley', 'Richard', 'Amanda', 'Joseph', 'Stephanie', 'Thomas', 'Melissa', 'Christopher', 'Nicole', 'Daniel', 'Elizabeth', 'Matthew', 'Helen', 'Anthony', 'Sandra', 'Mark', 'Donna', 'Donald', 'Carol', 'Steven', 'Ruth', 'Kenneth', 'Sharon', 'Paul', 'Michelle', 'Joshua', 'Laura', 'Kevin', 'Sarah', 'Brian', 'Kimberly'];
+        const lastNames = ['Johnson', 'Wilson', 'Davis', 'Miller', 'Anderson', 'Taylor', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen', 'Young', 'Hernandez', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Gonzalez', 'Nelson', 'Carter', 'Mitchell', 'Perez', 'Roberts', 'Turner', 'Phillips'];
+        const streets = ['Oak Street', 'Pine Avenue', 'Elm Drive', 'Maple Road', 'Cedar Lane', 'Birch Court', 'Willow Way', 'Cherry Street', 'Poplar Avenue', 'Spruce Drive'];
+        const transactionTypes = ['WITHDRAWAL', 'DEPOSIT', 'WIRE_TRANSFER', 'CASHIERS_CHECK'];
+        
+        function generateRandomCustomer() {
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const fullName = `${firstName} ${lastName}`;
+            const accountNumber = generateAccountNumber();
+            const street = streets[Math.floor(Math.random() * streets.length)];
+            const streetNumber = Math.floor(Math.random() * 9999) + 1;
+            const address = `${streetNumber} ${street}, Springfield`;
+            
+            // Generate DOB (age 18-80)
+            const currentYear = new Date().getFullYear();
+            const birthYear = currentYear - (Math.floor(Math.random() * 62) + 18);
+            const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+            const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+            const dob = `${birthYear}-${month}-${day}`;
+            
+            const transactionType = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
+            const amount = generateTransactionAmount(transactionType);
+            
+            // Create signature variations
+            const correctSignature = fullName;
+            const fraudSignatures = [
+                fullName + ' Jr',
+                firstName + ' ' + lastName.slice(0, -1) + 'n',
+                firstName.slice(0, 1) + '. ' + lastName,
+                fullName + ' Sr',
+                firstName + ' ' + lastName + ' II'
+            ];
+            
+            // 30% chance of fraud
+            const isFraud = Math.random() < 0.3;
+            const hasSignatureFraud = isFraud && Math.random() < 0.6;
+            const hasAmountFraud = isFraud && Math.random() < 0.5;
+            const hasAccountFraud = isFraud && Math.random() < 0.4;
+            
+            // Add to database if not exists
+            if (!customerDatabase[accountNumber]) {
+                customerDatabase[accountNumber] = {
+                    name: fullName,
+                    dob: dob,
+                    address: address,
+                    photo: `[Photo: ${firstName}, age ${currentYear - birthYear}]`,
+                    signature: correctSignature,
+                    balance: Math.floor(Math.random() * 50000) + 1000,
+                    accountStatus: 'ACTIVE'
+                };
             }
-        ];
+            
+            return {
+                name: fullName,
+                transactionType: transactionType,
+                requestedAmount: amount,
+                requestedAccount: accountNumber,
+                documents: generateDocuments(fullName, accountNumber, address, dob, transactionType, amount, {
+                    hasSignatureFraud,
+                    hasAmountFraud,
+                    hasAccountFraud,
+                    fraudSignature: hasSignatureFraud ? fraudSignatures[Math.floor(Math.random() * fraudSignatures.length)] : correctSignature,
+                    correctSignature
+                })
+            };
+        }
+        
+        function generateAccountNumber() {
+            return String(Math.floor(Math.random() * 900000000) + 100000000);
+        }
+        
+        function generateTransactionAmount(type) {
+            switch (type) {
+                case 'WITHDRAWAL':
+                    return Math.floor(Math.random() * 2000) + 50;
+                case 'DEPOSIT':
+                    return Math.floor(Math.random() * 5000) + 100;
+                case 'WIRE_TRANSFER':
+                    return Math.floor(Math.random() * 25000) + 1000;
+                case 'CASHIERS_CHECK':
+                    return Math.floor(Math.random() * 10000) + 500;
+                default:
+                    return 100;
+            }
+        }
+        
+        function generateDocuments(name, accountNumber, address, dob, transactionType, amount, fraudInfo) {
+            const licenseNumber = 'DL-' + Math.floor(Math.random() * 99999).toString().padStart(5, '0');
+            const passportNumber = 'US-' + Math.floor(Math.random() * 99999999).toString().padStart(8, '0');
+            
+            const documents = [];
+            
+            // Transaction form
+            if (transactionType === 'WIRE_TRANSFER') {
+                documents.push({
+                    id: 'WIRE',
+                    type: 'WIRE_FORM',
+                    title: 'Wire Transfer Request',
+                    content: {
+                        fromAccount: fraudInfo.hasAccountFraud ? generateAccountNumber() : accountNumber,
+                        toAccount: generateAccountNumber(),
+                        amount: fraudInfo.hasAmountFraud ? amount + Math.floor(Math.random() * 500) + 50 : amount,
+                        recipientName: 'Business Payment Recipient',
+                        purpose: 'Invoice Payment',
+                        senderName: name,
+                        date: '2024-06-01'
+                    }
+                });
+            } else {
+                documents.push({
+                    id: 'FORM',
+                    type: 'TRANSACTION_FORM',
+                    title: `${transactionType.replace('_', ' ').toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} Form`,
+                    content: {
+                        customerName: name,
+                        accountNumber: fraudInfo.hasAccountFraud ? generateAccountNumber() : accountNumber,
+                        transactionType: transactionType,
+                        amount: fraudInfo.hasAmountFraud ? amount + Math.floor(Math.random() * 500) + 50 : amount,
+                        date: '2024-06-01',
+                        customerSignature: fraudInfo.fraudSignature
+                    }
+                });
+            }
+            
+            // Driver's License
+            documents.push({
+                id: 'ID',
+                type: 'ID',
+                title: 'Driver\'s License',
+                content: {
+                    name: name,
+                    dob: dob,
+                    address: address,
+                    licenseNumber: licenseNumber,
+                    expirationDate: '2026-12-31'
+                }
+            });
+            
+            // Passport for wire transfers
+            if (transactionType === 'WIRE_TRANSFER') {
+                documents.push({
+                    id: 'PASSPORT',
+                    type: 'PASSPORT',
+                    title: 'U.S. Passport',
+                    content: {
+                        name: name,
+                        dob: dob,
+                        passportNumber: passportNumber,
+                        issuedDate: '2020-01-15',
+                        expirationDate: '2030-01-15'
+                    }
+                });
+            }
+            
+            // Signature card
+            documents.push({
+                id: 'SIG',
+                type: 'SIGNATURE',
+                title: 'Signature Verification',
+                content: {
+                    signature: fraudInfo.fraudSignature
+                }
+            });
+            
+            return documents;
+        }
+        
+        // Generate random customers
+        let customers = [];
+        for (let i = 0; i < 20; i++) {
+            customers.push(generateRandomCustomer());
+        }
         
         // Initialize game
         function initGame() {
@@ -519,15 +555,18 @@
         
         function loadNextCustomer() {
             if (gameState.currentCustomerIndex >= customers.length) {
-                endGame();
-                return;
+                // Generate more customers
+                for (let i = 0; i < 10; i++) {
+                    customers.push(generateRandomCustomer());
+                }
             }
             
             gameState.currentCustomer = customers[gameState.currentCustomerIndex];
             displayCustomer();
             playSound('drawer');
-            addTerminalOutput(`NEW CUSTOMER APPROACHING WINDOW`);
-            addTerminalOutput(`Customer states: "I need to process a ${gameState.currentCustomer.transactionType.replace('_', ' ').toLowerCase()}"`);
+            typewriterEffect(`NEW CUSTOMER APPROACHING WINDOW`, () => {
+                typewriterEffect(`Customer states: "I need to process a ${gameState.currentCustomer.transactionType.replace('_', ' ').toLowerCase()}"`);
+            });
         }
         
         function displayCustomer() {
@@ -574,36 +613,43 @@
             const action = parts[0];
             const parameter = parts.slice(1).join(' ');
             
-            addTerminalOutput(`TELLER> ${command}`);
-            
-            switch (action) {
-                case 'EXAMINE':
-                    examineDocument(parameter);
-                    break;
-                case 'LOOKUP':
-                    lookupAccount(parameter);
-                    break;
-                case 'VERIFY':
-                    verifyAmount(parameter);
-                    break;
-                case 'APPROVE':
-                    approveTransaction();
-                    break;
-                case 'REJECT':
-                    rejectTransaction();
-                    break;
-                case 'HELP':
-                    showHelp();
-                    break;
-                default:
-                    addTerminalOutput('UNKNOWN COMMAND. Type HELP for available commands.');
-                    playSound('buzzer');
-            }
+            typewriterEffect(`TELLER> ${command}`, () => {
+                switch (action) {
+                    case 'EXAMINE':
+                        examineDocument(parameter);
+                        break;
+                    case 'LOOKUP':
+                        lookupAccount(parameter);
+                        break;
+                    case 'VERIFY':
+                        verifyAmount(parameter);
+                        break;
+                    case 'PROCESS':
+                        processTransactionForm(parameter);
+                        break;
+                    case 'ENTER':
+                        enterFormData(parameter);
+                        break;
+                    case 'APPROVE':
+                        approveTransaction();
+                        break;
+                    case 'REJECT':
+                        rejectTransaction();
+                        break;
+                    case 'HELP':
+                        showHelp();
+                        break;
+                    default:
+                        typewriterEffect('UNKNOWN COMMAND. Type HELP for available commands.', () => {
+                            playSound('buzzer');
+                        });
+                }
+            });
         }
         
         function examineDocument(docType) {
             if (!gameState.currentCustomer) {
-                addTerminalOutput('No customer present.');
+                typewriterEffect('No customer present.');
                 return;
             }
             
@@ -619,23 +665,85 @@
             }
             
             if (docIndex === -1) {
-                addTerminalOutput('Document not found or not selected.');
-                playSound('buzzer');
+                typewriterEffect('Document not found or not selected.', () => {
+                    playSound('buzzer');
+                });
                 return;
             }
             
             const doc = gameState.currentCustomer.documents[docIndex];
             playSound('paperShuffle');
             
-            addTerminalOutput(`=== EXAMINING: ${doc.title} ===`);
-            
-            // Display document contents
-            Object.entries(doc.content).forEach(([key, value]) => {
-                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                addTerminalOutput(`${label}: ${value}`);
+            typewriterEffect(`=== EXAMINING: ${doc.title} ===`, () => {
+                // Display document contents with typewriter effect
+                const entries = Object.entries(doc.content);
+                let entryIndex = 0;
+                
+                function typeNextEntry() {
+                    if (entryIndex < entries.length) {
+                        const [key, value] = entries[entryIndex];
+                        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        typewriterEffect(`${label}: ${value}`, () => {
+                            entryIndex++;
+                            setTimeout(typeNextEntry, 100);
+                        });
+                    } else {
+                        typewriterEffect('=== END DOCUMENT ===');
+                    }
+                }
+                
+                setTimeout(typeNextEntry, 200);
             });
+        }
+        
+        function processTransactionForm(formType) {
+            if (!gameState.currentCustomer) {
+                typewriterEffect('No customer present.');
+                return;
+            }
             
-            addTerminalOutput(`=== END DOCUMENT ===`);
+            typewriterEffect('PROCESSING TRANSACTION FORM...', () => {
+                playSound('typewriter');
+                setTimeout(() => {
+                    const form = gameState.currentCustomer.documents.find(d => d.type.includes('FORM'));
+                    if (form) {
+                        typewriterEffect('=== TRANSACTION REQUEST ===', () => {
+                            Object.entries(form.content).forEach(([key, value], index) => {
+                                setTimeout(() => {
+                                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                                    typewriterEffect(`${label}: ${value}`);
+                                }, index * 300);
+                            });
+                            
+                            setTimeout(() => {
+                                typewriterEffect('=== END FORM ===', () => {
+                                    typewriterEffect('Use LOOKUP [account] to verify customer information');
+                                });
+                            }, Object.keys(form.content).length * 300 + 500);
+                        });
+                    } else {
+                        typewriterEffect('No transaction form found.', () => {
+                            playSound('buzzer');
+                        });
+                    }
+                }, 800);
+            });
+        }
+        
+        function enterFormData(data) {
+            if (!data) {
+                typewriterEffect('Please specify data to enter.');
+                return;
+            }
+            
+            playSound('typewriter');
+            typewriterEffect(`ENTERING: ${data}`, () => {
+                setTimeout(() => {
+                    typewriterEffect('Data entered into system.', () => {
+                        playSound('receipt');
+                    });
+                }, 500);
+            });
         }
         
         function lookupAccount(accountNumber) {
@@ -645,89 +753,129 @@
                 return;
             }
             
-            playSound('typewriter');
+            // Simulate typing each character of the account number lookup
             addTerminalOutput('Accessing customer database...');
+            typewriterEffect(`ACCOUNT LOOKUP: ${accountNumber}`, () => {
+                setTimeout(() => {
+                    const customerRecord = customerDatabase[accountNumber];
+                    if (customerRecord) {
+                        typewriterEffect('=== CUSTOMER RECORD ===', () => {
+                            typewriterEffect(`NAME: ${customerRecord.name}`, () => {
+                                typewriterEffect(`DOB: ${customerRecord.dob}`, () => {
+                                    typewriterEffect(`ADDRESS: ${customerRecord.address}`, () => {
+                                        typewriterEffect(`PHOTO: ${customerRecord.photo}`, () => {
+                                            typewriterEffect(`SIGNATURE ON FILE: ${customerRecord.signature}`, () => {
+                                                typewriterEffect(`CURRENT BALANCE: $${customerRecord.balance}`, () => {
+                                                    typewriterEffect(`ACCOUNT STATUS: ${customerRecord.accountStatus}`, () => {
+                                                        typewriterEffect('=== END RECORD ===');
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    } else {
+                        typewriterEffect('ACCOUNT NOT FOUND IN SYSTEM', () => {
+                            playSound('buzzer');
+                        });
+                    }
+                }, 500);
+            });
+        }
+        
+        function typewriterEffect(text, callback = null) {
+            const output = document.getElementById('terminal-output');
+            const newLine = document.createElement('div');
+            output.appendChild(newLine);
             
-            setTimeout(() => {
-                const customerRecord = customerDatabase[accountNumber];
-                if (customerRecord) {
-                    addTerminalOutput(`=== CUSTOMER RECORD ===`);
-                    addTerminalOutput(`Name: ${customerRecord.name}`);
-                    addTerminalOutput(`DOB: ${customerRecord.dob}`);
-                    addTerminalOutput(`Address: ${customerRecord.address}`);
-                    addTerminalOutput(`Photo: ${customerRecord.photo}`);
-                    addTerminalOutput(`Signature on file: ${customerRecord.signature}`);
-                    addTerminalOutput(`Current Balance: $${customerRecord.balance}`);
-                    addTerminalOutput(`Account Status: ${customerRecord.accountStatus}`);
-                    addTerminalOutput(`=== END RECORD ===`);
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                if (i < text.length) {
+                    newLine.textContent += text.charAt(i);
+                    if (Math.random() > 0.7) { // Random typing sounds
+                        playSound('typewriter');
+                    }
+                    i++;
                 } else {
-                    addTerminalOutput('ACCOUNT NOT FOUND IN SYSTEM');
-                    playSound('buzzer');
+                    clearInterval(typingInterval);
+                    if (callback) callback();
                 }
-            }, 1000);
+            }, 50 + Math.random() * 50); // Variable typing speed
+            
+            output.scrollTop = output.scrollHeight;
         }
         
         function verifyAmount(amount) {
             if (!amount) {
-                addTerminalOutput('Please specify amount to verify.');
+                typewriterEffect('Please specify amount to verify.');
                 return;
             }
             
             const numAmount = parseFloat(amount.replace('$', ''));
-            playSound('typewriter');
-            addTerminalOutput(`Verifying amount: $${numAmount}`);
-            
-            // Don't tell them if it's right or wrong - they must figure it out
+            typewriterEffect(`VERIFYING AMOUNT: $${numAmount}`, () => {
+                playSound('typewriter');
+                setTimeout(() => {
+                    typewriterEffect('Amount verification complete.', () => {
+                        playSound('stamp');
+                    });
+                }, 1000);
+            });
         }
         
         function approveTransaction() {
             if (!gameState.currentCustomer) {
-                addTerminalOutput('No customer present.');
+                typewriterEffect('No customer present.');
                 return;
             }
             
             playSound('stamp');
-            addTerminalOutput('TRANSACTION APPROVED');
-            addTerminalOutput('Processing...');
-            
-            setTimeout(() => {
-                const isCorrect = validateTransaction();
-                if (isCorrect) {
-                    gameState.score += 100;
-                    addTerminalOutput('✓ CORRECT APPROVAL');
-                    playSound('receipt');
-                } else {
-                    gameState.score -= 50;
-                    addTerminalOutput('✗ INCORRECT APPROVAL - FRAUD DETECTED BY SUPERVISOR');
-                    playSound('buzzer');
-                }
-                
-                completeTransaction();
-            }, 2000);
+            typewriterEffect('TRANSACTION APPROVED', () => {
+                typewriterEffect('Processing...', () => {
+                    setTimeout(() => {
+                        const isCorrect = validateTransaction();
+                        if (isCorrect) {
+                            gameState.score += 100;
+                            typewriterEffect('✓ CORRECT APPROVAL', () => {
+                                playSound('receipt');
+                            });
+                        } else {
+                            gameState.score -= 50;
+                            typewriterEffect('✗ INCORRECT APPROVAL - FRAUD DETECTED BY SUPERVISOR', () => {
+                                playSound('buzzer');
+                            });
+                        }
+                        
+                        setTimeout(completeTransaction, 1000);
+                    }, 2000);
+                });
+            });
         }
         
         function rejectTransaction() {
             if (!gameState.currentCustomer) {
-                addTerminalOutput('No customer present.');
+                typewriterEffect('No customer present.');
                 return;
             }
             
             playSound('buzzer');
-            addTerminalOutput('TRANSACTION REJECTED');
-            addTerminalOutput('Notifying supervisor...');
-            
-            setTimeout(() => {
-                const isCorrect = !validateTransaction(); // Correct if transaction was actually invalid
-                if (isCorrect) {
-                    gameState.score += 100;
-                    addTerminalOutput('✓ CORRECT REJECTION');
-                } else {
-                    gameState.score -= 50;
-                    addTerminalOutput('✗ INCORRECT REJECTION - VALID TRANSACTION DENIED');
-                }
-                
-                completeTransaction();
-            }, 2000);
+            typewriterEffect('TRANSACTION REJECTED', () => {
+                typewriterEffect('Notifying supervisor...', () => {
+                    setTimeout(() => {
+                        const isCorrect = !validateTransaction(); // Correct if transaction was actually invalid
+                        if (isCorrect) {
+                            gameState.score += 100;
+                            typewriterEffect('✓ CORRECT REJECTION');
+                        } else {
+                            gameState.score -= 50;
+                            typewriterEffect('✗ INCORRECT REJECTION - VALID TRANSACTION DENIED');
+                        }
+                        
+                        setTimeout(completeTransaction, 1000);
+                    }, 2000);
+                });
+            });
         }
         
         function validateTransaction() {
@@ -768,9 +916,11 @@
             gameState.currentCustomerIndex++;
             
             setTimeout(() => {
-                addTerminalOutput('Customer leaves window.');
-                addTerminalOutput('='.repeat(50));
-                loadNextCustomer();
+                typewriterEffect('Customer leaves window.', () => {
+                    typewriterEffect('='.repeat(50), () => {
+                        setTimeout(loadNextCustomer, 1000);
+                    });
+                });
             }, 3000);
             
             updateStatus();
@@ -798,16 +948,27 @@
         }
         
         function showHelp() {
-            addTerminalOutput('=== TELLER COMMANDS ===');
-            addTerminalOutput('EXAMINE [document_type] - Examine specific document');
-            addTerminalOutput('EXAMINE - Examine currently selected document');
-            addTerminalOutput('LOOKUP [account_number] - Look up customer in database');
-            addTerminalOutput('VERIFY [amount] - Verify transaction amount');
-            addTerminalOutput('APPROVE - Approve the transaction');
-            addTerminalOutput('REJECT - Reject the transaction');
-            addTerminalOutput('HELP - Show this help');
-            addTerminalOutput('=== Document Types ===');
-            addTerminalOutput('FORM, ID, PASSPORT, SIGNATURE');
+            typewriterEffect('=== TELLER COMMANDS ===', () => {
+                typewriterEffect('PROCESS - Process customer transaction form', () => {
+                    typewriterEffect('EXAMINE [document_type] - Examine specific document', () => {
+                        typewriterEffect('LOOKUP [account_number] - Look up customer in database', () => {
+                            typewriterEffect('VERIFY [amount] - Verify transaction amount', () => {
+                                typewriterEffect('ENTER [data] - Enter data into terminal', () => {
+                                    typewriterEffect('APPROVE - Approve the transaction', () => {
+                                        typewriterEffect('REJECT - Reject the transaction', () => {
+                                            typewriterEffect('HELP - Show this help', () => {
+                                                typewriterEffect('=== Document Types ===', () => {
+                                                    typewriterEffect('FORM, ID, PASSPORT, SIGNATURE');
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
         }
         
         function addTerminalOutput(text) {
