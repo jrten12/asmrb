@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Teller's Window</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #001100; 
+            color: #00ff00; 
+            height: 100vh; 
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        .game-container { 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        .screen { 
+            text-align: center; 
+            border: 2px solid #00ff00; 
+            background: rgba(0, 255, 0, 0.1); 
+            padding: 40px; 
+            max-width: 600px; 
+            width: 100%; 
+        }
+        h1 { font-size: 3rem; margin-bottom: 20px; text-shadow: 0 0 10px #00ff00; }
+        p { font-size: 1.2rem; margin-bottom: 20px; }
+        .btn { 
+            font-size: 1.2rem; 
+            background: #00ff00; 
+            color: #000000; 
+            border: none; 
+            padding: 20px 40px; 
+            cursor: pointer; 
+            font-family: inherit; 
+            margin: 10px;
+            min-height: 60px;
+            min-width: 150px;
+        }
+        .btn:active { background: #44ff44; transform: scale(0.95); }
+        .game-area { display: none; height: 100vh; flex-direction: column; }
+        .hud { 
+            background: rgba(0, 0, 0, 0.8); 
+            border-bottom: 2px solid #00ff00; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+        }
+        .customer { padding: 20px; border-bottom: 2px solid #00ff00; }
+        .documents { flex: 1; padding: 20px; overflow-y: auto; }
+        .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .document { 
+            border: 2px solid #00ff00; 
+            padding: 15px; 
+            cursor: pointer; 
+            background: rgba(0, 100, 0, 0.1); 
+            min-height: 100px;
+        }
+        .document:active { background: rgba(255, 255, 0, 0.2); border-color: #ffff00; }
+        .document.selected { background: rgba(255, 255, 0, 0.2); border-color: #ffff00; }
+        .document.error { border-color: #ff0000; background: rgba(255, 0, 0, 0.1); }
+        .actions { display: flex; gap: 15px; }
+        .action-btn { flex: 1; padding: 20px; font-size: 1.2rem; font-family: inherit; border: 2px solid; cursor: pointer; }
+        .process { background: #00ff00; color: #000000; border-color: #00ff00; }
+        .reject { background: #ff0000; color: #ffffff; border-color: #ff0000; }
+        @media (max-width: 768px) { 
+            h1 { font-size: 2rem; } 
+            .doc-grid { grid-template-columns: 1fr; } 
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="intro">
+        <div class="screen">
+            <h1>TELLER'S WINDOW</h1>
+            <p>1980s Bank Simulation</p>
+            <button class="btn" onclick="startGame()">START SHIFT</button>
+            <div style="margin-top: 30px; font-size: 0.9rem; text-align: left;">
+                <p>• Examine customer documents</p>
+                <p>• Check for errors and fraud</p>
+                <p>• Process or reject transactions</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-area" id="game">
+        <div class="hud">
+            <div>SCORE: <span id="score">0</span> | LEVEL: 1</div>
+            <div>TIME: 08:00 | MISTAKES: <span id="mistakes">0</span>/5</div>
+        </div>
+        
+        <div class="customer">
+            <h3>CUSTOMER: <span id="customer-name">Loading...</span></h3>
+            <p>REQUEST: <span id="request">Loading...</span></p>
+        </div>
+        
+        <div class="documents">
+            <h3>EXAMINE DOCUMENTS</h3>
+            <div class="doc-grid" id="docs"></div>
+            <div class="actions">
+                <button class="action-btn process" onclick="processTransaction()">PROCESS</button>
+                <button class="action-btn reject" onclick="rejectTransaction()">REJECT</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameData = {
+            score: 0,
+            mistakes: 0,
+            customers: [
+                {
+                    name: 'John Smith',
+                    request: 'DEPOSIT $500',
+                    docs: [
+                        { type: 'ID CARD', name: 'John Smith', detail: 'ID: 12345', valid: true },
+                        { type: 'BANK BOOK', name: 'John Smith', detail: 'Account: 987654', valid: true },
+                        { type: 'SLIP', name: 'John Smith', detail: 'DEPOSIT $500', valid: true },
+                        { type: 'SIGNATURE', name: 'John Smith', detail: 'Valid signature', valid: true }
+                    ]
+                },
+                {
+                    name: 'Mary Johnson',
+                    request: 'WITHDRAWAL $200',
+                    docs: [
+                        { type: 'ID CARD', name: 'Mary Johnson', detail: 'ID: 54321', valid: true },
+                        { type: 'BANK BOOK', name: 'Mary Johnson', detail: 'Account: 123456', valid: true },
+                        { type: 'SLIP', name: 'Mary Johnson', detail: 'WITHDRAWAL $250', valid: false, error: 'Amount mismatch!' },
+                        { type: 'SIGNATURE', name: 'Mary Johnson', detail: 'Invalid signature', valid: false, error: 'Signature does not match' }
+                    ]
+                }
+            ],
+            currentCustomer: null,
+            selectedDoc: null
+        };
+
+        function startGame() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            loadCustomer();
+        }
+
+        function loadCustomer() {
+            const customer = gameData.customers[Math.floor(Math.random() * gameData.customers.length)];
+            gameData.currentCustomer = customer;
+            
+            document.getElementById('customer-name').textContent = customer.name;
+            document.getElementById('request').textContent = customer.request;
+            
+            const docsEl = document.getElementById('docs');
+            docsEl.innerHTML = '';
+            
+            customer.docs.forEach((doc, i) => {
+                const div = document.createElement('div');
+                div.className = 'document' + (doc.valid ? '' : ' error');
+                div.onclick = () => selectDoc(i);
+                div.innerHTML = `<h4>${doc.type}</h4><p>${doc.name}</p><p>${doc.detail}</p>` + 
+                               (doc.error ? `<p style="color: #ff0000;">ERROR: ${doc.error}</p>` : '');
+                docsEl.appendChild(div);
+            });
+        }
+
+        function selectDoc(index) {
+            gameData.selectedDoc = index;
+            const docs = document.querySelectorAll('.document');
+            docs.forEach((doc, i) => doc.classList.toggle('selected', i === index));
+        }
+
+        function processTransaction() {
+            const hasErrors = gameData.currentCustomer.docs.some(doc => !doc.valid);
+            if (hasErrors) {
+                gameData.mistakes++;
+                gameData.score -= 50;
+                alert('MISTAKE! Transaction had errors but was processed!');
+            } else {
+                gameData.score += 100;
+                alert('SUCCESS! Transaction processed correctly!');
+            }
+            updateGame();
+        }
+
+        function rejectTransaction() {
+            const hasErrors = gameData.currentCustomer.docs.some(doc => !doc.valid);
+            if (hasErrors) {
+                gameData.score += 150;
+                alert('GOOD CATCH! Fraudulent transaction rejected!');
+            } else {
+                gameData.mistakes++;
+                gameData.score -= 25;
+                alert('MISTAKE! Valid transaction was rejected!');
+            }
+            updateGame();
+        }
+
+        function updateGame() {
+            document.getElementById('score').textContent = gameData.score;
+            document.getElementById('mistakes').textContent = gameData.mistakes;
+            setTimeout(loadCustomer, 1500);
+        }
+
+        // Touch handling
+        document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+        
+        console.log('Teller\'s Window game loaded successfully!');
+    </script>
+</body>
+</html>
