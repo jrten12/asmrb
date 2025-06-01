@@ -326,6 +326,16 @@ function App() {
         inputRef.current.value = '';
         inputRef.current.placeholder = "Enter command...";
       }
+    } else if (e.key !== 'Enter') {
+      // Play typing sound for each keypress
+      playSound('keypress');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Play typing sound for regular typing
+    if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Space') {
+      playSound('keypress');
     }
   };
 
@@ -384,58 +394,61 @@ function App() {
       <div style={{ 
         display: 'flex', 
         flex: 1, 
-        gap: '6px', 
+        gap: '8px', 
         minHeight: 0,
-        maxHeight: 'calc(100vh - 120px)',
-        flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+        maxHeight: 'calc(100vh - 140px)',
+        flexDirection: 'column'
       }}>
         
-        {/* Documents Section */}
+        {/* Documents Section - Always Visible at Top */}
         <div style={{
-          flex: 1,
-          background: 'rgba(0, 40, 0, 0.6)',
+          background: 'rgba(0, 40, 0, 0.8)',
           border: '3px solid #ffff00',
-          padding: '12px',
-          borderRadius: '4px',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: window.innerWidth < 768 ? '250px' : 'auto'
+          padding: '16px',
+          borderRadius: '6px',
+          marginBottom: '8px',
+          minHeight: '200px',
+          maxHeight: '300px',
+          overflowY: 'auto'
         }}>
-          <h3 style={{ margin: '0 0 12px 0', color: '#ffff00', fontSize: '18px', textAlign: 'center' }}>CUSTOMER DOCUMENTS</h3>
+          <h3 style={{ margin: '0 0 16px 0', color: '#ffff00', fontSize: '20px', textAlign: 'center' }}>📄 CUSTOMER DOCUMENTS</h3>
           
-          {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              {currentCustomer.documents.map((doc, index) => (
-                <div
-                  key={index}
-                  style={{
-                    background: 'rgba(255, 255, 0, 0.1)',
-                    border: '2px solid #ffff00',
-                    padding: '16px',
-                    margin: '12px 0',
-                    borderRadius: '6px'
-                  }}
-                >
-                  <strong style={{ fontSize: '18px', color: '#ffff00', display: 'block', marginBottom: '8px' }}>{doc.title}</strong>
-                  <div style={{ fontSize: '16px', lineHeight: '1.4' }}>
-                    {Object.entries(doc.data).map(([key, value]) => (
-                      <div key={key} style={{ marginBottom: '6px', padding: '2px 0' }}>
-                        <span style={{ color: '#00ffff', fontWeight: 'bold' }}>{key.toUpperCase()}:</span>{' '}
-                        <span style={{ color: '#ffffff', fontWeight: 'bold' }}>{value}</span>
-                      </div>
-                    ))}
-                  </div>
+          {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? 
+            currentCustomer.documents.map((doc, index) => (
+              <div
+                key={index}
+                style={{
+                  background: 'rgba(255, 255, 0, 0.15)',
+                  border: '3px solid #ffff00',
+                  padding: '20px',
+                  margin: '8px 0',
+                  borderRadius: '8px'
+                }}
+              >
+                <div style={{ fontSize: '22px', color: '#ffff00', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>
+                  {doc.title}
                 </div>
-              ))}
-            </div>
-          ) : (
+                <div style={{ fontSize: '18px', lineHeight: '1.6' }}>
+                  {Object.entries(doc.data).map(([key, value]) => (
+                    <div key={key} style={{ marginBottom: '8px', padding: '4px 0', borderBottom: '1px solid rgba(255,255,0,0.3)' }}>
+                      <span style={{ color: '#00ffff', fontWeight: 'bold', fontSize: '16px' }}>{key.toUpperCase()}:</span>{' '}
+                      <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '20px' }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          : (
             <div style={{
               textAlign: 'center',
-              color: '#888888',
-              padding: '20px',
-              fontSize: '16px'
+              color: '#ffaa00',
+              padding: '40px',
+              fontSize: '18px',
+              border: '2px dashed #ffaa00',
+              borderRadius: '8px'
             }}>
-              No documents available
+              No customer documents available<br/>
+              <span style={{ fontSize: '14px' }}>Use NEXT command to call customer</span>
             </div>
           )}
         </div>
@@ -700,6 +713,7 @@ function App() {
               type="text"
               placeholder="Enter command..."
               onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               style={{
                 flex: 1,
                 background: '#000000',
