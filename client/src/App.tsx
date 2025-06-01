@@ -593,12 +593,20 @@ function App() {
     }, 100);
     
     setTimeout(() => {
+      // Block most actions if customer data is incomplete
+      if (action !== 'HELP' && action !== 'NEXT' && 
+          (!currentCustomer || !currentCustomer.name || !currentCustomer.documents || currentCustomer.documents.length === 0)) {
+        setTerminalOutput(prev => [...prev, '✖ NO CUSTOMER DATA - Use NEXT command first']);
+        playGlitchTone();
+        return;
+      }
+
       switch (action) {
         case 'LOOKUP':
           if (parameter) {
             lookupAccount(parameter);
           } else {
-            typeMessage('ERROR: Specify account number');
+            setTerminalOutput(prev => [...prev, '✖ ERROR: Specify account number']);
             playGlitchTone();
           }
           break;
@@ -988,9 +996,30 @@ function App() {
 
   const loadNextCustomer = () => {
     console.log('Loading next customer...');
+    typeMessage('LOADING CUSTOMER DATA...');
+    
     try {
       const customer = generateCustomer();
       console.log('Generated customer:', customer);
+      
+      // Validate customer has all required fields
+      if (!customer.name || !customer.accountNumber || !customer.transactionType || 
+          !customer.requestedAmount || !customer.documents || customer.documents.length === 0) {
+        typeMessage('ERROR: Incomplete customer data - retrying...');
+        setTimeout(loadNextCustomer, 1000);
+        return;
+      }
+      
+      // Validate documents are properly formed
+      const hasValidDocuments = customer.documents.every(doc => 
+        doc.type && doc.title && doc.data && Object.keys(doc.data).length > 0
+      );
+      
+      if (!hasValidDocuments) {
+        typeMessage('ERROR: Invalid document data - retrying...');
+        setTimeout(loadNextCustomer, 1000);
+        return;
+      }
       
       // Clear previous state first
       setSelectedDocument(null);
@@ -1004,19 +1033,22 @@ function App() {
         transactionProcessed: false
       });
       
-      // Set new customer
+      // Set new customer only after validation
       setCurrentCustomer(customer);
       
+      typeMessage('✓ CUSTOMER DATA LOADED');
       typeMessage('NEW CUSTOMER APPROACHING WINDOW');
       setTimeout(() => {
         typeMessage(`Customer: ${customer.name}`);
         typeMessage(`Request: ${customer.transactionType} of $${customer.requestedAmount}`);
         typeMessage(`Account: ${customer.accountNumber}`);
-        typeMessage('Documents provided - ready for verification');
+        typeMessage(`Documents: ${customer.documents.length} provided`);
+        typeMessage('CUSTOMER READY FOR VERIFICATION');
       }, 500);
     } catch (error) {
       console.error('Error generating customer:', error);
-      typeMessage('ERROR: Could not generate customer');
+      typeMessage('ERROR: Could not generate customer - retrying...');
+      setTimeout(loadNextCustomer, 2000);
     }
   };
 
@@ -1169,7 +1201,7 @@ function App() {
             lineHeight: '1.4',
             minHeight: '100px'
           }}>
-            {currentCustomer ? (
+            {currentCustomer && currentCustomer.name && currentCustomer.accountNumber && currentCustomer.transactionType ? (
               <>
                 <div style={{ 
                   background: 'rgba(255, 255, 0, 0.15)', 
@@ -1187,6 +1219,10 @@ function App() {
                   <strong style={{ color: '#00ff00' }}>CUSTOMER:</strong> <span style={{ color: '#ffffff' }}>{currentCustomer.name}</span><br/>
                   <strong style={{ color: '#00ff00' }}>ACCOUNT:</strong> <span style={{ color: '#ffffff' }}>{currentCustomer.accountNumber}</span><br/>
                   <strong style={{ color: '#00ff00' }}>STATUS:</strong> <span style={{ color: '#ffaa00' }}>AWAITING VERIFICATION</span>
+                  <br/>
+                  <strong style={{ color: '#00ff00' }}>DOCUMENTS:</strong> <span style={{ color: '#ffffff' }}>
+                    {currentCustomer.documents ? `${currentCustomer.documents.length} provided` : 'Loading...'}
+                  </span>
                 </div>
               </>
             ) : (
@@ -1196,35 +1232,72 @@ function App() {
                 fontSize: '13px',
                 marginTop: '20px'
               }}>
-                No customer present<br/>
-                <span style={{ color: '#00aaff' }}>Use NEXT command to call customer</span>
+                {currentCustomer ? (
+                  <div style={{ color: '#ffaa00' }}>
+                    LOADING CUSTOMER DATA...<br/>
+                    <span style={{ fontSize: '11px' }}>Please wait for full data load</span>
+                  </div>
+                ) : (
+                  <>
+                    No customer present<br/>
+                    <span style={{ color: '#00aaff' }}>Use NEXT command to call customer</span>
+                  </>
+                )}
               </div>
             )}
           </div>
           
-          {/* Documents */}
+          {/* Documents - Always Visible */}
           <h5 style={{ margin: '0 0 8px 0' }}>DOCUMENTS PROVIDED:</h5>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {currentCustomer?.documents.map((doc, index) => (
-              <div
-                key={index}
-                style={{
-                  background: selectedDocument === index ? 'rgba(0, 120, 0, 0.5)' : 'rgba(0, 50, 0, 0.2)',
-                  border: selectedDocument === index ? '2px solid #00aa00' : '1px solid #005500',
-                  padding: '16px',
-                  margin: '8px 0',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontSize: '15px',
-                  borderRadius: '6px',
-                  minHeight: '48px'
-                }}
-                onClick={() => handleDocumentClick(index)}
-              >
-                <strong style={{ fontSize: '16px' }}>{doc.title}</strong><br/>
-                <small style={{ color: '#00cc00', fontSize: '13px' }}>Tap to open document viewer</small>
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: '120px' }}>
+            {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
+              currentCustomer.documents.map((doc, index) => (
+                <div
+                  key={index}
+                  style={{
+                    background: selectedDocument === index ? 'rgba(0, 120, 0, 0.5)' : 'rgba(0, 50, 0, 0.2)',
+                    border: selectedDocument === index ? '2px solid #00aa00' : '1px solid #005500',
+                    padding: '16px',
+                    margin: '8px 0',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    fontSize: '15px',
+                    borderRadius: '6px',
+                    minHeight: '48px'
+                  }}
+                  onClick={() => handleDocumentClick(index)}
+                >
+                  <strong style={{ fontSize: '16px' }}>{doc.title}</strong><br/>
+                  <small style={{ color: '#00cc00', fontSize: '13px' }}>Tap to open document viewer</small>
+                </div>
+              ))
+            ) : currentCustomer ? (
+              <div style={{
+                background: 'rgba(255, 150, 0, 0.2)',
+                border: '1px solid #ff9900',
+                padding: '16px',
+                margin: '8px 0',
+                borderRadius: '6px',
+                textAlign: 'center',
+                color: '#ffaa00'
+              }}>
+                <strong>LOADING DOCUMENTS...</strong><br/>
+                <small>Customer data is incomplete</small>
               </div>
-            ))}
+            ) : (
+              <div style={{
+                background: 'rgba(80, 80, 80, 0.2)',
+                border: '1px solid #666666',
+                padding: '16px',
+                margin: '8px 0',
+                borderRadius: '6px',
+                textAlign: 'center',
+                color: '#888888'
+              }}>
+                <strong>NO CUSTOMER</strong><br/>
+                <small>Use NEXT command to call customer</small>
+              </div>
+            )}
           </div>
         </div>
         
