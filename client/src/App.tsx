@@ -237,6 +237,85 @@ function App() {
             ))}
           </div>
 
+          {/* Command Buttons */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px',
+            marginBottom: '12px'
+          }}>
+            <button
+              onClick={() => handleCommand('NEXT')}
+              style={{
+                background: currentCustomer ? 'rgba(100, 100, 0, 0.6)' : 'rgba(0, 100, 0, 0.6)',
+                border: '2px solid #00ff00',
+                color: '#00ff00',
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                fontFamily: 'monospace'
+              }}
+            >
+              {currentCustomer ? 'NEXT CUSTOMER' : 'CALL CUSTOMER'}
+            </button>
+            
+            <button
+              onClick={() => handleCommand('LOOKUP')}
+              disabled={!currentCustomer}
+              style={{
+                background: currentCustomer ? 'rgba(0, 80, 100, 0.6)' : 'rgba(50, 50, 50, 0.3)',
+                border: '2px solid #00aaff',
+                color: currentCustomer ? '#00aaff' : '#666666',
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                borderRadius: '4px',
+                fontFamily: 'monospace'
+              }}
+            >
+              LOOKUP ACCOUNT
+            </button>
+            
+            <button
+              onClick={() => handleCommand('APPROVE')}
+              disabled={!currentCustomer}
+              style={{
+                background: currentCustomer ? 'rgba(0, 100, 0, 0.6)' : 'rgba(50, 50, 50, 0.3)',
+                border: '2px solid #00ff00',
+                color: currentCustomer ? '#00ff00' : '#666666',
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                borderRadius: '4px',
+                fontFamily: 'monospace'
+              }}
+            >
+              APPROVE
+            </button>
+            
+            <button
+              onClick={() => handleCommand('REJECT')}
+              disabled={!currentCustomer}
+              style={{
+                background: currentCustomer ? 'rgba(100, 0, 0, 0.6)' : 'rgba(50, 50, 50, 0.3)',
+                border: '2px solid #ff4444',
+                color: currentCustomer ? '#ff4444' : '#666666',
+                padding: '12px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                borderRadius: '4px',
+                fontFamily: 'monospace'
+              }}
+            >
+              REJECT
+            </button>
+          </div>
+
           {/* Terminal Input */}
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>&gt;</span>
