@@ -185,25 +185,85 @@ function App() {
     }
   };
 
-  const playSubtleBuzzSound = async () => {
+  const playRejectBuzzSound = async () => {
     await initAudio();
     if (!audioContextRef.current) return;
     
     try {
+      // Create low-frequency alert buzzer
       const oscillator = audioContextRef.current.createOscillator();
       const gainNode = audioContextRef.current.createGain();
+      const filter = audioContextRef.current.createBiquadFilter();
       
-      oscillator.connect(gainNode);
+      oscillator.connect(filter);
+      filter.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      oscillator.frequency.setValueAtTime(250, audioContextRef.current.currentTime);
-      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(180, audioContextRef.current.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(120, audioContextRef.current.currentTime + 0.3);
+      oscillator.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.2);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(400, audioContextRef.current.currentTime);
+      
+      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.6);
       
       oscillator.start();
-      oscillator.stop(audioContextRef.current.currentTime + 0.2);
+      oscillator.stop(audioContextRef.current.currentTime + 0.6);
+    } catch (e) {
+      // Silent fail
+    }
+  };
+
+  const playPenScratchSound = async () => {
+    await initAudio();
+    if (!audioContextRef.current) return;
+    
+    try {
+      // Create pen scratch + confirmation chime
+      const noise = audioContextRef.current.createBufferSource();
+      const buffer = audioContextRef.current.createBuffer(1, 1102, audioContextRef.current.sampleRate);
+      const output = buffer.getChannelData(0);
+      
+      for (let i = 0; i < 1102; i++) {
+        output[i] = (Math.random() * 2 - 1) * 0.06;
+      }
+      
+      noise.buffer = buffer;
+      const gainNode = audioContextRef.current.createGain();
+      const filter = audioContextRef.current.createBiquadFilter();
+      
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(2000, audioContextRef.current.currentTime);
+      
+      noise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+      
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.15);
+      
+      noise.start();
+      noise.stop(audioContextRef.current.currentTime + 0.15);
+      
+      // Add confirmation chime after pen scratch
+      setTimeout(() => {
+        const chime = audioContextRef.current!.createOscillator();
+        const chimeGain = audioContextRef.current!.createGain();
+        
+        chime.connect(chimeGain);
+        chimeGain.connect(audioContextRef.current!.destination);
+        
+        chime.frequency.setValueAtTime(800, audioContextRef.current!.currentTime);
+        chime.type = 'sine';
+        
+        chimeGain.gain.setValueAtTime(0.08, audioContextRef.current!.currentTime);
+        chimeGain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current!.currentTime + 0.3);
+        
+        chime.start();
+        chime.stop(audioContextRef.current!.currentTime + 0.3);
+      }, 200);
     } catch (e) {
       // Silent fail
     }
@@ -409,7 +469,7 @@ function App() {
             lookupAccount(parameter);
           } else {
             typeMessage('ERROR: Specify account number');
-            playSubtleBuzzSound();
+            playRejectBuzzSound();
           }
           break;
         case 'EXAMINE':
@@ -419,7 +479,7 @@ function App() {
             examineDocument('SELECTED');
           } else {
             typeMessage('ERROR: Specify document type or select document');
-            playSubtleBuzzSound();
+            playRejectBuzzSound();
           }
           break;
         case 'VERIFY':
@@ -427,7 +487,15 @@ function App() {
             verifyAmount(parseInt(parameter));
           } else {
             typeMessage('ERROR: Specify amount to verify');
-            playSubtleBuzzSound();
+            playRejectBuzzSound();
+          }
+          break;
+        case 'COMPARE':
+          if (parameter) {
+            compareField(parameter);
+          } else {
+            typeMessage('ERROR: Specify field to compare (DOB, NAME, SIGNATURE)');
+            playRejectBuzzSound();
           }
           break;
         case 'APPROVE':
@@ -444,7 +512,7 @@ function App() {
           break;
         default:
           typeMessage('UNKNOWN COMMAND. Type HELP for available commands.');
-          playSubtleBuzzSound();
+          playRejectBuzzSound();
       }
     }, 200);
   };
@@ -1066,7 +1134,7 @@ function App() {
                 <button
                   onClick={() => {
                     setSignatureModal({ isOpen: false, customerSig: '', fileSig: '' });
-                    playSubtleBuzzSound();
+                    playRejectBuzzSound();
                     typeMessage('SIGNATURE MISMATCH FLAGGED');
                   }}
                   style={{
