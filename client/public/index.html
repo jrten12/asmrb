@@ -2,180 +2,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Teller's Window</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teller's Window - 1980s Bank Simulation</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
         
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Share Tech Mono', 'Courier New', monospace; 
-            background: #001100; 
-            color: #00ff00; 
-            height: 100vh; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: #000;
+            color: #00ff00;
             overflow: hidden;
-            touch-action: manipulation;
+            user-select: none;
+        }
+        
+        .crt-container {
             position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #111 0%, #000 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        /* CRT Effects */
-        .crt-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%,
-                rgba(0, 0, 0, 0.25) 50%
-            );
-            background-size: 100% 4px;
-            z-index: 1000;
-            animation: flicker 0.15s infinite linear;
+        .crt-screen {
+            width: 95%;
+            height: 95%;
+            background: #001100;
+            border: 3px solid #333;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.1);
         }
         
-        @keyframes flicker {
-            0% { opacity: 1; }
-            98% { opacity: 1; }
-            99% { opacity: 0.98; }
-            100% { opacity: 1; }
-        }
-        
-        .screen-glow {
+        .scanlines {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(ellipse at center, rgba(0, 255, 0, 0.05) 0%, transparent 70%);
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
             pointer-events: none;
-        }
-        .game-container { 
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px; 
-        }
-        .screen { 
-            text-align: center; 
-            border: 2px solid #00ff00; 
-            background: rgba(0, 255, 0, 0.1); 
-            padding: 40px; 
-            max-width: 600px; 
-            width: 100%; 
-        }
-        h1 { font-size: 3rem; margin-bottom: 20px; text-shadow: 0 0 10px #00ff00; }
-        p { font-size: 1.2rem; margin-bottom: 20px; }
-        .btn { 
-            font-size: 1.2rem; 
-            background: #00ff00; 
-            color: #000000; 
-            border: none; 
-            padding: 20px 40px; 
-            cursor: pointer; 
-            font-family: inherit; 
-            margin: 10px;
-            min-height: 60px;
-            min-width: 150px;
-        }
-        .btn:active { background: #44ff44; transform: scale(0.95); }
-        .game-area { display: none; height: 100vh; flex-direction: column; }
-        .hud { 
-            background: rgba(0, 0, 0, 0.8); 
-            border-bottom: 2px solid #00ff00; 
-            padding: 15px; 
-            display: flex; 
-            justify-content: space-between; 
-        }
-        .customer { padding: 20px; border-bottom: 2px solid #00ff00; }
-        .main-content { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden;
-        }
-        .documents { flex: 1; padding: 20px; overflow-y: auto; }
-        .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .document { 
-            border: 2px solid #00ff00; 
-            padding: 15px; 
-            cursor: pointer; 
-            background: rgba(0, 100, 0, 0.1); 
-            min-height: 100px;
-            transition: all 0.3s ease;
-            transform: perspective(1000px) rotateY(0deg);
-        }
-        .document:hover { 
-            transform: perspective(1000px) rotateY(-5deg);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-        }
-        .document.selected { 
-            background: rgba(255, 255, 0, 0.2); 
-            border-color: #ffff00;
-            transform: perspective(1000px) rotateY(-10deg);
-            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
-        }
-        .document.error { 
-            border-color: #ff0000; 
-            background: rgba(255, 0, 0, 0.1);
-            animation: pulse-red 2s infinite;
+            animation: flicker 0.15s infinite linear alternate;
         }
         
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            100% { opacity: 0.97; }
         }
         
-        /* Terminal Interface */
-        .terminal {
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 2px solid #00ff00;
+        .game-interface {
+            display: flex;
+            height: 100%;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .customer-area {
+            flex: 1;
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #004400;
             padding: 15px;
-            min-height: 120px;
+            border-radius: 8px;
+        }
+        
+        .terminal-area {
+            flex: 1;
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #004400;
+            padding: 15px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
         }
         
-        .terminal-output {
-            flex: 1;
-            margin-bottom: 10px;
-            max-height: 60px;
-            overflow-y: auto;
-            font-size: 0.9rem;
-            line-height: 1.2;
+        .customer-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0, 100, 0, 0.1);
+            border: 1px solid #006600;
+            border-radius: 4px;
         }
         
-        .terminal-input-line {
+        .documents-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .document {
+            background: rgba(0, 80, 0, 0.2);
+            border: 1px solid #008800;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .document:hover {
+            background: rgba(0, 120, 0, 0.3);
+            border-color: #00aa00;
+        }
+        
+        .document.selected {
+            background: rgba(0, 150, 0, 0.4);
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .terminal-output {
+            flex: 1;
+            background: rgba(0, 30, 0, 0.5);
+            border: 1px solid #003300;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .terminal-input-area {
             display: flex;
             align-items: center;
-            font-size: 1rem;
+            background: rgba(0, 30, 0, 0.5);
+            border: 1px solid #003300;
+            padding: 10px;
+            border-radius: 4px;
         }
         
         .prompt {
             color: #00ff00;
-            margin-right: 8px;
+            margin-right: 10px;
         }
         
         .terminal-input {
+            flex: 1;
             background: transparent;
             border: none;
             color: #00ff00;
             font-family: inherit;
-            font-size: inherit;
+            font-size: 14px;
             outline: none;
-            flex: 1;
-            text-transform: uppercase;
         }
         
         .cursor {
             display: inline-block;
-            background: #00ff00;
             width: 8px;
             height: 16px;
+            background: #00ff00;
+            margin-left: 5px;
             animation: blink 1s infinite;
         }
         
@@ -184,650 +173,651 @@
             51%, 100% { opacity: 0; }
         }
         
-        /* Flash feedback */
-        .flash-success {
-            animation: flash-green 0.5s ease-out;
-        }
-        
-        .flash-error {
-            animation: flash-red 0.5s ease-out;
-        }
-        
-        @keyframes flash-green {
-            0% { background-color: rgba(0, 255, 0, 0.3); }
-            100% { background-color: transparent; }
-        }
-        
-        @keyframes flash-red {
-            0% { background-color: rgba(255, 0, 0, 0.3); }
-            100% { background-color: transparent; }
-        }
-        
-        /* Help panel */
-        .help-panel {
-            font-size: 0.8rem;
-            color: #88ff88;
-            margin-top: 10px;
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 50, 0, 0.8);
+            padding: 8px 20px;
+            font-size: 12px;
             border-top: 1px solid #004400;
-            padding-top: 10px;
         }
-        @media (max-width: 768px) { 
-            h1 { font-size: 2rem; } 
-            .doc-grid { grid-template-columns: 1fr; } 
+        
+        .help-text {
+            font-size: 11px;
+            color: #008800;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 40, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .signature-display {
+            background: rgba(0, 60, 0, 0.2);
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #006600;
+            border-radius: 4px;
+            font-style: italic;
+        }
+        
+        .transaction-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: rgba(0, 150, 0, 0.3);
+            border: 2px solid #00aa00;
+            color: #00ff00;
+        }
+        
+        .error {
+            background: rgba(150, 0, 0, 0.3);
+            border: 2px solid #aa0000;
+            color: #ff4444;
         }
     </style>
 </head>
 <body>
-    <div class="game-container" id="intro">
-        <div class="screen">
-            <h1>TELLER'S WINDOW</h1>
-            <p>1980s Bank Simulation</p>
-            <button class="btn" onclick="startGame()">START SHIFT</button>
-            <div style="margin-top: 30px; font-size: 0.9rem; text-align: left;">
-                <p>• Examine customer documents</p>
-                <p>• Check for errors and fraud</p>
-                <p>• Process or reject transactions</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="game-area" id="game">
-        <div class="hud">
-            <div>SCORE: <span id="score">0</span> | LEVEL: 1</div>
-            <div>TIME: 08:00 | MISTAKES: <span id="mistakes">0</span>/5</div>
-        </div>
-        
-        <div class="customer">
-            <h3>CUSTOMER: <span id="customer-name">Loading...</span></h3>
-            <p>REQUEST: <span id="request">Loading...</span></p>
-        </div>
-        
-        <div class="main-content">
-            <div class="documents">
-                <h3>EXAMINE DOCUMENTS - Click or type EXAMINE [ID/SLIP/BOOK/SIG]</h3>
-                <div class="doc-grid" id="docs"></div>
+    <div class="crt-container">
+        <div class="crt-screen">
+            <div class="scanlines"></div>
+            
+            <div class="game-interface">
+                <!-- Customer/Documents Area -->
+                <div class="customer-area">
+                    <div class="customer-info" id="customer-info">
+                        <h3>CURRENT CUSTOMER</h3>
+                        <div id="customer-details">Waiting for next customer...</div>
+                    </div>
+                    
+                    <div class="documents-area">
+                        <h4>DOCUMENTS PROVIDED:</h4>
+                        <div id="documents-list"></div>
+                    </div>
+                </div>
+                
+                <!-- Terminal Area -->
+                <div class="terminal-area">
+                    <div class="terminal-output" id="terminal-output">
+                        <div style="color: #00ff00; font-weight: bold;">
+                            ═══════════════════════════════════════════════════════════════════════
+                            ║                    FIRST NATIONAL BANK TERMINAL                    ║
+                            ║                         TELLER STATION #3                         ║
+                            ║                        SYSTEM VERSION 2.1                         ║
+                            ═══════════════════════════════════════════════════════════════════════
+                        </div>
+                        <br>
+                        <div>TERMINAL READY - AWAITING CUSTOMER</div>
+                        <div>Type HELP for available commands</div>
+                    </div>
+                    
+                    <div class="terminal-input-area">
+                        <span class="prompt">TELLER></span>
+                        <input type="text" class="terminal-input" id="terminal-input" 
+                               placeholder="Enter command..." autocomplete="off">
+                        <span class="cursor"></span>
+                    </div>
+                    
+                    <div class="help-text">
+                        COMMANDS: EXAMINE [doc] | LOOKUP [account] | VERIFY [amount] | APPROVE | REJECT | HELP
+                    </div>
+                </div>
             </div>
             
-            <div class="terminal">
-                <div class="terminal-output" id="terminal-output">
-                    TERMINAL READY. Type HELP for commands.
-                </div>
-                <div class="terminal-input-line">
-                    <span class="prompt">></span>
-                    <input type="text" class="terminal-input" id="terminal-input" placeholder="Enter command..." autocomplete="off">
-                    <span class="cursor"></span>
-                </div>
-                <div class="help-panel">
-                    Commands: EXAMINE [ID/SLIP/BOOK/SIG] | LOOKUP [account] | APPROVE [account] | REJECT [account] | VERIFY [amount] | HELP
-                </div>
+            <div class="status-bar">
+                <span id="game-status">Score: 0 | Transactions: 0 | Time: 08:30:00</span>
             </div>
         </div>
     </div>
-    
-    <!-- CRT Effects -->
-    <div class="crt-overlay"></div>
-    <div class="screen-glow"></div>
 
     <script>
-        let gameData = {
-            score: 0,
-            mistakes: 0,
-            customers: [
-                {
-                    name: 'John Smith',
-                    request: 'DEPOSIT $500',
-                    amount: 500,
-                    type: 'DEPOSIT',
-                    accountNumber: '987654321',
-                    dob: '1975-03-15',
-                    customerPhoto: generateCustomerPhoto('John Smith'),
-                    onFileSignature: generateSignature('john_smith_real'),
-                    docs: [
-                        { id: 'ID', type: 'ID CARD', name: 'John Smith', detail: 'ID: 12345 | DOB: 1975-03-15', valid: true },
-                        { id: 'BOOK', type: 'BANK BOOK', name: 'John Smith', detail: 'Account: 987654321 | Balance: $2,450', valid: true },
-                        { id: 'SLIP', type: 'TRANSACTION SLIP', name: 'John Smith', detail: 'DEPOSIT $500 to 987654321', valid: true },
-                        { id: 'SIG', type: 'SIGNATURE', name: 'John Smith', detail: 'Customer signature', signature: generateSignature('john_smith_real'), valid: true }
-                    ]
-                },
-                {
-                    name: 'Mary Johnson',
-                    request: 'WITHDRAWAL $200',
-                    amount: 200,
-                    type: 'WITHDRAWAL',
-                    accountNumber: '123456789',
-                    dob: '1982-07-22',
-                    customerPhoto: generateCustomerPhoto('Mary Johnson'),
-                    onFileSignature: generateSignature('mary_johnson_real'),
-                    docs: [
-                        { id: 'ID', type: 'ID CARD', name: 'Mary Johnson', detail: 'ID: 54321 | DOB: 1982-07-22', valid: true },
-                        { id: 'BOOK', type: 'BANK BOOK', name: 'Mary Johnson', detail: 'Account: 123456789 | Balance: $1,800', valid: true },
-                        { id: 'SLIP', type: 'TRANSACTION SLIP', name: 'Mary Johnson', detail: 'WITHDRAWAL $250 from 123456789', valid: false },
-                        { id: 'SIG', type: 'SIGNATURE', name: 'Mary Johnson', detail: 'Customer signature', signature: generateSignature('mary_johnson_fake'), valid: false }
-                    ]
-                },
-                {
-                    name: 'Robert Wilson',
-                    request: 'TRANSFER $750',
-                    amount: 750,
-                    type: 'TRANSFER',
-                    accountNumber: '555123456',
-                    dob: '1968-11-30',
-                    customerPhoto: generateCustomerPhoto('Robert Wilson'),
-                    onFileSignature: generateSignature('robert_wilson_real'),
-                    docs: [
-                        { id: 'ID', type: 'ID CARD', name: 'Robert Wilson', detail: 'ID: 78901 | DOB: 1968-11-30', valid: true },
-                        { id: 'BOOK', type: 'BANK BOOK', name: 'Robert Wilson', detail: 'Account: 555123456 | Balance: $3,200', valid: true },
-                        { id: 'SLIP', type: 'TRANSFER SLIP', name: 'Robert Wilson', detail: 'TRANSFER $750 to Account: 999888777', valid: true },
-                        { id: 'SIG', type: 'SIGNATURE', name: 'Robert Wilson', detail: 'Customer signature', signature: generateSignature('robert_wilson_real'), valid: true }
-                    ]
-                }
-            ],
-            currentCustomer: null,
-            selectedDoc: null,
-            sounds: {}
-        };
-
-        // Sound Effects System
+        // Sound system
+        const sounds = {};
+        
         function initSounds() {
             const soundFiles = {
-                typing: createTypingSound(),
-                receipt: createReceiptSound(),
-                stamp: createStampSound(),
-                drawer: createDrawerSound(),
-                buzzer: createBuzzerSound(),
-                paperShuffle: createPaperShuffleSound()
+                typewriter: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
+                stamp: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
+                receipt: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
+                drawer: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
+                buzzer: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD==',
+                paperShuffle: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBzuR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCDuP2vLNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYfCD=='
             };
             
-            gameData.sounds = soundFiles;
+            Object.keys(soundFiles).forEach(name => {
+                sounds[name] = new Audio(soundFiles[name]);
+                sounds[name].volume = 0.3;
+            });
         }
-
-        // Generate signature SVGs
-        function generateSignature(signatureId) {
-            const signatures = {
-                'john_smith_real': `<svg width="200" height="60" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10,30 Q20,15 30,30 Q40,45 50,30 L60,25 Q70,20 80,25 L90,30 Q100,25 110,30" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                    <path d="M120,35 Q130,20 140,35 Q150,50 160,35 L170,30 Q180,25 190,30" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                </svg>`,
-                'mary_johnson_real': `<svg width="200" height="60" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10,25 Q25,10 40,25 Q55,40 70,25 L80,20 Q95,35 110,20 L120,25" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                    <path d="M130,30 Q145,15 160,30 Q175,45 190,30" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                </svg>`,
-                'mary_johnson_fake': `<svg width="200" height="60" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10,35 Q25,20 40,35 Q55,50 70,35 L80,30 Q95,45 110,30 L120,35" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                    <path d="M130,25 Q145,40 160,25 Q175,10 190,25" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                </svg>`,
-                'robert_wilson_real': `<svg width="200" height="60" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10,20 Q30,35 50,20 Q70,5 90,20 L100,25 Q120,40 140,25 L150,20" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                    <path d="M160,30 Q170,15 180,30 Q185,45 190,30" 
-                          stroke="#000" stroke-width="2" fill="none"/>
-                </svg>`
-            };
-            return signatures[signatureId] || signatures['john_smith_real'];
-        }
-
-        // Generate customer photos (simple SVG avatars)
-        function generateCustomerPhoto(name) {
-            const hash = name.split('').reduce((a, b) => {
-                a = ((a << 5) - a) + b.charCodeAt(0);
-                return a & a;
-            }, 0);
-            const hue = Math.abs(hash) % 360;
-            
-            return `<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-                <rect width="80" height="80" fill="hsl(${hue}, 30%, 20%)"/>
-                <circle cx="40" cy="30" r="15" fill="hsl(${hue + 30}, 50%, 60%)"/>
-                <rect x="25" y="50" width="30" height="30" fill="hsl(${hue + 60}, 40%, 50%)"/>
-                <circle cx="35" cy="25" r="2" fill="#000"/>
-                <circle cx="45" cy="25" r="2" fill="#000"/>
-                <path d="M35,35 Q40,40 45,35" stroke="#000" stroke-width="1" fill="none"/>
-            </svg>`;
-        }
-
-        // Enhanced sound synthesis functions with more realistic ASMR qualities
-        function createTypingSound() {
-            return function() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                const filter = audioContext.createBiquadFilter();
-                
-                oscillator.connect(filter);
-                filter.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                // Mechanical typewriter sound
-                const baseFreq = 600 + Math.random() * 800;
-                oscillator.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(baseFreq * 0.3, audioContext.currentTime + 0.02);
-                oscillator.type = 'square';
-                
-                filter.type = 'bandpass';
-                filter.frequency.setValueAtTime(1200, audioContext.currentTime);
-                filter.Q.setValueAtTime(10, audioContext.currentTime);
-                
-                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.08);
-            };
-        }
-
-        function createReceiptSound() {
-            return function() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const noise = audioContext.createBufferSource();
-                const noiseBuffer = audioContext.createBuffer(1, 0.3 * audioContext.sampleRate, audioContext.sampleRate);
-                const output = noiseBuffer.getChannelData(0);
-                
-                for (let i = 0; i < noiseBuffer.length; i++) {
-                    output[i] = Math.random() * 0.1;
-                }
-                
-                noise.buffer = noiseBuffer;
-                noise.connect(audioContext.destination);
-                noise.start();
-                noise.stop(audioContext.currentTime + 0.3);
-            };
-        }
-
-        function createStampSound() {
-            return function() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-                oscillator.type = 'square';
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
-            };
-        }
-
-        function createDrawerSound() {
-            return function() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
-                oscillator.frequency.linearRampToValueAtTime(100, audioContext.currentTime + 0.5);
-                oscillator.type = 'sawtooth';
-                
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.5);
-            };
-        }
-
-        function createBuzzerSound() {
-            return function() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                oscillator.type = 'square';
-                
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + 0.2);
-                gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.3);
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + 0.4);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.6);
-            };
-        }
-
-        function createPaperShuffleSound() {
-            return function() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const noise = audioContext.createBufferSource();
-                const noiseBuffer = audioContext.createBuffer(1, 0.2 * audioContext.sampleRate, audioContext.sampleRate);
-                const output = noiseBuffer.getChannelData(0);
-                
-                for (let i = 0; i < noiseBuffer.length; i++) {
-                    output[i] = (Math.random() * 2 - 1) * 0.05;
-                }
-                
-                const filter = audioContext.createBiquadFilter();
-                filter.type = 'highpass';
-                filter.frequency.setValueAtTime(2000, audioContext.currentTime);
-                
-                noise.buffer = noiseBuffer;
-                noise.connect(filter);
-                filter.connect(audioContext.destination);
-                noise.start();
-                noise.stop(audioContext.currentTime + 0.2);
-            };
-        }
-
+        
         function playSound(soundName) {
-            try {
-                if (gameData.sounds[soundName]) {
-                    gameData.sounds[soundName]();
-                }
-            } catch (e) {
-                console.log('Sound playback not available');
+            if (sounds[soundName]) {
+                sounds[soundName].currentTime = 0;
+                sounds[soundName].play().catch(() => {}); // Ignore autoplay restrictions
             }
         }
-
-        function startGame() {
+        
+        // Game state
+        let gameState = {
+            currentCustomer: null,
+            currentCustomerIndex: 0,
+            score: 0,
+            transactions: 0,
+            selectedDocument: null,
+            systemDatabase: {} // Will hold customer records
+        };
+        
+        // Customer database - what's on file in the bank system
+        const customerDatabase = {
+            '123456789': {
+                name: 'Mary Johnson',
+                dob: '1982-07-22',
+                address: '123 Oak Street, Springfield',
+                photo: '[Photo: Woman, brown hair, glasses, age 42]',
+                signature: 'Mary Johnson',
+                balance: 1850,
+                accountStatus: 'ACTIVE'
+            },
+            '987654321': {
+                name: 'Robert Wilson',
+                dob: '1975-03-15', 
+                address: '456 Pine Avenue, Springfield',
+                photo: '[Photo: Man, dark hair, beard, age 49]',
+                signature: 'Robert Wilson',
+                balance: 12500,
+                accountStatus: 'ACTIVE'
+            },
+            '555777888': {
+                name: 'Sarah Davis',
+                dob: '1990-11-08',
+                address: '789 Elm Drive, Springfield',
+                photo: '[Photo: Woman, blonde hair, no glasses, age 34]',
+                signature: 'Sarah Davis',
+                balance: 3200,
+                accountStatus: 'ACTIVE'
+            }
+        };
+        
+        // Transaction requirements by type
+        const transactionRequirements = {
+            'WITHDRAWAL': ['TRANSACTION_FORM', 'ID', 'SIGNATURE'],
+            'DEPOSIT': ['TRANSACTION_FORM', 'ID', 'SIGNATURE'],
+            'WIRE_TRANSFER': ['WIRE_FORM', 'ID', 'PASSPORT', 'SIGNATURE'],
+            'ACCOUNT_OPENING': ['APPLICATION', 'ID', 'PROOF_OF_ADDRESS', 'INITIAL_DEPOSIT', 'SIGNATURE'],
+            'CASHIERS_CHECK': ['CHECK_REQUEST', 'ID', 'SIGNATURE', 'PAYMENT']
+        };
+        
+        // Customers with their requests and provided documents
+        const customers = [
+            {
+                name: 'Mary Johnson',
+                transactionType: 'WITHDRAWAL',
+                requestedAmount: 200,
+                requestedAccount: '123456789',
+                documents: [
+                    {
+                        id: 'FORM',
+                        type: 'TRANSACTION_FORM',
+                        title: 'Withdrawal Request Form',
+                        content: {
+                            customerName: 'Mary Johnson',
+                            accountNumber: '123456789',
+                            transactionType: 'WITHDRAWAL',
+                            amount: 250, // Intentional discrepancy!
+                            date: '2024-06-01',
+                            customerSignature: 'Mary Johnson'
+                        }
+                    },
+                    {
+                        id: 'ID',
+                        type: 'ID',
+                        title: 'Driver\'s License',
+                        content: {
+                            name: 'Mary Johnson',
+                            dob: '1982-07-22',
+                            address: '123 Oak Street, Springfield',
+                            licenseNumber: 'DL-54321',
+                            expirationDate: '2026-07-22'
+                        }
+                    },
+                    {
+                        id: 'SIG',
+                        type: 'SIGNATURE',
+                        title: 'Signature Card',
+                        content: {
+                            signature: 'Mary Johnson Fraudulent' // Intentional mismatch!
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'Robert Wilson',
+                transactionType: 'WIRE_TRANSFER',
+                requestedAmount: 5000,
+                requestedAccount: '987654321',
+                targetAccount: '555123456',
+                documents: [
+                    {
+                        id: 'WIRE',
+                        type: 'WIRE_FORM',
+                        title: 'Wire Transfer Request',
+                        content: {
+                            fromAccount: '987654321',
+                            toAccount: '555123456',
+                            amount: 5000,
+                            recipientName: 'Business Solutions Inc',
+                            purpose: 'Invoice Payment',
+                            senderName: 'Robert Wilson',
+                            date: '2024-06-01'
+                        }
+                    },
+                    {
+                        id: 'ID',
+                        type: 'ID',
+                        title: 'Driver\'s License',
+                        content: {
+                            name: 'Robert Wilson',
+                            dob: '1975-03-15',
+                            address: '456 Pine Avenue, Springfield',
+                            licenseNumber: 'DL-12345'
+                        }
+                    },
+                    {
+                        id: 'PASSPORT',
+                        type: 'PASSPORT',
+                        title: 'U.S. Passport',
+                        content: {
+                            name: 'Robert Wilson',
+                            dob: '1975-03-15',
+                            passportNumber: 'US-98765432',
+                            issuedDate: '2020-01-15',
+                            expirationDate: '2030-01-15'
+                        }
+                    },
+                    {
+                        id: 'SIG',
+                        type: 'SIGNATURE',
+                        title: 'Signature Verification',
+                        content: {
+                            signature: 'Robert Wilson'
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'Sarah Davis',
+                transactionType: 'DEPOSIT',
+                requestedAmount: 1200,
+                requestedAccount: '555777888',
+                documents: [
+                    {
+                        id: 'FORM',
+                        type: 'TRANSACTION_FORM',
+                        title: 'Deposit Form',
+                        content: {
+                            customerName: 'Sarah Davis',
+                            accountNumber: '555777889', // Wrong account number!
+                            transactionType: 'DEPOSIT',
+                            amount: 1200,
+                            depositType: 'CHECK',
+                            date: '2024-06-01'
+                        }
+                    },
+                    {
+                        id: 'ID',
+                        type: 'ID',
+                        title: 'Driver\'s License',
+                        content: {
+                            name: 'Sarah Davis',
+                            dob: '1990-11-08',
+                            address: '789 Elm Drive, Springfield',
+                            licenseNumber: 'DL-77788'
+                        }
+                    },
+                    {
+                        id: 'SIG',
+                        type: 'SIGNATURE',
+                        title: 'Signature Card',
+                        content: {
+                            signature: 'Sarah Davis'
+                        }
+                    }
+                ]
+            }
+        ];
+        
+        // Initialize game
+        function initGame() {
             initSounds();
-            playSound('drawer');
-            document.getElementById('intro').style.display = 'none';
-            document.getElementById('game').style.display = 'flex';
-            loadCustomer();
-            setupTerminal();
+            loadNextCustomer();
+            setupEventListeners();
         }
-
-        function setupTerminal() {
+        
+        function setupEventListeners() {
             const terminalInput = document.getElementById('terminal-input');
-            const terminalOutput = document.getElementById('terminal-output');
             
             terminalInput.addEventListener('keydown', function(e) {
-                playSound('typing');
-                
                 if (e.key === 'Enter') {
-                    const command = e.target.value.trim().toUpperCase();
-                    e.target.value = '';
-                    processCommand(command);
-                }
-                
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    // Tab completion logic
-                    const partial = e.target.value.toUpperCase();
-                    const commands = ['EXAMINE', 'PROCESS', 'REJECT', 'VERIFY', 'HELP'];
-                    const match = commands.find(cmd => cmd.startsWith(partial));
-                    if (match) {
-                        e.target.value = match + ' ';
+                    const command = this.value.trim().toUpperCase();
+                    if (command) {
+                        playSound('typewriter');
+                        processCommand(command);
+                        this.value = '';
                     }
                 }
             });
             
-            // Focus on terminal input
+            // Auto-focus terminal
             terminalInput.focus();
         }
-
+        
+        function loadNextCustomer() {
+            if (gameState.currentCustomerIndex >= customers.length) {
+                endGame();
+                return;
+            }
+            
+            gameState.currentCustomer = customers[gameState.currentCustomerIndex];
+            displayCustomer();
+            playSound('drawer');
+            addTerminalOutput(`NEW CUSTOMER APPROACHING WINDOW`);
+            addTerminalOutput(`Customer states: "I need to process a ${gameState.currentCustomer.transactionType.replace('_', ' ').toLowerCase()}"`);
+        }
+        
+        function displayCustomer() {
+            const customer = gameState.currentCustomer;
+            const customerDetails = document.getElementById('customer-details');
+            const documentsList = document.getElementById('documents-list');
+            
+            // Display customer info
+            customerDetails.innerHTML = `
+                <strong>CUSTOMER:</strong> ${customer.name}<br>
+                <strong>REQUEST:</strong> ${customer.transactionType.replace('_', ' ')}<br>
+                <strong>AMOUNT:</strong> $${customer.requestedAmount}<br>
+                <strong>ACCOUNT:</strong> ${customer.requestedAccount}
+            `;
+            
+            // Display documents
+            documentsList.innerHTML = '';
+            customer.documents.forEach((doc, index) => {
+                const docDiv = document.createElement('div');
+                docDiv.className = 'document';
+                docDiv.innerHTML = `
+                    <strong>${doc.title}</strong><br>
+                    <small>Type: ${doc.type}</small>
+                `;
+                docDiv.onclick = () => selectDocument(index);
+                documentsList.appendChild(docDiv);
+            });
+        }
+        
+        function selectDocument(index) {
+            // Remove previous selection
+            document.querySelectorAll('.document').forEach(doc => doc.classList.remove('selected'));
+            
+            // Select new document
+            document.querySelectorAll('.document')[index].classList.add('selected');
+            gameState.selectedDocument = index;
+            
+            playSound('paperShuffle');
+            addTerminalOutput(`Document selected: ${gameState.currentCustomer.documents[index].title}`);
+        }
+        
         function processCommand(command) {
-            const terminalOutput = document.getElementById('terminal-output');
-            
-            // Add command to output
-            terminalOutput.innerHTML += `<br>> ${command}`;
-            
             const parts = command.split(' ');
             const action = parts[0];
-            const target = parts[1];
+            const parameter = parts.slice(1).join(' ');
+            
+            addTerminalOutput(`TELLER> ${command}`);
             
             switch (action) {
                 case 'EXAMINE':
-                    if (target) {
-                        examineDocument(target);
-                    } else {
-                        addTerminalOutput('ERROR: Specify document (ID/SLIP/BOOK/SIG)');
-                        playSound('buzzer');
-                    }
+                    examineDocument(parameter);
                     break;
-                    
                 case 'LOOKUP':
-                    if (target) {
-                        lookupCustomer(target);
-                    } else {
-                        addTerminalOutput('ERROR: Specify account number for lookup');
-                        playSound('buzzer');
-                    }
+                    lookupAccount(parameter);
                     break;
-                    
-                case 'APPROVE':
-                    if (target) {
-                        approveTransaction(target);
-                    } else {
-                        addTerminalOutput('ERROR: Specify account number to approve');
-                        playSound('buzzer');
-                    }
-                    break;
-                    
-                case 'REJECT':
-                    if (target) {
-                        rejectTransactionWithAccount(target);
-                    } else {
-                        rejectTransaction();
-                    }
-                    break;
-                    
-                case 'PROCESS':
-                    processTransaction();
-                    break;
-                    
                 case 'VERIFY':
-                    if (target) {
-                        verifyAmount(parseInt(target));
-                    } else {
-                        addTerminalOutput('ERROR: Specify amount to verify');
-                        playSound('buzzer');
-                    }
+                    verifyAmount(parameter);
                     break;
-                    
+                case 'APPROVE':
+                    approveTransaction();
+                    break;
+                case 'REJECT':
+                    rejectTransaction();
+                    break;
                 case 'HELP':
                     showHelp();
                     break;
-                    
                 default:
                     addTerminalOutput('UNKNOWN COMMAND. Type HELP for available commands.');
                     playSound('buzzer');
             }
-            
-            // Scroll to bottom
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
-
-        function addTerminalOutput(text) {
-            const terminalOutput = document.getElementById('terminal-output');
-            terminalOutput.innerHTML += `<br>${text}`;
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
-
+        
         function examineDocument(docType) {
-            const customer = gameData.currentCustomer;
-            if (!customer) return;
-            
-            const doc = customer.docs.find(d => d.id === docType);
-            if (doc) {
-                playSound('paperShuffle');
-                selectDoc(customer.docs.indexOf(doc));
-                addTerminalOutput(`EXAMINING ${doc.type}: ${doc.detail}`);
-                
-                // Show signature comparison if examining signature
-                if (doc.type === 'SIGNATURE') {
-                    showSignatureComparison(customer);
-                }
-            } else {
-                addTerminalOutput('DOCUMENT NOT FOUND');
-                playSound('buzzer');
+            if (!gameState.currentCustomer) {
+                addTerminalOutput('No customer present.');
+                return;
             }
-        }
-
-        function showSignatureComparison(customer) {
-            const customerSig = customer.docs.find(d => d.type === 'SIGNATURE');
-            if (customerSig) {
-                addTerminalOutput('--- SIGNATURE COMPARISON ---');
-                addTerminalOutput('CUSTOMER PROVIDED:');
-                addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customerSig.signature}</div>`);
-                addTerminalOutput('ON FILE:');
-                addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customer.onFileSignature}</div>`);
-                addTerminalOutput('--- END COMPARISON ---');
-            }
-        }
-
-        function lookupCustomer(accountNumber) {
-            const customer = gameData.currentCustomer;
-            if (!customer) return;
             
-            playSound('receipt');
-            addTerminalOutput('--- CUSTOMER PROFILE LOOKUP ---');
-            addTerminalOutput(`ACCOUNT: ${customer.accountNumber}`);
-            addTerminalOutput(`NAME: ${customer.name}`);
-            addTerminalOutput(`DOB: ${customer.dob}`);
-            addTerminalOutput('PHOTO ON FILE:');
-            addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customer.customerPhoto}</div>`);
-            addTerminalOutput('SIGNATURE ON FILE:');
-            addTerminalOutput(`<div style="background: #002200; padding: 10px; margin: 5px 0;">${customer.onFileSignature}</div>`);
-            addTerminalOutput('--- END PROFILE ---');
-        }
-
-        function approveTransaction(accountNumber) {
-            const customer = gameData.currentCustomer;
-            if (!customer || customer.accountNumber !== accountNumber) {
-                addTerminalOutput('ACCOUNT NUMBER MISMATCH');
+            let docIndex = -1;
+            if (docType) {
+                // Find by type
+                docIndex = gameState.currentCustomer.documents.findIndex(doc => 
+                    doc.type === docType || doc.id === docType
+                );
+            } else if (gameState.selectedDocument !== null) {
+                // Use selected document
+                docIndex = gameState.selectedDocument;
+            }
+            
+            if (docIndex === -1) {
+                addTerminalOutput('Document not found or not selected.');
                 playSound('buzzer');
                 return;
             }
-            processTransaction();
-        }
-
-        function rejectTransactionWithAccount(accountNumber) {
-            const customer = gameData.currentCustomer;
-            if (!customer || customer.accountNumber !== accountNumber) {
-                addTerminalOutput('ACCOUNT NUMBER MISMATCH');
-                playSound('buzzer');
-                return;
-            }
-            rejectTransaction();
-        }
-
-        function verifyAmount(amount) {
-            const customer = gameData.currentCustomer;
-            if (!customer) return;
             
-            addTerminalOutput(`VERIFYING AMOUNT: $${amount}`);
-            playSound('stamp');
-            // Player must determine if this matches the transaction themselves
-        }
-
-        function showHelp() {
-            addTerminalOutput('=== AVAILABLE COMMANDS ===');
-            addTerminalOutput('EXAMINE [ID/SLIP/BOOK/SIG] - Examine document');
-            addTerminalOutput('LOOKUP [account] - Lookup customer profile');
-            addTerminalOutput('VERIFY [amount] - Verify transaction amount');
-            addTerminalOutput('APPROVE [account] - Approve transaction');
-            addTerminalOutput('REJECT [account] - Reject transaction');
-            addTerminalOutput('PROCESS - Quick approve without account');
-            addTerminalOutput('HELP - Show this help');
-        }
-
-        function flashScreen(type) {
-            const gameArea = document.getElementById('game');
-            gameArea.classList.add(type === 'success' ? 'flash-success' : 'flash-error');
-            setTimeout(() => {
-                gameArea.classList.remove('flash-success', 'flash-error');
-            }, 500);
-        }
-
-        function loadCustomer() {
-            const customer = gameData.customers[Math.floor(Math.random() * gameData.customers.length)];
-            gameData.currentCustomer = customer;
+            const doc = gameState.currentCustomer.documents[docIndex];
+            playSound('paperShuffle');
             
-            document.getElementById('customer-name').textContent = customer.name;
-            document.getElementById('request').textContent = customer.request;
+            addTerminalOutput(`=== EXAMINING: ${doc.title} ===`);
             
-            const docsEl = document.getElementById('docs');
-            docsEl.innerHTML = '';
-            
-            customer.docs.forEach((doc, i) => {
-                const div = document.createElement('div');
-                div.className = 'document' + (doc.valid ? '' : ' error');
-                div.onclick = () => {
-                    playSound('paperShuffle');
-                    selectDoc(i);
-                };
-                div.innerHTML = `<h4>${doc.type}</h4><p>${doc.name}</p><p>${doc.detail}</p>`;
-                docsEl.appendChild(div);
+            // Display document contents
+            Object.entries(doc.content).forEach(([key, value]) => {
+                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                addTerminalOutput(`${label}: ${value}`);
             });
             
-            addTerminalOutput(`NEW CUSTOMER: ${customer.name} - ${customer.request}`);
-            addTerminalOutput('Type EXAMINE [ID/SLIP/BOOK/SIG] to inspect documents');
+            addTerminalOutput(`=== END DOCUMENT ===`);
         }
-
-        function selectDoc(index) {
-            gameData.selectedDoc = index;
-            const docs = document.querySelectorAll('.document');
-            docs.forEach((doc, i) => doc.classList.toggle('selected', i === index));
-        }
-
-        function processTransaction() {
-            const hasErrors = gameData.currentCustomer.docs.some(doc => !doc.valid);
-            if (hasErrors) {
-                gameData.mistakes++;
-                gameData.score -= 50;
-                addTerminalOutput('TRANSACTION PROCESSED WITH ERRORS - MISTAKE!');
+        
+        function lookupAccount(accountNumber) {
+            if (!accountNumber) {
+                addTerminalOutput('Please specify account number.');
                 playSound('buzzer');
-                flashScreen('error');
-            } else {
-                gameData.score += 100;
-                addTerminalOutput('TRANSACTION PROCESSED SUCCESSFULLY');
-                playSound('stamp');
-                playSound('receipt');
-                flashScreen('success');
+                return;
             }
-            updateGame();
-        }
-
-        function rejectTransaction() {
-            const hasErrors = gameData.currentCustomer.docs.some(doc => !doc.valid);
-            if (hasErrors) {
-                gameData.score += 150;
-                addTerminalOutput('FRAUDULENT TRANSACTION REJECTED - GOOD CATCH!');
-                playSound('stamp');
-                flashScreen('success');
-            } else {
-                gameData.mistakes++;
-                gameData.score -= 25;
-                addTerminalOutput('VALID TRANSACTION REJECTED - MISTAKE!');
-                playSound('buzzer');
-                flashScreen('error');
-            }
-            updateGame();
-        }
-
-        function updateGame() {
-            document.getElementById('score').textContent = gameData.score;
-            document.getElementById('mistakes').textContent = gameData.mistakes;
-            addTerminalOutput('--- Transaction Complete ---');
+            
+            playSound('typewriter');
+            addTerminalOutput('Accessing customer database...');
+            
             setTimeout(() => {
-                loadCustomer();
-                document.getElementById('terminal-input').focus();
+                const customerRecord = customerDatabase[accountNumber];
+                if (customerRecord) {
+                    addTerminalOutput(`=== CUSTOMER RECORD ===`);
+                    addTerminalOutput(`Name: ${customerRecord.name}`);
+                    addTerminalOutput(`DOB: ${customerRecord.dob}`);
+                    addTerminalOutput(`Address: ${customerRecord.address}`);
+                    addTerminalOutput(`Photo: ${customerRecord.photo}`);
+                    addTerminalOutput(`Signature on file: ${customerRecord.signature}`);
+                    addTerminalOutput(`Current Balance: $${customerRecord.balance}`);
+                    addTerminalOutput(`Account Status: ${customerRecord.accountStatus}`);
+                    addTerminalOutput(`=== END RECORD ===`);
+                } else {
+                    addTerminalOutput('ACCOUNT NOT FOUND IN SYSTEM');
+                    playSound('buzzer');
+                }
+            }, 1000);
+        }
+        
+        function verifyAmount(amount) {
+            if (!amount) {
+                addTerminalOutput('Please specify amount to verify.');
+                return;
+            }
+            
+            const numAmount = parseFloat(amount.replace('$', ''));
+            playSound('typewriter');
+            addTerminalOutput(`Verifying amount: $${numAmount}`);
+            
+            // Don't tell them if it's right or wrong - they must figure it out
+        }
+        
+        function approveTransaction() {
+            if (!gameState.currentCustomer) {
+                addTerminalOutput('No customer present.');
+                return;
+            }
+            
+            playSound('stamp');
+            addTerminalOutput('TRANSACTION APPROVED');
+            addTerminalOutput('Processing...');
+            
+            setTimeout(() => {
+                const isCorrect = validateTransaction();
+                if (isCorrect) {
+                    gameState.score += 100;
+                    addTerminalOutput('✓ CORRECT APPROVAL');
+                    playSound('receipt');
+                } else {
+                    gameState.score -= 50;
+                    addTerminalOutput('✗ INCORRECT APPROVAL - FRAUD DETECTED BY SUPERVISOR');
+                    playSound('buzzer');
+                }
+                
+                completeTransaction();
             }, 2000);
         }
-
-        // Touch handling
-        document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
         
-        console.log('Teller\'s Window game loaded successfully!');
+        function rejectTransaction() {
+            if (!gameState.currentCustomer) {
+                addTerminalOutput('No customer present.');
+                return;
+            }
+            
+            playSound('buzzer');
+            addTerminalOutput('TRANSACTION REJECTED');
+            addTerminalOutput('Notifying supervisor...');
+            
+            setTimeout(() => {
+                const isCorrect = !validateTransaction(); // Correct if transaction was actually invalid
+                if (isCorrect) {
+                    gameState.score += 100;
+                    addTerminalOutput('✓ CORRECT REJECTION');
+                } else {
+                    gameState.score -= 50;
+                    addTerminalOutput('✗ INCORRECT REJECTION - VALID TRANSACTION DENIED');
+                }
+                
+                completeTransaction();
+            }, 2000);
+        }
+        
+        function validateTransaction() {
+            const customer = gameState.currentCustomer;
+            const account = customer.requestedAccount;
+            const dbRecord = customerDatabase[account];
+            
+            if (!dbRecord) return false;
+            
+            // Check various fraud indicators
+            let isValid = true;
+            
+            // Find documents
+            const form = customer.documents.find(d => d.type.includes('FORM'));
+            const id = customer.documents.find(d => d.type === 'ID');
+            const signature = customer.documents.find(d => d.type === 'SIGNATURE');
+            
+            // Check name matches
+            if (id && id.content.name !== dbRecord.name) isValid = false;
+            
+            // Check DOB matches
+            if (id && id.content.dob !== dbRecord.dob) isValid = false;
+            
+            // Check signature matches
+            if (signature && signature.content.signature !== dbRecord.signature) isValid = false;
+            
+            // Check amounts match between request and form
+            if (form && form.content.amount !== customer.requestedAmount) isValid = false;
+            
+            // Check account numbers match
+            if (form && form.content.accountNumber && form.content.accountNumber !== customer.requestedAccount) isValid = false;
+            
+            return isValid;
+        }
+        
+        function completeTransaction() {
+            gameState.transactions++;
+            gameState.currentCustomerIndex++;
+            
+            setTimeout(() => {
+                addTerminalOutput('Customer leaves window.');
+                addTerminalOutput('='.repeat(50));
+                loadNextCustomer();
+            }, 3000);
+            
+            updateStatus();
+        }
+        
+        function updateStatus() {
+            const statusEl = document.getElementById('game-status');
+            const time = new Date().toLocaleTimeString();
+            statusEl.textContent = `Score: ${gameState.score} | Transactions: ${gameState.transactions} | Time: ${time}`;
+        }
+        
+        function endGame() {
+            addTerminalOutput('='.repeat(50));
+            addTerminalOutput('END OF SHIFT');
+            addTerminalOutput(`Final Score: ${gameState.score}`);
+            addTerminalOutput(`Transactions Processed: ${gameState.transactions}`);
+            
+            if (gameState.score >= 200) {
+                addTerminalOutput('EXCELLENT WORK - PROMOTION RECOMMENDED');
+            } else if (gameState.score >= 100) {
+                addTerminalOutput('GOOD WORK - MEETS EXPECTATIONS');
+            } else {
+                addTerminalOutput('POOR PERFORMANCE - ADDITIONAL TRAINING REQUIRED');
+            }
+        }
+        
+        function showHelp() {
+            addTerminalOutput('=== TELLER COMMANDS ===');
+            addTerminalOutput('EXAMINE [document_type] - Examine specific document');
+            addTerminalOutput('EXAMINE - Examine currently selected document');
+            addTerminalOutput('LOOKUP [account_number] - Look up customer in database');
+            addTerminalOutput('VERIFY [amount] - Verify transaction amount');
+            addTerminalOutput('APPROVE - Approve the transaction');
+            addTerminalOutput('REJECT - Reject the transaction');
+            addTerminalOutput('HELP - Show this help');
+            addTerminalOutput('=== Document Types ===');
+            addTerminalOutput('FORM, ID, PASSPORT, SIGNATURE');
+        }
+        
+        function addTerminalOutput(text) {
+            const output = document.getElementById('terminal-output');
+            output.innerHTML += '<br>' + text;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // Start the game
+        initGame();
     </script>
 </body>
 </html>
