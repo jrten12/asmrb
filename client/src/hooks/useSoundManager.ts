@@ -6,20 +6,24 @@ export function useSoundManager() {
   const isMutedRef = useRef(false);
   
   useEffect(() => {
-    // Initialize sounds
+    // Initialize sounds with fallback to existing sounds
     const sounds: SoundEffects = {
-      typing: new Audio('/sounds/typing.mp3'),
-      stamp: new Audio('/sounds/stamp.mp3'),
-      drawer: new Audio('/sounds/drawer.mp3'),
-      cash: new Audio('/sounds/cash.mp3'),
-      receipt: new Audio('/sounds/receipt.mp3'),
-      warning: new Audio('/sounds/warning.mp3')
+      typing: new Audio('/sounds/hit.mp3'),
+      stamp: new Audio('/sounds/success.mp3'),
+      drawer: new Audio('/sounds/hit.mp3'),
+      cash: new Audio('/sounds/success.mp3'),
+      receipt: new Audio('/sounds/success.mp3'),
+      warning: new Audio('/sounds/hit.mp3')
     };
     
     // Set volume for all sounds
     Object.values(sounds).forEach(sound => {
       sound.volume = 0.3;
       sound.preload = 'auto';
+      // Handle loading errors gracefully
+      sound.addEventListener('error', () => {
+        console.log('Sound file not found, using Web Audio API fallback');
+      });
     });
     
     soundsRef.current = sounds;

@@ -58,13 +58,22 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       
-      graphics.drawRetroText('TELLER\'S WINDOW', centerX - 200, centerY - 100, 32);
-      graphics.drawRetroText('1980s Bank Simulation', centerX - 150, centerY - 50, 16);
-      graphics.drawRetroText('Click to start your shift...', centerX - 120, centerY + 50, 14, '#ffff00');
+      // Draw computer terminal background
+      graphics.drawTerminal(centerX - 250, centerY - 150, 500, 300);
+      
+      // Draw title text
+      graphics.drawRetroText('TELLER\'S WINDOW', centerX - 150, centerY - 80, 24);
+      graphics.drawRetroText('1980s Bank Simulation', centerX - 130, centerY - 40, 14);
+      
+      // Draw start button area
+      graphics.drawButton(centerX - 100, centerY + 10, 200, 40, 'START SHIFT');
+      
+      // Draw instructions
+      graphics.drawRetroText('Click anywhere to begin...', centerX - 100, centerY + 80, 12, '#ffff00');
       
       // Draw blinking cursor
       if (Math.floor(Date.now() / 500) % 2) {
-        graphics.drawRetroText('_', centerX + 130, centerY + 50, 14, '#ffff00');
+        graphics.drawRetroText('_', centerX + 110, centerY + 80, 12, '#ffff00');
       }
     }
     
@@ -212,13 +221,8 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
       const y = e.clientY - rect.top;
       
       if (gameState.phase === 'intro') {
-        // Start game
-        const centerX = canvas!.width / 2;
-        const centerY = canvas!.height / 2;
-        if (x > centerX - 150 && x < centerX + 150 && y > centerY + 30 && y < centerY + 70) {
-          // Start button area clicked
-          window.dispatchEvent(new CustomEvent('startGame'));
-        }
+        // Start game - click anywhere on the intro screen
+        window.dispatchEvent(new CustomEvent('startGame'));
       } else if (gameState.phase === 'working' && gameState.currentCustomer) {
         // Check document clicks
         const docsStartX = 50;
