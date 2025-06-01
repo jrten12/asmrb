@@ -1,0 +1,60 @@
+Maintain the existing CRT green aesthetic and game logic, but make the game clean, legible, and intuitive on mobile (especially iOS). Prioritize proper screen real estate, document visibility, and immersive sound effects.
+
+⸻
+
+📱 UI/Screen Layout Improvements
+	1.	Main Terminal Area
+	•	Enlarge the bank terminal panel on the right side so that typed inputs and verification results are clearly visible at all times.
+	•	Add a collapsible terminal history section if space is tight (so it can expand when needed).
+	•	Keep terminal command line always fixed and centered with clear blinking cursor and input line.
+	2.	Popups / Document Windows
+	•	Move all document popups (e.g. IDs, deposit forms, signatures) to a slide-up half-screen modal instead of full-screen. The bottom half should always show the bank terminal or verification data.
+	•	OR allow side-by-side view: left panel = document, right panel = account/computer data.
+	•	Add an “Expand” or “Compare” toggle for docs when space allows.
+	3.	Process Steps
+	•	Ensure all four steps (Review → Examine Docs → Verify Details → Approve/Reject) are visually indicated at top.
+	•	Automatically gray out steps that cannot proceed (e.g. if signature or ID is missing).
+
+⸻
+
+🧠 Bank Terminal Interactivity Improvements
+	•	Allow teller to type commands like:
+	•	LOOKUP 720997541 → pulls full account record
+	•	VERIFY DOB 1975-01-06 → confirms or denies match
+	•	COMPARE SIGNATURE → side-by-side auto popup
+	•	Account record should include name, DOB, known signature, ID on file, recent transactions, etc.
+
+⸻
+
+🔊 Fix the Sounds (ASMR-Inspired, Contextual)
+
+Current sound implementation is wrong—arcade-style and repetitive. Replace with these distinct, event-based sounds (can use short MP3 or WAV clips):
+	•	Typing: Soft, natural key clicks (not digital beeps)
+	•	Open document: Gentle paper rustle
+	•	Approve: Stamp sound or deep mechanical thud
+	•	Reject: Soft buzz or red-light-style sound
+	•	Signature match: Pen scratch and quick confirm chime
+	•	Popup open/close: Magnetic UI click or suction pop
+
+All sounds should be:
+	•	Under 1 second
+	•	Volume-balanced
+	•	Not looping or shared across actions
+
+Fix sound engine to trigger correct clip per event, not one global sound for everything.
+
+⸻
+
+📏 Mobile Optimization
+	•	Auto-scale for all iPhone models (13 and up).
+	•	Ensure at least 80% of the screen is used on mobile—currently it’s too compressed.
+	•	Allow vertical scrolling if needed but keep input/output always visible.
+	•	Buttons and clickable elements must be at least 44px height for iOS touch targets.
+
+⸻
+
+🔁 Maintain
+	•	CRT green theme
+	•	Core flow: review → examine → verify → approve/reject
+	•	Command system and document examination
+	•	Fraud detection scoring

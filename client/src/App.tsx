@@ -62,60 +62,93 @@ function App() {
     }
   };
 
-  // Enhanced ASMR sound effects
+  // Natural ASMR sound effects
   const playTypingSound = async () => {
     await initAudio();
     if (!audioContextRef.current) return;
     
     try {
+      // Create natural key click sound
       const oscillator = audioContextRef.current.createOscillator();
       const gainNode = audioContextRef.current.createGain();
+      const filter = audioContextRef.current.createBiquadFilter();
       
-      oscillator.connect(gainNode);
+      oscillator.connect(filter);
+      filter.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      oscillator.frequency.setValueAtTime(1200 + Math.random() * 400, audioContextRef.current.currentTime);
-      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(800 + Math.random() * 200, audioContextRef.current.currentTime);
+      oscillator.type = 'triangle';
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(400, audioContextRef.current.currentTime);
       
-      gainNode.gain.setValueAtTime(0.06, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.08);
+      gainNode.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.12);
       
       oscillator.start(audioContextRef.current.currentTime);
-      oscillator.stop(audioContextRef.current.currentTime + 0.08);
+      oscillator.stop(audioContextRef.current.currentTime + 0.12);
     } catch (e) {
       // Silent fail
     }
   };
 
-  const playPaperShuffleSound = async () => {
+  const playPaperRustleSound = async () => {
     await initAudio();
     if (!audioContextRef.current) return;
     
     try {
+      // Create gentle paper rustle
       const whiteNoise = audioContextRef.current.createBufferSource();
-      const buffer = audioContextRef.current.createBuffer(1, 4410, audioContextRef.current.sampleRate);
+      const buffer = audioContextRef.current.createBuffer(1, 2205, audioContextRef.current.sampleRate);
       const output = buffer.getChannelData(0);
       
-      for (let i = 0; i < 4410; i++) {
-        output[i] = (Math.random() * 2 - 1) * 0.1;
+      for (let i = 0; i < 2205; i++) {
+        output[i] = (Math.random() * 2 - 1) * 0.08;
       }
       
       whiteNoise.buffer = buffer;
       const gainNode = audioContextRef.current.createGain();
       const filter = audioContextRef.current.createBiquadFilter();
       
-      filter.type = 'highpass';
-      filter.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, audioContextRef.current.currentTime);
+      filter.Q.setValueAtTime(0.8, audioContextRef.current.currentTime);
       
       whiteNoise.connect(filter);
       filter.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.12, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.25);
       
       whiteNoise.start();
-      whiteNoise.stop(audioContextRef.current.currentTime + 0.3);
+      whiteNoise.stop(audioContextRef.current.currentTime + 0.25);
+    } catch (e) {
+      // Silent fail
+    }
+  };
+
+  const playMagneticClickSound = async () => {
+    await initAudio();
+    if (!audioContextRef.current) return;
+    
+    try {
+      // Create UI magnetic click
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+      
+      oscillator.frequency.setValueAtTime(1500, audioContextRef.current.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(800, audioContextRef.current.currentTime + 0.05);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.08);
+      
+      oscillator.start(audioContextRef.current.currentTime);
+      oscillator.stop(audioContextRef.current.currentTime + 0.08);
     } catch (e) {
       // Silent fail
     }
@@ -126,26 +159,27 @@ function App() {
     if (!audioContextRef.current) return;
     
     try {
-      const oscillator1 = audioContextRef.current.createOscillator();
-      const oscillator2 = audioContextRef.current.createOscillator();
+      // Create deep mechanical stamp thud
+      const oscillator = audioContextRef.current.createOscillator();
       const gainNode = audioContextRef.current.createGain();
+      const filter = audioContextRef.current.createBiquadFilter();
       
-      oscillator1.connect(gainNode);
-      oscillator2.connect(gainNode);
+      oscillator.connect(filter);
+      filter.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      oscillator1.frequency.setValueAtTime(80, audioContextRef.current.currentTime);
-      oscillator2.frequency.setValueAtTime(160, audioContextRef.current.currentTime);
-      oscillator1.type = 'square';
-      oscillator2.type = 'triangle';
+      oscillator.frequency.setValueAtTime(120, audioContextRef.current.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(60, audioContextRef.current.currentTime + 0.2);
+      oscillator.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.25, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.4);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(300, audioContextRef.current.currentTime);
       
-      oscillator1.start();
-      oscillator2.start();
-      oscillator1.stop(audioContextRef.current.currentTime + 0.4);
-      oscillator2.stop(audioContextRef.current.currentTime + 0.4);
+      gainNode.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.5);
+      
+      oscillator.start();
+      oscillator.stop(audioContextRef.current.currentTime + 0.5);
     } catch (e) {
       // Silent fail
     }
@@ -458,7 +492,7 @@ function App() {
       return;
     }
     
-    playPaperShuffleSound();
+    playPaperRustleSound();
     typeMessage(`=== EXAMINING: ${doc.title} ===`);
     
     let delay = 400;
@@ -586,7 +620,7 @@ function App() {
   const handleDocumentClick = async (index: number) => {
     await initAudio();
     setSelectedDocument(index);
-    playPaperShuffleSound();
+    playPaperRustleSound();
     setDocumentModal({ isOpen: true, docIndex: index });
     typeMessage(`Document selected: ${currentCustomer?.documents[index].title}`);
   };
@@ -629,21 +663,23 @@ function App() {
       background: 'radial-gradient(circle, #002200 0%, #000 100%)',
       color: '#00ff00',
       height: '100vh',
+      width: '100vw',
       display: 'flex',
       flexDirection: 'column',
-      padding: '12px',
-      overflow: 'hidden'
+      padding: '8px',
+      overflow: 'hidden',
+      minHeight: '100vh'
     }}>
       <div style={{
         textAlign: 'center',
-        marginBottom: '12px',
+        marginBottom: '8px',
         border: '2px solid #00ff00',
-        padding: '10px',
+        padding: '12px',
         background: 'rgba(0, 50, 0, 0.3)',
-        fontSize: '16px'
+        fontSize: '18px'
       }}>
-        <h3 style={{ margin: 0, fontSize: '18px' }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
-        <div style={{ fontSize: '14px' }}>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
+        <h3 style={{ margin: 0, fontSize: '20px' }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
+        <div style={{ fontSize: '16px' }}>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
       </div>
 
       {/* Step Indicators */}
@@ -688,23 +724,24 @@ function App() {
         ))}
       </div>
       
-      <div style={{ display: 'flex', flex: 1, gap: '10px', minHeight: 0 }}>
+      <div style={{ display: 'flex', flex: 1, gap: '8px', minHeight: 0 }}>
         <div style={{
-          flex: 1,
+          width: '35%',
           border: '2px solid #00ff00',
-          padding: '10px',
+          padding: '12px',
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
         }}>
-          <h4 style={{ margin: '0 0 10px 0' }}>CUSTOMER WINDOW</h4>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>CUSTOMER WINDOW</h4>
           <div style={{
             background: 'rgba(0, 60, 0, 0.3)',
             border: '1px solid #006600',
-            padding: '8px',
-            marginBottom: '10px',
-            fontSize: '12px'
+            padding: '12px',
+            marginBottom: '12px',
+            fontSize: '14px',
+            lineHeight: '1.4'
           }}>
             {currentCustomer ? (
               <>
@@ -726,18 +763,18 @@ function App() {
                 style={{
                   background: selectedDocument === index ? 'rgba(0, 120, 0, 0.5)' : 'rgba(0, 50, 0, 0.2)',
                   border: selectedDocument === index ? '2px solid #00aa00' : '1px solid #005500',
-                  padding: '12px',
-                  margin: '6px 0',
+                  padding: '16px',
+                  margin: '8px 0',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  fontSize: '13px',
-                  borderRadius: '4px',
-                  minHeight: '60px'
+                  fontSize: '15px',
+                  borderRadius: '6px',
+                  minHeight: '48px'
                 }}
                 onClick={() => handleDocumentClick(index)}
               >
-                <strong style={{ fontSize: '14px' }}>{doc.title}</strong><br/>
-                <small style={{ color: '#00cc00' }}>Tap to open document viewer</small>
+                <strong style={{ fontSize: '16px' }}>{doc.title}</strong><br/>
+                <small style={{ color: '#00cc00', fontSize: '13px' }}>Tap to open document viewer</small>
               </div>
             ))}
           </div>
@@ -771,27 +808,28 @@ function App() {
         </div>
         
         <div style={{
-          flex: 1,
+          width: '65%',
           border: '2px solid #00ff00',
-          padding: '10px',
+          padding: '12px',
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
         }}>
-          <h4 style={{ margin: '0 0 10px 0' }}>BANK TERMINAL</h4>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
           <div style={{
             flex: 1,
             background: '#001100',
-            border: '1px solid #004400',
-            padding: '8px',
+            border: '2px solid #004400',
+            padding: '15px',
             overflowY: 'auto',
-            marginBottom: '8px',
-            fontSize: '12px',
-            lineHeight: '1.3'
+            marginBottom: '12px',
+            fontSize: '15px',
+            lineHeight: '1.5',
+            fontWeight: 'bold'
           }}>
             {terminalOutput.map((line, index) => (
-              <div key={index}>{line}</div>
+              <div key={index} style={{ marginBottom: '2px' }}>{line}</div>
             ))}
           </div>
           
@@ -799,11 +837,12 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             background: '#001100',
-            border: '1px solid #004400',
-            padding: '6px',
-            fontSize: '12px'
+            border: '2px solid #004400',
+            padding: '12px',
+            fontSize: '16px',
+            minHeight: '48px'
           }}>
-            <span style={{ marginRight: '8px', color: '#00ff00' }}>BANK&gt;</span>
+            <span style={{ marginRight: '12px', color: '#00ff00', fontSize: '18px' }}>BANK&gt;</span>
             <input
               ref={inputRef}
               type="text"
@@ -813,22 +852,32 @@ function App() {
                 border: 'none',
                 color: '#00ff00',
                 fontFamily: 'inherit',
-                fontSize: '12px',
-                outline: 'none'
+                fontSize: '16px',
+                outline: 'none',
+                fontWeight: 'bold'
               }}
               onKeyDown={handleKeyDown}
               autoComplete="off"
               placeholder="Type commands here..."
             />
+            <div style={{
+              width: '3px',
+              height: '20px',
+              background: '#00ff00',
+              animation: 'blink 1s infinite',
+              marginLeft: '8px'
+            }}></div>
           </div>
           
           <div style={{
-            fontSize: '10px',
+            fontSize: '14px',
             color: '#00aa00',
-            marginTop: '5px',
-            padding: '3px'
+            marginTop: '8px',
+            padding: '8px',
+            background: 'rgba(0, 40, 0, 0.3)',
+            borderRadius: '4px'
           }}>
-            COMMANDS: HELP | LOOKUP [account] | EXAMINE [doc] | VERIFY [amount] | APPROVE | REJECT | NEXT
+            <strong>COMMANDS:</strong> HELP | LOOKUP [account] | EXAMINE [doc] | VERIFY [amount] | COMPARE SIGNATURE | APPROVE | REJECT | NEXT
           </div>
         </div>
       </div>
