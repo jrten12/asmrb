@@ -534,7 +534,7 @@ function App() {
         setTimeout(() => typeMessage('=== END RECORD ==='), 2400);
       } else {
         typeMessage('ACCOUNT NOT FOUND');
-        playSubtleBuzzSound();
+        playRejectBuzzSound();
       }
     }, 800);
   };
@@ -556,7 +556,7 @@ function App() {
     
     if (!doc) {
       typeMessage('Document not found');
-      playSubtleBuzzSound();
+      playRejectBuzzSound();
       return;
     }
     
@@ -585,6 +585,65 @@ function App() {
     }, 1000);
   };
 
+  const compareField = (field: string) => {
+    if (!currentCustomer) {
+      typeMessage('No customer present');
+      playRejectBuzzSound();
+      return;
+    }
+
+    const accountRecord = bankDatabase[currentCustomer.accountNumber];
+    if (!accountRecord) {
+      typeMessage('Account record not loaded. Use LOOKUP first.');
+      playRejectBuzzSound();
+      return;
+    }
+
+    playPenScratchSound();
+    
+    switch (field.toUpperCase()) {
+      case 'DOB':
+        const idDoc = currentCustomer.documents.find(d => d.type === 'ID');
+        if (idDoc && idDoc.data.dateOfBirth) {
+          typeMessage('=== DOB COMPARISON ===');
+          setTimeout(() => typeMessage(`DOCUMENT: ${idDoc.data.dateOfBirth}`), 300);
+          setTimeout(() => typeMessage(`ON FILE: ${accountRecord.dob}`), 600);
+          setTimeout(() => {
+            const match = idDoc.data.dateOfBirth === accountRecord.dob;
+            typeMessage(`MATCH: ${match ? 'YES' : 'NO'}`);
+            if (!match) playRejectBuzzSound();
+          }, 900);
+        } else {
+          typeMessage('No ID document with DOB found');
+        }
+        break;
+
+      case 'NAME':
+        typeMessage('=== NAME COMPARISON ===');
+        setTimeout(() => typeMessage(`CUSTOMER: ${currentCustomer.name}`), 300);
+        setTimeout(() => typeMessage(`ON FILE: ${accountRecord.name}`), 600);
+        setTimeout(() => {
+          const match = currentCustomer.name === accountRecord.name;
+          typeMessage(`MATCH: ${match ? 'YES' : 'NO'}`);
+          if (!match) playRejectBuzzSound();
+        }, 900);
+        break;
+
+      case 'SIGNATURE':
+        const sigDoc = currentCustomer.documents.find(d => d.type === 'SIGNATURE');
+        if (sigDoc && sigDoc.data.signature) {
+          openSignatureComparison();
+        } else {
+          typeMessage('No signature document found');
+        }
+        break;
+
+      default:
+        typeMessage('Unknown field. Valid: DOB, NAME, SIGNATURE');
+        playRejectBuzzSound();
+    }
+  };
+
   const approveTransaction = () => {
     if (!currentCustomer) {
       typeMessage('No customer present');
@@ -610,7 +669,7 @@ function App() {
         typeMessage('✓ CORRECT DECISION - Valid transaction approved');
       } else {
         typeMessage('✗ INCORRECT DECISION - Fraudulent transaction approved!');
-        playSubtleBuzzSound();
+        playRejectBuzzSound();
       }
       
       setTimeout(() => {
@@ -625,7 +684,7 @@ function App() {
       return;
     }
     
-    playSubtleBuzzSound();
+    playRejectBuzzSound();
     typeMessage('TRANSACTION REJECTED');
     typeMessage('Notifying security...');
     
@@ -656,11 +715,12 @@ function App() {
     typeMessage('=== BANK TELLER COMMANDS ===');
     setTimeout(() => typeMessage('LOOKUP [account] - Look up customer in database'), 200);
     setTimeout(() => typeMessage('EXAMINE [document] - Examine document details'), 400);
-    setTimeout(() => typeMessage('VERIFY [amount] - Verify transaction amount'), 600);
-    setTimeout(() => typeMessage('APPROVE - Approve the transaction'), 800);
-    setTimeout(() => typeMessage('REJECT - Reject the transaction'), 1000);
-    setTimeout(() => typeMessage('NEXT - Load next customer'), 1200);
-    setTimeout(() => typeMessage('HELP - Show this help'), 1400);
+    setTimeout(() => typeMessage('COMPARE [field] - Compare DOB, NAME, or SIGNATURE'), 600);
+    setTimeout(() => typeMessage('VERIFY [amount] - Verify transaction amount'), 800);
+    setTimeout(() => typeMessage('APPROVE - Approve the transaction'), 1000);
+    setTimeout(() => typeMessage('REJECT - Reject the transaction'), 1200);
+    setTimeout(() => typeMessage('NEXT - Load next customer'), 1400);
+    setTimeout(() => typeMessage('HELP - Show this help'), 1600);
   };
 
   const loadNextCustomer = () => {
