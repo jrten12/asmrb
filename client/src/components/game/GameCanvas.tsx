@@ -236,9 +236,11 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
     }
     
     function handleInteraction(x: number, y: number) {
+      console.log('Interaction at:', x, y, 'Phase:', gameState.phase);
       
       if (gameState.phase === 'intro') {
         // Start game - click anywhere on the intro screen
+        console.log('Starting game from intro screen');
         window.dispatchEvent(new CustomEvent('startGame'));
       } else if (gameState.phase === 'working' && gameState.currentCustomer) {
         // Check document clicks
@@ -285,11 +287,12 @@ export function GameCanvas({ gameState, onDocumentClick, onProcessClick, onRejec
       }
     }
     
-    // Add both mouse and touch events
+    // Add both mouse and touch events with passive: false for mobile
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('touchstart', handleTouch);
-    canvas.addEventListener('touchend', handleTouch);
+    canvas.addEventListener('touchstart', handleTouch, { passive: false });
+    canvas.addEventListener('touchend', handleTouch, { passive: false });
+    canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
