@@ -3,14 +3,22 @@ import { useGameState } from '../../hooks/useGameState';
 import { useSoundManager } from '../../hooks/useSoundManager';
 
 export function MobileTellerGame() {
+  console.log('MobileTellerGame component loading...');
+  
   const { gameState, startGame, restartGame, selectDocument, processTransaction, rejectTransaction } = useGameState();
   const { playSound, toggleMute, isMuted } = useSoundManager();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  
+  console.log('Game state:', gameState);
 
   const handleStartGame = () => {
     console.log('Starting game...');
-    playSound('typing');
-    startGame();
+    try {
+      playSound('typing');
+      startGame();
+    } catch (error) {
+      console.error('Error starting game:', error);
+    }
   };
 
   const handleRestartGame = () => {
