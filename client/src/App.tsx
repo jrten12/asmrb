@@ -454,11 +454,11 @@ function App() {
     
     if (!doc) {
       typeMessage('Document not found');
-      playBuzzerSound();
+      playSubtleBuzzSound();
       return;
     }
     
-    createTypewriterSound(400, 0.3);
+    playPaperShuffleSound();
     typeMessage(`=== EXAMINING: ${doc.title} ===`);
     
     let delay = 400;
@@ -475,7 +475,7 @@ function App() {
 
   const verifyAmount = (amount: number) => {
     typeMessage(`VERIFYING AMOUNT: $${amount}`);
-    createTypewriterSound(600, 0.5);
+    playTerminalChirpSound();
     
     setTimeout(() => {
       typeMessage('Amount verification complete');
@@ -508,7 +508,7 @@ function App() {
         typeMessage('✓ CORRECT DECISION - Valid transaction approved');
       } else {
         typeMessage('✗ INCORRECT DECISION - Fraudulent transaction approved!');
-        playBuzzerSound();
+        playSubtleBuzzSound();
       }
       
       setTimeout(() => {
@@ -523,7 +523,7 @@ function App() {
       return;
     }
     
-    playBuzzerSound();
+    playSubtleBuzzSound();
     typeMessage('TRANSACTION REJECTED');
     typeMessage('Notifying security...');
     
@@ -586,8 +586,28 @@ function App() {
   const handleDocumentClick = async (index: number) => {
     await initAudio();
     setSelectedDocument(index);
-    createTypewriterSound(600, 0.2);
+    playPaperShuffleSound();
+    setDocumentModal({ isOpen: true, docIndex: index });
     typeMessage(`Document selected: ${currentCustomer?.documents[index].title}`);
+  };
+
+  const openSignatureComparison = () => {
+    if (!currentCustomer) return;
+    const customerDoc = currentCustomer.documents.find(d => d.type === 'SIGNATURE');
+    const bankRecord = bankDatabase[currentCustomer.accountNumber];
+    if (customerDoc && bankRecord) {
+      setSignatureModal({
+        isOpen: true,
+        customerSig: customerDoc.data.signature as string,
+        fileSig: bankRecord.signature
+      });
+    }
+  };
+
+  const getStepStatus = (step: number) => {
+    if (step < currentStep) return 'completed';
+    if (step === currentStep) return 'current';
+    return 'pending';
   };
 
   useEffect(() => {
@@ -611,19 +631,61 @@ function App() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      padding: '10px',
+      padding: '12px',
       overflow: 'hidden'
     }}>
       <div style={{
         textAlign: 'center',
-        marginBottom: '10px',
+        marginBottom: '12px',
         border: '2px solid #00ff00',
-        padding: '8px',
+        padding: '10px',
         background: 'rgba(0, 50, 0, 0.3)',
-        fontSize: '14px'
+        fontSize: '16px'
       }}>
-        <h3 style={{ margin: 0 }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
-        <div>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
+        <h3 style={{ margin: 0, fontSize: '18px' }}>FIRST NATIONAL BANK - TELLER STATION #3</h3>
+        <div style={{ fontSize: '14px' }}>SYSTEM VERSION 2.1 - FRAUD DETECTION ENABLED</div>
+      </div>
+
+      {/* Step Indicators */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '12px',
+        padding: '8px',
+        background: 'rgba(0, 40, 0, 0.3)',
+        border: '1px solid #004400',
+        borderRadius: '4px'
+      }}>
+        {[
+          { num: 1, label: 'Review Request' },
+          { num: 2, label: 'Examine Documents' },
+          { num: 3, label: 'Verify Details' },
+          { num: 4, label: 'Approve/Reject' }
+        ].map(step => (
+          <div key={step.num} style={{
+            display: 'flex',
+            alignItems: 'center',
+            color: getStepStatus(step.num) === 'current' ? '#00ff00' : 
+                   getStepStatus(step.num) === 'completed' ? '#00aa00' : '#666',
+            fontSize: '12px'
+          }}>
+            <div style={{
+              width: '20px',
+              height: '20px',
+              borderRadius: '50%',
+              border: '2px solid currentColor',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '6px',
+              background: getStepStatus(step.num) === 'completed' ? 'currentColor' : 'transparent',
+              color: getStepStatus(step.num) === 'completed' ? '#000' : 'currentColor'
+            }}>
+              {getStepStatus(step.num) === 'completed' ? '✓' : step.num}
+            </div>
+            {step.label}
+          </div>
+        ))}
       </div>
       
       <div style={{ display: 'flex', flex: 1, gap: '10px', minHeight: 0 }}>
@@ -663,20 +725,49 @@ function App() {
                 key={index}
                 style={{
                   background: selectedDocument === index ? 'rgba(0, 120, 0, 0.5)' : 'rgba(0, 50, 0, 0.2)',
-                  border: selectedDocument === index ? '1px solid #00aa00' : '1px solid #005500',
-                  padding: '6px',
-                  margin: '3px 0',
+                  border: selectedDocument === index ? '2px solid #00aa00' : '1px solid #005500',
+                  padding: '12px',
+                  margin: '6px 0',
                   cursor: 'pointer',
-                  transition: 'background 0.2s',
-                  fontSize: '11px'
+                  transition: 'all 0.2s',
+                  fontSize: '13px',
+                  borderRadius: '4px',
+                  minHeight: '60px'
                 }}
                 onClick={() => handleDocumentClick(index)}
               >
-                <strong>{doc.title}</strong><br/>
-                <small>Click to select - Type EXAMINE to view details</small>
+                <strong style={{ fontSize: '14px' }}>{doc.title}</strong><br/>
+                <small style={{ color: '#00cc00' }}>Tap to open document viewer</small>
               </div>
             ))}
           </div>
+          
+          {currentCustomer?.transactionType === 'WIRE_TRANSFER' && (
+            <div style={{
+              marginTop: '8px',
+              padding: '8px',
+              background: 'rgba(0, 80, 0, 0.3)',
+              border: '1px solid #006600',
+              borderRadius: '4px',
+              fontSize: '11px'
+            }}>
+              <strong>SIGNATURE VERIFICATION REQUIRED</strong><br/>
+              <button
+                onClick={openSignatureComparison}
+                style={{
+                  background: 'rgba(0, 100, 0, 0.5)',
+                  border: '1px solid #00aa00',
+                  color: '#00ff00',
+                  padding: '6px 12px',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  marginTop: '4px'
+                }}
+              >
+                COMPARE SIGNATURES
+              </button>
+            </div>
+          )}
         </div>
         
         <div style={{
@@ -745,13 +836,207 @@ function App() {
       <div style={{
         background: 'rgba(0, 60, 0, 0.8)',
         border: '1px solid #006600',
-        padding: '5px',
-        marginTop: '5px',
+        padding: '8px',
+        marginTop: '8px',
         textAlign: 'center',
-        fontSize: '11px'
+        fontSize: '14px'
       }}>
         Score: {gameState.score} | Transactions: {gameState.transactions} | Accuracy: {accuracy}% | Time: {new Date().toLocaleTimeString()}
       </div>
+
+      {/* Document Modal */}
+      {documentModal.isOpen && documentModal.docIndex !== null && currentCustomer && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'rgba(0, 40, 0, 0.95)',
+            border: '3px solid #00ff00',
+            padding: '24px',
+            borderRadius: '8px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80%',
+            overflow: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '20px' }}>
+                {currentCustomer.documents[documentModal.docIndex].title}
+              </h3>
+              <button
+                onClick={() => setDocumentModal({ isOpen: false, docIndex: null })}
+                style={{
+                  background: 'rgba(255, 0, 0, 0.3)',
+                  border: '1px solid #ff4444',
+                  color: '#ff4444',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  borderRadius: '4px'
+                }}
+              >
+                CLOSE
+              </button>
+            </div>
+            
+            <div style={{
+              background: 'rgba(0, 60, 0, 0.3)',
+              border: '1px solid #006600',
+              padding: '20px',
+              borderRadius: '4px',
+              fontSize: '16px',
+              lineHeight: '1.6'
+            }}>
+              {Object.entries(currentCustomer.documents[documentModal.docIndex].data).map(([key, value]) => (
+                <div key={key} style={{ marginBottom: '12px', borderBottom: '1px solid #004400', paddingBottom: '8px' }}>
+                  <strong style={{ color: '#00aa00' }}>
+                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                  </strong>
+                  <br/>
+                  <span style={{ fontSize: '18px', marginLeft: '8px' }}>{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Signature Comparison Modal */}
+      {signatureModal.isOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'rgba(0, 40, 0, 0.95)',
+            border: '3px solid #00ff00',
+            padding: '24px',
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '80%'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '20px' }}>SIGNATURE VERIFICATION</h3>
+              <button
+                onClick={() => setSignatureModal({ isOpen: false, customerSig: '', fileSig: '' })}
+                style={{
+                  background: 'rgba(255, 0, 0, 0.3)',
+                  border: '1px solid #ff4444',
+                  color: '#ff4444',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  borderRadius: '4px'
+                }}
+              >
+                CLOSE
+              </button>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ color: '#00aa00', marginBottom: '12px' }}>CUSTOMER PROVIDED:</h4>
+                <div style={{
+                  background: 'rgba(0, 60, 0, 0.3)',
+                  border: '2px solid #006600',
+                  padding: '30px',
+                  borderRadius: '4px',
+                  fontSize: '24px',
+                  textAlign: 'center',
+                  fontStyle: 'italic',
+                  minHeight: '120px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {signatureModal.customerSig}
+                </div>
+              </div>
+              
+              <div style={{ flex: 1 }}>
+                <h4 style={{ color: '#00aa00', marginBottom: '12px' }}>ON FILE:</h4>
+                <div style={{
+                  background: 'rgba(0, 60, 0, 0.3)',
+                  border: '2px solid #006600',
+                  padding: '30px',
+                  borderRadius: '4px',
+                  fontSize: '24px',
+                  textAlign: 'center',
+                  fontStyle: 'italic',
+                  minHeight: '120px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {signatureModal.fileSig}
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '14px', marginBottom: '12px', color: '#00aa00' }}>
+                MANUAL VERIFICATION REQUIRED - COMPARE SIGNATURES CAREFULLY
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button
+                  onClick={() => {
+                    setSignatureModal({ isOpen: false, customerSig: '', fileSig: '' });
+                    playStampSound();
+                    typeMessage('SIGNATURE MATCH VERIFIED');
+                  }}
+                  style={{
+                    background: 'rgba(0, 150, 0, 0.5)',
+                    border: '2px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    borderRadius: '4px'
+                  }}
+                >
+                  SIGNATURES MATCH
+                </button>
+                <button
+                  onClick={() => {
+                    setSignatureModal({ isOpen: false, customerSig: '', fileSig: '' });
+                    playSubtleBuzzSound();
+                    typeMessage('SIGNATURE MISMATCH FLAGGED');
+                  }}
+                  style={{
+                    background: 'rgba(150, 0, 0, 0.5)',
+                    border: '2px solid #aa0000',
+                    color: '#ff4444',
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    borderRadius: '4px'
+                  }}
+                >
+                  FLAG MISMATCH
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
