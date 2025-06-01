@@ -1199,17 +1199,36 @@ function App() {
           {/* Terminal Output */}
           <div style={{
             flex: 1,
-            background: '#001100',
-            border: '2px solid #004400',
-            padding: '15px',
+            background: '#000800',
+            border: '2px solid #00aa00',
+            padding: '12px',
             overflowY: 'auto',
             marginBottom: '8px',
-            fontSize: '14px',
-            lineHeight: '1.4',
-            fontWeight: 'bold'
+            fontSize: '15px',
+            lineHeight: '1.6',
+            fontWeight: 'bold',
+            color: '#00ff00',
+            textShadow: '0 0 2px #00ff00',
+            minHeight: '200px',
+            maxHeight: '300px'
           }}>
+            {terminalOutput.length === 0 && (
+              <div style={{ 
+                color: '#008800', 
+                fontSize: '13px',
+                fontStyle: 'italic' 
+              }}>
+                TERMINAL READY - Type commands or use verification buttons
+              </div>
+            )}
             {terminalOutput.map((line, index) => (
-              <div key={index} style={{ marginBottom: '2px' }}>{line}</div>
+              <div key={index} style={{ 
+                marginBottom: '4px',
+                color: line.startsWith('BANK>') ? '#00ff88' : '#00ff00',
+                fontWeight: line.startsWith('===') ? 'bold' : 'normal'
+              }}>
+                {line}
+              </div>
             ))}
           </div>
 
