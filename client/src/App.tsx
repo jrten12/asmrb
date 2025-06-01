@@ -650,7 +650,7 @@ function App() {
         setTimeout(() => typeMessage('=== END RECORD ==='), 3200);
       } else {
         typeMessage('ACCOUNT NOT FOUND');
-        playRejectBuzzSound();
+        playGlitchTone();
       }
     }, 800);
   };
@@ -672,11 +672,11 @@ function App() {
     
     if (!doc) {
       typeMessage('Document not found');
-      playRejectBuzzSound();
+      playGlitchTone();
       return;
     }
     
-    playPaperRustleSound();
+    playPaperRustle();
     typeMessage(`=== EXAMINING: ${doc.title} ===`);
     
     let delay = 400;
@@ -694,14 +694,14 @@ function App() {
   const compareField = (field: string) => {
     if (!currentCustomer) {
       typeMessage('No customer present');
-      playRejectBuzzSound();
+      playGlitchTone();
       return;
     }
 
     const accountRecord = bankDatabase[currentCustomer.accountNumber];
     if (!accountRecord) {
       typeMessage('Account record not loaded. Use LOOKUP first.');
-      playRejectBuzzSound();
+      playGlitchTone();
       return;
     }
     
@@ -715,7 +715,7 @@ function App() {
           setTimeout(() => {
             const match = idDoc.data.dateOfBirth === accountRecord.dob;
             typeMessage(`MATCH: ${match ? 'YES' : 'NO'}`);
-            if (!match) playRejectBuzzSound();
+            if (!match) playRejectBuzz();
           }, 900);
         } else {
           typeMessage('No ID document with DOB found');
@@ -729,7 +729,7 @@ function App() {
         setTimeout(() => {
           const match = currentCustomer.name === accountRecord.name;
           typeMessage(`MATCH: ${match ? 'YES' : 'NO'}`);
-          if (!match) playRejectBuzzSound();
+          if (!match) playRejectBuzz();
         }, 900);
         break;
 
