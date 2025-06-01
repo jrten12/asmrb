@@ -1249,110 +1249,50 @@ function App() {
             </div>
           )}
 
-          {/* Terminal Command Input - Moved Higher */}
-          <div style={{
-            background: 'rgba(0, 80, 0, 0.6)',
-            border: '2px solid #00ff00',
-            padding: '10px',
-            borderRadius: '6px',
-            boxShadow: '0 0 6px rgba(0, 255, 0, 0.2)'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              background: '#001100',
-              border: '2px solid #00ff00',
-              padding: '10px',
-              borderRadius: '4px'
-            }}>
-              <span style={{ 
-                marginRight: '10px', 
-                color: '#00ff88', 
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}>
-                BANK&gt;
-              </span>
-              <input
-                ref={inputRef}
-                type="text"
-                onKeyDown={handleKeyDown}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                style={{
-                  flex: 1,
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#00ff00',
-                  fontFamily: 'Courier New, monospace',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  outline: 'none',
-                  textShadow: '0 0 3px #00ff00',
-                  padding: '2px 0'
-                }}
-                placeholder="Type commands here..."
-              />
-            </div>
-          </div>
-          
-          {/* Panel 1: Account Summary - Only shows after LOOKUP command */}
+          {/* Account Summary - Only shows after LOOKUP */}
           {currentCustomer && accountData && (
             <div style={{
               background: 'rgba(0, 60, 0, 0.4)',
-              border: '2px solid #006600',
-              padding: '12px',
-              marginBottom: '8px',
+              border: '1px solid #006600',
+              padding: '8px',
               borderRadius: '4px'
             }}>
-              <h5 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>ACCOUNT SUMMARY</h5>
-              <div style={{ fontSize: '14px', lineHeight: '1.4' }}>
+              <h5 style={{ margin: '0 0 4px 0', color: '#00ff00', fontSize: '13px' }}>ACCOUNT SUMMARY</h5>
+              <div style={{ fontSize: '12px', lineHeight: '1.2' }}>
                 <strong>NAME:</strong> {accountData.name}<br/>
                 <strong>DOB:</strong> {accountData.dob}<br/>
                 <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}<br/>
-                <strong>SIGNATURE:</strong> <span 
-                  style={{ textDecoration: 'underline', cursor: 'pointer' }}
-                  onClick={openSignatureComparison}
-                >
-                  {accountData.signature} (click to view)
-                </span><br/>
                 <strong>BALANCE:</strong> ${accountData.balance}
               </div>
             </div>
           )}
 
-          {/* Manual Verification Progress */}
+          {/* Compact Verification Progress */}
           {currentCustomer && (
             <div style={{
               background: 'rgba(0, 50, 0, 0.3)',
-              border: '2px solid #ffaa00',
-              padding: '12px',
-              marginBottom: '8px',
+              border: '1px solid #ffaa00',
+              padding: '6px',
               borderRadius: '4px'
             }}>
-              <h5 style={{ margin: '0 0 8px 0', color: '#ffaa00', fontSize: '14px' }}>⚠ MANUAL VERIFICATION CHECKLIST</h5>
-              <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
+              <div style={{ fontSize: '11px', lineHeight: '1.2', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2px' }}>
                 <div style={{ color: verificationProgress.accountLookedUp ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.accountLookedUp ? '✓' : '1.'} LOOKUP {currentCustomer.accountNumber}
+                  {verificationProgress.accountLookedUp ? '✓' : '○'} LOOKUP
                 </div>
-                <div style={{ color: '#aaaaaa' }}>2. Open documents (tap document below)</div>
                 <div style={{ color: verificationProgress.nameVerified ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.nameVerified ? '✓' : '3.'} VERIFY NAME [from customer documents]
+                  {verificationProgress.nameVerified ? '✓' : '○'} NAME
                 </div>
                 <div style={{ color: verificationProgress.dobVerified ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.dobVerified ? '✓' : '4.'} VERIFY DOB [from ID document]
+                  {verificationProgress.dobVerified ? '✓' : '○'} DOB
+                </div>
+                <div style={{ color: verificationProgress.addressVerified ? '#00ff00' : '#ffcc00' }}>
+                  {verificationProgress.addressVerified ? '✓' : '○'} ADDRESS
                 </div>
                 <div style={{ color: verificationProgress.signatureCompared ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.signatureCompared ? '✓' : '5.'} COMPARE SIGNATURE
+                  {verificationProgress.signatureCompared ? '✓' : '○'} SIGNATURE
                 </div>
                 <div style={{ color: verificationProgress.transactionProcessed ? '#00ff00' : '#ffcc00' }}>
-                  {verificationProgress.transactionProcessed ? '✓' : '6.'} PROCESS {currentCustomer.transactionType} {currentCustomer.requestedAmount}
-                </div>
-                <div style={{ 
-                  color: (verificationProgress.accountLookedUp && verificationProgress.signatureCompared) ? '#ff6666' : '#666666', 
-                  fontWeight: 'bold' 
-                }}>
-                  7. TYPE: APPROVE or REJECT
+                  {verificationProgress.transactionProcessed ? '✓' : '○'} PROCESS
                 </div>
               </div>
             </div>
@@ -1394,38 +1334,26 @@ function App() {
             ))}
           </div>
 
-          {/* Terminal Command Input */}
+          {/* Single Terminal Input Field */}
           <div style={{
             background: 'rgba(0, 80, 0, 0.6)',
-            border: '3px solid #00ff00',
-            padding: '16px',
-            marginTop: '8px',
-            marginBottom: '8px',
-            borderRadius: '8px',
-            boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)'
+            border: '2px solid #00ff00',
+            padding: '12px',
+            borderRadius: '4px',
+            boxShadow: '0 0 6px rgba(0, 255, 0, 0.2)'
           }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#ffff00',
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              textAlign: 'center'
-            }}>
-              SHORTCUTS: LOOKUP | VERIFY NAME | VERIFY DOB | COMPARE SIGNATURE | PROCESS | APPROVE | REJECT
-            </div>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               background: '#001100',
-              border: '3px solid #00ff00',
-              padding: '16px',
-              borderRadius: '6px',
-              minHeight: '20px'
+              border: '2px solid #00ff00',
+              padding: '12px',
+              borderRadius: '4px'
             }}>
               <span style={{ 
-                marginRight: '12px', 
+                marginRight: '10px', 
                 color: '#00ff88', 
-                fontSize: '20px',
+                fontSize: '16px',
                 fontWeight: 'bold'
               }}>
                 BANK&gt;
@@ -1442,159 +1370,13 @@ function App() {
                   border: 'none',
                   color: '#00ff00',
                   fontFamily: 'Courier New, monospace',
-                  fontSize: '18px',
+                  fontSize: '16px',
                   fontWeight: 'bold',
                   outline: 'none',
                   textShadow: '0 0 3px #00ff00',
-                  padding: '4px 0'
+                  padding: '2px 0'
                 }}
                 placeholder="Type commands here..."
-              />
-            </div>
-          </div>
-
-          {/* Panel 3: Decision Zone */}
-          <div style={{
-            background: 'rgba(0, 40, 0, 0.5)',
-            border: '2px solid #004400',
-            padding: '12px',
-            borderRadius: '4px'
-          }}>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('APPROVE clicked');
-                  playApprovalStamp();
-                  approveTransaction();
-                }}
-                disabled={!currentCustomer}
-                style={{
-                  background: currentCustomer ? 'rgba(0, 150, 0, 0.7)' : 'rgba(80, 80, 80, 0.3)',
-                  border: '2px solid #00aa00',
-                  color: currentCustomer ? '#00ff00' : '#666',
-                  padding: '16px 24px',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                  borderRadius: '6px',
-                  minHeight: '48px',
-                  flex: 1,
-                  outline: 'none',
-                  userSelect: 'none',
-                  WebkitTapHighlightColor: 'transparent'
-                }}
-              >
-                APPROVE
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('REJECT clicked');
-                  playRejectBuzz();
-                  rejectTransaction();
-                }}
-                disabled={!currentCustomer}
-                style={{
-                  background: currentCustomer ? 'rgba(150, 0, 0, 0.7)' : 'rgba(80, 80, 80, 0.3)',
-                  border: '2px solid #aa0000',
-                  color: currentCustomer ? '#ff4444' : '#666',
-                  padding: '16px 24px',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                  borderRadius: '6px',
-                  minHeight: '48px',
-                  flex: 1,
-                  outline: 'none',
-                  userSelect: 'none',
-                  WebkitTapHighlightColor: 'transparent'
-                }}
-              >
-                REJECT
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('NEXT clicked');
-                  playSoftClick();
-                  loadNextCustomer();
-                }}
-                style={{
-                  background: 'rgba(0, 0, 150, 0.7)',
-                  border: '2px solid #0088ff',
-                  color: '#00aaff',
-                  padding: '16px 24px',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  borderRadius: '6px',
-                  minHeight: '48px',
-                  flex: 1,
-                  outline: 'none',
-                  userSelect: 'none',
-                  WebkitTapHighlightColor: 'transparent'
-                }}
-              >
-                NEXT
-              </button>
-            </div>
-          </div>
-
-          {/* Enhanced Command Input */}
-          <div style={{
-            background: 'rgba(0, 50, 0, 0.5)',
-            border: '2px solid #00aa00',
-            padding: '12px',
-            marginTop: '8px',
-            borderRadius: '4px'
-          }}>
-            <div style={{
-              fontSize: '12px',
-              color: '#00cc00',
-              marginBottom: '6px',
-              fontWeight: 'bold'
-            }}>
-              MANUAL COMMANDS: LOOKUP [account] | VERIFY NAME [name] | VERIFY DOB [date] | COMPARE SIGNATURE | APPROVE | REJECT
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              background: '#001800',
-              border: '2px solid #00ff00',
-              padding: '10px',
-              borderRadius: '4px'
-            }}>
-              <span style={{ 
-                marginRight: '10px', 
-                color: '#00ff88', 
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}>
-                BANK&gt;
-              </span>
-              <input
-                ref={inputRef}
-                type="text"
-                style={{
-                  flex: 1,
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#00ff00',
-                  fontFamily: 'inherit',
-                  fontSize: '16px',
-                  outline: 'none',
-                  textShadow: '0 0 2px #00ff00'
-                }}
-                onKeyDown={handleKeyDown}
-                autoComplete="off"
-                placeholder="Type account number or command..."
               />
             </div>
           </div>
