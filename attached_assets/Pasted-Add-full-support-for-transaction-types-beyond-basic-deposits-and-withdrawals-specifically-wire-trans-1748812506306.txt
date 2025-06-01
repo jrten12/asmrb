@@ -1,0 +1,36 @@
+Add full support for transaction types beyond basic deposits and withdrawals—specifically wire transfers, inquiries, and account updates. The player must be able to both initiate and process these via typed commands or tap-accelerated prompts.
+	1.	When a customer submits a form (e.g., WIRE TRANSFER REQUEST), the form must include a destination account number in addition to the normal info. The player should be able to open this form from the DOCUMENTS PROVIDED section.
+	2.	Update the terminal so the player can type:
+SET DESTINATION [account]
+SEND [amount] TO [destination]
+This should trigger a system response confirming the destination is valid, and that funds are available (if required).
+	3.	Add command support for:
+
+	•	PROCESS WIRE [amount]
+	•	PROCESS DEPOSIT [amount]
+	•	PROCESS WITHDRAWAL [amount]
+Make the syntax consistent and simple across all transaction types.
+
+	4.	Allow a quick-select dropdown or button group near the terminal that lets the player choose transaction type. Example:
+
+	•	DEPOSIT
+	•	WITHDRAW
+	•	WIRE
+	•	ACCOUNT UPDATE
+Tapping one should autofill the terminal with the starting command (e.g., PROCESS WIRE ), ready for manual completion.
+
+	5.	Signature matching must be integrated into account lookup. When the player types:
+LOOKUP [account]
+the system must also display:
+SIGNATURE ON FILE: [click to view]
+Add a terminal command SHOW SIGNATURE that brings the saved signature up again in a larger modal for comparison.
+	6.	Only allow APPROVE once all required components for that transaction type have been manually reviewed:
+
+	•	For wires: confirm signature, source + destination accounts, identity
+	•	For withdrawals: verify balance
+	•	For updates: confirm matching records before and after
+Every transaction type has its own checklist.
+
+	7.	Buttons (like APPROVE, NEXT, LOOKUP) must be tied to proper functionality. If a button doesn’t do anything, hide it until it’s relevant. Don’t show dummy UI. And every button tap should play a distinct sound.
+
+This makes the game flexible, immersive, and smart without removing the retro control feel. It gives players both control and structure—typed when they want, assisted when they need.
