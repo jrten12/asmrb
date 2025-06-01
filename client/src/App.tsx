@@ -194,6 +194,119 @@ function App() {
     }
   };
 
+  const playTerminalEnter = () => {
+    // Soft terminal enter ping
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        osc.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        osc.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.06, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.15);
+      } catch (e) {}
+    }
+  };
+
+  const playDataBeep = () => {
+    // Faint data beep for successful lookups
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        osc.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        osc.frequency.setValueAtTime(1000, audioContextRef.current.currentTime);
+        osc.type = 'triangle';
+        gain.gain.setValueAtTime(0.05, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.2);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.2);
+      } catch (e) {}
+    }
+  };
+
+  const playGlitchTone = () => {
+    // Short glitch tone for invalid commands
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        osc.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        osc.frequency.setValueAtTime(200, audioContextRef.current.currentTime);
+        osc.frequency.setValueAtTime(300, audioContextRef.current.currentTime + 0.05);
+        osc.type = 'square';
+        gain.gain.setValueAtTime(0.07, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.1);
+      } catch (e) {}
+    }
+  };
+
+  const playPaperRustle = () => {
+    // Gentle paper rustle for opening documents
+    if (audioContextRef.current) {
+      try {
+        const noise = audioContextRef.current.createBufferSource();
+        const buffer = audioContextRef.current.createBuffer(1, 1102, audioContextRef.current.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        for (let i = 0; i < 1102; i++) {
+          output[i] = (Math.random() * 2 - 1) * 0.05;
+        }
+        
+        noise.buffer = buffer;
+        const gain = audioContextRef.current.createGain();
+        const filter = audioContextRef.current.createBiquadFilter();
+        
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1500, audioContextRef.current.currentTime);
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        
+        gain.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
+        
+        noise.start();
+        noise.stop(audioContextRef.current.currentTime + 0.3);
+      } catch (e) {}
+    }
+  };
+
+  const playKeyClick = () => {
+    // Light mechanical key click
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        const filter = audioContextRef.current.createBiquadFilter();
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        
+        osc.frequency.setValueAtTime(1000 + Math.random() * 300, audioContextRef.current.currentTime);
+        osc.type = 'triangle';
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(500, audioContextRef.current.currentTime);
+        
+        gain.gain.setValueAtTime(0.04, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.08);
+        
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.08);
+      } catch (e) {}
+    }
+  };
+
   const playRejectBuzzSound = async () => {
     await initAudio();
     if (!audioContextRef.current) return;
@@ -303,7 +416,7 @@ function App() {
     };
   };
 
-  // Terminal typing effect
+  // Enhanced terminal typing with sound
   const typeMessage = (text: string) => {
     let i = 0;
     const outputElement = document.createElement('div');
@@ -312,7 +425,10 @@ function App() {
     const typeInterval = setInterval(() => {
       if (i < text.length) {
         outputElement.textContent += text.charAt(i);
-        // Removed old typing sound that was causing arcade pinging
+        // Add subtle key click sound occasionally
+        if (Math.random() > 0.8) {
+          playKeyClick();
+        }
         i++;
         
         setTerminalOutput(prev => {
@@ -326,6 +442,31 @@ function App() {
     }, 30 + Math.random() * 40);
   };
 
+  const checkDocuments = () => {
+    if (!currentCustomer) {
+      typeMessage('No customer present');
+      playGlitchTone();
+      return;
+    }
+    
+    typeMessage('SCANNING DOCUMENTS...');
+    playDataBeep();
+    
+    setTimeout(() => {
+      const docs = currentCustomer.documents;
+      typeMessage(`FOUND ${docs.length} DOCUMENTS:`);
+      docs.forEach((doc, index) => {
+        setTimeout(() => {
+          typeMessage(`${index + 1}. ${doc.title} (${doc.type})`);
+        }, 300 * (index + 1));
+      });
+      
+      setTimeout(() => {
+        typeMessage('DOCUMENT SCAN COMPLETE');
+      }, 300 * (docs.length + 2));
+    }, 1000);
+  };
+
   // Command processing
   const processCommand = (command: string) => {
     const parts = command.trim().toUpperCase().split(' ');
@@ -333,6 +474,7 @@ function App() {
     const parameter = parts.slice(1).join(' ');
     
     setTerminalOutput(prev => [...prev, `BANK> ${command}`]);
+    playTerminalEnter();
     
     setTimeout(() => {
       switch (action) {
@@ -341,7 +483,7 @@ function App() {
             lookupAccount(parameter);
           } else {
             typeMessage('ERROR: Specify account number');
-            playRejectBuzzSound();
+            playGlitchTone();
           }
           break;
         case 'EXAMINE':
@@ -351,23 +493,60 @@ function App() {
             examineDocument('SELECTED');
           } else {
             typeMessage('ERROR: Specify document type or select document');
-            playRejectBuzzSound();
-          }
-          break;
-        case 'COMPARE':
-          if (parameter) {
-            compareField(parameter);
-          } else {
-            typeMessage('ERROR: Specify field to compare (DOB, NAME, SIGNATURE)');
-            playRejectBuzzSound();
+            playGlitchTone();
           }
           break;
         case 'VERIFY':
-          if (parameter) {
+          if (parameter === 'NAME') {
+            compareField('NAME');
+          } else if (parameter === 'DOB') {
+            compareField('DOB');
+          } else if (parameter === 'SIGNATURE') {
+            compareField('SIGNATURE');
+          } else if (parameter && !isNaN(parseInt(parameter))) {
             verifyAmount(parseInt(parameter));
           } else {
-            typeMessage('ERROR: Specify amount to verify');
-            playRejectBuzzSound();
+            typeMessage('ERROR: Specify NAME, DOB, SIGNATURE, or amount');
+            playGlitchTone();
+          }
+          break;
+        case 'SEND':
+          const sendParts = parameter.split(' TO ');
+          if (sendParts.length === 2) {
+            const amount = parseInt(sendParts[0]);
+            const account = sendParts[1];
+            typeMessage(`WIRE TRANSFER: $${amount} to account ${account}`);
+            typeMessage('Wire transfer initiated...');
+            playDataBeep();
+          } else {
+            typeMessage('ERROR: Use format SEND [amount] TO [account]');
+            playGlitchTone();
+          }
+          break;
+        case 'DEPOSIT':
+          if (parameter && !isNaN(parseInt(parameter))) {
+            typeMessage(`DEPOSIT TRANSACTION: $${parameter}`);
+            playDataBeep();
+          } else {
+            typeMessage('ERROR: Specify deposit amount');
+            playGlitchTone();
+          }
+          break;
+        case 'WITHDRAW':
+          if (parameter && !isNaN(parseInt(parameter))) {
+            typeMessage(`WITHDRAWAL TRANSACTION: $${parameter}`);
+            playDataBeep();
+          } else {
+            typeMessage('ERROR: Specify withdrawal amount');
+            playGlitchTone();
+          }
+          break;
+        case 'CHECK':
+          if (parameter === 'FORM') {
+            checkDocuments();
+          } else {
+            typeMessage('ERROR: Use CHECK FORM to scan documents');
+            playGlitchTone();
           }
           break;
         case 'APPROVE':
@@ -384,7 +563,7 @@ function App() {
           break;
         default:
           typeMessage('UNKNOWN COMMAND. Type HELP for available commands.');
-          playRejectBuzzSound();
+          playGlitchTone();
       }
     }, 200);
   };
@@ -510,10 +689,10 @@ function App() {
     setTimeout(() => {
       if (currentCustomer && amount === currentCustomer.requestedAmount) {
         typeMessage(`AMOUNT VERIFIED: $${amount} matches request`);
-        playStampSound();
+        playApprovalStamp();
       } else {
         typeMessage(`AMOUNT MISMATCH: Expected $${currentCustomer?.requestedAmount}, got $${amount}`);
-        playRejectBuzzSound();
+        playRejectBuzz();
       }
     }, 1000);
   };
@@ -1221,7 +1400,7 @@ function App() {
                 <button
                   onClick={() => {
                     setSignatureModal({ isOpen: false, customerSig: '', fileSig: '' });
-                    playStampSound();
+                    playApprovalStamp();
                     typeMessage('SIGNATURE VERIFIED - MATCH CONFIRMED');
                   }}
                   style={{
