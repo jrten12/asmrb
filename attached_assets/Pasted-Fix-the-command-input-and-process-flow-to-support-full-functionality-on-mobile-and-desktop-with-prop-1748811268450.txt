@@ -1,0 +1,25 @@
+Fix the command input and process flow to support full functionality on mobile and desktop with proper feedback, customer visibility, and interaction.
+	1.	Customer information must always be visible on screen during every phase. The customer’s name, account number, DOB, and transaction request should be displayed clearly in a fixed panel labeled CUSTOMER WINDOW above the terminal. This panel must not disappear or be pushed offscreen when commands are being typed. Do not hide this data—players need it for all verification inputs.
+	2.	Add a dedicated and clearly labeled ENTER button directly next to or below the terminal input field, optimized for mobile users who may not have a visible keyboard return key. It must be tapable, not just rely on the software keyboard.
+	3.	The terminal must accept submissions from:
+	•	Pressing enter/return on a physical or mobile keyboard
+	•	Tapping the ENTER button on screen
+	•	Both should trigger the same command handler without delay
+	4.	Every command entered must be followed by subtle confirmation:
+	•	Terminal should echo the command
+	•	The system should respond with a line like: “LOOKUP 820441562 RECEIVED – Searching…” or “✔ NAME MATCHED”
+	•	The confirmation must include both a visual feedback line and a brief ASMR-style sound: clean keypress, soft ping, or satisfying click
+	•	If the command is invalid, the error message must be clear and styled like a real system reject line: “✖ UNKNOWN COMMAND. Type HELP.”
+	5.	Streamline the command shortcuts bar:
+	•	Each command listed should be tappable to auto-fill the terminal input (but not execute it)
+	•	Tapping “VERIFY NAME” should place that text in the command line so the user can complete it with input (e.g., name)
+	•	Do not execute anything until the full command is submitted by the user
+	6.	Make sure only one input field is present. All command input must go through the terminal line—no extra fields, no overlapping UI.
+
+The player must always see:
+	•	The customer’s request
+	•	The documents (when tapped)
+	•	The terminal with typed input
+	•	The feedback confirming that action was recognized
+
+This is the heart of the game. It must feel like running a secure system—deliberate, clear, and fully under the teller’s control.

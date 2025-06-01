@@ -576,17 +576,21 @@ function App() {
     }, 1000);
   };
 
-  // Command processing with shortcuts
+  // Enhanced command processing with feedback
   const processCommand = (command: string) => {
     const parts = command.trim().toUpperCase().split(' ');
     let action = parts[0];
     let parameter = parts.slice(1).join(' ');
     
-    // Remove confusing shortcuts - use full commands only
-    // Players should type the actual banking commands
-    
+    // Echo command with confirmation sound
     setTerminalOutput(prev => [...prev, `BANK> ${command}`]);
     playTerminalEnter();
+    
+    // Immediate feedback that command was received
+    setTimeout(() => {
+      setTerminalOutput(prev => [...prev, `✓ COMMAND RECEIVED - ${action} ${parameter ? parameter : ''}`]);
+      playDataBeep();
+    }, 100);
     
     setTimeout(() => {
       switch (action) {
@@ -1146,37 +1150,48 @@ function App() {
           flexDirection: 'column',
           overflow: 'hidden'
         }}>
-          <h4 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>CUSTOMER WINDOW</h4>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#00ff00', textAlign: 'center' }}>CUSTOMER WINDOW</h4>
           
-          {/* Customer Info */}
+          {/* Always Visible Customer Info */}
           <div style={{
-            background: 'rgba(0, 60, 0, 0.3)',
-            border: '1px solid #006600',
-            padding: '8px',
+            background: 'rgba(0, 60, 0, 0.4)',
+            border: '2px solid #006600',
+            padding: '12px',
             marginBottom: '8px',
-            fontSize: '12px',
-            lineHeight: '1.3'
+            fontSize: '13px',
+            lineHeight: '1.4',
+            minHeight: '100px'
           }}>
             {currentCustomer ? (
               <>
                 <div style={{ 
-                  background: 'rgba(255, 255, 0, 0.1)', 
-                  padding: '6px', 
-                  marginBottom: '4px',
-                  border: '1px solid #ffff00',
-                  borderRadius: '3px'
+                  background: 'rgba(255, 255, 0, 0.15)', 
+                  padding: '8px', 
+                  marginBottom: '8px',
+                  border: '2px solid #ffff00',
+                  borderRadius: '4px'
                 }}>
-                  <strong style={{ color: '#ffff00' }}>TRANSACTION REQUEST:</strong><br/>
-                  <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                  <strong style={{ color: '#ffff00', fontSize: '14px' }}>TRANSACTION REQUEST</strong><br/>
+                  <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#ffff00' }}>
                     {currentCustomer.transactionType} ${currentCustomer.requestedAmount}
                   </span>
                 </div>
-                <strong>CUSTOMER:</strong> {currentCustomer.name}<br/>
-                <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}<br/>
-                <strong>STATUS:</strong> <span style={{ color: '#ffaa00' }}>AWAITING VERIFICATION</span>
+                <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
+                  <strong style={{ color: '#00ff00' }}>CUSTOMER:</strong> <span style={{ color: '#ffffff' }}>{currentCustomer.name}</span><br/>
+                  <strong style={{ color: '#00ff00' }}>ACCOUNT:</strong> <span style={{ color: '#ffffff' }}>{currentCustomer.accountNumber}</span><br/>
+                  <strong style={{ color: '#00ff00' }}>STATUS:</strong> <span style={{ color: '#ffaa00' }}>AWAITING VERIFICATION</span>
+                </div>
               </>
             ) : (
-              <div>Click NEXT for customer...</div>
+              <div style={{ 
+                textAlign: 'center', 
+                color: '#888888', 
+                fontSize: '13px',
+                marginTop: '20px'
+              }}>
+                No customer present<br/>
+                <span style={{ color: '#00aaff' }}>Use NEXT command to call customer</span>
+              </div>
             )}
           </div>
           
@@ -1235,17 +1250,43 @@ function App() {
             </button>
           </div>
 
-          {/* Collapsible Command Help */}
+          {/* Tappable Command Shortcuts */}
           {showCommands && (
             <div style={{
               background: 'rgba(0, 60, 0, 0.4)',
               border: '1px solid #00aa00',
               padding: '8px',
               borderRadius: '4px',
-              fontSize: '12px',
+              fontSize: '11px',
               color: '#00cc00'
             }}>
-              <strong>COMMANDS:</strong> LOOKUP [account] | VERIFY NAME [name] | VERIFY DOB [date] | COMPARE SIGNATURE | PROCESS [type] [amount] | APPROVE | REJECT
+              <strong style={{ marginBottom: '4px', display: 'block' }}>TAP TO AUTO-FILL:</strong>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                {['LOOKUP', 'VERIFY NAME', 'VERIFY DOB', 'VERIFY ADDRESS', 'COMPARE SIGNATURE', 'PROCESS WITHDRAWAL', 'PROCESS DEPOSIT', 'APPROVE', 'REJECT', 'NEXT'].map(cmd => (
+                  <button
+                    key={cmd}
+                    onClick={() => {
+                      if (inputRef.current) {
+                        inputRef.current.value = cmd + ' ';
+                        inputRef.current.focus();
+                      }
+                      playSoftClick();
+                    }}
+                    style={{
+                      background: 'rgba(0, 80, 0, 0.6)',
+                      border: '1px solid #00aa00',
+                      color: '#00ff00',
+                      padding: '2px 6px',
+                      fontSize: '10px',
+                      cursor: 'pointer',
+                      borderRadius: '2px',
+                      outline: 'none'
+                    }}
+                  >
+                    {cmd}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -1334,7 +1375,7 @@ function App() {
             ))}
           </div>
 
-          {/* Single Terminal Input Field */}
+          {/* Enhanced Terminal Input with ENTER Button */}
           <div style={{
             background: 'rgba(0, 80, 0, 0.6)',
             border: '2px solid #00ff00',
@@ -1347,14 +1388,15 @@ function App() {
               alignItems: 'center',
               background: '#001100',
               border: '2px solid #00ff00',
-              padding: '12px',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              overflow: 'hidden'
             }}>
               <span style={{ 
-                marginRight: '10px', 
+                padding: '12px 10px 12px 12px',
                 color: '#00ff88', 
                 fontSize: '16px',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                background: '#002200'
               }}>
                 BANK&gt;
               </span>
@@ -1374,10 +1416,35 @@ function App() {
                   fontWeight: 'bold',
                   outline: 'none',
                   textShadow: '0 0 3px #00ff00',
-                  padding: '2px 0'
+                  padding: '12px 8px'
                 }}
                 placeholder="Type commands here..."
               />
+              <button
+                onClick={() => {
+                  if (inputRef.current) {
+                    const command = inputRef.current.value.trim();
+                    if (command) {
+                      processCommand(command);
+                      inputRef.current.value = '';
+                    }
+                  }
+                }}
+                style={{
+                  background: 'rgba(0, 200, 0, 0.8)',
+                  border: 'none',
+                  color: '#ffffff',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  minHeight: '48px',
+                  borderLeft: '2px solid #00ff00'
+                }}
+              >
+                ENTER
+              </button>
             </div>
           </div>
 
