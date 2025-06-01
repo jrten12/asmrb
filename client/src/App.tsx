@@ -41,6 +41,7 @@ function App() {
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [documentModal, setDocumentModal] = useState<{ isOpen: boolean; docIndex: number | null }>({ isOpen: false, docIndex: null });
   const [signatureModal, setSignatureModal] = useState<{ isOpen: boolean; customerSig: string; fileSig: string }>({ isOpen: false, customerSig: '', fileSig: '' });
+  const [showCommands, setShowCommands] = useState(false);
   const [gameState, setGameState] = useState({
     score: 0,
     transactions: 0,
@@ -1127,14 +1128,91 @@ function App() {
         <div style={{
           width: window.innerWidth < 768 ? '100%' : '65%',
           border: '2px solid #00ff00',
-          padding: '8px',
+          padding: '12px',
           background: 'rgba(0, 40, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '0',
+          gap: '12px',
           flex: '1'
         }}>
-          <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h4 style={{ margin: '0', fontSize: '16px' }}>BANK TERMINAL</h4>
+            <button
+              onClick={() => setShowCommands(!showCommands)}
+              style={{
+                background: 'rgba(0, 80, 0, 0.6)',
+                border: '1px solid #00aa00',
+                color: '#00ff00',
+                padding: '4px 8px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                borderRadius: '3px'
+              }}
+            >
+              {showCommands ? 'HIDE COMMANDS' : 'SHOW COMMANDS'}
+            </button>
+          </div>
+
+          {/* Collapsible Command Help */}
+          {showCommands && (
+            <div style={{
+              background: 'rgba(0, 60, 0, 0.4)',
+              border: '1px solid #00aa00',
+              padding: '8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              color: '#00cc00'
+            }}>
+              <strong>COMMANDS:</strong> LOOKUP [account] | VERIFY NAME [name] | VERIFY DOB [date] | COMPARE SIGNATURE | PROCESS [type] [amount] | APPROVE | REJECT
+            </div>
+          )}
+
+          {/* Terminal Command Input - Moved Higher */}
+          <div style={{
+            background: 'rgba(0, 80, 0, 0.6)',
+            border: '2px solid #00ff00',
+            padding: '10px',
+            borderRadius: '6px',
+            boxShadow: '0 0 6px rgba(0, 255, 0, 0.2)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: '#001100',
+              border: '2px solid #00ff00',
+              padding: '10px',
+              borderRadius: '4px'
+            }}>
+              <span style={{ 
+                marginRight: '10px', 
+                color: '#00ff88', 
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}>
+                BANK&gt;
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                onKeyDown={handleKeyDown}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#00ff00',
+                  fontFamily: 'Courier New, monospace',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  outline: 'none',
+                  textShadow: '0 0 3px #00ff00',
+                  padding: '2px 0'
+                }}
+                placeholder="Type commands here..."
+              />
+            </div>
+          </div>
           
           {/* Panel 1: Account Summary - Only shows after LOOKUP command */}
           {currentCustomer && accountData && (

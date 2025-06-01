@@ -1,0 +1,14 @@
+Refactor the current layout to make the UI feel more spacious, organized, and functional—especially for mobile screens. Do not change the CRT visual style, fonts, or terminal mechanics. This is a layout and spacing pass only.
+
+The interface must separate and prioritize space based on use:
+	1.	Move the terminal command area higher on the screen. It should sit immediately below the main bank terminal text, not pinned beneath shortcut bars and buttons. The command line should be clearly separated with space above and below so it doesn’t feel crushed.
+	2.	Create clear visual separation between the terminal input (where the player types commands), the scrolling terminal log (where system responses appear), and the shortcut bar (if kept). These elements must not visually blend together.
+	3.	Make the shortcut bar collapsible or toggleable. It takes up too much space on mobile. Consider a “HELP” or “COMMANDS” button that reveals it when tapped, and otherwise keeps it hidden.
+	4.	Reduce the size and padding of the APPROVE, REJECT, and NEXT buttons. They are oversized relative to the rest of the interface and don’t match the tactile, precision-focused vibe of a terminal game. Shrink them slightly and allow them to sit side-by-side without overpowering the terminal input.
+	5.	Ensure document viewing does not overlap or cover the command input or terminal log. When a document is opened (e.g., ID or transaction form), it should either:
+	•	Slide up from the bottom and take half the screen, or
+	•	Appear as a toggleable overlay that collapses with a tap, allowing the player to view the bank terminal and form data side-by-side.
+	6.	Ensure there is consistent spacing between all elements: between the customer window and bank terminal, between sections of the terminal, and between documents and controls. Avoid vertical stacking that leaves important elements cramped or buried offscreen.
+	7.	All interactive zones (terminal input, buttons, document tabs) must be clearly separated and visually prioritized. The player should never have to scroll just to see or use the input field.
+
+The goal is to make the player feel like they’re operating a real, usable system—not squinting through clutter or crammed overlays. Prioritize clarity, responsiveness, and separation of command/control areas within the CRT aesthetic.
