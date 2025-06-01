@@ -54,6 +54,7 @@ function App() {
     signatureCompared: false,
     transactionProcessed: false
   });
+  const [accountData, setAccountData] = useState<BankRecord | null>(null);
   const [bankDatabase] = useState<Record<string, BankRecord>>({
     "720997541": {
       name: "Jennifer M. Rodriguez",
@@ -700,6 +701,7 @@ function App() {
         setTimeout(() => typeMessage(`STATUS: ${record.accountStatus}`), 2800);
         setTimeout(() => typeMessage('=== END RECORD ==='), 3200);
         setTimeout(() => {
+          setAccountData(record);
           setVerificationProgress(prev => ({ ...prev, accountLookedUp: true }));
         }, 3500);
       } else {
@@ -902,6 +904,14 @@ function App() {
       console.log('Generated customer:', customer);
       setCurrentCustomer(customer);
       setSelectedDocument(null);
+      setAccountData(null);
+      setVerificationProgress({
+        accountLookedUp: false,
+        nameVerified: false,
+        dobVerified: false,
+        signatureCompared: false,
+        transactionProcessed: false
+      });
       
       typeMessage('NEW CUSTOMER APPROACHING WINDOW');
       setTimeout(() => {
@@ -1094,8 +1104,8 @@ function App() {
         }}>
           <h4 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
           
-          {/* Panel 1: Account Summary */}
-          {currentCustomer && bankDatabase[currentCustomer.accountNumber] && (
+          {/* Panel 1: Account Summary - Only shows after LOOKUP command */}
+          {currentCustomer && accountData && (
             <div style={{
               background: 'rgba(0, 60, 0, 0.4)',
               border: '2px solid #006600',
@@ -1105,16 +1115,16 @@ function App() {
             }}>
               <h5 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>ACCOUNT SUMMARY</h5>
               <div style={{ fontSize: '14px', lineHeight: '1.4' }}>
-                <strong>NAME:</strong> {bankDatabase[currentCustomer.accountNumber].name}<br/>
-                <strong>DOB:</strong> {bankDatabase[currentCustomer.accountNumber].dob}<br/>
+                <strong>NAME:</strong> {accountData.name}<br/>
+                <strong>DOB:</strong> {accountData.dob}<br/>
                 <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}<br/>
                 <strong>SIGNATURE:</strong> <span 
                   style={{ textDecoration: 'underline', cursor: 'pointer' }}
                   onClick={openSignatureComparison}
                 >
-                  {bankDatabase[currentCustomer.accountNumber].signature} (click to view)
+                  {accountData.signature} (click to view)
                 </span><br/>
-                <strong>BALANCE:</strong> ${bankDatabase[currentCustomer.accountNumber].balance}
+                <strong>BALANCE:</strong> ${accountData.balance}
               </div>
             </div>
           )}
