@@ -1,0 +1,34 @@
+Refine the process and interaction flow for teller gameplay so that each customer interaction feels logical, immersive, and manually driven. The player must perform each action step-by-step based on the type of transaction, with no automatic checks or assumptions by the system.
+
+The teller workflow should follow this exact structure, adapted for each transaction type:
+	1.	Customer Request Arrives
+A new customer submits a request along with a form and ID. The form includes their name, account number, DOB, address, transaction type, amount, and signature.
+	2.	Player Reviews Form and Documents
+Player taps to open the submitted documents: transaction form and ID. This must be done manually. Nothing should be verified until the player takes action.
+	3.	Player Initiates Account Lookup
+Player types LOOKUP [account number] to access internal bank records for that customer. The account summary should display the system’s stored name, DOB, address, and signature on file.
+	4.	Player Performs Individual Verifications
+Based on the documents and form, the player then types one verification command at a time:
+
+	•	VERIFY NAME [name from form]
+	•	VERIFY DOB [dob from ID]
+	•	VERIFY ADDRESS [address from form]
+	•	COMPARE SIGNATURE (triggers side-by-side view)
+
+These checks must be typed manually by the player using the information they’ve read. The system returns a match or mismatch response, but never initiates the check itself.
+	5.	Transaction-Specific Commands
+Depending on the request, the player must manually initiate the proper transaction:
+
+	•	For withdrawal: PROCESS WITHDRAWAL [amount]
+	•	For deposit: PROCESS DEPOSIT [amount]
+	•	For wire transfer: SET DESTINATION [account] followed by SEND [amount]
+	•	For account inquiry: CONFIRM ACCOUNT INFO
+	•	For update requests: CONFIRM CHANGE [field]
+
+The player must ensure all required verifications are completed before processing the request.
+	6.	Approval Decision
+Only after all necessary steps are manually performed, the player must type APPROVE or REJECT. These commands must not be buttons alone—they must be typed to reflect final teller judgment.
+	7.	System Advances to Next Customer
+Once approved or rejected, the system clears the screen and loads the next customer. If the player types NEXT prematurely, a warning should prevent advancement.
+
+All steps above must be player-driven. The system should never validate, compare, or move forward without an explicit command from the player. The goal is to simulate an old-school bank terminal where everything is typed, read, and judged by the user—not automated.

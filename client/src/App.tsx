@@ -52,6 +52,7 @@ function App() {
     accountLookedUp: false,
     nameVerified: false,
     dobVerified: false,
+    addressVerified: false,
     signatureCompared: false,
     transactionProcessed: false
   });
@@ -511,9 +512,12 @@ function App() {
         setTimeout(() => {
           const match = value.toUpperCase().includes(fileAddressValue.toUpperCase()) || 
                        fileAddressValue.toUpperCase().includes(value.toUpperCase());
-          typeMessage(`RESULT: ${match ? 'ADDRESS MATCHED' : 'ADDRESS MISMATCH - VERIFY DOCUMENT'}`);
+          typeMessage(`RESULT: ${match ? '✓ ADDRESS MATCHED' : '✗ ADDRESS MISMATCH - VERIFY DOCUMENT'}`);
           if (!match) playGlitchTone();
-          else playDataBeep();
+          else {
+            playDataBeep();
+            setVerificationProgress(prev => ({ ...prev, addressVerified: true }));
+          }
         }, 600);
         break;
 
@@ -620,6 +624,22 @@ function App() {
             playGlitchTone();
           }
           break;
+        case 'SET':
+          if (parameter.startsWith('DESTINATION')) {
+            const destAccount = parameter.replace('DESTINATION', '').trim();
+            if (destAccount) {
+              typeMessage(`WIRE DESTINATION SET: ${destAccount}`);
+              typeMessage('Use SEND [amount] to initiate transfer');
+              playDataBeep();
+            } else {
+              typeMessage('ERROR: Specify destination account');
+              playGlitchTone();
+            }
+          } else {
+            typeMessage('ERROR: Use SET DESTINATION [account]');
+            playGlitchTone();
+          }
+          break;
         case 'SEND':
           const sendParts = parameter.split(' TO ');
           if (sendParts.length === 2) {
@@ -642,19 +662,41 @@ function App() {
             playGlitchTone();
           }
           break;
-        case 'WITHDRAW':
         case 'PROCESS':
-          if (parameter.startsWith('WITHDRAWAL') || parameter.startsWith('DEPOSIT') || parameter.startsWith('TRANSFER')) {
-            const parts = parameter.split(' ');
-            const type = parts[0];
-            const amount = parts[1];
+          if (parameter.startsWith('WITHDRAWAL')) {
+            const amount = parameter.replace('WITHDRAWAL', '').trim();
             if (amount && !isNaN(parseInt(amount))) {
-              typeMessage(`PROCESSING ${type}: $${amount}`);
-              typeMessage(`VERIFY ACCOUNT BALANCE AND AUTHORIZATION`);
+              typeMessage(`PROCESSING WITHDRAWAL: $${amount}`);
+              typeMessage('VERIFY SUFFICIENT FUNDS AND AUTHORIZATION');
+              typeMessage('Ready for APPROVE or REJECT decision');
               setVerificationProgress(prev => ({ ...prev, transactionProcessed: true }));
               playDataBeep();
             } else {
-              typeMessage('ERROR: Specify amount - PROCESS WITHDRAWAL 500');
+              typeMessage('ERROR: Use PROCESS WITHDRAWAL [amount]');
+              playGlitchTone();
+            }
+          } else if (parameter.startsWith('DEPOSIT')) {
+            const amount = parameter.replace('DEPOSIT', '').trim();
+            if (amount && !isNaN(parseInt(amount))) {
+              typeMessage(`PROCESSING DEPOSIT: $${amount}`);
+              typeMessage('VERIFY DEPOSIT DOCUMENTS AND AUTHORIZATION');
+              typeMessage('Ready for APPROVE or REJECT decision');
+              setVerificationProgress(prev => ({ ...prev, transactionProcessed: true }));
+              playDataBeep();
+            } else {
+              typeMessage('ERROR: Use PROCESS DEPOSIT [amount]');
+              playGlitchTone();
+            }
+          } else if (parameter.startsWith('TRANSFER')) {
+            const amount = parameter.replace('TRANSFER', '').trim();
+            if (amount && !isNaN(parseInt(amount))) {
+              typeMessage(`PROCESSING TRANSFER: $${amount}`);
+              typeMessage('VERIFY DESTINATION ACCOUNT AND AUTHORIZATION');
+              typeMessage('Ready for APPROVE or REJECT decision');
+              setVerificationProgress(prev => ({ ...prev, transactionProcessed: true }));
+              playDataBeep();
+            } else {
+              typeMessage('ERROR: Use PROCESS TRANSFER [amount]');
               playGlitchTone();
             }
           } else {
@@ -671,16 +713,51 @@ function App() {
           }
           break;
         case 'APPROVE':
-          approveTransaction();
+          if (!verificationProgress.accountLookedUp) {
+            typeMessage('ERROR: Must LOOKUP account first');
+            playGlitchTone();
+          } else if (!verificationProgress.transactionProcessed) {
+            typeMessage('ERROR: Must PROCESS transaction first');
+            playGlitchTone();
+          } else {
+            approveTransaction();
+          }
           break;
         case 'REJECT':
-          rejectTransaction();
+          if (!verificationProgress.accountLookedUp) {
+            typeMessage('ERROR: Must LOOKUP account first');
+            playGlitchTone();
+          } else {
+            rejectTransaction();
+          }
+          break;
+        case 'CONFIRM':
+          if (parameter === 'ACCOUNT INFO') {
+            typeMessage('ACCOUNT INFORMATION CONFIRMED');
+            typeMessage('Ready for APPROVE or REJECT decision');
+            setVerificationProgress(prev => ({ ...prev, transactionProcessed: true }));
+            playDataBeep();
+          } else if (parameter.startsWith('CHANGE')) {
+            const field = parameter.replace('CHANGE', '').trim();
+            typeMessage(`CHANGE CONFIRMED: ${field}`);
+            typeMessage('Ready for APPROVE or REJECT decision');
+            setVerificationProgress(prev => ({ ...prev, transactionProcessed: true }));
+            playDataBeep();
+          } else {
+            typeMessage('ERROR: Use CONFIRM ACCOUNT INFO or CONFIRM CHANGE [field]');
+            playGlitchTone();
+          }
           break;
         case 'HELP':
           showHelp();
           break;
         case 'NEXT':
-          loadNextCustomer();
+          if (currentCustomer) {
+            typeMessage('WARNING: Customer still at window. Complete transaction or REJECT first.');
+            playGlitchTone();
+          } else {
+            loadNextCustomer();
+          }
           break;
         default:
           typeMessage('UNKNOWN COMMAND. Type HELP for available commands.');
@@ -891,14 +968,18 @@ function App() {
 
   const showHelp = () => {
     typeMessage('=== BANK TELLER COMMANDS ===');
-    setTimeout(() => typeMessage('LOOKUP [account] - Look up customer in database'), 200);
-    setTimeout(() => typeMessage('EXAMINE [document] - Examine document details'), 400);
-    setTimeout(() => typeMessage('COMPARE [field] - Compare DOB, NAME, or SIGNATURE'), 600);
-    setTimeout(() => typeMessage('VERIFY [amount] - Verify transaction amount'), 800);
-    setTimeout(() => typeMessage('APPROVE - Approve the transaction'), 1000);
-    setTimeout(() => typeMessage('REJECT - Reject the transaction'), 1200);
-    setTimeout(() => typeMessage('NEXT - Load next customer'), 1400);
-    setTimeout(() => typeMessage('HELP - Show this help'), 1600);
+    setTimeout(() => typeMessage('LOOKUP [account] - Look up customer account'), 200);
+    setTimeout(() => typeMessage('VERIFY NAME [name] - Verify customer name'), 400);
+    setTimeout(() => typeMessage('VERIFY DOB [date] - Verify date of birth'), 600);
+    setTimeout(() => typeMessage('VERIFY ADDRESS [address] - Verify address'), 800);
+    setTimeout(() => typeMessage('COMPARE SIGNATURE - Compare signatures'), 1000);
+    setTimeout(() => typeMessage('PROCESS WITHDRAWAL/DEPOSIT/TRANSFER [amount]'), 1200);
+    setTimeout(() => typeMessage('SET DESTINATION [account] - Set wire destination'), 1400);
+    setTimeout(() => typeMessage('SEND [amount] - Send wire transfer'), 1600);
+    setTimeout(() => typeMessage('CONFIRM ACCOUNT INFO - Confirm inquiry'), 1800);
+    setTimeout(() => typeMessage('APPROVE - Approve transaction'), 2000);
+    setTimeout(() => typeMessage('REJECT - Reject transaction'), 2200);
+    setTimeout(() => typeMessage('NEXT - Load next customer'), 2400);
   };
 
   const loadNextCustomer = () => {
@@ -913,6 +994,7 @@ function App() {
         accountLookedUp: false,
         nameVerified: false,
         dobVerified: false,
+        addressVerified: false,
         signatureCompared: false,
         transactionProcessed: false
       });
