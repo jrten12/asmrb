@@ -1,0 +1,22 @@
+Fix the verification command entry flow so that the player can view customer documents while typing. Right now, when a verification button is pressed (like VERIFY NAME), the system brings up an input field but hides or blocks the documents—making it impossible to compare or transcribe the necessary information.
+	1.	Do not block or cover the DOCUMENTS PROVIDED panel when entering typed verification commands. The player must be able to read the customer’s name, DOB, address, and account info while typing those same fields into the terminal. Always leave enough screen space or dock the document panel on top/left.
+	2.	When a verification button is pressed (e.g. VERIFY NAME), it should:
+
+	•	Autofill the terminal line with VERIFY NAME  or equivalent
+	•	Move cursor focus to the command line
+	•	Leave all relevant documents visible so the player can transcribe the correct value
+	•	Never trigger a modal or full-screen overlay that hides context
+
+	3.	Sound effects must play immediately when a button is pressed:
+
+	•	Clicking VERIFY NAME or PROCESS should trigger a soft mechanical “click” sound
+	•	Pressing enter after typing should trigger a terminal confirm ping
+	•	APPROVE should trigger a stamp thunk or chime
+	•	REJECT should trigger a subtle denial buzz
+	•	All sounds must be short, clean, and mobile-compatible (triggered on touch events)
+
+	4.	Ensure the terminal input field is always visible, aligned, and not overlapping with other UI elements. Keep the typing area fixed at the bottom, with scrolling log above it and document view accessible in parallel.
+	5.	If input requires longer values (e.g. SEND 8000 TO 987654321), expand the width of the terminal field dynamically without pushing any other content out of view.
+	6.	Do not activate VERIFY status flags (the checkmarks or indicators) until the player has submitted a valid typed command that matches the expected field.
+
+This game depends on side-by-side manual comparison. You can’t ask a teller to verify something they can’t see. Always allow document visibility while typing, preserve screen space, and deliver audio confirmation for every meaningful interaction.

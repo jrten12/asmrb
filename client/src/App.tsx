@@ -114,11 +114,15 @@ function App() {
 
       switch (type) {
         case 'keypress':
-          createTone(800, 0.1, 0.05);
+          createTone(800, 0.08, 0.04);
           break;
         case 'button_click':
-          createTone(1200, 0.15, 0.1);
-          setTimeout(() => createTone(900, 0.1, 0.05), 50);
+          createTone(1200, 0.12, 0.08);
+          setTimeout(() => createTone(900, 0.08, 0.04), 40);
+          break;
+        case 'terminal_confirm':
+          createTone(1100, 0.15, 0.06);
+          setTimeout(() => createTone(1300, 0.1, 0.04), 80);
           break;
         case 'customer_approach':
           createTone(600, 0.3, 0.08);
@@ -130,40 +134,21 @@ function App() {
           setTimeout(() => createTone(1200, 0.1, 0.03), 200);
           break;
         case 'approve':
-          createTone(800, 0.2, 0.08);
-          setTimeout(() => createTone(1000, 0.3, 0.1), 200);
+          createTone(800, 0.15, 0.08);
+          setTimeout(() => createTone(1000, 0.25, 0.1), 150);
           break;
         case 'reject':
-          createTone(400, 0.4, 0.1);
-          setTimeout(() => createTone(350, 0.3, 0.08), 200);
-          break;
-        case 'processing':
-          createTone(900, 0.15, 0.06);
-          setTimeout(() => createTone(950, 0.15, 0.05), 150);
-          setTimeout(() => createTone(1000, 0.2, 0.07), 300);
+          createTone(400, 0.25, 0.08);
+          setTimeout(() => createTone(350, 0.2, 0.06), 150);
           break;
         case 'stamp':
-          createTone(300, 0.05, 0.15);
-          setTimeout(() => createTone(250, 0.1, 0.1), 50);
+          createTone(300, 0.05, 0.12);
+          setTimeout(() => createTone(250, 0.08, 0.08), 40);
           break;
         case 'paper_rustle':
           createTone(1500, 0.03, 0.02);
           setTimeout(() => createTone(1400, 0.02, 0.015), 30);
           setTimeout(() => createTone(1600, 0.025, 0.018), 60);
-          break;
-        case 'cash_count':
-          for (let i = 0; i < 5; i++) {
-            setTimeout(() => createTone(400 + i * 50, 0.08, 0.04), i * 120);
-          }
-          break;
-        case 'drawer_open':
-          createTone(200, 0.3, 0.08);
-          setTimeout(() => createTone(180, 0.2, 0.06), 150);
-          break;
-        case 'receipt_print':
-          for (let i = 0; i < 8; i++) {
-            setTimeout(() => createTone(2000, 0.02, 0.03), i * 25);
-          }
           break;
         default:
           createTone(500, 0.1, 0.05);
@@ -322,13 +307,11 @@ function App() {
     if (e.key === 'Enter' && inputRef.current) {
       const command = inputRef.current.value;
       if (command.trim()) {
+        playSound('terminal_confirm');
         handleCommand(command);
         inputRef.current.value = '';
         inputRef.current.placeholder = "Enter command...";
       }
-    } else if (e.key !== 'Enter') {
-      // Play typing sound for each keypress
-      playSound('keypress');
     }
   };
 
@@ -400,16 +383,17 @@ function App() {
         flexDirection: 'column'
       }}>
         
-        {/* Documents Section - Always Visible at Top */}
+        {/* Documents Section - Always Visible and Fixed */}
         <div style={{
-          background: 'rgba(0, 40, 0, 0.8)',
+          background: 'rgba(0, 40, 0, 0.9)',
           border: '3px solid #ffff00',
           padding: '16px',
           borderRadius: '6px',
-          marginBottom: '8px',
-          minHeight: '200px',
-          maxHeight: '300px',
-          overflowY: 'auto'
+          marginBottom: '12px',
+          height: '280px',
+          overflowY: 'auto',
+          position: 'relative',
+          zIndex: 10
         }}>
           <h3 style={{ margin: '0 0 16px 0', color: '#ffff00', fontSize: '20px', textAlign: 'center' }}>📄 CUSTOMER DOCUMENTS</h3>
           
@@ -479,6 +463,7 @@ function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px' }}>
                 <button
                   onClick={() => {
+                    playSound('button_click');
                     if (inputRef.current) {
                       inputRef.current.value = 'VERIFY NAME ';
                       inputRef.current.focus();
@@ -499,6 +484,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
+                    playSound('button_click');
                     if (inputRef.current) {
                       inputRef.current.value = 'VERIFY DOB ';
                       inputRef.current.focus();
@@ -519,6 +505,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
+                    playSound('button_click');
                     if (inputRef.current) {
                       inputRef.current.value = 'COMPARE SIGNATURE';
                       inputRef.current.focus();
@@ -539,6 +526,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
+                    playSound('button_click');
                     if (inputRef.current) {
                       inputRef.current.value = 'PROCESS ' + (currentCustomer?.transactionType || '') + ' ';
                       inputRef.current.focus();
@@ -645,8 +633,8 @@ function App() {
             
             <button
               onClick={() => {
+                playSound('approve');
                 handleCommand('APPROVE');
-                playSound('button_click');
               }}
               disabled={!currentCustomer}
               style={{
@@ -666,8 +654,8 @@ function App() {
             
             <button
               onClick={() => {
+                playSound('reject');
                 handleCommand('REJECT');
-                playSound('button_click');
               }}
               disabled={!currentCustomer}
               style={{
@@ -705,24 +693,34 @@ function App() {
             ))}
           </div>
 
-          {/* Terminal Input */}
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '8px' }}>&gt;</span>
+          {/* Terminal Input - Fixed at Bottom */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            position: 'sticky',
+            bottom: 0,
+            background: '#000000',
+            padding: '4px 0',
+            borderTop: '1px solid #00ff00'
+          }}>
+            <span style={{ marginRight: '8px', color: '#00ff00', fontWeight: 'bold' }}>&gt;</span>
             <input
               ref={inputRef}
               type="text"
-              placeholder="Enter command..."
+              placeholder="Type verification commands here..."
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
               style={{
                 flex: 1,
                 background: '#000000',
-                border: '1px solid #00ff00',
+                border: '2px solid #00ff00',
                 color: '#00ff00',
-                padding: '8px',
-                fontSize: '14px',
+                padding: '10px',
+                fontSize: '16px',
                 fontFamily: 'monospace',
-                outline: 'none'
+                outline: 'none',
+                borderRadius: '4px',
+                minWidth: '300px'
               }}
             />
           </div>
