@@ -199,6 +199,8 @@ function App() {
       } catch (e) {}
     }
   };
+  
+
 
   const playSoftClick = () => {
     console.log('ASMR paper rustle');
@@ -744,7 +746,7 @@ function App() {
 
       default:
         typeMessage('Unknown field. Valid: DOB, NAME, SIGNATURE');
-        playRejectBuzzSound();
+        playRejectBuzz();
     }
   };
 
@@ -786,7 +788,7 @@ function App() {
         typeMessage('✓ CORRECT DECISION - Valid transaction approved');
       } else {
         typeMessage('✗ INCORRECT DECISION - Fraudulent transaction approved!');
-        playRejectBuzzSound();
+        playRejectBuzz();
       }
       
       setTimeout(() => {
@@ -801,7 +803,7 @@ function App() {
       return;
     }
     
-    playRejectBuzzSound();
+    playRejectBuzz();
     typeMessage('TRANSACTION REJECTED');
     typeMessage('Notifying security...');
     
@@ -820,7 +822,7 @@ function App() {
         typeMessage('✓ CORRECT DECISION - Fraudulent transaction rejected');
       } else {
         typeMessage('✗ INCORRECT DECISION - Valid transaction rejected!');
-        playRejectBuzzSound();
+        playRejectBuzz();
       }
       
       setTimeout(() => {
@@ -1630,7 +1632,7 @@ function App() {
                 <button
                   onClick={() => {
                     setSignatureModal({ isOpen: false, customerSig: '', fileSig: '' });
-                    playRejectBuzzSound();
+                    playRejectBuzz();
                     typeMessage('SIGNATURE MISMATCH FLAGGED');
                   }}
                   style={{
