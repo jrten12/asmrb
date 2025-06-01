@@ -135,61 +135,102 @@ function App() {
     }
   };
 
-  // Proper ASMR sound effects
+  // ASMR stamp sound - heavy thud
   const playApprovalStamp = () => {
-    console.log('Approval stamp sound');
-    // Create a brief mechanical stamp sound
+    console.log('ASMR stamp sound');
     if (audioContextRef.current) {
       try {
-        const osc = audioContextRef.current.createOscillator();
+        // Create heavy stamp thud sound
+        const noise = audioContextRef.current.createBufferSource();
+        const buffer = audioContextRef.current.createBuffer(1, 4410, audioContextRef.current.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        for (let i = 0; i < 4410; i++) {
+          output[i] = (Math.random() * 2 - 1) * Math.exp(-i / 1000) * 0.3;
+        }
+        
+        noise.buffer = buffer;
         const gain = audioContextRef.current.createGain();
-        osc.connect(gain);
+        const lowpass = audioContextRef.current.createBiquadFilter();
+        
+        lowpass.type = 'lowpass';
+        lowpass.frequency.setValueAtTime(200, audioContextRef.current.currentTime);
+        
+        noise.connect(lowpass);
+        lowpass.connect(gain);
         gain.connect(audioContextRef.current.destination);
-        osc.frequency.setValueAtTime(80, audioContextRef.current.currentTime);
-        osc.type = 'square';
-        gain.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
-        osc.start();
-        osc.stop(audioContextRef.current.currentTime + 0.3);
+        
+        gain.gain.setValueAtTime(0.4, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.5);
+        
+        noise.start();
+        noise.stop(audioContextRef.current.currentTime + 0.5);
       } catch (e) {}
     }
   };
 
   const playRejectBuzz = () => {
-    console.log('Reject buzz sound');
-    // Create a low mechanical buzz
+    console.log('ASMR mechanical buzzer');
     if (audioContextRef.current) {
       try {
+        // Create realistic mechanical buzzer sound
         const osc = audioContextRef.current.createOscillator();
         const gain = audioContextRef.current.createGain();
-        osc.connect(gain);
+        const filter = audioContextRef.current.createBiquadFilter();
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(300, audioContextRef.current.currentTime);
+        filter.Q.setValueAtTime(2, audioContextRef.current.currentTime);
+        
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(audioContextRef.current.destination);
-        osc.frequency.setValueAtTime(150, audioContextRef.current.currentTime);
+        
+        osc.frequency.setValueAtTime(120, audioContextRef.current.currentTime);
+        osc.frequency.setValueAtTime(100, audioContextRef.current.currentTime + 0.1);
         osc.type = 'sawtooth';
-        gain.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.4);
+        
+        gain.gain.setValueAtTime(0.2, audioContextRef.current.currentTime);
+        gain.gain.setValueAtTime(0.2, audioContextRef.current.currentTime + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.6);
+        
         osc.start();
-        osc.stop(audioContextRef.current.currentTime + 0.4);
+        osc.stop(audioContextRef.current.currentTime + 0.6);
       } catch (e) {}
     }
   };
 
   const playSoftClick = () => {
-    console.log('Soft click sound');
-    // Create a gentle page turn/click
+    console.log('ASMR paper rustle');
     if (audioContextRef.current) {
       try {
-        const osc = audioContextRef.current.createOscillator();
+        // Create realistic paper rustling sound
+        const noise = audioContextRef.current.createBufferSource();
+        const buffer = audioContextRef.current.createBuffer(1, 2205, audioContextRef.current.sampleRate);
+        const output = buffer.getChannelData(0);
+        
+        for (let i = 0; i < 2205; i++) {
+          const decay = Math.exp(-i / 800);
+          output[i] = (Math.random() * 2 - 1) * decay * 0.15;
+        }
+        
+        noise.buffer = buffer;
         const gain = audioContextRef.current.createGain();
-        osc.connect(gain);
+        const bandpass = audioContextRef.current.createBiquadFilter();
+        
+        bandpass.type = 'bandpass';
+        bandpass.frequency.setValueAtTime(2000, audioContextRef.current.currentTime);
+        bandpass.Q.setValueAtTime(3, audioContextRef.current.currentTime);
+        
+        noise.connect(bandpass);
+        bandpass.connect(gain);
         gain.connect(audioContextRef.current.destination);
-        osc.frequency.setValueAtTime(1200, audioContextRef.current.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioContextRef.current.currentTime + 0.05);
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
-        osc.start();
-        osc.stop(audioContextRef.current.currentTime + 0.1);
+        
+        gain.gain.setValueAtTime(0.2, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
+        
+        noise.start();
+        noise.stop(audioContextRef.current.currentTime + 0.3);
       } catch (e) {}
     }
   };
@@ -282,27 +323,34 @@ function App() {
   };
 
   const playKeyClick = () => {
-    // Light mechanical key click
+    // ASMR mechanical keyboard click
     if (audioContextRef.current) {
       try {
-        const osc = audioContextRef.current.createOscillator();
-        const gain = audioContextRef.current.createGain();
-        const filter = audioContextRef.current.createBiquadFilter();
+        // Create two-stage key click (press and release)
+        const noise1 = audioContextRef.current.createBufferSource();
+        const buffer1 = audioContextRef.current.createBuffer(1, 441, audioContextRef.current.sampleRate);
+        const output1 = buffer1.getChannelData(0);
         
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioContextRef.current.destination);
+        for (let i = 0; i < 441; i++) {
+          output1[i] = (Math.random() * 2 - 1) * Math.exp(-i / 100) * 0.1;
+        }
         
-        osc.frequency.setValueAtTime(1000 + Math.random() * 300, audioContextRef.current.currentTime);
-        osc.type = 'triangle';
-        filter.type = 'highpass';
-        filter.frequency.setValueAtTime(500, audioContextRef.current.currentTime);
+        noise1.buffer = buffer1;
+        const gain1 = audioContextRef.current.createGain();
+        const highpass = audioContextRef.current.createBiquadFilter();
         
-        gain.gain.setValueAtTime(0.04, audioContextRef.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.08);
+        highpass.type = 'highpass';
+        highpass.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
         
-        osc.start();
-        osc.stop(audioContextRef.current.currentTime + 0.08);
+        noise1.connect(highpass);
+        highpass.connect(gain1);
+        gain1.connect(audioContextRef.current.destination);
+        
+        gain1.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
+        
+        noise1.start();
+        noise1.stop(audioContextRef.current.currentTime + 0.1);
       } catch (e) {}
     }
   };
@@ -890,6 +938,7 @@ function App() {
         flex: 1, 
         gap: '4px', 
         minHeight: 0,
+        maxHeight: 'calc(100vh - 120px)',
         flexDirection: window.innerWidth < 768 ? 'column' : 'row'
       }}>
         {/* Customer Area */}
