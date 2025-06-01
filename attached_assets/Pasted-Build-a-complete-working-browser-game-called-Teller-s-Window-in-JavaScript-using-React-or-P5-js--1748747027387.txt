@@ -1,0 +1,39 @@
+Build a complete, working browser game called “Teller’s Window” in JavaScript (using React or P5.js—whichever is more reliable for crisp, 2D pixel/retro graphics and easy sound integration).
+
+Concept: The player is a bank teller in the 1980s, working behind a green monochrome terminal. Customers come to deposit, withdraw, or transfer money, presenting paper slips, IDs, and sometimes questionable credentials.
+
+Goals:
+	1.	Create a single main scene: The teller’s desk, customer window, retro computer terminal, paper slips, and drawers.
+	2.	Each round, a pixel-art character appears at the window with a request (“Deposit $100,” “Withdraw $800,” etc.).
+	3.	Show all paperwork/credentials as 2D sprite graphics (bank book, IDs, cash stacks, etc.), rendered in retro green/amber CRT style.
+	4.	The player must type or click to process the transaction, checking all details for accuracy. If something doesn’t match (name, signature, amount, account number), the player can reject or request clarification.
+	5.	Add random errors: mismatched names, fake IDs, suspicious requests, etc. Escalate difficulty over time.
+	6.	Include a timer and a “supervisor” character who appears with a warning if the player messes up too often or takes too long.
+	7.	Implement satisfying, high-quality retro/ASMR sounds for every action: keypresses, drawer opening, stamps, money counting, receipt printing, etc. (use open-source sound files or synthesize as needed).
+	8.	Score the player at the end of each “shift.”
+
+UI & Graphics:
+	•	Use pixel-art or vector 2D graphics (no 3D, no modern effects).
+	•	Everything should feel like 1980s computer terminals and old bank counters.
+	•	Add optional CRT “flicker” or scanline overlay.
+	•	All text in classic terminal fonts.
+
+Sound:
+	•	Use multiple distinct, high-quality sound files for typing, printing, stamping, drawer, cash handling.
+	•	Use open-source or free files only, and ensure they are imported/played correctly on all actions (not just one generic click sound).
+
+Tech Stack:
+	•	Frontend: React.js (with HTML Canvas or P5.js for drawing sprites and effects).
+	•	Sound: Use Howler.js or native audio tags for reliable sound playback.
+
+Code Organization:
+	•	Separate logic: Game state, graphics, and sound should be cleanly separated for easy edits.
+	•	Use only assets that can be embedded or easily linked (no broken URLs).
+	•	Include a README with setup/play instructions and how to add new customers or sound files.
+
+NO unnecessary AI commentary, no TODOs, no placeholder comments—just clean, working, ready-to-run code and direct instructions.
+
+Do not use 3D, do not add multiplayer or social features, do not stray from the bank teller gameplay.
+
+Start with a working MVP (minimum viable product) that runs locally and looks/feels complete (not a stub).
+If you need assets, generate simple SVGs or pixel art in code, or use free ones with correct attributions
