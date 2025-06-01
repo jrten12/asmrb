@@ -1192,6 +1192,57 @@ function App() {
             ))}
           </div>
 
+          {/* Terminal Command Input */}
+          <div style={{
+            background: 'rgba(0, 50, 0, 0.5)',
+            border: '2px solid #00aa00',
+            padding: '12px',
+            marginTop: '8px',
+            borderRadius: '4px'
+          }}>
+            <div style={{
+              fontSize: '12px',
+              color: '#00cc00',
+              marginBottom: '6px',
+              fontWeight: 'bold'
+            }}>
+              MANUAL COMMANDS: LOOKUP [account] | VERIFY NAME [name] | VERIFY DOB [date] | COMPARE SIGNATURE | APPROVE | REJECT
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: '#001800',
+              border: '2px solid #00ff00',
+              padding: '10px',
+              borderRadius: '4px'
+            }}>
+              <span style={{ 
+                marginRight: '10px', 
+                color: '#00ff88', 
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}>
+                BANK&gt;
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                onKeyDown={handleKeyDown}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#00ff00',
+                  fontFamily: 'inherit',
+                  fontSize: '16px',
+                  outline: 'none',
+                  textShadow: '0 0 2px #00ff00'
+                }}
+                placeholder="Type commands here..."
+              />
+            </div>
+          </div>
+
           {/* Panel 3: Decision Zone */}
           <div style={{
             background: 'rgba(0, 40, 0, 0.5)',
