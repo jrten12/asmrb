@@ -21,11 +21,11 @@
   bottom: 0;
   background: linear-gradient(
     transparent 50%,
-    rgba(0, 255, 0, 0.03) 50%
+    rgba(0, 255, 0, 0.015) 50%
   );
-  background-size: 100% 4px;
+  background-size: 100% 6px;
   pointer-events: none;
-  animation: scanlines 2s linear infinite;
+  animation: scanlines 3s linear infinite;
 }
 
 @layer base {

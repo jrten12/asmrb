@@ -135,9 +135,63 @@ function App() {
     }
   };
 
-  const playStampSound = async () => {
-    // Disabled old sound system - sounds will be added later
-    console.log('Stamp sound triggered');
+  // Proper ASMR sound effects
+  const playApprovalStamp = () => {
+    console.log('Approval stamp sound');
+    // Create a brief mechanical stamp sound
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        osc.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        osc.frequency.setValueAtTime(80, audioContextRef.current.currentTime);
+        osc.type = 'square';
+        gain.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.3);
+      } catch (e) {}
+    }
+  };
+
+  const playRejectBuzz = () => {
+    console.log('Reject buzz sound');
+    // Create a low mechanical buzz
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        osc.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        osc.frequency.setValueAtTime(150, audioContextRef.current.currentTime);
+        osc.type = 'sawtooth';
+        gain.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.4);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.4);
+      } catch (e) {}
+    }
+  };
+
+  const playSoftClick = () => {
+    console.log('Soft click sound');
+    // Create a gentle page turn/click
+    if (audioContextRef.current) {
+      try {
+        const osc = audioContextRef.current.createOscillator();
+        const gain = audioContextRef.current.createGain();
+        osc.connect(gain);
+        gain.connect(audioContextRef.current.destination);
+        osc.frequency.setValueAtTime(1200, audioContextRef.current.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioContextRef.current.currentTime + 0.05);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioContextRef.current.currentTime + 0.1);
+      } catch (e) {}
+    }
   };
 
   const playRejectBuzzSound = async () => {
@@ -470,7 +524,6 @@ function App() {
       return;
     }
     
-    playStampSound();
     typeMessage('TRANSACTION APPROVED');
     typeMessage('Processing...');
     
@@ -880,10 +933,12 @@ function App() {
           }}>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   console.log('APPROVE clicked');
+                  playApprovalStamp();
                   approveTransaction();
                 }}
                 disabled={!currentCustomer}
@@ -897,16 +952,21 @@ function App() {
                   cursor: currentCustomer ? 'pointer' : 'not-allowed',
                   borderRadius: '6px',
                   minHeight: '48px',
-                  flex: 1
+                  flex: 1,
+                  outline: 'none',
+                  userSelect: 'none',
+                  WebkitTapHighlightColor: 'transparent'
                 }}
               >
                 APPROVE
               </button>
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   console.log('REJECT clicked');
+                  playRejectBuzz();
                   rejectTransaction();
                 }}
                 disabled={!currentCustomer}
@@ -920,16 +980,21 @@ function App() {
                   cursor: currentCustomer ? 'pointer' : 'not-allowed',
                   borderRadius: '6px',
                   minHeight: '48px',
-                  flex: 1
+                  flex: 1,
+                  outline: 'none',
+                  userSelect: 'none',
+                  WebkitTapHighlightColor: 'transparent'
                 }}
               >
                 REJECT
               </button>
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   console.log('NEXT clicked');
+                  playSoftClick();
                   loadNextCustomer();
                 }}
                 style={{
@@ -942,7 +1007,10 @@ function App() {
                   cursor: 'pointer',
                   borderRadius: '6px',
                   minHeight: '48px',
-                  flex: 1
+                  flex: 1,
+                  outline: 'none',
+                  userSelect: 'none',
+                  WebkitTapHighlightColor: 'transparent'
                 }}
               >
                 NEXT
