@@ -39,6 +39,9 @@ function App() {
   ]);
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
+  const [documentModal, setDocumentModal] = useState<{ isOpen: boolean; docIndex: number | null }>({ isOpen: false, docIndex: null });
+  const [signatureModal, setSignatureModal] = useState<{ isOpen: boolean; customerSig: string; fileSig: string }>({ isOpen: false, customerSig: '', fileSig: '' });
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [gameState, setGameState] = useState({
     score: 0,
     transactions: 0,
@@ -59,8 +62,8 @@ function App() {
     }
   };
 
-  // Sound effects with Web Audio API
-  const createTypewriterSound = async (frequency = 800, duration = 0.1) => {
+  // Enhanced ASMR sound effects
+  const playTypingSound = async () => {
     await initAudio();
     if (!audioContextRef.current) return;
     
@@ -71,16 +74,50 @@ function App() {
       oscillator.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      oscillator.frequency.setValueAtTime(frequency + Math.random() * 200, audioContextRef.current.currentTime);
+      oscillator.frequency.setValueAtTime(1200 + Math.random() * 400, audioContextRef.current.currentTime);
       oscillator.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + duration);
+      gainNode.gain.setValueAtTime(0.06, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.08);
       
       oscillator.start(audioContextRef.current.currentTime);
-      oscillator.stop(audioContextRef.current.currentTime + duration);
+      oscillator.stop(audioContextRef.current.currentTime + 0.08);
     } catch (e) {
-      // Silent fail for audio
+      // Silent fail
+    }
+  };
+
+  const playPaperShuffleSound = async () => {
+    await initAudio();
+    if (!audioContextRef.current) return;
+    
+    try {
+      const whiteNoise = audioContextRef.current.createBufferSource();
+      const buffer = audioContextRef.current.createBuffer(1, 4410, audioContextRef.current.sampleRate);
+      const output = buffer.getChannelData(0);
+      
+      for (let i = 0; i < 4410; i++) {
+        output[i] = (Math.random() * 2 - 1) * 0.1;
+      }
+      
+      whiteNoise.buffer = buffer;
+      const gainNode = audioContextRef.current.createGain();
+      const filter = audioContextRef.current.createBiquadFilter();
+      
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(800, audioContextRef.current.currentTime);
+      
+      whiteNoise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+      
+      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
+      
+      whiteNoise.start();
+      whiteNoise.stop(audioContextRef.current.currentTime + 0.3);
+    } catch (e) {
+      // Silent fail
     }
   };
 
@@ -89,26 +126,32 @@ function App() {
     if (!audioContextRef.current) return;
     
     try {
-      const oscillator = audioContextRef.current.createOscillator();
+      const oscillator1 = audioContextRef.current.createOscillator();
+      const oscillator2 = audioContextRef.current.createOscillator();
       const gainNode = audioContextRef.current.createGain();
       
-      oscillator.connect(gainNode);
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      oscillator.frequency.setValueAtTime(200, audioContextRef.current.currentTime);
-      oscillator.type = 'square';
+      oscillator1.frequency.setValueAtTime(80, audioContextRef.current.currentTime);
+      oscillator2.frequency.setValueAtTime(160, audioContextRef.current.currentTime);
+      oscillator1.type = 'square';
+      oscillator2.type = 'triangle';
       
-      gainNode.gain.setValueAtTime(0.2, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.25, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.4);
       
-      oscillator.start();
-      oscillator.stop(audioContextRef.current.currentTime + 0.3);
+      oscillator1.start();
+      oscillator2.start();
+      oscillator1.stop(audioContextRef.current.currentTime + 0.4);
+      oscillator2.stop(audioContextRef.current.currentTime + 0.4);
     } catch (e) {
       // Silent fail
     }
   };
 
-  const playBuzzerSound = async () => {
+  const playSubtleBuzzSound = async () => {
     await initAudio();
     if (!audioContextRef.current) return;
     
@@ -119,14 +162,39 @@ function App() {
       oscillator.connect(gainNode);
       gainNode.connect(audioContextRef.current.destination);
       
-      oscillator.frequency.setValueAtTime(150, audioContextRef.current.currentTime);
-      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(250, audioContextRef.current.currentTime);
+      oscillator.type = 'triangle';
       
-      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.5);
+      gainNode.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.2);
       
       oscillator.start();
-      oscillator.stop(audioContextRef.current.currentTime + 0.5);
+      oscillator.stop(audioContextRef.current.currentTime + 0.2);
+    } catch (e) {
+      // Silent fail
+    }
+  };
+
+  const playTerminalChirpSound = async () => {
+    await initAudio();
+    if (!audioContextRef.current) return;
+    
+    try {
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+      
+      oscillator.frequency.setValueAtTime(1000, audioContextRef.current.currentTime);
+      oscillator.frequency.linearRampToValueAtTime(1200, audioContextRef.current.currentTime + 0.05);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.1);
+      
+      oscillator.start();
+      oscillator.stop(audioContextRef.current.currentTime + 0.1);
     } catch (e) {
       // Silent fail
     }
@@ -278,7 +346,7 @@ function App() {
       if (i < text.length) {
         outputElement.textContent += text.charAt(i);
         if (Math.random() > 0.7) {
-          createTypewriterSound();
+          playTypingSound();
         }
         i++;
         
@@ -307,7 +375,7 @@ function App() {
             lookupAccount(parameter);
           } else {
             typeMessage('ERROR: Specify account number');
-            playBuzzerSound();
+            playSubtleBuzzSound();
           }
           break;
         case 'EXAMINE':
@@ -317,7 +385,7 @@ function App() {
             examineDocument('SELECTED');
           } else {
             typeMessage('ERROR: Specify document type or select document');
-            playBuzzerSound();
+            playSubtleBuzzSound();
           }
           break;
         case 'VERIFY':
@@ -325,7 +393,7 @@ function App() {
             verifyAmount(parseInt(parameter));
           } else {
             typeMessage('ERROR: Specify amount to verify');
-            playBuzzerSound();
+            playSubtleBuzzSound();
           }
           break;
         case 'APPROVE':
@@ -342,7 +410,7 @@ function App() {
           break;
         default:
           typeMessage('UNKNOWN COMMAND. Type HELP for available commands.');
-          playBuzzerSound();
+          playSubtleBuzzSound();
       }
     }, 200);
   };
@@ -364,7 +432,7 @@ function App() {
         setTimeout(() => typeMessage('=== END RECORD ==='), 2400);
       } else {
         typeMessage('ACCOUNT NOT FOUND');
-        playBuzzerSound();
+        playSubtleBuzzSound();
       }
     }, 800);
   };

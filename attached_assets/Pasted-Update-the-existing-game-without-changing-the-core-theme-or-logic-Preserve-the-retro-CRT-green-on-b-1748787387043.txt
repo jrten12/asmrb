@@ -1,0 +1,82 @@
+Update the existing game without changing the core theme or logic.
+Preserve the retro CRT green-on-black aesthetic, but improve clarity, usability, and game feel. Do not redesign from scratch. Just refine and build on the working base.
+
+⸻
+
+✅ Maintain:
+	•	CRT-style green terminal theme
+	•	Teller-based fraud detection mechanics
+	•	All existing game data, logic, and visual structure
+
+⸻
+
+🔧 Improve the following:
+
+⸻
+
+1. UI & Visual Design (App Store Ready)
+	•	Keep CRT green theme, but increase font size, improve line spacing, and boost text contrast for mobile readability.
+	•	Make all interactive elements large enough for touch interface (iPhone/iPad).
+	•	When a document is clicked, open it in a large centered modal window, not just a sidebar log.
+	•	Add step-by-step indicators at the top of the screen:
+	•	Step 1: Review Request → Step 2: Examine Documents → Step 3: Verify → Step 4: Approve/Reject
+
+⸻
+
+2. Request Flow & Form Handling
+
+Each service type (deposit, withdrawal, wire, inquiry) should:
+	•	Require different forms and documents:
+	•	Wire Transfer: Wire form, photo ID, signature, optional passport or secondary ID
+	•	Deposit: Deposit slip, ID, signature
+	•	Withdrawal: Withdrawal slip, ID, signature
+	•	Account Inquiry: Just ID
+	•	System must validate required docs and flag any missing ones before allowing progress.
+	•	If a required document is missing, display a clear error prompt (“Missing valid ID”).
+
+⸻
+
+3. Document Management System
+	•	Show all customer documents in a scrollable sidebar or grid.
+	•	Click/tap on a doc opens large, interactive modal with zoom and highlight tools.
+	•	Overlay should allow comparison of:
+	•	Photo ID details (name, DOB, match with account)
+	•	Signature
+	•	Document validity (expiry, consistency)
+
+⸻
+
+4. Signature Verification System
+	•	When a signature is required, open split view:
+	•	Left: Signature from the submitted form
+	•	Right: Signature on file (from bank records)
+	•	Provide:
+	•	“MATCH” / “FLAG MISMATCH” buttons
+	•	Optional zoom/magnify to inspect detail
+	•	Require manual judgment for approval (fraud detection angle)
+
+⸻
+
+5. Sound Design (No More Arcade Beeps)
+
+Replace current generic arcade sound with immersive ASMR-style effects:
+	•	Typing: Light, crisp key clicks (not cartoonish)
+	•	Document open/close: Paper shuffling, folder sounds
+	•	Signature verification: Pen scribble or sharp “scratch”
+	•	Approval stamp: Deep, satisfying thud
+	•	Error/rejection: Subtle, short buzz—not jarring
+	•	System alerts: Vintage terminal chirps or tones, short and atmospheric
+Ensure sounds are varied—not one global sound—and volume-balanced and non-repetitive.
+
+⸻
+
+6. Mobile Optimization
+	•	Scale layout responsively for iPhone and iPad viewports.
+	•	Ensure all interactions are touch-friendly.
+	•	Score/time bar should be readable and not squeezed.
+
+⸻
+
+🛠 Final Rule:
+Make all these changes to the existing system—do NOT rebuild or wipe functionality.
+This is a refinement pass, not a reset.
