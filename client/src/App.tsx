@@ -114,7 +114,10 @@ function App() {
 
       switch (type) {
         case 'keypress':
-          createTone(800, 0.08, 0.04);
+          // Enhanced ASMR typing sound with mechanical keyboard feel
+          createTone(850, 0.05, 0.08);
+          setTimeout(() => createTone(650, 0.03, 0.06), 10);
+          setTimeout(() => createTone(450, 0.02, 0.04), 20);
           break;
         case 'button_click':
           createTone(1200, 0.12, 0.08);
@@ -413,41 +416,44 @@ function App() {
         flexDirection: 'column'
       }}>
         
-        {/* Documents Section - Clean and Compact */}
+        {/* Documents Section - Separated from Input */}
         <div style={{
           background: 'rgba(0, 40, 0, 0.95)',
           border: '2px solid #ffff00',
-          padding: '12px',
-          borderRadius: '4px',
-          marginBottom: '10px',
-          height: '220px',
+          padding: '16px',
+          borderRadius: '6px',
+          marginBottom: '20px',
+          minHeight: '240px',
+          maxHeight: '260px',
           overflowY: 'auto'
         }}>
-          <div style={{ color: '#ffff00', fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+          <div style={{ color: '#ffff00', fontSize: '18px', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>
             CUSTOMER DOCUMENTS
           </div>
           
           {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
-            <div style={{ display: 'grid', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {currentCustomer.documents.map((doc, index) => (
                 <div
                   key={index}
                   style={{
-                    background: 'rgba(255, 255, 0, 0.1)',
-                    border: '1px solid #ffff00',
-                    padding: '10px',
-                    borderRadius: '4px'
+                    background: 'rgba(255, 255, 0, 0.15)',
+                    border: '2px solid #ffff00',
+                    padding: '14px',
+                    borderRadius: '6px'
                   }}
                 >
-                  <div style={{ color: '#ffff00', fontSize: '14px', fontWeight: 'bold', marginBottom: '6px' }}>
+                  <div style={{ color: '#ffff00', fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
                     {doc.title}
                   </div>
-                  {Object.entries(doc.data).map(([key, value]) => (
-                    <div key={key} style={{ fontSize: '13px', marginBottom: '3px' }}>
-                      <span style={{ color: '#00cccc' }}>{key.toUpperCase()}:</span>{' '}
-                      <span style={{ color: '#ffffff', fontWeight: 'bold' }}>{value}</span>
-                    </div>
-                  ))}
+                  <div style={{ display: 'grid', gap: '6px' }}>
+                    {Object.entries(doc.data).map(([key, value]) => (
+                      <div key={key} style={{ fontSize: '14px', padding: '2px 0' }}>
+                        <span style={{ color: '#00cccc', fontSize: '12px' }}>{key.toUpperCase()}:</span>{' '}
+                        <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '16px' }}>{value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -455,8 +461,8 @@ function App() {
             <div style={{
               textAlign: 'center',
               color: '#999999',
-              padding: '30px',
-              fontSize: '14px'
+              padding: '40px',
+              fontSize: '16px'
             }}>
               No customer present<br/>
               <span style={{ color: '#ffaa00' }}>Type NEXT to call customer</span>
@@ -491,9 +497,8 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current && currentCustomer) {
-                      const customerName = currentCustomer.documents.find(d => d.data.name)?.data.name || '';
-                      inputRef.current.value = `VERIFY NAME ${customerName}`;
+                    if (inputRef.current) {
+                      inputRef.current.value = 'VERIFY NAME ';
                       inputRef.current.focus();
                     }
                   }}
@@ -514,9 +519,8 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current && currentCustomer) {
-                      const dob = currentCustomer.documents.find(d => d.data.dateOfBirth)?.data.dateOfBirth || '';
-                      inputRef.current.value = `VERIFY DOB ${dob}`;
+                    if (inputRef.current) {
+                      inputRef.current.value = 'VERIFY DOB ';
                       inputRef.current.focus();
                     }
                   }}
@@ -559,8 +563,8 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current && currentCustomer) {
-                      inputRef.current.value = `PROCESS ${currentCustomer.transactionType} ${currentCustomer.requestedAmount}`;
+                    if (inputRef.current) {
+                      inputRef.current.value = 'PROCESS ';
                       inputRef.current.focus();
                     }
                   }}
