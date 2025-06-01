@@ -114,10 +114,9 @@ function App() {
 
       switch (type) {
         case 'keypress':
-          // Enhanced ASMR typing sound with mechanical keyboard feel
-          createTone(850, 0.05, 0.08);
-          setTimeout(() => createTone(650, 0.03, 0.06), 10);
-          setTimeout(() => createTone(450, 0.02, 0.04), 20);
+          // Realistic mechanical keyboard click sound
+          createTone(1200, 0.02, 0.06);
+          setTimeout(() => createTone(800, 0.015, 0.04), 8);
           break;
         case 'button_click':
           createTone(1200, 0.12, 0.08);
@@ -209,9 +208,15 @@ function App() {
         }, 1200);
       }
     } else if (cmd.startsWith('VERIFY NAME ')) {
-      const enteredName = cmd.replace('VERIFY NAME ', '');
+      const enteredName = cmd.replace('VERIFY NAME ', '').trim();
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (!enteredName) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Name required", "Usage: VERIFY NAME [full name]"]);
+        playSound('reject');
         return;
       }
       
@@ -233,9 +238,15 @@ function App() {
         }
       }, 1000);
     } else if (cmd.startsWith('VERIFY DOB ')) {
-      const enteredDOB = cmd.replace('VERIFY DOB ', '');
+      const enteredDOB = cmd.replace('VERIFY DOB ', '').trim();
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (!enteredDOB) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Date of birth required", "Usage: VERIFY DOB [YYYY-MM-DD]"]);
+        playSound('reject');
         return;
       }
       
@@ -330,7 +341,8 @@ function App() {
     } else if (cmd === 'HELP') {
       setTerminalOutput(prev => [...prev, "> " + command, "Manual Verification Commands:", "LOOKUP [account_number] - Get system data", "VERIFY NAME [full_name] - Check name", "VERIFY DOB [YYYY-MM-DD] - Check date of birth", "COMPARE SIGNATURE - View signatures", "PROCESS [DEPOSIT/WITHDRAWAL/WIRE] [amount]", "APPROVE - Approve after all verifications", "REJECT - Reject transaction"]);
     } else {
-      setTerminalOutput(prev => [...prev, "> " + command, "Unknown command. Type HELP for available commands."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Command not recognized", "Type HELP for available commands", "Check spelling and try again"]);
+      playSound('reject');
     }
   };
 
