@@ -1339,64 +1339,66 @@ function App() {
             </div>
           )}
 
-          {/* Terminal Output */}
+          {/* Unified Terminal Display and Input */}
           <div style={{
             flex: 1,
             background: '#000800',
             border: '2px solid #00aa00',
-            padding: '12px',
-            overflowY: 'auto',
-            marginBottom: '8px',
+            padding: '0',
+            display: 'flex',
+            flexDirection: 'column',
             fontSize: '15px',
-            lineHeight: '1.6',
             fontWeight: 'bold',
             color: '#00ff00',
             textShadow: '0 0 2px #00ff00',
-            minHeight: '180px',
-            maxHeight: '220px'
+            minHeight: '250px'
           }}>
-            {terminalOutput.length === 0 && (
-              <div style={{ 
-                color: '#008800', 
-                fontSize: '13px',
-                fontStyle: 'italic' 
-              }}>
-                TERMINAL READY - Type commands or use verification buttons
-              </div>
-            )}
-            {terminalOutput.map((line, index) => (
-              <div key={index} style={{ 
-                marginBottom: '4px',
-                color: line.startsWith('BANK>') ? '#00ff88' : '#00ff00',
-                fontWeight: line.startsWith('===') ? 'bold' : 'normal'
-              }}>
-                {line}
-              </div>
-            ))}
-          </div>
+            {/* Terminal Output Area */}
+            <div style={{
+              flex: 1,
+              padding: '12px',
+              overflowY: 'auto',
+              lineHeight: '1.6'
+            }}>
+              {terminalOutput.length === 0 && (
+                <div style={{ 
+                  color: '#008800', 
+                  fontSize: '13px',
+                  fontStyle: 'italic' 
+                }}>
+                  TERMINAL READY - Type commands below
+                </div>
+              )}
+              {terminalOutput.map((line, index) => (
+                <div key={index} style={{ 
+                  marginBottom: '4px',
+                  color: line.startsWith('BANK>') ? '#00ff88' : 
+                        line.startsWith('✓') ? '#00ff00' :
+                        line.startsWith('✖') ? '#ff4444' : '#00ff00',
+                  fontWeight: line.startsWith('===') ? 'bold' : 'normal'
+                }}>
+                  {line}
+                </div>
+              ))}
+            </div>
 
-          {/* Enhanced Terminal Input with ENTER Button */}
-          <div style={{
-            background: 'rgba(0, 80, 0, 0.6)',
-            border: '2px solid #00ff00',
-            padding: '12px',
-            borderRadius: '4px',
-            boxShadow: '0 0 6px rgba(0, 255, 0, 0.2)'
-          }}>
+            {/* Single Terminal Input Line */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               background: '#001100',
-              border: '2px solid #00ff00',
-              borderRadius: '4px',
-              overflow: 'hidden'
+              borderTop: '2px solid #00aa00',
+              padding: '0',
+              fontSize: '16px',
+              minHeight: '48px'
             }}>
               <span style={{ 
                 padding: '12px 10px 12px 12px',
                 color: '#00ff88', 
                 fontSize: '16px',
                 fontWeight: 'bold',
-                background: '#002200'
+                background: '#002200',
+                borderRight: '1px solid #00aa00'
               }}>
                 BANK&gt;
               </span>
@@ -1433,14 +1435,14 @@ function App() {
                 style={{
                   background: 'rgba(0, 200, 0, 0.8)',
                   border: 'none',
+                  borderLeft: '1px solid #00aa00',
                   color: '#ffffff',
                   padding: '12px 16px',
                   fontSize: '14px',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   outline: 'none',
-                  minHeight: '48px',
-                  borderLeft: '2px solid #00ff00'
+                  minHeight: '48px'
                 }}
               >
                 ENTER
