@@ -1380,6 +1380,83 @@ function App() {
               />
             </div>
           </div>
+
+          {/* Action Buttons */}
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            marginTop: '8px'
+          }}>
+            <button
+              onClick={() => {
+                playApprovalStamp();
+                approveTransaction();
+              }}
+              disabled={!currentCustomer || !verificationProgress.accountLookedUp || !verificationProgress.transactionProcessed}
+              style={{
+                background: (currentCustomer && verificationProgress.accountLookedUp && verificationProgress.transactionProcessed) 
+                  ? 'rgba(0, 150, 0, 0.7)' : 'rgba(80, 80, 80, 0.3)',
+                border: '2px solid #00aa00',
+                color: (currentCustomer && verificationProgress.accountLookedUp && verificationProgress.transactionProcessed) 
+                  ? '#00ff00' : '#666',
+                padding: '12px 16px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: (currentCustomer && verificationProgress.accountLookedUp && verificationProgress.transactionProcessed) 
+                  ? 'pointer' : 'not-allowed',
+                borderRadius: '4px',
+                flex: 1,
+                outline: 'none'
+              }}
+            >
+              APPROVE
+            </button>
+            <button
+              onClick={() => {
+                playRejectBuzz();
+                rejectTransaction();
+              }}
+              disabled={!currentCustomer || !verificationProgress.accountLookedUp}
+              style={{
+                background: (currentCustomer && verificationProgress.accountLookedUp) 
+                  ? 'rgba(150, 0, 0, 0.7)' : 'rgba(80, 80, 80, 0.3)',
+                border: '2px solid #aa0000',
+                color: (currentCustomer && verificationProgress.accountLookedUp) 
+                  ? '#ff4444' : '#666',
+                padding: '12px 16px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: (currentCustomer && verificationProgress.accountLookedUp) 
+                  ? 'pointer' : 'not-allowed',
+                borderRadius: '4px',
+                flex: 1,
+                outline: 'none'
+              }}
+            >
+              REJECT
+            </button>
+            <button
+              onClick={() => {
+                playSoftClick();
+                loadNextCustomer();
+              }}
+              disabled={currentCustomer !== null}
+              style={{
+                background: currentCustomer ? 'rgba(80, 80, 80, 0.3)' : 'rgba(0, 0, 150, 0.7)',
+                border: '2px solid #0088ff',
+                color: currentCustomer ? '#666' : '#00aaff',
+                padding: '12px 16px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: currentCustomer ? 'not-allowed' : 'pointer',
+                borderRadius: '4px',
+                flex: 1,
+                outline: 'none'
+              }}
+            >
+              NEXT
+            </button>
+          </div>
         </div>
       </div>
       
