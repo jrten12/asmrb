@@ -49,11 +49,20 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Sound effects with Web Audio API
-  const createTypewriterSound = (frequency = 800, duration = 0.1) => {
+  // Initialize audio context on first user interaction
+  const initAudio = async () => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
     }
+  };
+
+  // Sound effects with Web Audio API
+  const createTypewriterSound = async (frequency = 800, duration = 0.1) => {
+    await initAudio();
+    if (!audioContextRef.current) return;
     
     try {
       const oscillator = audioContextRef.current.createOscillator();
@@ -65,7 +74,7 @@ function App() {
       oscillator.frequency.setValueAtTime(frequency + Math.random() * 200, audioContextRef.current.currentTime);
       oscillator.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.05, audioContextRef.current.currentTime);
+      gainNode.gain.setValueAtTime(0.08, audioContextRef.current.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + duration);
       
       oscillator.start(audioContextRef.current.currentTime);
@@ -75,7 +84,8 @@ function App() {
     }
   };
 
-  const playStampSound = () => {
+  const playStampSound = async () => {
+    await initAudio();
     if (!audioContextRef.current) return;
     
     try {
@@ -88,7 +98,7 @@ function App() {
       oscillator.frequency.setValueAtTime(200, audioContextRef.current.currentTime);
       oscillator.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
+      gainNode.gain.setValueAtTime(0.2, audioContextRef.current.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.3);
       
       oscillator.start();
@@ -98,7 +108,8 @@ function App() {
     }
   };
 
-  const playBuzzerSound = () => {
+  const playBuzzerSound = async () => {
+    await initAudio();
     if (!audioContextRef.current) return;
     
     try {
@@ -111,7 +122,7 @@ function App() {
       oscillator.frequency.setValueAtTime(150, audioContextRef.current.currentTime);
       oscillator.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      gainNode.gain.setValueAtTime(0.15, audioContextRef.current.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContextRef.current.currentTime + 0.5);
       
       oscillator.start();
@@ -273,7 +284,7 @@ function App() {
         
         setTerminalOutput(prev => {
           const newOutput = [...prev];
-          newOutput[newOutput.length - 1] = outputElement.textContent;
+          newOutput[newOutput.length - 1] = outputElement.textContent || '';
           return newOutput;
         });
       } else {
