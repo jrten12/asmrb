@@ -991,7 +991,8 @@ function App() {
     try {
       const customer = generateCustomer();
       console.log('Generated customer:', customer);
-      setCurrentCustomer(customer);
+      
+      // Clear previous state first
       setSelectedDocument(null);
       setAccountData(null);
       setVerificationProgress({
@@ -1003,10 +1004,16 @@ function App() {
         transactionProcessed: false
       });
       
+      // Set new customer
+      setCurrentCustomer(customer);
+      
       typeMessage('NEW CUSTOMER APPROACHING WINDOW');
       setTimeout(() => {
-        typeMessage(`Customer requests: "${customer.transactionType} of $${customer.requestedAmount}"`);
-      }, 1000);
+        typeMessage(`Customer: ${customer.name}`);
+        typeMessage(`Request: ${customer.transactionType} of $${customer.requestedAmount}`);
+        typeMessage(`Account: ${customer.accountNumber}`);
+        typeMessage('Documents provided - ready for verification');
+      }, 500);
     } catch (error) {
       console.error('Error generating customer:', error);
       typeMessage('ERROR: Could not generate customer');
