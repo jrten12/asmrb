@@ -572,7 +572,9 @@ function App() {
   };
 
   const loadNextCustomer = () => {
+    console.log('Loading next customer...');
     const customer = generateCustomer();
+    console.log('Generated customer:', customer);
     setCurrentCustomer(customer);
     setSelectedDocument(null);
     
@@ -733,6 +735,140 @@ function App() {
         }}>
           <h4 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>BANK TERMINAL</h4>
           
+          {/* Panel 1: Account Summary */}
+          {currentCustomer && bankDatabase[currentCustomer.accountNumber] && (
+            <div style={{
+              background: 'rgba(0, 60, 0, 0.4)',
+              border: '2px solid #006600',
+              padding: '12px',
+              marginBottom: '8px',
+              borderRadius: '4px'
+            }}>
+              <h5 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>ACCOUNT SUMMARY</h5>
+              <div style={{ fontSize: '14px', lineHeight: '1.4' }}>
+                <strong>NAME:</strong> {bankDatabase[currentCustomer.accountNumber].name}<br/>
+                <strong>DOB:</strong> {bankDatabase[currentCustomer.accountNumber].dob}<br/>
+                <strong>ACCOUNT:</strong> {currentCustomer.accountNumber}<br/>
+                <strong>SIGNATURE:</strong> <span 
+                  style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                  onClick={openSignatureComparison}
+                >
+                  {bankDatabase[currentCustomer.accountNumber].signature} (click to view)
+                </span><br/>
+                <strong>BALANCE:</strong> ${bankDatabase[currentCustomer.accountNumber].balance}
+              </div>
+            </div>
+          )}
+
+          {/* Panel 2: Verification Actions */}
+          {currentCustomer && (
+            <div style={{
+              background: 'rgba(0, 50, 0, 0.3)',
+              border: '2px solid #005500',
+              padding: '12px',
+              marginBottom: '8px',
+              borderRadius: '4px'
+            }}>
+              <h5 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>VERIFICATION ACTIONS</h5>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                <button
+                  onClick={async () => {
+                    await initAudio();
+                    playMagneticClickSound();
+                    compareField('NAME');
+                  }}
+                  style={{
+                    background: 'rgba(0, 80, 0, 0.5)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    minHeight: '40px'
+                  }}
+                >
+                  Compare Name
+                </button>
+                <button
+                  onClick={() => compareField('DOB')}
+                  style={{
+                    background: 'rgba(0, 80, 0, 0.5)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    minHeight: '40px'
+                  }}
+                >
+                  Compare DOB
+                </button>
+                <button
+                  onClick={() => compareField('SIGNATURE')}
+                  style={{
+                    background: 'rgba(0, 80, 0, 0.5)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    minHeight: '40px'
+                  }}
+                >
+                  Compare Signature
+                </button>
+                <button
+                  onClick={() => verifyAmount(currentCustomer.requestedAmount)}
+                  style={{
+                    background: 'rgba(0, 80, 0, 0.5)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    minHeight: '40px'
+                  }}
+                >
+                  Verify Amount
+                </button>
+                <button
+                  onClick={() => lookupAccount(currentCustomer.accountNumber)}
+                  style={{
+                    background: 'rgba(0, 80, 0, 0.5)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    minHeight: '40px'
+                  }}
+                >
+                  Lookup Account
+                </button>
+                <button
+                  onClick={() => examineDocument('SELECTED')}
+                  style={{
+                    background: 'rgba(0, 80, 0, 0.5)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    minHeight: '40px'
+                  }}
+                >
+                  Examine Doc
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Terminal Output */}
           <div style={{
             flex: 1,
@@ -740,27 +876,104 @@ function App() {
             border: '2px solid #004400',
             padding: '15px',
             overflowY: 'auto',
-            marginBottom: '12px',
-            fontSize: '15px',
-            lineHeight: '1.5',
+            marginBottom: '8px',
+            fontSize: '14px',
+            lineHeight: '1.4',
             fontWeight: 'bold'
           }}>
             {terminalOutput.map((line, index) => (
               <div key={index} style={{ marginBottom: '2px' }}>{line}</div>
             ))}
           </div>
-          
-          {/* Command Input */}
+
+          {/* Panel 3: Decision Zone */}
+          <div style={{
+            background: 'rgba(0, 40, 0, 0.5)',
+            border: '2px solid #004400',
+            padding: '12px',
+            borderRadius: '4px'
+          }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={async () => {
+                  await initAudio();
+                  playStampSound();
+                  approveTransaction();
+                }}
+                disabled={!currentCustomer}
+                style={{
+                  background: currentCustomer ? 'rgba(0, 150, 0, 0.7)' : 'rgba(80, 80, 80, 0.3)',
+                  border: '2px solid #00aa00',
+                  color: currentCustomer ? '#00ff00' : '#666',
+                  padding: '16px 24px',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                  borderRadius: '6px',
+                  minHeight: '48px',
+                  flex: 1
+                }}
+              >
+                APPROVE
+              </button>
+              <button
+                onClick={async () => {
+                  await initAudio();
+                  playRejectBuzzSound();
+                  rejectTransaction();
+                }}
+                disabled={!currentCustomer}
+                style={{
+                  background: currentCustomer ? 'rgba(150, 0, 0, 0.7)' : 'rgba(80, 80, 80, 0.3)',
+                  border: '2px solid #aa0000',
+                  color: currentCustomer ? '#ff4444' : '#666',
+                  padding: '16px 24px',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                  borderRadius: '6px',
+                  minHeight: '48px',
+                  flex: 1
+                }}
+              >
+                REJECT
+              </button>
+              <button
+                onClick={async () => {
+                  await initAudio();
+                  playMagneticClickSound();
+                  loadNextCustomer();
+                }}
+                style={{
+                  background: 'rgba(0, 0, 150, 0.7)',
+                  border: '2px solid #0088ff',
+                  color: '#00aaff',
+                  padding: '16px 24px',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  minHeight: '48px',
+                  flex: 1
+                }}
+              >
+                NEXT
+              </button>
+            </div>
+          </div>
+
+          {/* Command Input (smaller) */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             background: '#001100',
-            border: '2px solid #004400',
-            padding: '12px',
-            fontSize: '16px',
-            minHeight: '48px'
+            border: '1px solid #004400',
+            padding: '8px',
+            fontSize: '14px',
+            marginTop: '8px',
+            minHeight: '36px'
           }}>
-            <span style={{ marginRight: '12px', color: '#00ff00', fontSize: '18px' }}>BANK&gt;</span>
+            <span style={{ marginRight: '8px', color: '#00ff00', fontSize: '14px' }}>CMD&gt;</span>
             <input
               ref={inputRef}
               type="text"
@@ -770,33 +983,13 @@ function App() {
                 border: 'none',
                 color: '#00ff00',
                 fontFamily: 'inherit',
-                fontSize: '16px',
-                outline: 'none',
-                fontWeight: 'bold'
+                fontSize: '14px',
+                outline: 'none'
               }}
               onKeyDown={handleKeyDown}
               autoComplete="off"
-              placeholder="Type commands here..."
+              placeholder="Optional commands..."
             />
-            <div style={{
-              width: '3px',
-              height: '20px',
-              background: '#00ff00',
-              animation: 'blink 1s infinite',
-              marginLeft: '8px'
-            }}></div>
-          </div>
-          
-          {/* Command Help */}
-          <div style={{
-            fontSize: '14px',
-            color: '#00aa00',
-            marginTop: '8px',
-            padding: '8px',
-            background: 'rgba(0, 40, 0, 0.3)',
-            borderRadius: '4px'
-          }}>
-            <strong>COMMANDS:</strong> HELP | LOOKUP [account] | EXAMINE [doc] | COMPARE [field] | VERIFY [amount] | APPROVE | REJECT | NEXT
           </div>
         </div>
       </div>
