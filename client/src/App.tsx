@@ -198,9 +198,16 @@ function App() {
         setTerminalOutput(prev => [...prev, "> " + command, "LOOKUP initiated.", "Enter: LOOKUP [account_number]"]);
       } else {
         const accountNum = cmd.replace('LOOKUP ', '');
-        setVerificationState(prev => ({...prev, accountLookedUp: true, identityVerified: true}));
-        setTerminalOutput(prev => [...prev, "> " + command, "Looking up account: " + accountNum, "Account found - Customer verified", "SIGNATURE ON FILE: [Type SHOW SIGNATURE to view]", "Balance: $" + Math.floor(Math.random() * 50000)]);
-        playSound('database_lookup');
+        const isCorrectAccount = currentCustomer && accountNum === currentCustomer.accountNumber;
+        
+        if (isCorrectAccount) {
+          setVerificationState(prev => ({...prev, accountLookedUp: true, identityVerified: true}));
+          setTerminalOutput(prev => [...prev, "> " + command, "Looking up account: " + accountNum, "✓ ACCOUNT VERIFIED - Customer match confirmed", "Name: " + currentCustomer.name, "SIGNATURE ON FILE: [Type SHOW SIGNATURE to view]", "Balance: $" + Math.floor(Math.random() * 50000)]);
+          playSound('database_lookup');
+        } else {
+          setTerminalOutput(prev => [...prev, "> " + command, "Looking up account: " + accountNum, "⚠ ACCOUNT MISMATCH - Check customer documents", "Entered: " + accountNum, "Customer Account: " + (currentCustomer?.accountNumber || 'UNKNOWN')]);
+          playSound('error');
+        }
       }
     } else if (cmd === 'SHOW SIGNATURE') {
       if (currentCustomer) {
@@ -319,8 +326,8 @@ function App() {
       width: '100vw',
       display: 'flex',
       flexDirection: 'column',
-      padding: '8px',
-      overflow: 'hidden',
+      padding: '4px',
+      overflow: 'auto',
       position: 'fixed',
       top: 0,
       left: 0,
@@ -365,8 +372,9 @@ function App() {
       <div style={{ 
         display: 'flex', 
         flex: 1, 
-        gap: '8px', 
+        gap: '6px', 
         minHeight: 0,
+        maxHeight: 'calc(100vh - 120px)',
         flexDirection: window.innerWidth < 768 ? 'column' : 'row'
       }}>
         
@@ -584,10 +592,12 @@ function App() {
             
             <button
               onClick={() => {
-                if (currentCustomer) {
-                  handleCommand('LOOKUP ' + currentCustomer.accountNumber);
-                  playSound('button_click');
+                setTerminalOutput(prev => [...prev, "> LOOKUP", "Enter account number to verify:"]);
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                  inputRef.current.placeholder = "Type account number...";
                 }
+                playSound('button_click');
               }}
               disabled={!currentCustomer}
               style={{
