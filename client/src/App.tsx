@@ -393,15 +393,15 @@ function App() {
         {/* Documents Section */}
         <div style={{
           flex: 1,
-          background: 'rgba(0, 30, 0, 0.4)',
-          border: '2px solid #00ff00',
-          padding: '8px',
+          background: 'rgba(0, 40, 0, 0.6)',
+          border: '3px solid #ffff00',
+          padding: '12px',
           borderRadius: '4px',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: window.innerWidth < 768 ? '200px' : 'auto'
+          minHeight: window.innerWidth < 768 ? '250px' : 'auto'
         }}>
-          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: '14px' }}>DOCUMENTS PROVIDED</h3>
+          <h3 style={{ margin: '0 0 12px 0', color: '#ffff00', fontSize: '18px', textAlign: 'center' }}>CUSTOMER DOCUMENTS</h3>
           
           {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
             <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -409,20 +409,19 @@ function App() {
                 <div
                   key={index}
                   style={{
-                    background: selectedDocument === index ? 'rgba(0, 120, 0, 0.5)' : 'rgba(0, 50, 0, 0.3)',
-                    border: selectedDocument === index ? '2px solid #00ff00' : '1px solid #005500',
+                    background: 'rgba(255, 255, 0, 0.1)',
+                    border: '2px solid #ffff00',
                     padding: '16px',
-                    margin: '8px 0',
-                    cursor: 'pointer',
-                    borderRadius: '4px'
+                    margin: '12px 0',
+                    borderRadius: '6px'
                   }}
-                  onClick={() => setSelectedDocument(selectedDocument === index ? null : index)}
                 >
-                  <strong style={{ fontSize: '16px', color: '#00ff00' }}>{doc.title}</strong>
-                  <div style={{ fontSize: '14px', marginTop: '8px' }}>
+                  <strong style={{ fontSize: '18px', color: '#ffff00', display: 'block', marginBottom: '8px' }}>{doc.title}</strong>
+                  <div style={{ fontSize: '16px', lineHeight: '1.4' }}>
                     {Object.entries(doc.data).map(([key, value]) => (
-                      <div key={key} style={{ marginBottom: '4px' }}>
-                        <span style={{ color: '#00ccff' }}>{key.toUpperCase()}:</span> {value}
+                      <div key={key} style={{ marginBottom: '6px', padding: '2px 0' }}>
+                        <span style={{ color: '#00ffff', fontWeight: 'bold' }}>{key.toUpperCase()}:</span>{' '}
+                        <span style={{ color: '#ffffff', fontWeight: 'bold' }}>{value}</span>
                       </div>
                     ))}
                   </div>
