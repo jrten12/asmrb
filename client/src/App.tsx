@@ -1798,9 +1798,8 @@ function App() {
                 <button
                   onClick={() => {
                     if (currentCustomer) {
-                      setTerminalOutput(prev => [...prev, "> LOOKUP", "Accessing bank database..."]);
-                      handleCommand('LOOKUP');
                       playSound('button_click');
+                      handleCommand(`LOOKUP ${currentCustomer.accountNumber}`);
                     }
                   }}
                   disabled={!currentCustomer}
@@ -1822,9 +1821,8 @@ function App() {
                 <button
                   onClick={() => {
                     if (currentCustomer) {
-                      setTerminalOutput(prev => [...prev, "> COMPARE", "Loading signature comparison..."]);
-                      handleCommand('COMPARE');
                       playSound('button_click');
+                      handleCommand('COMPARE');
                     }
                   }}
                   disabled={!currentCustomer}
