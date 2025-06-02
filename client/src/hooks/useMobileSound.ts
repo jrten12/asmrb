@@ -12,20 +12,20 @@ export function useMobileSound(): SoundManager {
   const soundBuffersRef = useRef<Map<string, AudioBuffer>>(new Map());
   const isUnlockedRef = useRef(false);
 
-  // Sound file mappings - correct ASMR sounds for each action
+  // Sound file mappings - fixed ASMR sounds
   const soundFiles = {
-    keyboard: '/keyboard-typing.mp3',          // Typing/keyboard sounds
-    printer: '/dot-matrix-printer-73220.mp3', // Dot matrix printing
-    button_click: '/keyboard-typing.mp3',      // Button presses (keyboard click)
-    success: '/dot-matrix-printer-73220.mp3', // Success actions (printer)
-    error: '/keyboard-typing.mp3',             // Error sounds (keyboard)
-    approve: '/dot-matrix-printer-73220.mp3', // Transaction approval (printer)
-    reject: '/keyboard-typing.mp3',            // Transaction rejection (keyboard)
-    paper_rustle: '/keyboard-typing.mp3',      // Paper handling (keyboard)
-    stamp: '/dot-matrix-printer-73220.mp3',   // Stamping documents (printer)
-    drawer: '/keyboard-typing.mp3',            // Cash drawer (keyboard)
-    cash: '/dot-matrix-printer-73220.mp3',    // Cash counting (printer)
-    receipt: '/dot-matrix-printer-73220.mp3'  // Receipt printing (printer)
+    keyboard: '/keyboard-typing.mp3',          // For actual typing
+    printer: '/dot-matrix-printer-73220.mp3', // For printing only
+    button_click: '/punch-clock.mp3',          // For button clicks
+    success: '/dot-matrix-printer-73220.mp3', // For approvals
+    error: '/punch-clock.mp3',                 // For errors
+    approve: '/dot-matrix-printer-73220.mp3', // For transaction approval
+    reject: '/punch-clock.mp3',                // For rejections
+    paper_rustle: '/punch-clock.mp3',          // For paper handling
+    stamp: '/dot-matrix-printer-73220.mp3',   // For stamping
+    drawer: '/punch-clock.mp3',                // For cash drawer
+    cash: '/punch-clock.mp3',                  // For cash sounds
+    receipt: '/dot-matrix-printer-73220.mp3'  // For receipts
   };
 
   // Initialize AudioContext

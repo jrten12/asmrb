@@ -642,18 +642,16 @@ function App() {
       {showFloatingInput && (
         <div style={{
           position: 'fixed',
-          top: '10px',
-          left: '10px',
-          right: '10px',
+          bottom: '20px',
+          left: '20px',
+          right: '20px',
           width: 'auto',
           background: 'rgba(0, 100, 0, 0.98)',
           border: '3px solid #ffff00',
           borderRadius: '8px',
           padding: '16px',
           zIndex: 9999,
-          boxShadow: '0 4px 20px rgba(255, 255, 0, 0.5)',
-          maxHeight: '200px',
-          overflow: 'visible'
+          boxShadow: '0 -4px 20px rgba(255, 255, 0, 0.5)'
         }}>
           <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: '16px', fontWeight: 'bold' }}>
             💻 TELLER TERMINAL INPUT

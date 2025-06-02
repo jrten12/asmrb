@@ -8,144 +8,37 @@
 }
 
 @media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100vw !important;
-  }
-  
-  /* Ultra-aggressive mobile layout reset - with exceptions */
-  *:not([style*="z-index: 1000"]):not([style*="position: sticky"]):not([style*="position: fixed"]) {
-    position: static !important;
-    float: none !important;
-    clear: both !important;
-    transform: none !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    z-index: auto !important;
-  }
-  
-  /* Force all containers to stack */
-  div, section, article, main {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    min-width: 0 !important;
-    margin: 0 auto !important;
-    padding: 4px !important;
-    box-sizing: border-box !important;
-  }
-  
-  /* Main game container - absolutely vertical */
+  /* Simple mobile layout without breaking functionality */
   .mobile-responsive {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    padding: 4px !important;
-    gap: 6px !important;
-    overflow-x: hidden !important;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
   }
   
-  /* All panels must behave */
   .mobile-panel {
-    display: block !important;
-    width: calc(100vw - 12px) !important;
-    max-width: calc(100vw - 12px) !important;
-    min-width: 0 !important;
-    margin: 3px auto !important;
-    padding: 8px !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    word-wrap: break-word !important;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
   }
   
-  /* Preserve floating panels with high z-index */
-  div[style*="z-index: 9999"] {
-    position: fixed !important;
-    top: 10px !important;
-    left: 10px !important;
-    right: 10px !important;
-    bottom: auto !important;
-    width: auto !important;
-    max-width: calc(100vw - 20px) !important;
-    z-index: 9999 !important;
-    display: block !important;
-  }
-  
-  /* Exception for floating input panel on mobile */
-  div[style*="position: sticky"] {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 1000 !important;
-    width: 100% !important;
-    margin: 0 !important;
-  }
-  
-  /* Input panels */
-  input {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    font-size: 16px !important;
-    padding: 8px !important;
-  }
-  
-  /* Scrollable areas - larger for documents */
   .mobile-scroll {
-    max-height: 250px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
+    max-height: 200px;
+    overflow-y: auto;
   }
   
-  /* Ultra touch-friendly buttons */
-  button, .mobile-button {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 44px !important;
-    padding: 12px 8px !important;
-    margin: 4px 0 !important;
-    font-size: 16px !important;
-    border-radius: 4px !important;
-    touch-action: manipulation !important;
-    box-sizing: border-box !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+  button {
+    min-height: 44px;
+    font-size: 16px;
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 8px;
   }
   
-  /* Typography that fits */
-  h1 { font-size: 16px !important; margin: 4px 0 !important; }
-  h2 { font-size: 14px !important; margin: 4px 0 !important; }
-  h3 { font-size: 12px !important; margin: 4px 0 !important; }
-  p, div, span { 
-    font-size: 12px !important; 
-    line-height: 1.3 !important; 
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-  }
-  
-  /* Fix white background issue */
-  body, html, #root {
-    background-color: #001100 !important;
-    color: #00ff00 !important;
-  }
-  
-  /* Ensure all containers inherit dark background */
-  div {
-    background-color: transparent !important;
-  }
-  
-  /* Override any white backgrounds */
-  .mobile-panel:not([style*="background: rgba(255, 255, 255"]) {
-    background: rgba(0, 50, 0, 0.8) !important;
+  input {
+    font-size: 16px;
+    padding: 8px;
+    width: 100%;
   }
 }
 
