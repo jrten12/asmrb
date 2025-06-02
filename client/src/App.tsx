@@ -1737,7 +1737,11 @@ function App() {
                   </div>
                   
                   {/* Side-by-side comparison */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', 
+                    gap: '8px' 
+                  }}>
                     
                     {/* Bank System Records */}
                     <div style={{

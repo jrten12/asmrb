@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile layout fixes */
+@media (max-width: 768px) {
+  .game-container > div {
+    margin-bottom: 8px !important;
+  }
+  
+  .transaction-console {
+    margin-top: 6px !important;
+    padding: 8px !important;
+  }
+  
+  .customer-info-panel {
+    margin-bottom: 6px !important;
+  }
+  
+  .verification-panel {
+    margin-bottom: 6px !important;
+  }
+  
+  .fraud-detection-panel {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+  }
+}
+
 @keyframes blink {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
