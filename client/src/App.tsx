@@ -804,10 +804,17 @@ function App() {
         ]);
         
         setTimeout(() => {
-          setGamePhase('punch_out');
-          setCurrentCustomer(null);
-          setPunchStatus(`CLOCKED OUT - ${statusColor.toUpperCase()}`);
-          setTerminalOutput([]);
+          // Play punch clock sound for clocking out
+          const punchAudio = new Audio('/punch-clock.mp3');
+          punchAudio.volume = 0.8;
+          punchAudio.play().catch(e => console.log('Audio play failed:', e));
+          
+          setPunchStatus('ENDING SHIFT');
+          setTimeout(() => {
+            setGamePhase('punch_out');
+            setCurrentCustomer(null);
+            setTerminalOutput([]);
+          }, 1500);
         }, 2000);
       }, 1500);
     } else if (cmd === 'HELP') {
@@ -1090,15 +1097,16 @@ function App() {
   };
 
   const playTimeclockPunch = () => {
-    // Beautiful mechanical punch clock with ASMR sounds
-    playSound('card_insert');
-    setTimeout(() => playSound('mechanical_whir'), 150);
-    setTimeout(() => playSound('punch_clock_in'), 300);
-    setTimeout(() => playSound('completion_bell'), 600);
+    // Play your authentic punch clock audio immediately when card goes in
+    const punchAudio = new Audio('/punch-clock.mp3');
+    punchAudio.volume = 0.8;
+    punchAudio.play().catch(e => console.log('Audio play failed:', e));
+    
+    // Show status after the punch sound
     setTimeout(() => {
-      setPunchStatus('CLOCKED IN - GREEN');
-      punchIn();
-    }, 1000);
+      setPunchStatus('BEGIN SHIFT');
+      setTimeout(() => punchIn(), 1000);
+    }, 800);
   };
 
   const getSmartPlaceholder = (): string => {
@@ -1179,24 +1187,28 @@ function App() {
             {punchStatus && (
               <div style={{
                 marginTop: '10px',
-                padding: '8px',
-                borderRadius: '4px',
-                fontSize: '12px',
+                padding: '12px',
+                borderRadius: '6px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 textAlign: 'center',
-                backgroundColor: punchStatus.includes('GREEN') ? 'rgba(0, 255, 0, 0.2)' : 
-                                punchStatus.includes('YELLOW') ? 'rgba(255, 255, 0, 0.2)' : 
-                                'rgba(255, 0, 0, 0.2)',
-                color: punchStatus.includes('GREEN') ? '#00ff00' : 
-                       punchStatus.includes('YELLOW') ? '#ffff00' : 
-                       '#ff0000',
-                border: `1px solid ${punchStatus.includes('GREEN') ? '#00ff00' : 
-                        punchStatus.includes('YELLOW') ? '#ffff00' : '#ff0000'}`,
-                textShadow: `0 0 8px ${punchStatus.includes('GREEN') ? '#00ff00' : 
-                            punchStatus.includes('YELLOW') ? '#ffff00' : '#ff0000'}`,
-                animation: 'statusGlow 2s ease-in-out infinite alternate'
+                backgroundColor: punchStatus === 'BEGIN SHIFT' ? 'rgba(0, 255, 0, 0.3)' : 
+                                punchStatus === 'ENDING SHIFT' ? 'rgba(255, 0, 0, 0.3)' : 
+                                'rgba(255, 255, 0, 0.2)',
+                color: punchStatus === 'BEGIN SHIFT' ? '#00ff00' : 
+                       punchStatus === 'ENDING SHIFT' ? '#ff0000' : 
+                       '#ffff00',
+                border: `2px solid ${punchStatus === 'BEGIN SHIFT' ? '#00ff00' : 
+                        punchStatus === 'ENDING SHIFT' ? '#ff0000' : '#ffff00'}`,
+                textShadow: `0 0 15px ${punchStatus === 'BEGIN SHIFT' ? '#00ff00' : 
+                            punchStatus === 'ENDING SHIFT' ? '#ff0000' : '#ffff00'}`,
+                boxShadow: `0 0 20px ${punchStatus === 'BEGIN SHIFT' ? '#00ff00' : 
+                           punchStatus === 'ENDING SHIFT' ? '#ff0000' : '#ffff00'}`,
+                animation: 'statusGlow 1.5s ease-in-out infinite alternate'
               }}>
-                {punchStatus}
+                {punchStatus === 'BEGIN SHIFT' && '🟢 BEGIN SHIFT'}
+                {punchStatus === 'ENDING SHIFT' && '🔴 ENDING SHIFT'}
+                {punchStatus !== 'BEGIN SHIFT' && punchStatus !== 'ENDING SHIFT' && punchStatus}
               </div>
             )}
           </div>
