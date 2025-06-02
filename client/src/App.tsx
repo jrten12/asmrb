@@ -454,7 +454,22 @@ function App() {
         setTerminalOutput(prev => [...prev, "Next customer please."]);
       }, 1500);
     } else if (cmd === 'HELP') {
-      setTerminalOutput(prev => [...prev, "> " + command, "Manual Verification Commands:", "LOOKUP [account_number] - Get system data", "VERIFY NAME [full_name] - Check name", "VERIFY DOB [YYYY-MM-DD] - Check date of birth", "COMPARE SIGNATURE - View signatures", "PROCESS [DEPOSIT/WITHDRAWAL/WIRE] [amount]", "APPROVE - Approve after all verifications", "REJECT - Reject transaction"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Manual Verification Commands:", "LOOKUP [account_number] - Get system data", "COMPARE SIGNATURE - View signatures", "PROCESS [DEPOSIT/WITHDRAWAL/WIRE] [amount]", "APPROVE - Approve after all verifications", "REJECT - Reject transaction"]);
+    } else if (cmd === 'KONAMI' || cmd === 'UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A') {
+      setTerminalOutput(prev => [...prev, "> " + command, "=== EASTER EGG ACTIVATED ===", "You found the classic code!", "30 lives granted... wait, wrong system!", "=========================="]);
+      playSound('easter_melody');
+    } else if (cmd === 'MATRIX' || cmd === 'WAKE UP NEO') {
+      setTerminalOutput(prev => [...prev, "> " + command, "Follow the white rabbit...", "The Matrix has you...", "Unfortunately, no one can be told what the Matrix is."]);
+      playSound('matrix_code');
+    } else if (cmd === 'DIAL' || cmd === 'MODEM') {
+      setTerminalOutput(prev => [...prev, "> " + command, "Connecting to BBS...", "CARRIER DETECTED", "Welcome to 1995!"]);
+      playSound('retro_modem');
+    } else if (cmd === 'SECRET' || cmd === 'ADMIN' || cmd === 'ROOT') {
+      setTerminalOutput(prev => [...prev, "> " + command, "Access Level: SUPERVISOR", "Hidden features unlocked", "You are now in developer mode"]);
+      playSound('secret_unlock');
+    } else if (cmd === 'PLAY MUSIC' || cmd === 'JUKEBOX') {
+      setTerminalOutput(prev => [...prev, "> " + command, "Now playing: Bank Teller Blues", "♪ ♫ ♪ ♫ ♪ ♫ ♪ ♫"]);
+      playSound('easter_melody');
     } else {
       setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Command not recognized", "Type HELP for available commands", "Check spelling and try again"]);
       playSound('reject');
@@ -492,7 +507,7 @@ function App() {
       display: 'flex',
       flexDirection: 'column',
       padding: '4px',
-      paddingBottom: '120px',
+      paddingBottom: '20px',
       overflow: 'auto',
       position: 'fixed',
       top: 0,
@@ -828,41 +843,91 @@ function App() {
             ))}
           </div>
 
-          {/* Terminal Input - Always at Bottom */}
+          {/* Quick Command Buttons Above Input */}
+          {currentCustomer && (
+            <div style={{
+              marginTop: '8px',
+              padding: '8px',
+              background: 'rgba(0, 40, 0, 0.3)',
+              border: '1px solid #00aa00',
+              borderRadius: '4px'
+            }}>
+              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00cccc' }}>ESSENTIAL COMMANDS:</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                <button
+                  onClick={() => {
+                    playSound('button_click');
+                    if (inputRef.current) {
+                      inputRef.current.value = 'LOOKUP ';
+                      inputRef.current.focus();
+                    }
+                  }}
+                  disabled={!currentCustomer}
+                  style={{
+                    background: currentCustomer ? 'rgba(0, 80, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
+                    border: '1px solid #00aaaa',
+                    color: currentCustomer ? '#00ffff' : '#666666',
+                    padding: '10px',
+                    fontSize: '12px',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  LOOKUP ACCOUNT
+                </button>
+                <button
+                  onClick={() => {
+                    playSound('button_click');
+                    if (inputRef.current) {
+                      inputRef.current.value = 'COMPARE SIGNATURE';
+                      inputRef.current.focus();
+                    }
+                  }}
+                  disabled={!currentCustomer}
+                  style={{
+                    background: currentCustomer ? 'rgba(0, 0, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
+                    border: '1px solid #0088ff',
+                    color: currentCustomer ? '#00aaff' : '#666666',
+                    padding: '10px',
+                    fontSize: '12px',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  SIGNATURE CHECK
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Terminal Input - At Bottom of Section */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center',
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            right: '20px',
+            marginTop: '8px',
             background: '#000000',
-            padding: '12px',
-            borderTop: '2px solid #00ff00',
-            borderLeft: '2px solid #00ff00',
-            borderRight: '2px solid #00ff00',
-            borderBottom: '2px solid #00ff00',
-            borderRadius: '6px',
-            zIndex: 100,
-            boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+            padding: '8px',
+            border: '1px solid #00ff00',
+            borderRadius: '4px'
           }}>
-            <span style={{ marginRight: '12px', color: '#00ff00', fontWeight: 'bold', fontSize: '18px' }}>&gt;</span>
+            <span style={{ marginRight: '8px', color: '#00ff00', fontWeight: 'bold' }}>&gt;</span>
             <input
               ref={inputRef}
               type="text"
-              placeholder="Type commands here (LOOKUP, COMPARE SIGNATURE, APPROVE, REJECT)..."
+              placeholder="Type commands here..."
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
               style={{
                 flex: 1,
                 background: '#001100',
-                border: '1px solid #00aa00',
+                border: 'none',
                 color: '#00ff00',
-                padding: '12px',
-                fontSize: '16px',
+                padding: '8px',
+                fontSize: '14px',
                 fontFamily: 'monospace',
-                outline: 'none',
-                borderRadius: '4px'
+                outline: 'none'
               }}
             />
           </div>
