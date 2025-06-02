@@ -442,48 +442,22 @@ function App() {
         }
         
         playSound('account_verification');
-        setTerminalOutput(prev => [...prev, "> " + command, "CONNECTING TO BANK DATABASE...", "SEARCHING ACCOUNT RECORDS...", "VALIDATING ACCOUNT NUMBER..."]);
+        setTerminalOutput(prev => [...prev, "> " + command, "CONNECTING TO DATABASE...", "SEARCHING..."]);
         
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
             if (currentCustomer.isFraud) {
-              setTerminalOutput(prev => [...prev, 
-                "========== ACCOUNT LOOKUP FAILED ==========",
-                "✗ ACCOUNT NOT FOUND IN SYSTEM",
-                "✗ ACCOUNT NUMBER: " + accountNum,
-                "✗ STATUS: DOES NOT EXIST",
-                "*** INVALID ACCOUNT NUMBER ***",
-                "RECOMMENDATION: VERIFY DOCUMENTS",
-                "========================================"
-              ]);
+              setTerminalOutput(prev => [...prev, "✗ ACCOUNT NOT FOUND"]);
               playSound('reject');
             } else if (accountNum === currentCustomer.accountNumber) {
               const balance = Math.floor(Math.random() * 50000) + 5000;
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true}));
-              setTerminalOutput(prev => [...prev, 
-                "========== ACCOUNT LOOKUP SUCCESS ==========",
-                "✓ ACCOUNT VERIFIED: " + accountNum,
-                "✓ ACCOUNT HOLDER: " + currentCustomer.name,
-                "✓ STATUS: ACTIVE",
-                "✓ CURRENT BALANCE: $" + balance.toLocaleString(),
-                "✓ LAST ACTIVITY: 05/28/2025",
-                "✓ ACCOUNT TYPE: CHECKING",
-                "PROCEED TO SIGNATURE VERIFICATION",
-                "========================================="
-              ]);
+              setTerminalOutput(prev => [...prev, "✓ ACCOUNT VERIFIED"]);
               playSound('approve');
             } else {
-              setTerminalOutput(prev => [...prev, 
-                "========== ACCOUNT LOOKUP FAILED ==========",
-                "✗ ACCOUNT NUMBER MISMATCH",
-                "✗ ENTERED: " + accountNum,
-                "✗ EXPECTED: " + currentCustomer.accountNumber,
-                "✗ VERIFICATION FAILED",
-                "CHECK CUSTOMER DOCUMENTS AGAIN",
-                "========================================"
-              ]);
+              setTerminalOutput(prev => [...prev, "✗ ACCOUNT MISMATCH"]);
               playSound('reject');
             }
           }, 800);
@@ -1592,27 +1566,41 @@ function App() {
             </div>
           )}
 
-          {/* Verification Status */}
+          {/* Verification Status - Compact */}
           {currentCustomer && (
             <div style={{
-              marginBottom: '12px',
-              padding: '12px',
+              marginBottom: '8px',
+              padding: '8px',
               background: 'rgba(0, 0, 40, 0.4)',
               border: '2px solid #0088ff',
-              borderRadius: '6px'
+              borderRadius: '4px'
             }}>
-              <div style={{ fontSize: '14px', marginBottom: '8px', color: '#00aaff', fontWeight: 'bold' }}>VERIFICATION STATUS:</div>
-              <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
-                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888', marginBottom: '4px' }}>
-                  {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup Complete
-                </div>
-                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888', marginBottom: '4px' }}>
-                  {verificationState.signatureCompared ? '✓' : '○'} Signature Verified
-                </div>
-                <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
-                  {verificationState.transactionProcessed ? '✓' : '○'} Transaction Processed
-                </div>
+              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00aaff', fontWeight: 'bold' }}>VERIFICATION:</div>
+              <div style={{ fontSize: '11px', display: 'flex', gap: '12px' }}>
+                <span style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT' : '○ ACCOUNT'}
+                </span>
+                <span style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888' }}>
+                  {verificationState.signatureCompared ? '✓ SIGNATURE' : '○ SIGNATURE'}
+                </span>
+                <span style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
+                  {verificationState.transactionProcessed ? '✓ PROCESSED' : '○ PROCESSED'}
+                </span>
               </div>
+              {/* Account Info Display - Only when looked up */}
+              {verificationState.accountLookedUp && (
+                <div style={{
+                  marginTop: '6px',
+                  padding: '6px',
+                  background: 'rgba(0, 50, 0, 0.6)',
+                  border: '1px solid #00aa00',
+                  borderRadius: '3px',
+                  fontSize: '10px',
+                  color: '#00ff00'
+                }}>
+                  ✓ ACCT: {currentCustomer.accountNumber} | BAL: ${accountBalance.toLocaleString()} | STATUS: ACTIVE
+                </div>
+              )}
             </div>
           )}
 
