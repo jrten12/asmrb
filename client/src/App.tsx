@@ -2468,6 +2468,7 @@ function App() {
             }}>
               <button
                 onClick={() => {
+                  setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: false}));
                   setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
                   setTerminalOutput(prev => [...prev, 
                     "========== SIGNATURE VERIFIED ==========",
