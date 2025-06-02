@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMobileSound } from './hooks/useMobileSound';
 
 interface Customer {
   name: string;
@@ -66,47 +67,16 @@ function App() {
   
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sound effects
-  const playSound = (type: string) => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      switch (type) {
-        case 'keyboard':
-          oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-          break;
-        case 'printer':
-          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-          break;
-        case 'approve':
-          oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
-          break;
-        case 'reject':
-          oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-          break;
-        default:
-          oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-      }
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
-    } catch (error) {
-      console.log('Audio not available');
+  // Mobile sound system with ASMR audio files
+  const { playSound, isReady: soundReady, unlock: unlockAudio } = useMobileSound();
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+
+  // Audio unlock handler for mobile browsers
+  const handleFirstInteraction = () => {
+    if (!audioUnlocked && soundReady) {
+      unlockAudio();
+      setAudioUnlocked(true);
+      playSound('keyboard');
     }
   };
 
@@ -588,19 +558,46 @@ function App() {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <h3 style={{ color: '#ffff00', fontSize: '16px', marginBottom: '8px' }}>Documents:</h3>
+            <h3 style={{ color: '#ffff00', fontSize: '18px', marginBottom: '12px', textAlign: 'center' }}>📄 Customer Documents:</h3>
             {currentCustomer.documents.map((doc, index) => (
               <div key={index} style={{
-                background: 'rgba(255, 255, 0, 0.1)',
-                border: '1px solid #ffff00',
-                borderRadius: '4px',
-                padding: '12px',
-                marginBottom: '8px'
+                background: 'rgba(255, 255, 0, 0.15)',
+                border: '2px solid #ffff00',
+                borderRadius: '6px',
+                padding: window.innerWidth < 768 ? '16px' : '12px',
+                marginBottom: '12px',
+                boxShadow: '0 2px 8px rgba(255, 255, 0, 0.3)'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{doc.title}</div>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  marginBottom: '8px', 
+                  fontSize: window.innerWidth < 768 ? '16px' : '14px',
+                  color: '#ffff00',
+                  textAlign: 'center',
+                  borderBottom: '1px solid #ffff00',
+                  paddingBottom: '4px'
+                }}>
+                  📋 {doc.title}
+                </div>
                 {Object.entries(doc.data).map(([key, value]) => (
-                  <div key={key} style={{ fontSize: '14px' }}>
-                    <strong>{key}:</strong> {value}
+                  <div key={key} style={{ 
+                    fontSize: window.innerWidth < 768 ? '15px' : '14px',
+                    marginBottom: '6px',
+                    padding: '4px 8px',
+                    background: 'rgba(0, 0, 0, 0.2)',
+                    borderRadius: '3px',
+                    display: 'flex',
+                    flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+                    gap: window.innerWidth < 768 ? '2px' : '8px'
+                  }}>
+                    <span style={{ 
+                      color: '#00dddd', 
+                      fontWeight: 'bold',
+                      minWidth: window.innerWidth < 768 ? 'auto' : '120px'
+                    }}>
+                      {key}:
+                    </span>
+                    <span style={{ color: '#ffffff' }}>{value}</span>
                   </div>
                 ))}
               </div>
