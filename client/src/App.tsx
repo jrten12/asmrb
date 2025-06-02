@@ -491,9 +491,10 @@ function App() {
             if (currentCustomer.isFraud) {
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
-                "*** ACCOUNT NOT FOUND ***",
+                "❌❌❌ ACCOUNT NOT FOUND ❌❌❌",
                 "STATUS: INVALID - NO RECORD IN SYSTEM",
-                "RESULT: FRAUD DETECTED"
+                "WARNING: POTENTIAL FRAUD DETECTED",
+                "ACTION: REJECT TRANSACTION IMMEDIATELY"
               ]);
               playSound('reject');
             } else if (accountNum === currentCustomer.accountNumber) {
@@ -502,9 +503,10 @@ function App() {
               setVerificationState(prev => ({...prev, accountLookedUp: true}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
-                "✓ ACCOUNT VERIFIED - RECORD FOUND",
-                "COMPARISON PANEL ACTIVATED",
-                "CHECK DOCUMENTS SECTION FOR FRAUD DETECTION"
+                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+                "STATUS: ACTIVE CUSTOMER",
+                "BALANCE: $" + balance.toLocaleString(),
+                "BANK RECORDS NOW DISPLAYED BELOW"
               ]);
               playSound('approve');
             } else {
