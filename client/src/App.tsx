@@ -525,8 +525,8 @@ function App() {
       const name = currentCustomer.name;
       const isFraudulent = Math.random() < 0.3; // 30% fraud rate distributed randomly
       
-      // Bank signature (on file) - stylized versions
-      const bankSignatures = {
+      // Bank signature (on file) - stylized versions  
+      const bankSignatures: Record<string, string> = {
         "John Smith": "𝒥𝑜𝒽𝓃 𝒮𝓂𝒾𝓉𝒽",
         "Sarah Johnson": "𝒮𝒶𝓇𝒶𝒽 𝒥𝑜𝒽𝓃𝓈𝑜𝓃",
         "Mike Wilson": "𝑀𝒾𝓀𝑒 𝒲𝒾𝓁𝓈𝑜𝓃",
@@ -1922,7 +1922,7 @@ function App() {
               lineHeight: '1.3'
             }}>
               Compare signatures carefully for differences in letter formation, spacing, and style.<br/>
-              Use APPROVE/REJECT buttons after comparison.
+              Make your determination based on visual comparison.
             </div>
             
             <div style={{
@@ -1932,15 +1932,75 @@ function App() {
             }}>
               <button
                 onClick={() => {
-                  setSignatureModal({isOpen: false, signature: ''});
-                  playSound('modal_close');
+                  setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
+                  setTerminalOutput(prev => [...prev, 
+                    "========== SIGNATURE VERIFIED ==========",
+                    "✓ SIGNATURES MATCH",
+                    "✓ VISUAL COMPARISON: AUTHENTIC",
+                    "✓ HANDWRITING ANALYSIS: CONSISTENT",
+                    "STATUS: IDENTITY CONFIRMED",
+                    "PROCEED WITH TRANSACTION",
+                    "======================================"
+                  ]);
+                  playSound('approve');
                 }}
                 style={{
-                  background: 'rgba(0, 100, 0, 0.6)',
+                  background: 'rgba(0, 120, 0, 0.8)',
                   border: '2px solid #00ff00',
                   color: '#00ff00',
                   padding: '12px 24px',
-                  fontSize: '16px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                ✓ VALID
+              </button>
+              
+              <button
+                onClick={() => {
+                  setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
+                  setTerminalOutput(prev => [...prev, 
+                    "========== SIGNATURE REJECTED ==========",
+                    "✗ SIGNATURES DO NOT MATCH",
+                    "✗ VISUAL COMPARISON: INCONSISTENT",
+                    "✗ HANDWRITING ANALYSIS: SUSPICIOUS",
+                    "STATUS: IDENTITY NOT CONFIRMED",
+                    "*** POTENTIAL FRAUD DETECTED ***",
+                    "TRANSACTION DENIED - CALL SECURITY",
+                    "======================================="
+                  ]);
+                  playSound('reject');
+                  handleError();
+                }}
+                style={{
+                  background: 'rgba(120, 0, 0, 0.8)',
+                  border: '2px solid #ff0000',
+                  color: '#ff0000',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                ✗ FRAUD
+              </button>
+              
+              <button
+                onClick={() => {
+                  setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
+                  playSound('modal_close');
+                }}
+                style={{
+                  background: 'rgba(60, 60, 60, 0.8)',
+                  border: '2px solid #888888',
+                  color: '#cccccc',
+                  padding: '12px 24px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   borderRadius: '4px',
