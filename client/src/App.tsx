@@ -2274,19 +2274,25 @@ function App() {
           </div>
 
           {/* Terminal Output */}
-          <div style={{
-            flex: 1,
-            background: '#000000',
-            border: '2px solid #00ff00',
-            padding: '12px',
-            borderRadius: '4px',
-            overflow: 'auto',
-            marginBottom: '12px',
-            fontSize: '15px',
-            fontFamily: 'monospace',
-            lineHeight: '1.5',
-            color: '#00ff00'
-          }}>
+          <div 
+            ref={(el) => {
+              if (el) {
+                el.scrollTop = el.scrollHeight;
+              }
+            }}
+            style={{
+              flex: 1,
+              background: '#000000',
+              border: '2px solid #00ff00',
+              padding: '12px',
+              borderRadius: '4px',
+              overflow: 'auto',
+              marginBottom: '12px',
+              fontSize: '15px',
+              fontFamily: 'monospace',
+              lineHeight: '1.5',
+              color: '#00ff00'
+            }}>
             {terminalOutput.map((line, index) => (
               <div key={index} style={{ 
                 marginBottom: '3px',
