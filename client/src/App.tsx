@@ -327,20 +327,35 @@ function App() {
           setTimeout(() => createTone(800, 0.04, 0.06), 50);
           break;
         case 'punch_clock_in':
-          // Beautiful mechanical punch clock - clocking in
-          createTone(800, 0.08, 0.06);
-          setTimeout(() => createTone(600, 0.12, 0.08), 60);
-          setTimeout(() => createNoise(0.025, 0.04), 120);
-          setTimeout(() => createTone(1000, 0.06, 0.04), 180);
-          setTimeout(() => createTone(1200, 0.08, 0.05), 220);
+          // Authentic mechanical punch clock - clocking in
+          // Card insertion mechanism
+          createTone(300, 0.15, 0.08);
+          createNoise(0.08, 0.12);
+          // Heavy mechanical punch
+          setTimeout(() => {
+            createTone(150, 0.25, 0.15);
+            createTone(200, 0.2, 0.12);
+            createNoise(0.15, 0.08);
+          }, 120);
+          // Metal settling and spring mechanism
+          setTimeout(() => createTone(800, 0.08, 0.06), 200);
+          setTimeout(() => createTone(600, 0.06, 0.04), 250);
+          // Completion bell
+          setTimeout(() => createTone(1200, 0.1, 0.08), 320);
           break;
         case 'punch_clock_out':
-          // Beautiful mechanical punch clock - clocking out
-          createTone(1200, 0.08, 0.06);
-          setTimeout(() => createTone(1000, 0.12, 0.08), 60);
-          setTimeout(() => createNoise(0.025, 0.04), 120);
-          setTimeout(() => createTone(600, 0.06, 0.04), 180);
-          setTimeout(() => createTone(400, 0.08, 0.05), 220);
+          // Authentic mechanical punch clock - clocking out
+          // Similar but slightly different tone sequence
+          createTone(350, 0.15, 0.08);
+          createNoise(0.08, 0.12);
+          setTimeout(() => {
+            createTone(180, 0.25, 0.15);
+            createTone(220, 0.2, 0.12);
+            createNoise(0.15, 0.08);
+          }, 120);
+          setTimeout(() => createTone(700, 0.08, 0.06), 200);
+          setTimeout(() => createTone(500, 0.06, 0.04), 250);
+          setTimeout(() => createTone(1000, 0.1, 0.08), 320);
           break;
         case 'mechanical_whir':
           // Internal mechanism engaging
