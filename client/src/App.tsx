@@ -1611,7 +1611,7 @@ function App() {
       )}
 
       {/* Main Content */}
-      <div style={{ 
+      <div className="game-layout" style={{ 
         display: 'flex', 
         flex: 1, 
         gap: window.innerWidth < 768 ? '4px' : '8px', 
@@ -1622,7 +1622,7 @@ function App() {
       }}>
         
         {/* Enhanced Documents Section - Clearly Visible */}
-        <div style={{
+        <div className="game-documents game-panel" style={{
           background: 'linear-gradient(145deg, rgba(0, 60, 0, 0.95), rgba(0, 40, 0, 0.9))',
           border: '3px solid #ffff00',
           padding: window.innerWidth < 768 ? '6px' : '16px',
@@ -1819,7 +1819,7 @@ function App() {
         </div>
 
         {/* Terminal Section */}
-        <div style={{
+        <div className="game-terminal game-panel" style={{
           flex: 1,
           background: 'rgba(0, 30, 0, 0.4)',
           border: '2px solid #00ff00',
