@@ -32,6 +32,7 @@ interface Document {
 
 function App() {
   const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('punch_in');
+  const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
     "FIRST NATIONAL BANK SYSTEM v2.1",
@@ -808,21 +809,21 @@ function App() {
       setTerminalOutput(prev => [...prev, "> " + command, "PUNCHING OUT...", "CALCULATING SHIFT TIME...", "UPDATING TIMESHEET..."]);
       
       setTimeout(() => {
-        const shiftPerformance = score > 500 ? 'EXCELLENT' : score > 200 ? 'GOOD' : 'NEEDS IMPROVEMENT';
-        const statusColor = score > 500 ? 'green' : score > 200 ? 'yellow' : 'red';
+        const shiftPerformance = gameScore.score > 500 ? 'EXCELLENT' : gameScore.score > 200 ? 'GOOD' : 'NEEDS IMPROVEMENT';
+        const statusColor = gameScore.score > 500 ? 'green' : gameScore.score > 200 ? 'yellow' : 'red';
         
         setTerminalOutput(prev => [...prev, 
           "========== SHIFT COMPLETE ==========",
           `PERFORMANCE: ${shiftPerformance}`,
-          `TRANSACTIONS: ${transactionsCompleted}`,
-          `SCORE: ${score}`,
-          `ERRORS: ${errors}`,
+          `TRANSACTIONS: ${gameScore.correctTransactions}`,
+          `SCORE: ${gameScore.score}`,
+          `ERRORS: ${gameScore.errors}`,
           "RETURNING TO TIME CLOCK...",
           "===================================="
         ]);
         
         setTimeout(() => {
-          setGamePhase('punch');
+          setGamePhase('punch_out');
           setCurrentCustomer(null);
           setPunchStatus(`CLOCKED OUT - ${statusColor.toUpperCase()}`);
           setTerminalOutput([]);
@@ -1108,14 +1109,15 @@ function App() {
   };
 
   const playTimeclockPunch = () => {
-    // Enhanced multi-layered time clock punch sound sequence
+    // Beautiful mechanical punch clock with ASMR sounds
     playSound('card_insert');
     setTimeout(() => playSound('mechanical_whir'), 150);
-    setTimeout(() => playSound('heavy_stamp'), 300);
-    setTimeout(() => playSound('metal_clang'), 350);
-    setTimeout(() => playSound('spring_bounce'), 450);
+    setTimeout(() => playSound('punch_clock_in'), 300);
     setTimeout(() => playSound('completion_bell'), 600);
-    setTimeout(() => punchIn(), 1000);
+    setTimeout(() => {
+      setPunchStatus('CLOCKED IN - GREEN');
+      punchIn();
+    }, 1000);
   };
 
   const getSmartPlaceholder = (): string => {
@@ -1192,6 +1194,30 @@ function App() {
             <div style={{ color: '#00cccc', fontSize: '14px', marginTop: '5px' }}>
               FIRST NATIONAL BANK
             </div>
+            {/* Punch Status Display */}
+            {punchStatus && (
+              <div style={{
+                marginTop: '10px',
+                padding: '8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                backgroundColor: punchStatus.includes('GREEN') ? 'rgba(0, 255, 0, 0.2)' : 
+                                punchStatus.includes('YELLOW') ? 'rgba(255, 255, 0, 0.2)' : 
+                                'rgba(255, 0, 0, 0.2)',
+                color: punchStatus.includes('GREEN') ? '#00ff00' : 
+                       punchStatus.includes('YELLOW') ? '#ffff00' : 
+                       '#ff0000',
+                border: `1px solid ${punchStatus.includes('GREEN') ? '#00ff00' : 
+                        punchStatus.includes('YELLOW') ? '#ffff00' : '#ff0000'}`,
+                textShadow: `0 0 8px ${punchStatus.includes('GREEN') ? '#00ff00' : 
+                            punchStatus.includes('YELLOW') ? '#ffff00' : '#ff0000'}`,
+                animation: 'statusGlow 2s ease-in-out infinite alternate'
+              }}>
+                {punchStatus}
+              </div>
+            )}
           </div>
 
           {/* Card Slot */}
