@@ -641,17 +641,19 @@ function App() {
       {/* Floating Input Panel */}
       {showFloatingInput && (
         <div style={{
-          position: window.innerWidth < 768 ? 'sticky' : 'fixed',
-          top: window.innerWidth < 768 ? '0' : '50%',
-          left: window.innerWidth < 768 ? '0' : '50%',
-          transform: window.innerWidth < 768 ? 'none' : 'translate(-50%, -50%)',
-          width: window.innerWidth < 768 ? '100%' : '400px',
-          background: 'rgba(0, 100, 0, 0.95)',
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          right: '10px',
+          width: 'auto',
+          background: 'rgba(0, 100, 0, 0.98)',
           border: '3px solid #ffff00',
           borderRadius: '8px',
-          padding: '20px',
-          zIndex: 1000,
-          boxShadow: '0 4px 20px rgba(255, 255, 0, 0.3)'
+          padding: '16px',
+          zIndex: 9999,
+          boxShadow: '0 4px 20px rgba(255, 255, 0, 0.5)',
+          maxHeight: '200px',
+          overflow: 'visible'
         }}>
           <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: '16px', fontWeight: 'bold' }}>
             💻 TELLER TERMINAL INPUT
@@ -663,18 +665,19 @@ function App() {
             placeholder={commandPrefix}
             onKeyPress={(e) => {
               handleFirstInteraction();
-              playSound('keyboard');
+              if (e.key !== 'Enter') {
+                playSound('keyboard');
+              }
               if (e.key === 'Enter') {
                 processCommand(e.currentTarget.value);
               }
             }}
-            onChange={() => {
+            onInput={() => {
               handleFirstInteraction();
               playSound('keyboard');
             }}
             onFocus={() => {
               handleFirstInteraction();
-              playSound('keyboard');
             }}
             style={{
               width: '100%',
@@ -690,14 +693,14 @@ function App() {
           <button
             onClick={() => {
               handleFirstInteraction();
-              playSound('keyboard');
+              playSound('printer');
               if (inputRef.current) {
                 processCommand(inputRef.current.value);
               }
             }}
             onTouchStart={() => {
               handleFirstInteraction();
-              playSound('keyboard');
+              playSound('button_click');
             }}
             style={{
               marginTop: '8px',
