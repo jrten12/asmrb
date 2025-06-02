@@ -11,6 +11,19 @@ interface Customer {
   fraudType: number;
 }
 
+interface GameScore {
+  score: number;
+  correctTransactions: number;
+  errors: number;
+  timeOnShift: number;
+}
+
+interface LeaderboardEntry {
+  name: string;
+  score: number;
+  date: string;
+}
+
 interface Document {
   type: string;
   title: string;
@@ -18,24 +31,30 @@ interface Document {
 }
 
 function App() {
+  const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('punch_in');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
     "FIRST NATIONAL BANK SYSTEM v2.1",
     "TELLER AUTHENTICATION: APPROVED",
     "",
-    "Tap CALL CUSTOMER to begin"
+    "Ready for customer service"
   ]);
+  const [gameScore, setGameScore] = useState<GameScore>({
+    score: 0,
+    correctTransactions: 0,
+    errors: 0,
+    timeOnShift: 0
+  });
+  const [shiftStartTime, setShiftStartTime] = useState<number>(0);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
-    nameVerified: false,
-    dobVerified: false,
-    addressVerified: false,
     signatureCompared: false,
     transactionProcessed: false
   });
   const [signatureModal, setSignatureModal] = useState<{isOpen: boolean, signature: string}>({isOpen: false, signature: ''});
-  const [selectedTransactionType, setSelectedTransactionType] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState<'lookup' | 'signature' | 'process' | 'approve'>('lookup');
+  const [waitingForInput, setWaitingForInput] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -496,6 +515,286 @@ function App() {
       playSound('keypress');
     }
   };
+
+  const punchIn = () => {
+    playSound('punch_clock');
+    setShiftStartTime(Date.now());
+    setGamePhase('working');
+    setTerminalOutput([
+      "SHIFT STARTED - " + new Date().toLocaleTimeString(),
+      "Welcome to First National Bank",
+      "Ready for customer service",
+      "",
+      "Type HELP for commands or click CALL CUSTOMER"
+    ]);
+  };
+
+  const punchOut = () => {
+    playSound('punch_clock');
+    const timeWorked = Math.floor((Date.now() - shiftStartTime) / 60000);
+    setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
+    
+    if (gameScore.score >= getMinScoreForLeaderboard()) {
+      setGamePhase('leaderboard');
+    } else {
+      setGamePhase('punch_in');
+      resetGame();
+    }
+  };
+
+  const resetGame = () => {
+    setGameScore({ score: 0, correctTransactions: 0, errors: 0, timeOnShift: 0 });
+    setCurrentCustomer(null);
+    resetVerificationState();
+    setTerminalOutput([
+      "SHIFT ENDED",
+      "Thank you for your service",
+      "",
+      "Ready for next shift"
+    ]);
+  };
+
+  const getMinScoreForLeaderboard = (): number => {
+    const leaderboard = getLeaderboard();
+    return leaderboard.length >= 10 ? leaderboard[9].score : 0;
+  };
+
+  const getLeaderboard = (): LeaderboardEntry[] => {
+    const stored = localStorage.getItem('bankTellerLeaderboard');
+    return stored ? JSON.parse(stored) : [];
+  };
+
+  const addToLeaderboard = (name: string) => {
+    const leaderboard = getLeaderboard();
+    const newEntry: LeaderboardEntry = {
+      name,
+      score: gameScore.score,
+      date: new Date().toLocaleDateString()
+    };
+    leaderboard.push(newEntry);
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard.splice(10);
+    localStorage.setItem('bankTellerLeaderboard', JSON.stringify(leaderboard));
+    setGamePhase('punch_in');
+    resetGame();
+  };
+
+  const handleCorrectTransaction = () => {
+    setGameScore(prev => ({
+      ...prev,
+      score: prev.score + 100,
+      correctTransactions: prev.correctTransactions + 1
+    }));
+  };
+
+  const handleError = () => {
+    const newErrors = gameScore.errors + 1;
+    setGameScore(prev => ({ ...prev, errors: newErrors }));
+    
+    if (newErrors >= 3) {
+      setTerminalOutput(prev => [...prev, "*** THREE STRIKES - YOU'RE FIRED! ***", "Shift terminated", "Better luck next time"]);
+      setTimeout(() => punchOut(), 2000);
+    }
+  };
+
+  const getCustomerResponse = (wasCorrect: boolean): string[] => {
+    if (wasCorrect) {
+      return ["Thank you for your service!", "Have a great day!"];
+    } else {
+      const responses = [
+        ["What do you mean rejected?!", "I've been banking here for years!", "This is ridiculous!"],
+        ["Are you kidding me?", "I need to speak to your manager!", "This is unacceptable!"],
+        ["You've got to be joking!", "Check again!", "I know this is right!"],
+        ["This is absurd!", "I demand to see the supervisor!", "You're making a mistake!"],
+        ["What kind of operation is this?", "I'm taking my business elsewhere!", "Incompetent!"]
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+  };
+
+  // Punch Clock Interface
+  if (gamePhase === 'punch_in') {
+    return (
+      <div style={{
+        height: '100vh',
+        width: '100vw',
+        background: 'linear-gradient(135deg, #001100 0%, #002200 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'monospace',
+        color: '#00ff00',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          background: 'rgba(0, 40, 0, 0.4)',
+          border: '3px solid #00ff00',
+          borderRadius: '12px',
+          padding: '40px',
+          textAlign: 'center',
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)',
+          maxWidth: '500px'
+        }}>
+          <h1 style={{ fontSize: '36px', marginBottom: '20px', textShadow: '0 0 20px #00ff00' }}>
+            FIRST NATIONAL BANK
+          </h1>
+          <div style={{ 
+            fontSize: '18px', 
+            marginBottom: '30px', 
+            opacity: 0.8,
+            lineHeight: '1.6'
+          }}>
+            EMPLOYEE PUNCH CLOCK SYSTEM<br/>
+            Terminal ID: TNK-001<br/>
+            {new Date().toLocaleDateString()} - {new Date().toLocaleTimeString()}
+          </div>
+          
+          <div style={{
+            background: '#000000',
+            border: '2px solid #00aa00',
+            padding: '20px',
+            marginBottom: '30px',
+            borderRadius: '8px'
+          }}>
+            <div style={{ fontSize: '16px', marginBottom: '15px' }}>
+              PUNCH CARD SLOT
+            </div>
+            <div style={{
+              width: '200px',
+              height: '80px',
+              border: '2px dashed #00ff00',
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              opacity: 0.6
+            }}>
+              Insert Card Here
+            </div>
+          </div>
+          
+          <button
+            onClick={punchIn}
+            style={{
+              background: 'rgba(0, 255, 0, 0.2)',
+              border: '3px solid #00ff00',
+              color: '#00ff00',
+              padding: '20px 40px',
+              fontSize: '24px',
+              fontFamily: 'monospace',
+              cursor: 'pointer',
+              borderRadius: '8px',
+              textShadow: '0 0 10px #00ff00',
+              boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)',
+              transition: 'all 0.2s'
+            }}
+          >
+            PUNCH IN - START SHIFT
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Leaderboard Interface
+  if (gamePhase === 'leaderboard') {
+    const [playerName, setPlayerName] = useState('');
+    const leaderboard = getLeaderboard();
+    
+    return (
+      <div style={{
+        height: '100vh',
+        width: '100vw',
+        background: 'linear-gradient(135deg, #001100 0%, #002200 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'monospace',
+        color: '#00ff00',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          background: 'rgba(0, 40, 0, 0.4)',
+          border: '3px solid #00ff00',
+          borderRadius: '12px',
+          padding: '40px',
+          textAlign: 'center',
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)',
+          maxWidth: '600px',
+          width: '90%'
+        }}>
+          <h1 style={{ fontSize: '28px', marginBottom: '20px' }}>
+            HIGH SCORE ACHIEVED!
+          </h1>
+          
+          <div style={{ marginBottom: '30px' }}>
+            <div>Final Score: {gameScore.score}</div>
+            <div>Transactions: {gameScore.correctTransactions}</div>
+            <div>Time on Shift: {gameScore.timeOnShift} min</div>
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <input
+              type="text"
+              placeholder="Enter your name for leaderboard"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              style={{
+                background: '#001100',
+                border: '2px solid #00aa00',
+                color: '#00ff00',
+                padding: '12px',
+                fontSize: '16px',
+                fontFamily: 'monospace',
+                textAlign: 'center',
+                width: '250px',
+                outline: 'none'
+              }}
+              maxLength={20}
+            />
+          </div>
+          
+          <button
+            onClick={() => addToLeaderboard(playerName || 'Anonymous')}
+            style={{
+              background: 'rgba(0, 255, 0, 0.2)',
+              border: '2px solid #00ff00',
+              color: '#00ff00',
+              padding: '15px 30px',
+              fontSize: '18px',
+              fontFamily: 'monospace',
+              cursor: 'pointer',
+              borderRadius: '6px'
+            }}
+          >
+            SAVE TO LEADERBOARD
+          </button>
+          
+          {leaderboard.length > 0 && (
+            <div style={{ marginTop: '30px' }}>
+              <h3>TOP TELLERS</h3>
+              {leaderboard.slice(0, 5).map((entry, index) => (
+                <div key={index} style={{ 
+                  padding: '8px',
+                  borderBottom: '1px solid #00aa00',
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}>
+                  <span>{index + 1}. {entry.name}</span>
+                  <span>{entry.score}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
