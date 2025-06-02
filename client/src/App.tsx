@@ -52,6 +52,7 @@ function App() {
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [showManagerWarning, setShowManagerWarning] = useState(false);
   const [managerMessage, setManagerMessage] = useState('');
+  const [mobileTab, setMobileTab] = useState<'terminal' | 'customer' | 'docs'>('terminal');
 
   // Enhanced error tracking and scoring system
   const addCorrectTransaction = () => {

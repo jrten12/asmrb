@@ -2,10 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aggressive mobile layout fixes */
+/* Complete mobile layout override */
 @media (max-width: 768px) {
   * {
     box-sizing: border-box !important;
+    max-width: 100vw !important;
   }
   
   body {
@@ -14,66 +15,72 @@
     overflow-x: hidden !important;
   }
   
-  /* Root container fixes */
-  .mobile-fix {
-    padding: 5px !important;
-    gap: 5px !important;
-  }
-  
-  /* Force all flex containers to stack vertically */
-  .mobile-fix > div,
-  .mobile-fix div[style*="display: flex"],
-  .mobile-fix div[style*="display:flex"] {
+  /* Kill all flex layouts and force stacking */
+  [style*="display: flex"],
+  [style*="display:flex"] {
+    display: block !important;
     flex-direction: column !important;
     width: 100% !important;
     min-width: auto !important;
-    max-width: 100vw !important;
     height: auto !important;
     min-height: auto !important;
-    margin-bottom: 8px !important;
   }
   
-  /* Grid layouts become single column */
-  .mobile-fix div[style*="grid-template-columns"],
-  .mobile-fix div[style*="gridTemplateColumns"] {
+  /* Force all grids to single column */
+  [style*="grid"],
+  [style*="Grid"] {
+    display: block !important;
     grid-template-columns: 1fr !important;
-    gap: 4px !important;
   }
   
-  /* Reduce all padding and margins dramatically */
-  .mobile-fix div {
-    padding: 4px !important;
-    margin: 2px 0 !important;
-  }
-  
-  /* Smaller fonts across the board */
-  .mobile-fix * {
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-  }
-  
-  /* Button fixes */
-  .mobile-fix button {
-    padding: 6px !important;
-    margin: 2px 0 !important;
-    width: 100% !important;
-    font-size: 10px !important;
-  }
-  
-  /* Terminal and panel specific fixes */
-  .mobile-fix div[style*="border"] {
-    border-width: 1px !important;
-    border-radius: 2px !important;
-  }
-  
-  /* Absolute positioning resets for mobile */
-  .mobile-fix div[style*="position: absolute"],
-  .mobile-fix div[style*="position:absolute"] {
+  /* Reset all positioning */
+  [style*="position: absolute"],
+  [style*="position:absolute"],
+  [style*="position: fixed"],
+  [style*="position:fixed"] {
     position: static !important;
     top: auto !important;
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
+    transform: none !important;
+  }
+  
+  /* Aggressive spacing reduction */
+  div {
+    padding: 2px !important;
+    margin: 1px 0 !important;
+    gap: 2px !important;
+  }
+  
+  /* Text size reduction */
+  * {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+  
+  /* Button normalization */
+  button {
+    display: block !important;
+    width: 100% !important;
+    padding: 4px !important;
+    margin: 1px 0 !important;
+    font-size: 9px !important;
+  }
+  
+  /* Border reduction */
+  [style*="border"] {
+    border-width: 1px !important;
+  }
+  
+  /* Height overrides */
+  [style*="height: 80vh"],
+  [style*="height:80vh"],
+  [style*="minHeight"],
+  [style*="min-height"] {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: 200px !important;
   }
 }
 
