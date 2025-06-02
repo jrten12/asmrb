@@ -760,6 +760,41 @@ function App() {
         ]);
         playSound('wire_confirmation');
       }, 2000);
+      
+    } else if (cmd === 'INQUIRY' || cmd === 'BALANCE INQUIRY') {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (currentCustomer.transactionType !== 'INQUIRY') {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer not requesting balance inquiry"]);
+        playSound('reject');
+        return;
+      }
+      
+      if (!verificationState.accountLookedUp || !verificationState.signatureCompared) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Complete verification first", "1. LOOKUP account", "2. COMPARE SIGNATURE"]);
+        playSound('reject');
+        return;
+      }
+      
+      playSound('legacy_processing');
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING BALANCE INQUIRY...", "PREPARING BALANCE SLIP..."]);
+      
+      setTimeout(() => {
+        setVerificationState(prev => ({...prev, transactionProcessed: true}));
+        setTerminalOutput(prev => [...prev, 
+          "========== BALANCE INQUIRY COMPLETE ==========",
+          `CUSTOMER: ${currentCustomer.name}`,
+          `ACCOUNT: ${currentCustomer.accountNumber}`,
+          `CURRENT BALANCE: $${accountBalance.toLocaleString()}`,
+          "STATUS: READY FOR SLIP PRINTING",
+          "==========================================="
+        ]);
+        playSound('register_print');
+      }, 1500);
+      
     } else if (cmd === 'APPROVE') {
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
