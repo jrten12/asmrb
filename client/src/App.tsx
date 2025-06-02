@@ -1797,9 +1797,11 @@ function App() {
               <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', gap: '8px' }}>
                 <button
                   onClick={() => {
-                    setTerminalOutput(prev => [...prev, "> LOOKUP", "Accessing bank database..."]);
-                    handleCommand('LOOKUP');
-                    playSound('button_click');
+                    if (currentCustomer) {
+                      setTerminalOutput(prev => [...prev, "> LOOKUP", "Accessing bank database..."]);
+                      handleCommand('LOOKUP');
+                      playSound('button_click');
+                    }
                   }}
                   disabled={!currentCustomer}
                   style={{
@@ -1809,7 +1811,7 @@ function App() {
                     padding: '10px',
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
                     borderRadius: '4px',
                     fontFamily: 'monospace'
                   }}
@@ -1819,9 +1821,11 @@ function App() {
                 
                 <button
                   onClick={() => {
-                    setTerminalOutput(prev => [...prev, "> COMPARE", "Loading signature comparison..."]);
-                    handleCommand('COMPARE');
-                    playSound('button_click');
+                    if (currentCustomer) {
+                      setTerminalOutput(prev => [...prev, "> COMPARE", "Loading signature comparison..."]);
+                      handleCommand('COMPARE');
+                      playSound('button_click');
+                    }
                   }}
                   disabled={!currentCustomer}
                   style={{
@@ -1834,7 +1838,7 @@ function App() {
                     padding: '10px',
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
+                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
                     borderRadius: '4px',
                     fontFamily: 'monospace'
                   }}
@@ -2043,58 +2047,7 @@ function App() {
             </div>
           )}
 
-          {/* Essential Commands */}
-          {currentCustomer && (
-            <div style={{
-              marginBottom: '12px',
-              padding: '12px',
-              background: 'rgba(0, 40, 0, 0.4)',
-              border: '2px solid #00aa00',
-              borderRadius: '6px'
-            }}>
-              <div style={{ fontSize: '14px', marginBottom: '8px', color: '#00cccc', fontWeight: 'bold' }}>ESSENTIAL COMMANDS:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                <button
-                  onClick={() => {
-                    playSound('button_click');
-                    setCommandWithPrefix('LOOKUP ', 'account number');
-                  }}
-                  style={{
-                    background: 'rgba(0, 80, 80, 0.8)',
-                    border: '2px solid #00aaaa',
-                    color: '#00ffff',
-                    padding: '12px',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    borderRadius: '4px',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  LOOKUP ACCOUNT
-                </button>
-                <button
-                  onClick={() => {
-                    playSound('button_click');
-                    handleCommand('COMPARE SIGNATURE');
-                  }}
-                  style={{
-                    background: 'rgba(0, 0, 80, 0.8)',
-                    border: '2px solid #0088ff',
-                    color: '#00aaff',
-                    padding: '12px',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    borderRadius: '4px',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  SIGNATURE CHECK
-                </button>
-              </div>
-            </div>
-          )}
+
 
           {/* Verification Status - Compact */}
           {currentCustomer && (
