@@ -2260,7 +2260,7 @@ function App() {
                 fontFamily: 'monospace'
               }}
             >
-              {currentCustomer ? 'CONTINUE PROCESSING' : 'CALL CUSTOMER'}
+              {currentCustomer ? 'NEXT CUSTOMER' : 'CALL CUSTOMER'}
             </button>
             
             <button
