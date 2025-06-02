@@ -337,6 +337,11 @@ function App() {
           }
           setTimeout(() => createTone(1800, 0.2, 0.08), 1000);
           break;
+        case 'terminal_focus':
+          // Soft terminal focus sound
+          createTone(1000, 0.05, 0.03);
+          createTone(1200, 0.03, 0.02);
+          break;
         default:
           createTone(500, 0.1, 0.05);
       }
@@ -724,6 +729,26 @@ function App() {
     setTimeout(() => punchIn(), 1000);
   };
 
+  const getSmartPlaceholder = (): string => {
+    if (!currentCustomer) {
+      return "Type NEXT to call customer...";
+    }
+    
+    if (!verificationState.accountLookedUp) {
+      return `Type LOOKUP ${currentCustomer.accountNumber}`;
+    }
+    
+    if (!verificationState.signatureCompared) {
+      return "Type COMPARE SIGNATURE";
+    }
+    
+    if (!verificationState.transactionProcessed) {
+      return `Type PROCESS ${currentCustomer.transactionType} ${currentCustomer.requestedAmount}`;
+    }
+    
+    return "Type APPROVE or REJECT";
+  };
+
   // Punch Clock Interface
   if (gamePhase === 'punch_in') {
 
@@ -1089,56 +1114,147 @@ function App() {
         flexDirection: 'column'
       }}>
         
-        {/* Documents Section - Separated from Input */}
+        {/* Enhanced Documents Section - Clearly Visible */}
         <div style={{
-          background: 'rgba(0, 40, 0, 0.95)',
-          border: '2px solid #ffff00',
-          padding: '16px',
-          borderRadius: '6px',
-          marginBottom: '20px',
-          minHeight: '240px',
-          maxHeight: '260px',
-          overflowY: 'auto'
+          background: 'linear-gradient(145deg, rgba(0, 60, 0, 0.95), rgba(0, 40, 0, 0.9))',
+          border: '3px solid #ffff00',
+          padding: window.innerWidth < 768 ? '12px' : '16px',
+          borderRadius: '8px',
+          marginBottom: '16px',
+          minHeight: window.innerWidth < 768 ? '200px' : '240px',
+          maxHeight: window.innerWidth < 768 ? '300px' : '320px',
+          overflowY: 'auto',
+          boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
+          WebkitOverflowScrolling: 'touch' // iOS smooth scrolling
         }}>
-          <div style={{ color: '#ffff00', fontSize: '18px', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>
-            CUSTOMER DOCUMENTS
+          <div style={{ 
+            color: '#ffff00', 
+            fontSize: window.innerWidth < 768 ? '16px' : '18px', 
+            fontWeight: 'bold', 
+            marginBottom: '12px', 
+            textAlign: 'center',
+            textShadow: '0 0 10px #ffff00'
+          }}>
+            📋 CUSTOMER DOCUMENTS
           </div>
           
           {currentCustomer && currentCustomer.documents && currentCustomer.documents.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {currentCustomer.documents.map((doc, index) => (
                 <div
                   key={index}
+                  onClick={() => playSound('paper_rustle')}
                   style={{
-                    background: 'rgba(255, 255, 0, 0.15)',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 0, 0.2), rgba(255, 255, 0, 0.1))',
                     border: '2px solid #ffff00',
-                    padding: '14px',
-                    borderRadius: '6px'
+                    padding: window.innerWidth < 768 ? '12px' : '14px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 0, 0.3), rgba(255, 255, 0, 0.2))';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 255, 0, 0.2)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 0, 0.2), rgba(255, 255, 0, 0.1))';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
                   }}
                 >
-                  <div style={{ color: '#ffff00', fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
-                    {doc.title}
+                  <div style={{ 
+                    color: '#ffff00', 
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px', 
+                    fontWeight: 'bold', 
+                    marginBottom: '8px', 
+                    textAlign: 'center',
+                    borderBottom: '1px solid #ffff00',
+                    paddingBottom: '4px'
+                  }}>
+                    📄 {doc.title}
                   </div>
-                  <div style={{ display: 'grid', gap: '6px' }}>
+                  <div style={{ 
+                    display: 'grid', 
+                    gap: '4px',
+                    fontSize: window.innerWidth < 768 ? '12px' : '14px'
+                  }}>
                     {Object.entries(doc.data).map(([key, value]) => (
-                      <div key={key} style={{ fontSize: '14px', padding: '2px 0' }}>
-                        <span style={{ color: '#00cccc', fontSize: '12px' }}>{key.toUpperCase()}:</span>{' '}
-                        <span style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '16px' }}>{value}</span>
+                      <div key={key} style={{ 
+                        padding: '4px 8px',
+                        background: 'rgba(0, 0, 0, 0.2)',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+                        gap: window.innerWidth < 768 ? '0' : '8px'
+                      }}>
+                        <span style={{ 
+                          color: '#00dddd', 
+                          fontSize: window.innerWidth < 768 ? '10px' : '12px',
+                          fontWeight: 'bold',
+                          minWidth: window.innerWidth < 768 ? 'auto' : '100px'
+                        }}>
+                          {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                        </span>
+                        <span style={{ 
+                          color: '#ffffff', 
+                          fontWeight: 'bold', 
+                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
+                          fontFamily: 'monospace',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          {value}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
+              
+              {/* Quick Reference System Data */}
+              <div style={{
+                marginTop: '8px',
+                padding: '8px',
+                background: 'rgba(0, 100, 200, 0.2)',
+                border: '1px solid #0088ff',
+                borderRadius: '4px'
+              }}>
+                <div style={{ 
+                  fontSize: window.innerWidth < 768 ? '10px' : '11px', 
+                  color: '#00aaff',
+                  fontWeight: 'bold',
+                  marginBottom: '4px'
+                }}>
+                  💻 SYSTEM VERIFICATION DATA
+                </div>
+                <div style={{ 
+                  fontSize: window.innerWidth < 768 ? '9px' : '10px', 
+                  color: '#cccccc', 
+                  lineHeight: '1.3',
+                  fontFamily: 'monospace'
+                }}>
+                  Account: {currentCustomer.accountNumber}<br/>
+                  Type: {currentCustomer.transactionType}<br/>
+                  Amount: ${currentCustomer.requestedAmount}<br/>
+                  {currentCustomer.destinationAccount && (
+                    <>Wire To: {currentCustomer.destinationAccount}<br/></>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
             <div style={{
               textAlign: 'center',
               color: '#999999',
-              padding: '40px',
-              fontSize: '16px'
+              padding: window.innerWidth < 768 ? '20px' : '40px',
+              fontSize: window.innerWidth < 768 ? '14px' : '16px'
             }}>
-              No customer present<br/>
-              <span style={{ color: '#ffaa00' }}>Type NEXT to call customer</span>
+              📭 No customer present<br/>
+              <span style={{ color: '#ffaa00', fontSize: window.innerWidth < 768 ? '12px' : '14px' }}>
+                Call customer to view documents
+              </span>
             </div>
           )}
         </div>
@@ -1409,32 +1525,42 @@ function App() {
             </div>
           )}
 
-          {/* Terminal Input - At Bottom of Section */}
+          {/* Enhanced Terminal Input with Smart Prompts */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center',
             marginTop: '8px',
-            background: '#000000',
-            padding: '8px',
-            border: '1px solid #00ff00',
-            borderRadius: '4px'
+            background: 'linear-gradient(145deg, #000000, #001100)',
+            padding: window.innerWidth < 768 ? '10px' : '12px',
+            border: '2px solid #00ff00',
+            borderRadius: '6px',
+            boxShadow: '0 0 10px rgba(0, 255, 0, 0.2)'
           }}>
-            <span style={{ marginRight: '8px', color: '#00ff00', fontWeight: 'bold' }}>&gt;</span>
+            <span style={{ 
+              marginRight: '8px', 
+              color: '#00ff00', 
+              fontWeight: 'bold',
+              fontSize: window.innerWidth < 768 ? '14px' : '16px'
+            }}>
+              &gt;
+            </span>
             <input
               ref={inputRef}
               type="text"
-              placeholder="Type commands here..."
+              placeholder={getSmartPlaceholder()}
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
+              onFocus={() => playSound('terminal_focus')}
               style={{
                 flex: 1,
-                background: '#001100',
+                background: 'rgba(0, 20, 0, 0.8)',
                 border: 'none',
                 color: '#00ff00',
-                padding: '8px',
-                fontSize: '14px',
+                padding: window.innerWidth < 768 ? '10px' : '12px',
+                fontSize: window.innerWidth < 768 ? '14px' : '16px',
                 fontFamily: 'monospace',
-                outline: 'none'
+                outline: 'none',
+                borderRadius: '4px'
               }}
             />
           </div>
