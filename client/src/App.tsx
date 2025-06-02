@@ -296,7 +296,7 @@ function App() {
       const signature = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature || 'No signature';
       setSignatureModal({isOpen: true, signature: signature as string});
       setVerificationState(prev => ({...prev, signatureCompared: true}));
-      setTerminalOutput(prev => [...prev, "> " + command, "Displaying signatures for comparison...", "Compare customer signature with system signature"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE VERIFICATION ==========", "STEP 1: Customer signing pad activated", "STEP 2: Ask customer to sign their name", "STEP 3: Compare fresh signature with card on file", "ANALYSIS POINTS:", "- Signature flow and speed", "- Letter formation style", "- Pressure points and spacing", "- Overall handwriting consistency", "Manual verification required - use visual judgment", "=========================================", ""]);
       playSound('paper_rustle');
     } else if (cmd.startsWith('PROCESS ')) {
       const transactionPart = cmd.replace('PROCESS ', '');
@@ -327,12 +327,12 @@ function App() {
         return;
       }
       
-      const required = ['accountLookedUp', 'nameVerified', 'dobVerified', 'signatureCompared', 'transactionProcessed'];
+      const required = ['accountLookedUp', 'signatureCompared'];
       const missing = required.filter(req => !verificationState[req as keyof typeof verificationState]);
       
       if (missing.length > 0) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Cannot approve without verification:", ...missing.map(m => "- " + m.replace(/([A-Z])/g, ' $1').toUpperCase())]);
-        playSound('error');
+        setTerminalOutput(prev => [...prev, "> " + command, "========== APPROVAL BLOCKED ==========", "ERROR: Missing required verifications:", ...missing.map(m => "- " + m.replace(/([A-Z])/g, ' $1').toUpperCase()), "Complete all verification steps before approval", "====================================", ""]);
+        playSound('reject');
         return;
       }
       
@@ -525,51 +525,29 @@ function App() {
               border: '1px solid #00aa00',
               borderRadius: '4px'
             }}>
-              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00cccc' }}>QUICK COMMANDS:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px' }}>
+              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00cccc' }}>ESSENTIAL COMMANDS:</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
                 <button
                   onClick={() => {
                     playSound('button_click');
                     if (inputRef.current) {
-                      inputRef.current.value = 'VERIFY NAME ';
+                      inputRef.current.value = 'LOOKUP ';
                       inputRef.current.focus();
                     }
                   }}
                   disabled={!currentCustomer}
                   style={{
-                    background: currentCustomer ? 'rgba(0, 60, 0, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #00aa00',
-                    color: currentCustomer ? '#00ff00' : '#666666',
-                    padding: '8px',
-                    fontSize: '11px',
+                    background: currentCustomer ? 'rgba(0, 80, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
+                    border: '1px solid #00aaaa',
+                    color: currentCustomer ? '#00ffff' : '#666666',
+                    padding: '10px',
+                    fontSize: '12px',
                     cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '3px',
+                    borderRadius: '4px',
                     fontFamily: 'monospace'
                   }}
                 >
-                  VERIFY NAME
-                </button>
-                <button
-                  onClick={() => {
-                    playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'VERIFY DOB ';
-                      inputRef.current.focus();
-                    }
-                  }}
-                  disabled={!currentCustomer}
-                  style={{
-                    background: currentCustomer ? 'rgba(60, 60, 0, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #aaaa00',
-                    color: currentCustomer ? '#ffff00' : '#666666',
-                    padding: '8px',
-                    fontSize: '11px',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '3px',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  VERIFY DOB
+                  LOOKUP ACCOUNT
                 </button>
                 <button
                   onClick={() => {
@@ -581,39 +559,17 @@ function App() {
                   }}
                   disabled={!currentCustomer}
                   style={{
-                    background: currentCustomer ? 'rgba(0, 0, 60, 0.8)' : 'rgba(30, 30, 30, 0.5)',
+                    background: currentCustomer ? 'rgba(0, 0, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
                     border: '1px solid #0088ff',
                     color: currentCustomer ? '#00aaff' : '#666666',
-                    padding: '8px',
-                    fontSize: '11px',
+                    padding: '10px',
+                    fontSize: '12px',
                     cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '3px',
+                    borderRadius: '4px',
                     fontFamily: 'monospace'
                   }}
                 >
-                  SIGNATURE
-                </button>
-                <button
-                  onClick={() => {
-                    playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'PROCESS ';
-                      inputRef.current.focus();
-                    }
-                  }}
-                  disabled={!currentCustomer}
-                  style={{
-                    background: currentCustomer ? 'rgba(60, 0, 60, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #aa00aa',
-                    color: currentCustomer ? '#ff00ff' : '#666666',
-                    padding: '8px',
-                    fontSize: '11px',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '3px',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  PROCESS
+                  SIGNATURE CHECK
                 </button>
               </div>
             </div>
@@ -628,22 +584,13 @@ function App() {
               border: '1px solid #ffaa00',
               borderRadius: '4px'
             }}>
-              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#ffaa00' }}>VERIFICATION STATUS:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', fontSize: '10px' }}>
-                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.accountLookedUp ? '✓' : '○'} LOOKUP
+              <div style={{ fontSize: '12px', marginBottom: '6px', color: '#ffaa00' }}>VERIFICATION CHECKLIST:</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px', fontSize: '11px' }}>
+                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#ffaa00', padding: '2px' }}>
+                  {verificationState.accountLookedUp ? '✓' : '○'} ACCOUNT LOOKUP
                 </div>
-                <div style={{ color: verificationState.nameVerified ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.nameVerified ? '✓' : '○'} NAME
-                </div>
-                <div style={{ color: verificationState.dobVerified ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.dobVerified ? '✓' : '○'} DOB
-                </div>
-                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.signatureCompared ? '✓' : '○'} SIGNATURE
-                </div>
-                <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#ffaa00' }}>
-                  {verificationState.transactionProcessed ? '✓' : '○'} PROCESS
+                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#ffaa00', padding: '2px' }}>
+                  {verificationState.signatureCompared ? '✓' : '○'} SIGNATURE CHECK
                 </div>
               </div>
             </div>
