@@ -1850,6 +1850,30 @@ function App() {
             </div>
           )}
           
+          {/* Verification Status Bar - Right below controls */}
+          {currentCustomer && (
+            <div style={{
+              marginBottom: '16px',
+              padding: '8px',
+              background: 'rgba(0, 0, 40, 0.4)',
+              border: '2px solid #0088ff',
+              borderRadius: '4px'
+            }}>
+              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00aaff', fontWeight: 'bold' }}>VERIFICATION STATUS:</div>
+              <div style={{ fontSize: '11px', display: 'flex', gap: '12px' }}>
+                <span style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT' : '○ ACCOUNT'}
+                </span>
+                <span style={{ color: verificationState.signatureCompared ? (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : '#888888' }}>
+                  {verificationState.signatureCompared ? (verificationState.signatureFraud ? '✗ SIGNATURE' : '✓ SIGNATURE') : '○ SIGNATURE'}
+                </span>
+                <span style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
+                  {verificationState.transactionProcessed ? '✓ PROCESSED' : '○ PROCESSED'}
+                </span>
+              </div>
+            </div>
+          )}
+          
           {/* Customer Information Console */}
           {currentCustomer && (
             <div style={{
