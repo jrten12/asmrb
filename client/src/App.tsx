@@ -58,6 +58,8 @@ function App() {
   const [commandPrefix, setCommandPrefix] = useState<string>('');
   const [accountBalance, setAccountBalance] = useState<number>(0);
   const [showBalanceWindow, setShowBalanceWindow] = useState(false);
+  const [showFloatingInput, setShowFloatingInput] = useState(false);
+  const [inputPrompt, setInputPrompt] = useState<string>('');
   const [cardPosition, setCardPosition] = useState({ x: 50, y: 400 });
   const [cardInSlot, setCardInSlot] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -609,11 +611,32 @@ function App() {
 
   const setCommandWithPrefix = (prefix: string, placeholder: string = '') => {
     setCommandPrefix(prefix);
+    setInputPrompt(placeholder);
+    setShowFloatingInput(true);
+    playSound('terminal_focus');
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.value = '';
+        inputRef.current.placeholder = placeholder;
+        inputRef.current.focus();
+      }
+    }, 100);
+  };
+
+  const closeFloatingInput = () => {
+    setShowFloatingInput(false);
+    setCommandPrefix('');
+    setInputPrompt('');
     if (inputRef.current) {
       inputRef.current.value = '';
-      inputRef.current.placeholder = placeholder;
-      inputRef.current.focus();
     }
+  };
+
+  const checkAccountBalance = (accountNumber: string) => {
+    // Generate realistic account balance
+    const balance = Math.floor(Math.random() * 50000) + 1000;
+    setAccountBalance(balance);
+    return balance;
   };
 
   const punchIn = () => {
@@ -1746,6 +1769,239 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Floating Input Panel */}
+      {showFloatingInput && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(145deg, #001100, #002200)',
+          border: '3px solid #00ff00',
+          borderRadius: '8px',
+          padding: '20px',
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.4)',
+          zIndex: 2000,
+          minWidth: window.innerWidth < 768 ? '90%' : '400px',
+          animation: 'slideUp 0.3s ease-out'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px'
+          }}>
+            <div style={{
+              color: '#00ff00',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}>
+              {commandPrefix ? `COMMAND: ${commandPrefix.trim()}` : 'COMMAND INPUT'}
+            </div>
+            <button
+              onClick={closeFloatingInput}
+              style={{
+                background: 'none',
+                border: '1px solid #ff4444',
+                color: '#ff4444',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                borderRadius: '2px',
+                fontSize: '12px'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: '#000000',
+            padding: '12px',
+            borderRadius: '4px',
+            border: '1px solid #00aa00'
+          }}>
+            <span style={{
+              color: '#00ff00',
+              fontWeight: 'bold',
+              marginRight: '8px'
+            }}>
+              &gt;
+            </span>
+            {commandPrefix && (
+              <span style={{
+                color: '#00ff00',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                marginRight: '4px'
+              }}>
+                {commandPrefix}
+              </span>
+            )}
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder={inputPrompt}
+              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                color: '#00ff00',
+                padding: '8px',
+                fontSize: '16px',
+                fontFamily: 'monospace',
+                outline: 'none'
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Bank Balance Withdrawal Window */}
+      {showBalanceWindow && currentCustomer && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1500
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #002200, #003300)',
+            border: '3px solid #ffff00',
+            borderRadius: '8px',
+            padding: '30px',
+            maxWidth: '90%',
+            boxShadow: '0 0 30px rgba(255, 255, 0, 0.3)'
+          }}>
+            <h3 style={{
+              color: '#ffff00',
+              textAlign: 'center',
+              marginBottom: '20px',
+              fontSize: '20px'
+            }}>
+              💰 ACCOUNT BALANCE CHECK
+            </h3>
+            
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              padding: '20px',
+              borderRadius: '4px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ color: '#00cccc', marginBottom: '10px' }}>
+                Account: {currentCustomer.accountNumber}
+              </div>
+              <div style={{ color: '#00cccc', marginBottom: '10px' }}>
+                Customer: {currentCustomer.name}
+              </div>
+              <div style={{
+                color: '#00ff00',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                padding: '10px',
+                border: '1px solid #00aa00',
+                borderRadius: '4px',
+                background: 'rgba(0, 255, 0, 0.1)'
+              }}>
+                Available Balance: ${accountBalance.toLocaleString()}
+              </div>
+              <div style={{
+                color: '#ffff00',
+                marginTop: '10px',
+                textAlign: 'center'
+              }}>
+                Requested Withdrawal: ${currentCustomer.requestedAmount.toLocaleString()}
+              </div>
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              gap: '15px',
+              justifyContent: 'center',
+              flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+            }}>
+              <button
+                onClick={() => {
+                  if (currentCustomer.requestedAmount <= accountBalance) {
+                    playSound('cash_counting');
+                    setTimeout(() => playSound('register_print'), 800);
+                    setTimeout(() => {
+                      setShowBalanceWindow(false);
+                      setTerminalOutput(prev => [...prev, "FUNDS AVAILABLE", "Processing withdrawal...", "Cash counting in progress..."]);
+                      handleCorrectTransaction();
+                    }, 1500);
+                  } else {
+                    playSound('reject');
+                    setShowBalanceWindow(false);
+                    setTerminalOutput(prev => [...prev, "INSUFFICIENT FUNDS", "Withdrawal denied", "Customer must be rejected"]);
+                    handleError();
+                  }
+                }}
+                disabled={currentCustomer.requestedAmount > accountBalance}
+                style={{
+                  background: currentCustomer.requestedAmount <= accountBalance ? 'rgba(0, 255, 0, 0.2)' : 'rgba(100, 100, 100, 0.2)',
+                  border: '2px solid ' + (currentCustomer.requestedAmount <= accountBalance ? '#00ff00' : '#666666'),
+                  color: currentCustomer.requestedAmount <= accountBalance ? '#00ff00' : '#666666',
+                  padding: '15px 30px',
+                  fontSize: '16px',
+                  cursor: currentCustomer.requestedAmount <= accountBalance ? 'pointer' : 'not-allowed',
+                  borderRadius: '6px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                ✓ PROCESS WITHDRAWAL
+              </button>
+              
+              <button
+                onClick={() => {
+                  playSound('reject');
+                  setShowBalanceWindow(false);
+                  setTerminalOutput(prev => [...prev, "WITHDRAWAL CANCELLED", "Transaction rejected"]);
+                  handleError();
+                }}
+                style={{
+                  background: 'rgba(255, 0, 0, 0.2)',
+                  border: '2px solid #ff4444',
+                  color: '#ff4444',
+                  padding: '15px 30px',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                ✗ REJECT TRANSACTION
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes slideUp {
+          from {
+            transform: translateX(-50%) translateY(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(-50%) translateY(0px);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 }
