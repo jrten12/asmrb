@@ -3025,9 +3025,6 @@ function App() {
           right: 0,
           bottom: 0,
           background: '#000000',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
           zIndex: 3000,
           animation: 'fadeInArrest 0.5s ease-in-out',
           fontFamily: 'monospace'
@@ -3043,75 +3040,134 @@ function App() {
             pointerEvents: 'none'
           }} />
           
-          {/* Authentic Bank Security Response */}
+          {/* Bank Scene with Arrest Animation */}
           <div style={{
             width: '100%',
             height: '100%',
             position: 'relative',
             background: 'linear-gradient(180deg, #001100 0%, #002200 100%)',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center'
+            overflow: 'hidden'
           }}>
-            {/* Security Alert Header */}
+            {/* Bank Floor */}
             <div style={{
-              color: '#ff0000',
-              fontSize: '32px',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              marginBottom: '40px',
-              animation: 'securityAlert 1s ease-in-out infinite',
-              textShadow: '0 0 20px #ff0000'
+              position: 'absolute',
+              bottom: '0px',
+              left: '0px',
+              right: '0px',
+              height: '60px',
+              background: 'linear-gradient(180deg, #003300 0%, #001100 100%)',
+              border: '2px solid #00ff00',
+              borderBottom: 'none'
+            }} />
+            
+            {/* Teller Counter */}
+            <div style={{
+              position: 'absolute',
+              bottom: '60px',
+              left: '50px',
+              width: '250px',
+              height: '80px',
+              background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
+              border: '2px solid #00ff00'
+            }} />
+            
+            {/* Customer Being Arrested */}
+            <div style={{
+              position: 'absolute',
+              bottom: '140px',
+              left: '400px',
+              fontSize: '60px',
+              color: '#ffaa00',
+              animation: 'customerArrest 4s linear forwards'
             }}>
-              ⚠️ SECURITY ALERT ⚠️
+              🧑‍💼
             </div>
             
-            {/* Bank Security Protocol */}
+            {/* Police Officer 1 */}
             <div style={{
-              color: '#00ff00',
-              fontSize: '18px',
-              textAlign: 'left',
-              lineHeight: '1.8',
-              maxWidth: '600px',
-              marginBottom: '40px',
-              animation: 'protocolText 3s ease-in-out'
+              position: 'absolute',
+              bottom: '140px',
+              right: '200px',
+              fontSize: '60px',
+              color: '#0088ff',
+              animation: 'officer1Approach 2s linear forwards'
             }}>
-              &gt; FRAUD DETECTION SYSTEM ACTIVATED<br/>
-              &gt; Customer flagged for suspicious activity<br/>
-              &gt; Transaction blocked - Account frozen<br/>
-              &gt; Bank security notified<br/>
-              &gt; Law enforcement contacted<br/>
-              &gt; Customer escorted from premises<br/>
-              &gt; Investigation initiated
+              👮‍♂️
+            </div>
+            
+            {/* Police Officer 2 */}
+            <div style={{
+              position: 'absolute',
+              bottom: '140px',
+              right: '600px',
+              fontSize: '60px',
+              color: '#0088ff',
+              animation: 'officer2Approach 2.5s linear forwards'
+            }}>
+              👮‍♀️
+            </div>
+            
+            {/* Handcuffs Animation */}
+            <div style={{
+              position: 'absolute',
+              bottom: '180px',
+              left: '420px',
+              fontSize: '30px',
+              color: '#cccccc',
+              animation: 'handcuffsApply 6s linear forwards',
+              opacity: 0
+            }}>
+              🔗
+            </div>
+            
+            {/* Police Car Outside */}
+            <div style={{
+              position: 'absolute',
+              bottom: '140px',
+              right: '-200px',
+              fontSize: '40px',
+              color: '#0066cc',
+              animation: 'policeCarArrive 1.5s linear forwards'
+            }}>
+              🚔
+            </div>
+            
+            {/* Arrest Text Sequence */}
+            <div style={{
+              position: 'absolute',
+              top: '50px',
+              left: '50px',
+              color: '#ff0000',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              animation: 'arrestDialog 6s linear forwards'
+            }}>
+              <div style={{ animation: 'textStep1 6s linear forwards' }}>
+                "You're under arrest for attempted fraud"
+              </div>
+              <div style={{ animation: 'textStep2 6s linear forwards', animationDelay: '2s' }}>
+                "You have the right to remain silent"
+              </div>
+              <div style={{ animation: 'textStep3 6s linear forwards', animationDelay: '4s' }}>
+                "Customer escorted to police vehicle"
+              </div>
             </div>
             
             {/* Success Message */}
             <div style={{
-              color: '#ffff00',
+              position: 'absolute',
+              bottom: '50px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: '#00ff00',
               fontSize: '24px',
               fontWeight: 'bold',
               textAlign: 'center',
-              border: '3px solid #ffff00',
-              padding: '20px',
-              background: 'rgba(255, 255, 0, 0.1)',
-              animation: 'successMessage 2s ease-in-out'
+              animation: 'finalMessage 6s linear forwards',
+              opacity: 0
             }}>
-              FRAUD ATTEMPT PREVENTED<br/>
-              BANK ASSETS PROTECTED<br/>
-              EXCELLENT WORK, TELLER
-            </div>
-            
-            {/* Return Notice */}
-            <div style={{
-              position: 'absolute',
-              bottom: '40px',
-              color: '#888888',
-              fontSize: '16px',
-              animation: 'returnNotice 4s ease-in-out'
-            }}>
-              Returning to teller station...
+              FRAUD SUSPECT ARRESTED<br/>
+              EXCELLENT DETECTIVE WORK
             </div>
           </div>
         </div>
@@ -3135,27 +3191,63 @@ function App() {
           to { opacity: 1; }
         }
         
-        @keyframes securityAlert {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.05); }
+        @keyframes customerArrest {
+          0% { transform: translateX(0px) rotate(0deg); }
+          25% { transform: translateX(-10px) rotate(-5deg); }
+          50% { transform: translateX(-20px) rotate(-10deg); }
+          75% { transform: translateX(-30px) rotate(-15deg); }
+          100% { transform: translateX(-40px) rotate(-20deg); }
         }
         
-        @keyframes protocolText {
-          0% { opacity: 0; transform: translateY(20px); }
-          20% { opacity: 1; transform: translateY(0px); }
-          80% { opacity: 1; transform: translateY(0px); }
-          100% { opacity: 1; transform: translateY(0px); }
+        @keyframes officer1Approach {
+          0% { transform: translateX(0px); }
+          100% { transform: translateX(-150px); }
         }
         
-        @keyframes successMessage {
-          0% { opacity: 0; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.05); }
-          100% { opacity: 1; transform: scale(1); }
+        @keyframes officer2Approach {
+          0% { transform: translateX(0px); }
+          100% { transform: translateX(400px); }
         }
         
-        @keyframes returnNotice {
+        @keyframes handcuffsApply {
+          0% { opacity: 0; transform: scale(0); }
+          50% { opacity: 0; transform: scale(0); }
+          60% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+          100% { opacity: 1; transform: scale(1) rotate(360deg); }
+        }
+        
+        @keyframes policeCarArrive {
+          0% { transform: translateX(0px); }
+          100% { transform: translateX(150px); }
+        }
+        
+        @keyframes textStep1 {
+          0% { opacity: 0; }
+          10% { opacity: 1; }
+          30% { opacity: 1; }
+          35% { opacity: 0; }
+          100% { opacity: 0; }
+        }
+        
+        @keyframes textStep2 {
+          0% { opacity: 0; }
+          35% { opacity: 0; }
+          40% { opacity: 1; }
+          65% { opacity: 1; }
+          70% { opacity: 0; }
+          100% { opacity: 0; }
+        }
+        
+        @keyframes textStep3 {
           0% { opacity: 0; }
           70% { opacity: 0; }
+          75% { opacity: 1; }
+          100% { opacity: 1; }
+        }
+        
+        @keyframes finalMessage {
+          0% { opacity: 0; }
+          80% { opacity: 0; }
           100% { opacity: 1; }
         }
       `}</style>
