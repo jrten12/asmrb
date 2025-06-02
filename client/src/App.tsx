@@ -2248,11 +2248,24 @@ function App() {
           }}>
             <button
               onClick={() => {
-                handleCommand('NEXT');
+                // Always call next customer
+                setCurrentCustomer(generateCustomer());
+                setVerificationState({
+                  accountLookedUp: false,
+                  accountNotFound: false,
+                  signatureCompared: false,
+                  signatureFraud: false,
+                  transactionProcessed: false
+                });
+                setTerminalOutput(prev => [...prev, 
+                  "",
+                  "> Customer approaching teller window",
+                  "Ready to process transaction"
+                ]);
                 playSound('button_click');
               }}
               style={{
-                background: currentCustomer ? 'rgba(100, 100, 0, 0.6)' : 'rgba(0, 100, 0, 0.6)',
+                background: 'rgba(0, 100, 0, 0.6)',
                 border: '2px solid #00ff00',
                 color: '#00ff00',
                 padding: '12px',
@@ -2263,7 +2276,7 @@ function App() {
                 fontFamily: 'monospace'
               }}
             >
-              {currentCustomer ? 'NEXT CUSTOMER' : 'CALL CUSTOMER'}
+              CALL CUSTOMER
             </button>
             
             {/* REPORT FRAUD Button */}
@@ -2292,8 +2305,10 @@ function App() {
                         setCurrentCustomer(generateCustomer());
                         setVerificationState({
                           accountLookedUp: false,
+                          accountNotFound: false,
                           signatureCompared: false,
-                          documentsReviewed: false
+                          signatureFraud: false,
+                          transactionProcessed: false
                         });
                         setTerminalOutput(prev => [...prev, 
                           "",
