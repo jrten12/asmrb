@@ -453,12 +453,34 @@ function App() {
       display: 'flex',
       flexDirection: 'column',
       padding: '4px',
+      paddingBottom: '120px',
       overflow: 'auto',
       position: 'fixed',
       top: 0,
       left: 0,
       boxSizing: 'border-box'
     }}>
+      
+      {/* CRT Scanline Effect */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent)',
+        animation: 'scanline 6s linear infinite',
+        zIndex: 1000,
+        pointerEvents: 'none'
+      }} />
+      
+      <style>{`
+        @keyframes scanline {
+          0% { transform: translateY(-2px); opacity: 0.8; }
+          50% { opacity: 1; }
+          100% { transform: translateY(100vh); opacity: 0.6; }
+        }
+      `}</style>
       
       {/* Customer Information */}
       {currentCustomer ? (
@@ -765,34 +787,41 @@ function App() {
             ))}
           </div>
 
-          {/* Terminal Input - Fixed at Bottom */}
+          {/* Terminal Input - Always at Bottom */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center',
-            position: 'sticky',
-            bottom: 0,
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            right: '20px',
             background: '#000000',
-            padding: '4px 0',
-            borderTop: '1px solid #00ff00'
+            padding: '12px',
+            borderTop: '2px solid #00ff00',
+            borderLeft: '2px solid #00ff00',
+            borderRight: '2px solid #00ff00',
+            borderBottom: '2px solid #00ff00',
+            borderRadius: '6px',
+            zIndex: 100,
+            boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
           }}>
-            <span style={{ marginRight: '8px', color: '#00ff00', fontWeight: 'bold' }}>&gt;</span>
+            <span style={{ marginRight: '12px', color: '#00ff00', fontWeight: 'bold', fontSize: '18px' }}>&gt;</span>
             <input
               ref={inputRef}
               type="text"
-              placeholder="Type verification commands here..."
+              placeholder="Type commands here (LOOKUP, COMPARE SIGNATURE, APPROVE, REJECT)..."
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
               style={{
                 flex: 1,
-                background: '#000000',
-                border: '2px solid #00ff00',
+                background: '#001100',
+                border: '1px solid #00aa00',
                 color: '#00ff00',
-                padding: '10px',
+                padding: '12px',
                 fontSize: '16px',
                 fontFamily: 'monospace',
                 outline: 'none',
-                borderRadius: '4px',
-                minWidth: '300px'
+                borderRadius: '4px'
               }}
             />
           </div>
