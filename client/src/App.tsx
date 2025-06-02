@@ -1735,28 +1735,55 @@ function App() {
           {/* Customer Information Console */}
           {currentCustomer && (
             <div style={{
-              marginBottom: '12px',
-              padding: '12px',
+              marginBottom: '16px',
+              padding: window.innerWidth < 768 ? '16px' : '20px',
               background: 'rgba(0, 0, 40, 0.4)',
-              border: '2px solid #0088ff',
-              borderRadius: '6px'
+              border: '3px solid #0088ff',
+              borderRadius: '8px',
+              cursor: 'default',
+              minHeight: window.innerWidth < 768 ? '280px' : '320px'
             }}>
-              <div style={{ fontSize: '14px', marginBottom: '12px', color: '#00aaff', fontWeight: 'bold', textAlign: 'center' }}>
+              <div style={{ 
+                fontSize: window.innerWidth < 768 ? '16px' : '18px', 
+                marginBottom: '16px', 
+                color: '#00aaff', 
+                fontWeight: 'bold', 
+                textAlign: 'center',
+                cursor: 'default'
+              }}>
                 CUSTOMER INFORMATION CONSOLE
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr', 
+                gap: '16px', 
+                marginBottom: '16px' 
+              }}>
                 {/* Customer Request */}
                 <div style={{
                   background: 'rgba(40, 40, 0, 0.6)',
-                  border: '2px solid #ffff00',
-                  borderRadius: '4px',
-                  padding: '10px'
+                  border: '3px solid #ffff00',
+                  borderRadius: '6px',
+                  padding: window.innerWidth < 768 ? '12px' : '16px',
+                  cursor: 'default'
                 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffff00', marginBottom: '6px' }}>
+                  <div style={{ 
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px', 
+                    fontWeight: 'bold', 
+                    color: '#ffff00', 
+                    marginBottom: '10px',
+                    cursor: 'default'
+                  }}>
                     📋 TRANSACTION REQUEST
                   </div>
-                  <div style={{ fontSize: '11px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                  <div style={{ 
+                    fontSize: window.innerWidth < 768 ? '13px' : '15px', 
+                    color: '#ffffff', 
+                    lineHeight: '1.6', 
+                    fontFamily: 'monospace',
+                    cursor: 'default'
+                  }}>
                     <div><strong>CUSTOMER:</strong> {currentCustomer.name}</div>
                     <div><strong>TYPE:</strong> {currentCustomer.transactionType}</div>
                     <div><strong>AMOUNT:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
@@ -1769,21 +1796,40 @@ function App() {
                 {/* Account Status */}
                 <div style={{
                   background: verificationState.accountLookedUp ? 'rgba(0, 40, 0, 0.6)' : 'rgba(40, 0, 0, 0.6)',
-                  border: `2px solid ${verificationState.accountLookedUp ? '#00ff00' : '#ff0000'}`,
-                  borderRadius: '4px',
-                  padding: '10px'
+                  border: `3px solid ${verificationState.accountLookedUp ? '#00ff00' : '#ff0000'}`,
+                  borderRadius: '6px',
+                  padding: window.innerWidth < 768 ? '12px' : '16px',
+                  cursor: 'default'
                 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: verificationState.accountLookedUp ? '#00ff00' : '#ff0000', marginBottom: '6px' }}>
+                  <div style={{ 
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px', 
+                    fontWeight: 'bold', 
+                    color: verificationState.accountLookedUp ? '#00ff00' : '#ff0000', 
+                    marginBottom: '10px',
+                    cursor: 'default'
+                  }}>
                     💳 ACCOUNT STATUS
                   </div>
                   {verificationState.accountLookedUp ? (
-                    <div style={{ fontSize: '11px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                    <div style={{ 
+                      fontSize: window.innerWidth < 768 ? '13px' : '15px', 
+                      color: '#ffffff', 
+                      lineHeight: '1.6', 
+                      fontFamily: 'monospace',
+                      cursor: 'default'
+                    }}>
                       <div><strong>VERIFIED:</strong> ✓ YES</div>
                       <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
                       <div><strong>STATUS:</strong> ACTIVE</div>
                     </div>
                   ) : (
-                    <div style={{ fontSize: '11px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                    <div style={{ 
+                      fontSize: window.innerWidth < 768 ? '13px' : '15px', 
+                      color: '#ffffff', 
+                      lineHeight: '1.6', 
+                      fontFamily: 'monospace',
+                      cursor: 'default'
+                    }}>
                       <div><strong>STATUS:</strong> NOT VERIFIED</div>
                       <div><strong>ACTION:</strong> USE LOOKUP COMMAND</div>
                     </div>
@@ -1794,27 +1840,50 @@ function App() {
               {/* Documents Review */}
               <div style={{
                 background: 'rgba(40, 0, 40, 0.6)',
-                border: '2px solid #ff00ff',
-                borderRadius: '4px',
-                padding: '10px',
-                marginBottom: '12px'
+                border: '3px solid #ff00ff',
+                borderRadius: '6px',
+                padding: window.innerWidth < 768 ? '12px' : '16px',
+                marginBottom: '8px',
+                cursor: 'default'
               }}>
-                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ff00ff', marginBottom: '8px' }}>
+                <div style={{ 
+                  fontSize: window.innerWidth < 768 ? '14px' : '16px', 
+                  fontWeight: 'bold', 
+                  color: '#ff00ff', 
+                  marginBottom: '12px',
+                  cursor: 'default'
+                }}>
                   📄 CUSTOMER DOCUMENTS PRESENTED
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
+                  gap: '12px' 
+                }}>
                   {currentCustomer.documents.map((doc, index) => (
                     <div key={index} style={{
                       background: 'rgba(0, 0, 0, 0.3)',
-                      border: '1px solid #ff00ff',
-                      padding: '6px',
-                      borderRadius: '3px'
+                      border: '2px solid #ff00ff',
+                      padding: window.innerWidth < 768 ? '10px' : '12px',
+                      borderRadius: '4px',
+                      cursor: 'default'
                     }}>
-                      <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#ff00ff', marginBottom: '4px' }}>
+                      <div style={{ 
+                        fontSize: window.innerWidth < 768 ? '12px' : '14px', 
+                        fontWeight: 'bold', 
+                        color: '#ff00ff', 
+                        marginBottom: '8px',
+                        cursor: 'default'
+                      }}>
                         {doc.title}
                       </div>
                       {Object.entries(doc.data).map(([key, value]) => (
-                        <div key={key} style={{ fontSize: '9px', color: '#cccccc' }}>
+                        <div key={key} style={{ 
+                          fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                          color: '#cccccc',
+                          marginBottom: '4px',
+                          cursor: 'default'
+                        }}>
                           <strong>{key}:</strong> {value}
                         </div>
                       ))}
