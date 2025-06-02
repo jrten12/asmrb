@@ -635,12 +635,18 @@ function App() {
 
       {/* Floating Input Panel */}
       {showFloatingInput && (
-        <div className="mobile-panel" style={{
-          background: 'rgba(0, 100, 0, 0.9)',
-          border: '2px solid #ffff00',
-          borderRadius: '6px',
-          padding: '16px',
-          marginBottom: '12px'
+        <div style={{
+          position: window.innerWidth < 768 ? 'sticky' : 'fixed',
+          top: window.innerWidth < 768 ? '0' : '50%',
+          left: window.innerWidth < 768 ? '0' : '50%',
+          transform: window.innerWidth < 768 ? 'none' : 'translate(-50%, -50%)',
+          width: window.innerWidth < 768 ? '100%' : '400px',
+          background: 'rgba(0, 100, 0, 0.95)',
+          border: '3px solid #ffff00',
+          borderRadius: '8px',
+          padding: '20px',
+          zIndex: 1000,
+          boxShadow: '0 4px 20px rgba(255, 255, 0, 0.3)'
         }}>
           <div style={{ marginBottom: '8px', color: '#ffff00' }}>{inputPrompt}</div>
           <input
