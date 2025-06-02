@@ -55,6 +55,11 @@ function App() {
   const [signatureModal, setSignatureModal] = useState<{isOpen: boolean, signature: string}>({isOpen: false, signature: ''});
   const [currentStep, setCurrentStep] = useState<'lookup' | 'signature' | 'process' | 'approve'>('lookup');
   const [waitingForInput, setWaitingForInput] = useState<string>('');
+  const [cardPosition, setCardPosition] = useState({ x: 50, y: 400 });
+  const [cardInSlot, setCardInSlot] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [playerName, setPlayerName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -613,87 +618,248 @@ function App() {
 
   // Punch Clock Interface
   if (gamePhase === 'punch_in') {
+    const [cardPosition, setCardPosition] = useState({ x: 50, y: 400 });
+    const [cardInSlot, setCardInSlot] = useState(false);
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleCardClick = () => {
+      if (!cardInSlot) {
+        // Animate card to slot
+        setCardPosition({ x: 200, y: 280 });
+        setTimeout(() => {
+          setCardInSlot(true);
+          playTimeclockPunch();
+        }, 500);
+      }
+    };
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+      if (!cardInSlot) {
+        setIsDragging(true);
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        setDragOffset({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+      if (isDragging && !cardInSlot) {
+        setCardPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        });
+        
+        // Check if near slot (auto-snap)
+        if (Math.abs(e.clientX - 350) < 50 && Math.abs(e.clientY - 320) < 50) {
+          setCardPosition({ x: 200, y: 280 });
+        }
+      }
+    };
+
+    const handleMouseUp = (e: React.MouseEvent) => {
+      if (isDragging) {
+        setIsDragging(false);
+        
+        // Check if dropped in slot area
+        if (Math.abs(e.clientX - 350) < 60 && Math.abs(e.clientY - 320) < 60) {
+          setCardPosition({ x: 200, y: 280 });
+          setTimeout(() => {
+            setCardInSlot(true);
+            playTimeclockPunch();
+          }, 200);
+        }
+      }
+    };
+
+    const playTimeclockPunch = () => {
+      // Multi-layered time clock punch sound
+      playSound('mechanical_click');
+      setTimeout(() => playSound('metal_stamp'), 100);
+      setTimeout(() => playSound('card_slide'), 200);
+      setTimeout(() => playSound('bell_ding'), 400);
+      setTimeout(() => punchIn(), 800);
+    };
+
     return (
-      <div style={{
-        height: '100vh',
-        width: '100vw',
-        background: 'linear-gradient(135deg, #001100 0%, #002200 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: 'monospace',
-        color: '#00ff00',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
+      <div 
+        style={{
+          height: '100vh',
+          width: '100vw',
+          background: 'linear-gradient(135deg, #001100 0%, #002200 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontFamily: 'monospace',
+          color: '#00ff00',
+          position: 'relative',
+          overflow: 'hidden',
+          userSelect: 'none'
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        {/* Time Clock Machine */}
         <div style={{
-          background: 'rgba(0, 40, 0, 0.4)',
-          border: '3px solid #00ff00',
+          background: 'linear-gradient(145deg, #333333, #1a1a1a)',
+          border: '4px solid #666666',
           borderRadius: '12px',
           padding: '40px',
           textAlign: 'center',
-          boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)',
-          maxWidth: '500px'
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.5)',
+          maxWidth: '500px',
+          position: 'relative'
         }}>
-          <h1 style={{ fontSize: '36px', marginBottom: '20px', textShadow: '0 0 20px #00ff00' }}>
-            FIRST NATIONAL BANK
-          </h1>
-          <div style={{ 
-            fontSize: '18px', 
-            marginBottom: '30px', 
-            opacity: 0.8,
-            lineHeight: '1.6'
-          }}>
-            EMPLOYEE PUNCH CLOCK SYSTEM<br/>
-            Terminal ID: TNK-001<br/>
-            {new Date().toLocaleDateString()} - {new Date().toLocaleTimeString()}
-          </div>
-          
+          {/* Clock Display */}
           <div style={{
             background: '#000000',
-            border: '2px solid #00aa00',
-            padding: '20px',
-            marginBottom: '30px',
-            borderRadius: '8px'
+            border: '3px inset #666666',
+            padding: '15px',
+            marginBottom: '20px',
+            borderRadius: '8px',
+            boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.8)'
           }}>
-            <div style={{ fontSize: '16px', marginBottom: '15px' }}>
-              PUNCH CARD SLOT
-            </div>
-            <div style={{
-              width: '200px',
-              height: '80px',
-              border: '2px dashed #00ff00',
-              margin: '0 auto',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '14px',
-              opacity: 0.6
+            <div style={{ 
+              color: '#00ff00', 
+              fontSize: '24px', 
+              fontWeight: 'bold',
+              textShadow: '0 0 10px #00ff00',
+              fontFamily: 'monospace'
             }}>
-              Insert Card Here
+              {new Date().toLocaleTimeString()}
+            </div>
+            <div style={{ color: '#00cccc', fontSize: '14px', marginTop: '5px' }}>
+              FIRST NATIONAL BANK
             </div>
           </div>
-          
-          <button
-            onClick={punchIn}
-            style={{
-              background: 'rgba(0, 255, 0, 0.2)',
-              border: '3px solid #00ff00',
-              color: '#00ff00',
-              padding: '20px 40px',
-              fontSize: '24px',
-              fontFamily: 'monospace',
-              cursor: 'pointer',
-              borderRadius: '8px',
-              textShadow: '0 0 10px #00ff00',
-              boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)',
-              transition: 'all 0.2s'
-            }}
-          >
-            PUNCH IN - START SHIFT
-          </button>
+
+          {/* Card Slot */}
+          <div style={{
+            background: 'linear-gradient(145deg, #2a2a2a, #0f0f0f)',
+            border: '3px inset #555555',
+            padding: '25px',
+            marginBottom: '20px',
+            borderRadius: '8px',
+            position: 'relative',
+            boxShadow: 'inset 0 0 15px rgba(0, 0, 0, 0.8)'
+          }}>
+            <div style={{ 
+              fontSize: '16px', 
+              marginBottom: '15px', 
+              color: '#cccccc',
+              fontWeight: 'bold'
+            }}>
+              INSERT PUNCH CARD
+            </div>
+            
+            {/* Slot Opening */}
+            <div style={{
+              width: '180px',
+              height: '60px',
+              background: 'linear-gradient(180deg, #000000, #111111)',
+              border: '2px solid #333333',
+              margin: '0 auto',
+              borderRadius: '4px',
+              position: 'relative',
+              boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {cardInSlot ? (
+                <div style={{
+                  width: '160px',
+                  height: '40px',
+                  background: 'linear-gradient(145deg, #e8e8e8, #d0d0d0)',
+                  border: '1px solid #999999',
+                  borderRadius: '2px',
+                  animation: 'punchAnimation 0.5s ease-out'
+                }} />
+              ) : (
+                <div style={{ 
+                  color: '#666666', 
+                  fontSize: '12px',
+                  textAlign: 'center'
+                }}>
+                  SLOT
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <div style={{
+            fontSize: '14px',
+            color: '#999999',
+            marginBottom: '20px',
+            lineHeight: '1.4'
+          }}>
+            Click or drag your punch card to the slot<br/>
+            to begin your banking shift
+          </div>
         </div>
+
+        {/* Punch Card */}
+        {!cardInSlot && (
+          <div
+            style={{
+              position: 'absolute',
+              left: cardPosition.x + 'px',
+              top: cardPosition.y + 'px',
+              width: '160px',
+              height: '100px',
+              background: 'linear-gradient(145deg, #f5f5f5, #e0e0e0)',
+              border: '2px solid #cccccc',
+              borderRadius: '4px',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              transition: isDragging ? 'none' : 'all 0.5s ease-out',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+              transform: isDragging ? 'rotate(5deg)' : 'rotate(0deg)',
+              zIndex: 1000
+            }}
+            onMouseDown={handleMouseDown}
+            onClick={handleCardClick}
+          >
+            {/* Card Content */}
+            <div style={{
+              padding: '8px',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              fontSize: '10px',
+              color: '#333333',
+              fontFamily: 'monospace'
+            }}>
+              <div style={{ fontWeight: 'bold', fontSize: '12px' }}>
+                EMPLOYEE ID: 001
+              </div>
+              <div>
+                TELLER WORKSTATION<br/>
+                FIRST NATIONAL BANK
+              </div>
+              <div style={{ 
+                borderTop: '1px solid #999999', 
+                paddingTop: '4px',
+                fontSize: '8px'
+              }}>
+                AUTHORIZED PERSONNEL ONLY
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Punch Animation Keyframes */}
+        <style>{`
+          @keyframes punchAnimation {
+            0% { transform: translateY(20px); opacity: 0; }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); opacity: 1; }
+          }
+        `}</style>
       </div>
     );
   }
