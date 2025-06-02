@@ -393,8 +393,6 @@ function App() {
     }
   };
 
-  const isMobile = window.innerWidth < 768;
-
   if (gamePhase === 'punch_in') {
     return (
       <div style={{
@@ -460,16 +458,12 @@ function App() {
       background: 'linear-gradient(135deg, #001100 0%, #003300 50%, #001100 100%)',
       color: '#00ff00',
       fontFamily: 'Courier New, monospace',
-      padding: isMobile ? '10px' : '20px',
+      padding: '20px',
       display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      gap: isMobile ? '10px' : '20px'
+      gap: '20px'
     }}>
       
-      <div style={{ 
-        flex: '1',
-        marginBottom: isMobile ? '120px' : '0'
-      }}>
+      <div style={{ flex: '1' }}>
         
         <div style={{
           background: 'rgba(0, 50, 0, 0.8)',
@@ -479,8 +473,8 @@ function App() {
           marginBottom: '12px',
           textAlign: 'center'
         }}>
-          <h1 style={{ margin: 0, fontSize: isMobile ? '16px' : '20px' }}>🏦 TELLER'S WINDOW</h1>
-          <div style={{ fontSize: isMobile ? '12px' : '14px', color: '#ffff00' }}>
+          <h1 style={{ margin: 0, fontSize: '20px' }}>🏦 TELLER'S WINDOW</h1>
+          <div style={{ fontSize: '14px', color: '#ffff00' }}>
             Score: {gameScore.score} | Transactions: {gameScore.correctTransactions} | Errors: {gameScore.errors}
           </div>
           <button 
@@ -509,7 +503,7 @@ function App() {
             marginBottom: '12px',
             textAlign: 'center'
           }}>
-            <h2 style={{ color: '#888888', margin: '0 0 16px 0', fontSize: isMobile ? '16px' : '18px' }}>NO CUSTOMER PRESENT</h2>
+            <h2 style={{ color: '#888888', margin: '0 0 16px 0' }}>NO CUSTOMER PRESENT</h2>
             <button 
               onClick={() => {
                 handleFirstInteraction();
@@ -519,7 +513,7 @@ function App() {
               style={{
                 minHeight: '44px',
                 padding: '12px 16px',
-                fontSize: isMobile ? '14px' : '16px',
+                fontSize: '16px',
                 fontFamily: 'Courier New, monospace',
                 border: '2px solid #00ff00',
                 backgroundColor: 'rgba(0, 100, 0, 0.3)',
@@ -539,19 +533,18 @@ function App() {
             borderRadius: '6px',
             padding: '16px',
             marginBottom: '12px',
-            maxHeight: isMobile ? '400px' : '600px',
+            maxHeight: '600px',
             overflowY: 'auto'
           }}>
             <h2 style={{ 
               color: '#ffff00', 
               margin: '0 0 16px 0', 
-              textAlign: 'center',
-              fontSize: isMobile ? '14px' : '16px'
+              textAlign: 'center'
             }}>
               📋 CUSTOMER: {currentCustomer.name}
             </h2>
             
-            <div style={{ marginBottom: '16px', textAlign: 'center', fontSize: isMobile ? '12px' : '14px' }}>
+            <div style={{ marginBottom: '16px', textAlign: 'center' }}>
               <div><strong>Transaction:</strong> {currentCustomer.transactionType}</div>
               <div><strong>Amount:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
               <div><strong>Account:</strong> {currentCustomer.accountNumber}</div>
@@ -563,7 +556,7 @@ function App() {
             <div style={{ marginBottom: '16px' }}>
               <h3 style={{ 
                 color: '#ffff00', 
-                fontSize: isMobile ? '14px' : '16px', 
+                fontSize: '16px', 
                 marginBottom: '12px', 
                 textAlign: 'center' 
               }}>
@@ -574,14 +567,14 @@ function App() {
                   background: 'rgba(255, 255, 0, 0.15)',
                   border: '2px solid #ffff00',
                   borderRadius: '6px',
-                  padding: isMobile ? '12px' : '16px',
+                  padding: '16px',
                   marginBottom: '12px',
                   boxShadow: '0 2px 8px rgba(255, 255, 0, 0.3)'
                 }}>
                   <div style={{ 
                     fontWeight: 'bold', 
                     marginBottom: '8px', 
-                    fontSize: isMobile ? '13px' : '16px',
+                    fontSize: '16px',
                     color: '#ffff00',
                     textAlign: 'center',
                     borderBottom: '1px solid #ffff00',
@@ -591,19 +584,19 @@ function App() {
                   </div>
                   {Object.entries(doc.data).map(([key, value]) => (
                     <div key={key} style={{ 
-                      fontSize: isMobile ? '11px' : '13px',
+                      fontSize: '13px',
                       marginBottom: '6px',
                       padding: '4px 8px',
                       background: 'rgba(0, 0, 0, 0.2)',
                       borderRadius: '3px',
                       display: 'flex',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      gap: '4px'
+                      flexDirection: 'row',
+                      gap: '8px'
                     }}>
                       <span style={{ 
                         color: '#00dddd', 
                         fontWeight: 'bold',
-                        minWidth: isMobile ? 'auto' : '120px'
+                        minWidth: '120px'
                       }}>
                         {key}:
                       </span>
@@ -614,7 +607,7 @@ function App() {
               ))}
             </div>
             
-            <div style={{ fontSize: isMobile ? '10px' : '12px' }}>
+            <div style={{ fontSize: '12px' }}>
               <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
                 {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup
               </div>
@@ -636,11 +629,11 @@ function App() {
           borderRadius: '4px',
           padding: '12px',
           fontFamily: 'Courier New, monospace',
-          fontSize: isMobile ? '10px' : '12px',
-          height: isMobile ? '200px' : '600px',
+          fontSize: '12px',
+          height: '600px',
           overflowY: 'auto'
         }}>
-          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: isMobile ? '12px' : '14px' }}>
+          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>
             BANK TERMINAL
           </h3>
           {terminalOutput.map((line, index) => (
@@ -655,10 +648,9 @@ function App() {
         <div style={{
           position: 'fixed',
           bottom: '20px',
-          left: isMobile ? '10px' : '50%',
-          right: isMobile ? '10px' : 'auto',
-          transform: isMobile ? 'none' : 'translateX(-50%)',
-          width: isMobile ? 'auto' : '500px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '500px',
           background: 'rgba(0, 100, 0, 0.98)',
           border: '3px solid #ffff00',
           borderRadius: '8px',
@@ -669,12 +661,12 @@ function App() {
           <div style={{ 
             marginBottom: '8px', 
             color: '#ffff00', 
-            fontSize: isMobile ? '14px' : '16px', 
+            fontSize: '16px', 
             fontWeight: 'bold' 
           }}>
             💻 TELLER TERMINAL INPUT
           </div>
-          <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: isMobile ? '12px' : '14px' }}>
+          <div style={{ marginBottom: '8px', color: '#ffff00' }}>
             {inputPrompt}
           </div>
           <input
@@ -693,7 +685,7 @@ function App() {
             style={{
               width: '100%',
               padding: '8px',
-              fontSize: isMobile ? '14px' : '16px',
+              fontSize: '16px',
               fontFamily: 'Courier New, monospace',
               background: '#001100',
               border: '1px solid #00ff00',
@@ -713,7 +705,7 @@ function App() {
               marginTop: '8px',
               width: '100%',
               padding: '8px',
-              fontSize: isMobile ? '14px' : '16px',
+              fontSize: '16px',
               fontFamily: 'Courier New, monospace',
               background: 'rgba(0, 255, 0, 0.2)',
               border: '1px solid #00ff00',
@@ -731,30 +723,26 @@ function App() {
       {signatureModal.isOpen && (
         <div style={{
           position: 'fixed',
-          top: isMobile ? '10px' : '50%',
-          left: isMobile ? '10px' : '50%',
-          right: isMobile ? '10px' : 'auto',
-          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           background: 'rgba(0, 80, 0, 0.95)',
           border: '3px solid #ffff00',
           borderRadius: '8px',
           padding: '20px',
           zIndex: 1000,
-          width: isMobile ? 'auto' : '500px',
-          maxHeight: isMobile ? '80vh' : 'auto',
-          overflowY: isMobile ? 'auto' : 'visible'
+          width: '500px'
         }}>
           <h3 style={{ 
             color: '#ffff00', 
             textAlign: 'center', 
-            marginBottom: '16px',
-            fontSize: isMobile ? '14px' : '16px'
+            marginBottom: '16px'
           }}>
             SIGNATURE COMPARISON
           </h3>
           
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: isMobile ? '12px' : '14px' }}>
+            <div style={{ marginBottom: '8px', color: '#ffff00' }}>
               Bank Signature:
             </div>
             <div style={{
@@ -762,7 +750,7 @@ function App() {
               border: '1px solid #00ff00',
               padding: '12px',
               borderRadius: '4px',
-              fontSize: isMobile ? '14px' : '18px',
+              fontSize: '18px',
               fontStyle: 'italic',
               textAlign: 'center'
             }}>
@@ -771,7 +759,7 @@ function App() {
           </div>
           
           <div style={{ marginBottom: '20px' }}>
-            <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: isMobile ? '12px' : '14px' }}>
+            <div style={{ marginBottom: '8px', color: '#ffff00' }}>
               Customer Signature:
             </div>
             <div style={{
@@ -779,7 +767,7 @@ function App() {
               border: '1px solid #00ff00',
               padding: '12px',
               borderRadius: '4px',
-              fontSize: isMobile ? '14px' : '18px',
+              fontSize: '18px',
               fontStyle: 'italic',
               textAlign: 'center'
             }}>
@@ -789,8 +777,7 @@ function App() {
           
           <div style={{ 
             display: 'flex', 
-            gap: '10px', 
-            flexDirection: isMobile ? 'column' : 'row' 
+            gap: '10px'
           }}>
             <button
               onClick={() => {
@@ -801,7 +788,7 @@ function App() {
               style={{
                 flex: 1,
                 padding: '12px',
-                fontSize: isMobile ? '14px' : '16px',
+                fontSize: '16px',
                 background: 'rgba(0, 255, 0, 0.2)',
                 border: '2px solid #00ff00',
                 color: '#00ff00',
@@ -821,7 +808,7 @@ function App() {
               style={{
                 flex: 1,
                 padding: '12px',
-                fontSize: isMobile ? '14px' : '16px',
+                fontSize: '16px',
                 background: 'rgba(255, 0, 0, 0.2)',
                 border: '2px solid #ff0000',
                 color: '#ff0000',
@@ -849,8 +836,6 @@ function App() {
           color: '#000000',
           fontFamily: 'monospace',
           zIndex: 1000,
-          fontSize: isMobile ? '12px' : '14px',
-          maxWidth: isMobile ? '300px' : '400px',
           animation: 'slideDown 0.5s ease-out'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '12px' }}>
