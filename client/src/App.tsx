@@ -240,6 +240,33 @@ function App() {
         case 'modal_close':
           createTone(800, 0.1, 0.05);
           break;
+        case 'easter_melody':
+          // Hidden melody Easter egg
+          const melody = [440, 523, 659, 784, 659, 523, 440];
+          melody.forEach((freq, i) => {
+            setTimeout(() => createTone(freq, 0.3, 0.08), i * 200);
+          });
+          break;
+        case 'retro_modem':
+          // Classic dial-up modem sound
+          createTone(1200, 0.5, 0.06);
+          setTimeout(() => createTone(2400, 0.3, 0.04), 500);
+          setTimeout(() => createNoise(0.8, 0.03), 800);
+          break;
+        case 'matrix_code':
+          // Digital rain sound effect
+          for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+              createTone(800 + Math.random() * 1000, 0.05, 0.03);
+            }, i * 50);
+          }
+          break;
+        case 'secret_unlock':
+          // Secret unlock sound sequence
+          createTone(659, 0.2, 0.08);
+          setTimeout(() => createTone(880, 0.2, 0.08), 200);
+          setTimeout(() => createTone(1108, 0.4, 0.1), 400);
+          break;
         default:
           createTone(500, 0.1, 0.05);
       }
