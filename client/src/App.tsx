@@ -478,7 +478,27 @@ function App() {
               const balance = Math.floor(Math.random() * 50000) + 5000;
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true}));
-              setTerminalOutput(prev => [...prev, "✓ ACCOUNT VERIFIED"]);
+              setTerminalOutput(prev => [...prev, 
+                "========== ACCOUNT VERIFICATION SUCCESS ==========",
+                "✓ ACCOUNT FOUND IN SYSTEM",
+                "",
+                "BANK RECORDS:",
+                `NAME: ${currentCustomer.name}`,
+                `ACCOUNT: ${currentCustomer.accountNumber}`,
+                `DOB: 1985-03-15`,
+                `ADDRESS: 123 Main Street, Springfield, IL 62701`,
+                `BALANCE: $${balance.toLocaleString()}`,
+                `STATUS: ACTIVE`,
+                "",
+                "CUSTOMER DOCUMENTS TO VERIFY:",
+                `ID NAME: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.name || 'N/A'}`,
+                `ID DOB: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || 'N/A'}`,
+                `ID ADDRESS: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}`,
+                `FORM ACCOUNT: ${currentCustomer.documents.find(d => d.type === 'SLIP')?.data.accountNumber || 'N/A'}`,
+                "",
+                "COMPARE ALL DETAILS CAREFULLY",
+                "============================================="
+              ]);
               playSound('approve');
             } else {
               setTerminalOutput(prev => [...prev, "✗ ACCOUNT MISMATCH"]);
