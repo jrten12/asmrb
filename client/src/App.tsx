@@ -722,6 +722,153 @@ function App() {
             borderRadius: '4px'
           }}
         />
+        
+        {/* Mobile Command Helper */}
+        <div className="mobile-commands" style={{
+          marginTop: '10px',
+          display: 'none'
+        }}>
+          <div style={{ fontSize: '10px', color: '#ffff00', marginBottom: '5px' }}>Quick Commands:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'NEXT';
+                  handleCommand('NEXT');
+                  inputRef.current.value = '';
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '1px solid #00ff00',
+                color: '#00ff00',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              NEXT
+            </button>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'LOOKUP ';
+                  inputRef.current.focus();
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '1px solid #00ff00',
+                color: '#00ff00',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              LOOKUP
+            </button>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'VERIFY NAME ';
+                  inputRef.current.focus();
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '1px solid #00ff00',
+                color: '#00ff00',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              VERIFY NAME
+            </button>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'VERIFY DOB ';
+                  inputRef.current.focus();
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '1px solid #00ff00',
+                color: '#00ff00',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              VERIFY DOB
+            </button>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'COMPARE SIGNATURE';
+                  handleCommand('COMPARE SIGNATURE');
+                  inputRef.current.value = '';
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '1px solid #00ff00',
+                color: '#00ff00',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              SIGNATURE
+            </button>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'PROCESS';
+                  handleCommand('PROCESS');
+                  inputRef.current.value = '';
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '1px solid #00ff00',
+                color: '#00ff00',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              PROCESS
+            </button>
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = 'REJECT';
+                  handleCommand('REJECT');
+                  inputRef.current.value = '';
+                }
+              }}
+              style={{
+                padding: '4px 8px',
+                fontSize: '10px',
+                background: 'rgba(255, 0, 0, 0.2)',
+                border: '1px solid #ff0000',
+                color: '#ff0000',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              REJECT
+            </button>
+          </div>
+        </div>
       </div>
 
       {showFloatingInput && (

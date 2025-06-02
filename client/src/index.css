@@ -62,4 +62,14 @@
   div[style*="flex: 1"]:first-child {
     margin-bottom: 100px !important;
   }
+  
+  /* Show mobile command buttons */
+  .mobile-commands {
+    display: block !important;
+  }
+  
+  /* Hide floating input on mobile - use main input instead */
+  div[style*="position: fixed"][style*="bottom: 20px"] {
+    display: none !important;
+  }
 }
