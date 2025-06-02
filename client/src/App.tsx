@@ -651,7 +651,6 @@ function App() {
         bankSignature, 
         customerSignature
       });
-      setVerificationState(prev => ({...prev, signatureCompared: true}));
       setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE COMPARISON ==========", "RETRIEVING SIGNATURE ON FILE...", "CUSTOMER SIGNING FRESH SIGNATURE...", "", "VISUAL COMPARISON REQUIRED", "EXAMINE BOTH SIGNATURES CAREFULLY", "LOOK FOR:", "- Letter formation differences", "- Spacing and flow variations", "- Pressure and pen strokes", "- Overall handwriting style", "", "USE YOUR JUDGMENT TO DETERMINE AUTHENTICITY", "========================================"]);
       playSound('paper_rustle');
     } else if (cmd.startsWith('DEPOSIT $')) {
