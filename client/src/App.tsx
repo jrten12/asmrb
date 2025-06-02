@@ -55,6 +55,9 @@ function App() {
   const [signatureModal, setSignatureModal] = useState<{isOpen: boolean, signature: string}>({isOpen: false, signature: ''});
   const [currentStep, setCurrentStep] = useState<'lookup' | 'signature' | 'process' | 'approve'>('lookup');
   const [waitingForInput, setWaitingForInput] = useState<string>('');
+  const [commandPrefix, setCommandPrefix] = useState<string>('');
+  const [accountBalance, setAccountBalance] = useState<number>(0);
+  const [showBalanceWindow, setShowBalanceWindow] = useState(false);
   const [cardPosition, setCardPosition] = useState({ x: 50, y: 400 });
   const [cardInSlot, setCardInSlot] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -342,6 +345,31 @@ function App() {
           createTone(1000, 0.05, 0.03);
           createTone(1200, 0.03, 0.02);
           break;
+        case 'cash_counting':
+          // Cash counting machine sounds
+          for (let i = 0; i < 15; i++) {
+            setTimeout(() => {
+              createTone(800 + (i % 3) * 100, 0.03, 0.04);
+              createNoise(0.01, 0.02);
+            }, i * 60);
+          }
+          break;
+        case 'register_print':
+          // Old check register printing with ASMR
+          for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+              createTone(1600 + (i % 4) * 150, 0.02, 0.03);
+              createNoise(0.008, 0.015);
+            }, i * 45);
+          }
+          setTimeout(() => createTone(1200, 0.15, 0.06), 900);
+          break;
+        case 'balance_lookup':
+          // Account balance lookup processing
+          createTone(1400, 0.1, 0.05);
+          setTimeout(() => createTone(1600, 0.08, 0.04), 100);
+          setTimeout(() => createTone(1800, 0.06, 0.03), 200);
+          break;
         default:
           createTone(500, 0.1, 0.05);
       }
@@ -554,20 +582,37 @@ function App() {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && inputRef.current) {
-      const command = inputRef.current.value;
-      if (command.trim()) {
+      const fullCommand = commandPrefix + inputRef.current.value;
+      if (fullCommand.trim()) {
         playSound('terminal_confirm');
-        handleCommand(command);
+        handleCommand(fullCommand);
         inputRef.current.value = '';
-        inputRef.current.placeholder = "Enter command...";
+        setCommandPrefix('');
       }
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!inputRef.current) return;
+    
+    // Prevent deletion of command prefix
+    if (e.key === 'Backspace' && (inputRef.current.selectionStart || 0) <= 0 && commandPrefix) {
+      e.preventDefault();
+      return;
+    }
+    
     // Play typing sound for regular typing
     if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Space') {
       playSound('keypress');
+    }
+  };
+
+  const setCommandWithPrefix = (prefix: string, placeholder: string = '') => {
+    setCommandPrefix(prefix);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+      inputRef.current.placeholder = placeholder;
+      inputRef.current.focus();
     }
   };
 
@@ -1525,7 +1570,7 @@ function App() {
             </div>
           )}
 
-          {/* Enhanced Terminal Input with Smart Prompts */}
+          {/* Enhanced Terminal Input with Command Prefix */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center',
@@ -1544,10 +1589,20 @@ function App() {
             }}>
               &gt;
             </span>
+            {commandPrefix && (
+              <span style={{
+                color: '#00ff00',
+                fontSize: window.innerWidth < 768 ? '14px' : '16px',
+                fontFamily: 'monospace',
+                fontWeight: 'bold'
+              }}>
+                {commandPrefix}
+              </span>
+            )}
             <input
               ref={inputRef}
               type="text"
-              placeholder={getSmartPlaceholder()}
+              placeholder={commandPrefix ? inputRef.current?.placeholder || 'enter value...' : getSmartPlaceholder()}
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
               onFocus={() => playSound('terminal_focus')}
