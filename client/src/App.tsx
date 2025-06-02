@@ -2138,6 +2138,32 @@ function App() {
                 >
                   WIRE
                 </button>
+                <button
+                  onClick={() => {
+                    if (currentCustomer && currentCustomer.transactionType === 'INQUIRY') {
+                      playSound('button_click');
+                      setTerminalOutput(prev => [...prev, "> BALANCE INQUIRY", "Processing balance inquiry..."]);
+                      handleCommand('INQUIRY');
+                    } else {
+                      setTerminalOutput(prev => [...prev, "ERROR: Customer not requesting balance inquiry"]);
+                      playSound('reject');
+                    }
+                  }}
+                  disabled={!currentCustomer || currentCustomer.transactionType !== 'INQUIRY'}
+                  style={{
+                    background: currentCustomer && currentCustomer.transactionType === 'INQUIRY' ? 'rgba(120, 120, 0, 0.8)' : 'rgba(50, 50, 50, 0.3)',
+                    border: '2px solid #aaaa00',
+                    color: currentCustomer && currentCustomer.transactionType === 'INQUIRY' ? '#ffff00' : '#666666',
+                    padding: '12px',
+                    fontSize: '12px',
+                    cursor: currentCustomer && currentCustomer.transactionType === 'INQUIRY' ? 'pointer' : 'not-allowed',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  INQUIRY
+                </button>
               </div>
             </div>
           )}
