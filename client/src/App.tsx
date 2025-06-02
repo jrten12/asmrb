@@ -1614,10 +1614,11 @@ function App() {
       <div style={{ 
         display: 'flex', 
         flex: 1, 
-        gap: '8px', 
+        gap: window.innerWidth < 768 ? '4px' : '8px', 
         minHeight: 0,
-        maxHeight: 'calc(100vh - 140px)',
-        flexDirection: 'column'
+        maxHeight: window.innerWidth < 768 ? 'none' : 'calc(100vh - 140px)',
+        flexDirection: 'column',
+        overflowY: window.innerWidth < 768 ? 'visible' : 'auto'
       }}>
         
         {/* Enhanced Documents Section - Clearly Visible */}
@@ -1627,8 +1628,8 @@ function App() {
           padding: window.innerWidth < 768 ? '12px' : '16px',
           borderRadius: '8px',
           marginBottom: '16px',
-          minHeight: window.innerWidth < 768 ? '200px' : '240px',
-          maxHeight: window.innerWidth < 768 ? '300px' : '320px',
+          minHeight: window.innerWidth < 768 ? '120px' : '240px',
+          maxHeight: window.innerWidth < 768 ? '160px' : '320px',
           overflowY: 'auto',
           boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
           WebkitOverflowScrolling: 'touch' // iOS smooth scrolling
@@ -1826,7 +1827,7 @@ function App() {
           borderRadius: '4px',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: window.innerWidth < 768 ? '300px' : 'auto'
+          minHeight: window.innerWidth < 768 ? '150px' : 'auto'
         }}>
           <h3 style={{ margin: '0 0 12px 0', color: '#00ff00', fontSize: '18px' }}>BANK TERMINAL</h3>
           
