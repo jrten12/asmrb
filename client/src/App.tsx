@@ -468,7 +468,11 @@ function App() {
           playSound('legacy_processing');
           setTimeout(() => {
             if (currentCustomer.isFraud) {
-              setTerminalOutput(prev => [...prev, "✗ ACCOUNT NOT FOUND"]);
+              setTerminalOutput(prev => [...prev, 
+                "\x1b[31m*** NO ACCOUNT EXISTS AT BANK ***\x1b[0m",
+                "\x1b[31mACCOUNT NUMBER: " + accountNum + " - INVALID\x1b[0m",
+                "\x1b[31mSTATUS: NOT IN SYSTEM\x1b[0m"
+              ]);
               playSound('reject');
             } else if (accountNum === currentCustomer.accountNumber) {
               const balance = Math.floor(Math.random() * 50000) + 5000;
@@ -604,8 +608,8 @@ function App() {
       setVerificationState(prev => ({...prev, signatureCompared: true}));
       setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE COMPARISON ==========", "RETRIEVING SIGNATURE ON FILE...", "CUSTOMER SIGNING FRESH SIGNATURE...", "", "VISUAL COMPARISON REQUIRED", "EXAMINE BOTH SIGNATURES CAREFULLY", "LOOK FOR:", "- Letter formation differences", "- Spacing and flow variations", "- Pressure and pen strokes", "- Overall handwriting style", "", "USE YOUR JUDGMENT TO DETERMINE AUTHENTICITY", "========================================"]);
       playSound('paper_rustle');
-    } else if (cmd.startsWith('DEPOSIT ')) {
-      const amount = cmd.substring(8).trim();
+    } else if (cmd.startsWith('DEPOSIT $')) {
+      const amount = cmd.substring(9).trim();
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
@@ -633,8 +637,8 @@ function App() {
         playSound('register_print');
       }, 1500);
       
-    } else if (cmd.startsWith('WITHDRAW ')) {
-      const amount = cmd.substring(9).trim();
+    } else if (cmd.startsWith('WITHDRAW $')) {
+      const amount = cmd.substring(10).trim();
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
@@ -671,8 +675,9 @@ function App() {
         setTimeout(() => playSound('register_print'), 800);
       }, 1500);
       
-    } else if (cmd.startsWith('WIRE ')) {
-      const parts = cmd.substring(5).trim().split(' ');
+    } else if (cmd.startsWith('WIRE $')) {
+      const wireData = cmd.substring(6).trim();
+      const parts = wireData.split(' TO ');
       const amount = parts[0];
       const destAccount = parts[1];
       
@@ -1689,7 +1694,7 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    setCommandWithPrefix('DEPOSIT ', 'amount (e.g. 1500.00)');
+                    setCommandWithPrefix('DEPOSIT $', '1500.00');
                   }}
                   style={{
                     background: 'rgba(0, 120, 0, 0.8)',
@@ -1708,7 +1713,7 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    setCommandWithPrefix('WITHDRAW ', 'amount (e.g. 500.00)');
+                    setCommandWithPrefix('WITHDRAW $', '500.00');
                   }}
                   style={{
                     background: 'rgba(120, 120, 0, 0.8)',
@@ -1727,7 +1732,7 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    setCommandWithPrefix('WIRE ', 'amount destination_account');
+                    setCommandWithPrefix('WIRE $', '1000.00 TO 123456789');
                   }}
                   style={{
                     background: 'rgba(120, 0, 120, 0.8)',
@@ -1855,8 +1860,11 @@ function App() {
             color: '#00ff00'
           }}>
             {terminalOutput.map((line, index) => (
-              <div key={index} style={{ marginBottom: '3px' }}>
-                {line}
+              <div key={index} style={{ 
+                marginBottom: '3px',
+                color: line.includes('*** NO ACCOUNT EXISTS') || line.includes('ACCOUNT NUMBER:') && line.includes('INVALID') || line.includes('STATUS: NOT IN SYSTEM') ? '#ff0000' : '#00ff00'
+              }}>
+                {line.replace(/\x1b\[[0-9;]*m/g, '')}
               </div>
             ))}
           </div>
