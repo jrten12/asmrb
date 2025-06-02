@@ -1439,65 +1439,119 @@ function App() {
           flex: 1,
           background: 'rgba(0, 30, 0, 0.4)',
           border: '2px solid #00ff00',
-          padding: '8px',
+          padding: '12px',
           borderRadius: '4px',
           display: 'flex',
           flexDirection: 'column',
           minHeight: window.innerWidth < 768 ? '300px' : 'auto'
         }}>
-          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: '14px' }}>TERMINAL</h3>
+          <h3 style={{ margin: '0 0 12px 0', color: '#00ff00', fontSize: '18px' }}>BANK TERMINAL</h3>
           
-          {/* Verification Checklist */}
+          {/* Essential Commands */}
           {currentCustomer && (
             <div style={{
-              marginBottom: '8px',
-              padding: '8px',
-              background: 'rgba(0, 40, 0, 0.3)',
-              border: '1px solid #00aa00',
-              borderRadius: '4px'
+              marginBottom: '12px',
+              padding: '12px',
+              background: 'rgba(0, 40, 0, 0.4)',
+              border: '2px solid #00aa00',
+              borderRadius: '6px'
             }}>
-              <div style={{ fontSize: '12px', marginBottom: '6px', color: '#00cccc' }}>VERIFICATION CHECKLIST:</div>
-              <div style={{ fontSize: '10px', lineHeight: '1.4' }}>
-                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#666666' }}>
+              <div style={{ fontSize: '14px', marginBottom: '8px', color: '#00cccc', fontWeight: 'bold' }}>ESSENTIAL COMMANDS:</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    playSound('button_click');
+                    setCommandWithPrefix('LOOKUP ', 'account number');
+                  }}
+                  style={{
+                    background: 'rgba(0, 80, 80, 0.8)',
+                    border: '2px solid #00aaaa',
+                    color: '#00ffff',
+                    padding: '12px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  LOOKUP ACCOUNT
+                </button>
+                <button
+                  onClick={() => {
+                    playSound('button_click');
+                    handleCommand('COMPARE SIGNATURE');
+                  }}
+                  style={{
+                    background: 'rgba(0, 0, 80, 0.8)',
+                    border: '2px solid #0088ff',
+                    color: '#00aaff',
+                    padding: '12px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  SIGNATURE CHECK
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Verification Status */}
+          {currentCustomer && (
+            <div style={{
+              marginBottom: '12px',
+              padding: '12px',
+              background: 'rgba(0, 0, 40, 0.4)',
+              border: '2px solid #0088ff',
+              borderRadius: '6px'
+            }}>
+              <div style={{ fontSize: '14px', marginBottom: '8px', color: '#00aaff', fontWeight: 'bold' }}>VERIFICATION STATUS:</div>
+              <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888', marginBottom: '4px' }}>
                   {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup Complete
                 </div>
-                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#666666' }}>
+                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888', marginBottom: '4px' }}>
                   {verificationState.signatureCompared ? '✓' : '○'} Signature Verified
                 </div>
-                <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#666666' }}>
+                <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
                   {verificationState.transactionProcessed ? '✓' : '○'} Transaction Processed
                 </div>
               </div>
             </div>
           )}
 
-          {/* Transaction Processing Console */}
+          {/* Transaction Console */}
           {currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && (
             <div style={{
-              marginBottom: '8px',
-              padding: '8px',
-              background: 'rgba(0, 0, 40, 0.4)',
-              border: '2px solid #0088ff',
-              borderRadius: '4px'
+              marginBottom: '12px',
+              padding: '12px',
+              background: 'rgba(40, 0, 40, 0.4)',
+              border: '2px solid #aa00aa',
+              borderRadius: '6px'
             }}>
-              <div style={{ fontSize: '12px', marginBottom: '6px', color: '#00aaff', fontWeight: 'bold' }}>
+              <div style={{ fontSize: '14px', marginBottom: '8px', color: '#ff00ff', fontWeight: 'bold' }}>
                 TRANSACTION CONSOLE:
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
                 <button
                   onClick={() => {
                     playSound('button_click');
                     setCommandWithPrefix('DEPOSIT ', 'amount (e.g. 1500.00)');
                   }}
                   style={{
-                    background: 'rgba(0, 100, 0, 0.8)',
-                    border: '1px solid #00aa00',
+                    background: 'rgba(0, 120, 0, 0.8)',
+                    border: '2px solid #00aa00',
                     color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '10px',
+                    padding: '12px',
+                    fontSize: '12px',
                     cursor: 'pointer',
-                    borderRadius: '3px',
-                    fontFamily: 'monospace'
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
                   }}
                 >
                   DEPOSIT
@@ -1508,14 +1562,15 @@ function App() {
                     setCommandWithPrefix('WITHDRAW ', 'amount (e.g. 500.00)');
                   }}
                   style={{
-                    background: 'rgba(100, 100, 0, 0.8)',
-                    border: '1px solid #aaaa00',
+                    background: 'rgba(120, 120, 0, 0.8)',
+                    border: '2px solid #aaaa00',
                     color: '#ffff00',
-                    padding: '8px',
-                    fontSize: '10px',
+                    padding: '12px',
+                    fontSize: '12px',
                     cursor: 'pointer',
-                    borderRadius: '3px',
-                    fontFamily: 'monospace'
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
                   }}
                 >
                   WITHDRAW
@@ -1526,14 +1581,15 @@ function App() {
                     setCommandWithPrefix('WIRE ', 'amount destination_account');
                   }}
                   style={{
-                    background: 'rgba(100, 0, 100, 0.8)',
-                    border: '1px solid #aa00aa',
+                    background: 'rgba(120, 0, 120, 0.8)',
+                    border: '2px solid #aa00aa',
                     color: '#ff00ff',
-                    padding: '8px',
-                    fontSize: '10px',
+                    padding: '12px',
+                    fontSize: '12px',
                     cursor: 'pointer',
-                    borderRadius: '3px',
-                    fontFamily: 'monospace'
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
                   }}
                 >
                   WIRE
@@ -1542,26 +1598,7 @@ function App() {
             </div>
           )}
 
-          {/* Verification Status */}
-          {currentCustomer && (
-            <div style={{
-              marginBottom: '8px',
-              padding: '8px',
-              background: 'rgba(40, 40, 0, 0.3)',
-              border: '1px solid #ffaa00',
-              borderRadius: '4px'
-            }}>
-              <div style={{ fontSize: '12px', marginBottom: '6px', color: '#ffaa00' }}>VERIFICATION CHECKLIST:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px', fontSize: '11px' }}>
-                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#ffaa00', padding: '2px' }}>
-                  {verificationState.accountLookedUp ? '✓' : '○'} ACCOUNT LOOKUP
-                </div>
-                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#ffaa00', padding: '2px' }}>
-                  {verificationState.signatureCompared ? '✓' : '○'} SIGNATURE CHECK
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Main Action Buttons */}
           <div style={{
@@ -1662,79 +1699,24 @@ function App() {
           <div style={{
             flex: 1,
             background: '#000000',
-            border: '1px solid #00ff00',
-            padding: '8px',
-            borderRadius: '2px',
+            border: '2px solid #00ff00',
+            padding: '12px',
+            borderRadius: '4px',
             overflow: 'auto',
-            marginBottom: '8px',
-            fontSize: '14px',
-            fontFamily: 'monospace'
+            marginBottom: '12px',
+            fontSize: '15px',
+            fontFamily: 'monospace',
+            lineHeight: '1.5',
+            color: '#00ff00'
           }}>
             {terminalOutput.map((line, index) => (
-              <div key={index} style={{ marginBottom: '2px' }}>
+              <div key={index} style={{ marginBottom: '3px' }}>
                 {line}
               </div>
             ))}
           </div>
 
-          {/* Quick Command Buttons Above Input */}
-          {currentCustomer && (
-            <div style={{
-              marginTop: '8px',
-              padding: '8px',
-              background: 'rgba(0, 40, 0, 0.3)',
-              border: '1px solid #00aa00',
-              borderRadius: '4px'
-            }}>
-              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00cccc' }}>ESSENTIAL COMMANDS:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
-                <button
-                  onClick={() => {
-                    playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'LOOKUP ';
-                      inputRef.current.focus();
-                    }
-                  }}
-                  disabled={!currentCustomer}
-                  style={{
-                    background: currentCustomer ? 'rgba(0, 80, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #00aaaa',
-                    color: currentCustomer ? '#00ffff' : '#666666',
-                    padding: '10px',
-                    fontSize: '12px',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '4px',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  LOOKUP ACCOUNT
-                </button>
-                <button
-                  onClick={() => {
-                    playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'COMPARE SIGNATURE';
-                      inputRef.current.focus();
-                    }
-                  }}
-                  disabled={!currentCustomer}
-                  style={{
-                    background: currentCustomer ? 'rgba(0, 0, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #0088ff',
-                    color: currentCustomer ? '#00aaff' : '#666666',
-                    padding: '10px',
-                    fontSize: '12px',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '4px',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  SIGNATURE CHECK
-                </button>
-              </div>
-            </div>
-          )}
+
 
           {/* Enhanced Terminal Input with Command Prefix */}
           <div style={{ 
