@@ -1986,48 +1986,7 @@ function App() {
                   </div>
                 </div>
 
-                {/* Account Status */}
-                <div style={{
-                  background: verificationState.accountLookedUp ? 'rgba(0, 40, 0, 0.6)' : 'rgba(40, 0, 0, 0.6)',
-                  border: `3px solid ${verificationState.accountLookedUp ? '#00ff00' : '#ff0000'}`,
-                  borderRadius: '6px',
-                  padding: window.innerWidth < 768 ? '12px' : '16px',
-                  cursor: 'default'
-                }}>
-                  <div style={{ 
-                    fontSize: window.innerWidth < 768 ? '14px' : '16px', 
-                    fontWeight: 'bold', 
-                    color: verificationState.accountLookedUp ? '#00ff00' : '#ff0000', 
-                    marginBottom: '10px',
-                    cursor: 'default'
-                  }}>
-                    💳 ACCOUNT STATUS
-                  </div>
-                  {verificationState.accountLookedUp ? (
-                    <div style={{ 
-                      fontSize: window.innerWidth < 768 ? '13px' : '15px', 
-                      color: '#ffffff', 
-                      lineHeight: '1.6', 
-                      fontFamily: 'monospace',
-                      cursor: 'default'
-                    }}>
-                      <div><strong>VERIFIED:</strong> ✓ YES</div>
-                      <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
-                      <div><strong>STATUS:</strong> ACTIVE</div>
-                    </div>
-                  ) : (
-                    <div style={{ 
-                      fontSize: window.innerWidth < 768 ? '13px' : '15px', 
-                      color: '#ffffff', 
-                      lineHeight: '1.6', 
-                      fontFamily: 'monospace',
-                      cursor: 'default'
-                    }}>
-                      <div><strong>STATUS:</strong> NOT VERIFIED</div>
-                      <div><strong>ACTION:</strong> USE LOOKUP COMMAND</div>
-                    </div>
-                  )}
-                </div>
+
               </div>
 
               {/* Bank System Records - Only after account lookup */}
