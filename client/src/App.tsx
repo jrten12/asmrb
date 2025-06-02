@@ -468,17 +468,19 @@ function App() {
         left: 0,
         right: 0,
         height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent)',
-        animation: 'scanline 6s linear infinite',
+        background: 'linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent)',
+        animation: 'scanline 15s linear infinite',
         zIndex: 1000,
         pointerEvents: 'none'
       }} />
       
       <style>{`
         @keyframes scanline {
-          0% { transform: translateY(-2px); opacity: 0.8; }
-          50% { opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0.6; }
+          0% { transform: translateY(-2px); opacity: 0.3; }
+          25% { opacity: 0.5; }
+          50% { opacity: 0.4; }
+          75% { opacity: 0.6; }
+          100% { transform: translateY(100vh); opacity: 0.2; }
         }
       `}</style>
       
