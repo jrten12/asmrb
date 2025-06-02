@@ -1625,11 +1625,11 @@ function App() {
         <div style={{
           background: 'linear-gradient(145deg, rgba(0, 60, 0, 0.95), rgba(0, 40, 0, 0.9))',
           border: '3px solid #ffff00',
-          padding: window.innerWidth < 768 ? '12px' : '16px',
+          padding: window.innerWidth < 768 ? '6px' : '16px',
           borderRadius: '8px',
-          marginBottom: '16px',
-          minHeight: window.innerWidth < 768 ? '120px' : '240px',
-          maxHeight: window.innerWidth < 768 ? '160px' : '320px',
+          marginBottom: window.innerWidth < 768 ? '6px' : '16px',
+          minHeight: window.innerWidth < 768 ? '80px' : '240px',
+          maxHeight: window.innerWidth < 768 ? '100px' : '320px',
           overflowY: 'auto',
           boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
           WebkitOverflowScrolling: 'touch' // iOS smooth scrolling
@@ -1823,27 +1823,27 @@ function App() {
           flex: 1,
           background: 'rgba(0, 30, 0, 0.4)',
           border: '2px solid #00ff00',
-          padding: '12px',
+          padding: window.innerWidth < 768 ? '6px' : '12px',
           borderRadius: '4px',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: window.innerWidth < 768 ? '150px' : 'auto'
+          minHeight: window.innerWidth < 768 ? '120px' : 'auto'
         }}>
           <h3 style={{ margin: '0 0 12px 0', color: '#00ff00', fontSize: '18px' }}>BANK TERMINAL</h3>
           
           {/* Verification Controls - Above Customer Console */}
           {currentCustomer && (
             <div style={{
-              marginBottom: '16px',
-              padding: '12px',
+              marginBottom: window.innerWidth < 768 ? '6px' : '16px',
+              padding: window.innerWidth < 768 ? '6px' : '12px',
               background: 'rgba(40, 0, 40, 0.4)',
               border: '2px solid #aa00aa',
               borderRadius: '6px'
             }}>
-              <div style={{ fontSize: '14px', marginBottom: '12px', color: '#ff00ff', fontWeight: 'bold', textAlign: 'center' }}>
+              <div style={{ fontSize: '14px', marginBottom: window.innerWidth < 768 ? '4px' : '12px', color: '#ff00ff', fontWeight: 'bold', textAlign: 'center' }}>
                 🔍 VERIFICATION CONTROLS
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', gap: window.innerWidth < 768 ? '4px' : '8px' }}>
                 <button
                   onClick={() => {
                     if (currentCustomer) {
