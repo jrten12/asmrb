@@ -197,9 +197,14 @@ function App() {
     setInputPrompt('Enter account number for lookup:');
     setShowFloatingInput(true);
     
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    // Debug log
+    console.log('Setting showFloatingInput to true');
+    
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
     
     playSound('paper_rustle');
   };
@@ -648,6 +653,9 @@ function App() {
           zIndex: 1000,
           boxShadow: '0 4px 20px rgba(255, 255, 0, 0.3)'
         }}>
+          <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: '16px', fontWeight: 'bold' }}>
+            💻 TELLER TERMINAL INPUT
+          </div>
           <div style={{ marginBottom: '8px', color: '#ffff00' }}>{inputPrompt}</div>
           <input
             ref={inputRef}
