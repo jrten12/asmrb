@@ -515,8 +515,15 @@ function App() {
         }}>
           <h2 style={{ color: '#888888', margin: '0 0 16px 0' }}>NO CUSTOMER PRESENT</h2>
           <button 
-            onClick={callCustomer}
-            onTouchStart={() => playSound('keyboard')}
+            onClick={() => {
+              handleFirstInteraction();
+              playSound('keyboard');
+              callCustomer();
+            }}
+            onTouchStart={() => {
+              handleFirstInteraction();
+              playSound('keyboard');
+            }}
             className="mobile-button"
             style={{
               minHeight: '44px',

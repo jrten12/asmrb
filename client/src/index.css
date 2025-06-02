@@ -122,6 +122,22 @@
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
   }
+  
+  /* Fix white background issue */
+  body, html, #root {
+    background-color: #001100 !important;
+    color: #00ff00 !important;
+  }
+  
+  /* Ensure all containers inherit dark background */
+  div {
+    background-color: transparent !important;
+  }
+  
+  /* Override any white backgrounds */
+  .mobile-panel:not([style*="background: rgba(255, 255, 255"]) {
+    background: rgba(0, 50, 0, 0.8) !important;
+  }
 }
 
 @keyframes blink {

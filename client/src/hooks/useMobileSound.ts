@@ -14,13 +14,18 @@ export function useMobileSound(): SoundManager {
 
   // Sound file mappings
   const soundFiles = {
-    keyboard: '/punch-clock.mp3',
-    printer: '/dot-matrix-printer.mp3',
-    button_click: '/punch-clock.mp3',
-    success: '/dot-matrix-printer.mp3',
-    error: '/punch-clock.mp3',
-    approve: '/dot-matrix-printer.mp3',
-    reject: '/punch-clock.mp3'
+    keyboard: '/keyboard-typing.mp3',
+    printer: '/dot-matrix-printer-73220.mp3',
+    button_click: '/keyboard-typing.mp3',
+    success: '/dot-matrix-printer-73220.mp3',
+    error: '/keyboard-typing.mp3',
+    approve: '/dot-matrix-printer-73220.mp3',
+    reject: '/keyboard-typing.mp3',
+    paper_rustle: '/keyboard-typing.mp3',
+    stamp: '/dot-matrix-printer-73220.mp3',
+    drawer: '/keyboard-typing.mp3',
+    cash: '/dot-matrix-printer-73220.mp3',
+    receipt: '/dot-matrix-printer-73220.mp3'
   };
 
   // Initialize AudioContext
