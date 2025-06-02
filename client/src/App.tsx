@@ -441,19 +441,52 @@ function App() {
           return;
         }
         
-        playSound('database_lookup');
+        playSound('account_verification');
+        setTerminalOutput(prev => [...prev, "> " + command, "CONNECTING TO BANK DATABASE...", "SEARCHING ACCOUNT RECORDS...", "VALIDATING ACCOUNT NUMBER..."]);
+        
         setTimeout(() => {
-          if (currentCustomer.isFraud) {
-            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "*** ACCOUNT NOT FOUND ***", "Account number " + accountNum + " does not exist", "POSSIBLE FRAUD - REJECT TRANSACTION"]);
-            playSound('reject');
-          } else if (accountNum === currentCustomer.accountNumber) {
-            setVerificationState(prev => ({...prev, accountLookedUp: true}));
-            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✓ ACCOUNT VERIFIED: " + accountNum, "Name on file: " + currentCustomer.name, "DOB on file: 1985-03-15", "Address: 123 Main Street, Springfield, IL", "Account status: ACTIVE", "Current balance: $" + Math.floor(Math.random() * 50000), "", "Account verification complete"]);
-            playSound('approve');
-          } else {
-            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "✗ ACCOUNT MISMATCH", "Entered: " + accountNum, "Expected: " + currentCustomer.accountNumber, "VERIFICATION FAILED"]);
-            playSound('reject');
-          }
+          playSound('legacy_processing');
+          setTimeout(() => {
+            if (currentCustomer.isFraud) {
+              setTerminalOutput(prev => [...prev, 
+                "========== ACCOUNT LOOKUP FAILED ==========",
+                "✗ ACCOUNT NOT FOUND IN SYSTEM",
+                "✗ ACCOUNT NUMBER: " + accountNum,
+                "✗ STATUS: DOES NOT EXIST",
+                "*** INVALID ACCOUNT NUMBER ***",
+                "RECOMMENDATION: VERIFY DOCUMENTS",
+                "========================================"
+              ]);
+              playSound('reject');
+            } else if (accountNum === currentCustomer.accountNumber) {
+              const balance = Math.floor(Math.random() * 50000) + 5000;
+              setAccountBalance(balance);
+              setVerificationState(prev => ({...prev, accountLookedUp: true}));
+              setTerminalOutput(prev => [...prev, 
+                "========== ACCOUNT LOOKUP SUCCESS ==========",
+                "✓ ACCOUNT VERIFIED: " + accountNum,
+                "✓ ACCOUNT HOLDER: " + currentCustomer.name,
+                "✓ STATUS: ACTIVE",
+                "✓ CURRENT BALANCE: $" + balance.toLocaleString(),
+                "✓ LAST ACTIVITY: 05/28/2025",
+                "✓ ACCOUNT TYPE: CHECKING",
+                "PROCEED TO SIGNATURE VERIFICATION",
+                "========================================="
+              ]);
+              playSound('approve');
+            } else {
+              setTerminalOutput(prev => [...prev, 
+                "========== ACCOUNT LOOKUP FAILED ==========",
+                "✗ ACCOUNT NUMBER MISMATCH",
+                "✗ ENTERED: " + accountNum,
+                "✗ EXPECTED: " + currentCustomer.accountNumber,
+                "✗ VERIFICATION FAILED",
+                "CHECK CUSTOMER DOCUMENTS AGAIN",
+                "========================================"
+              ]);
+              playSound('reject');
+            }
+          }, 800);
         }, 1200);
       }
     } else if (cmd.startsWith('VERIFY NAME ')) {
