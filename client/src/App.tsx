@@ -50,6 +50,7 @@ function App() {
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
+    accountNotFound: false,
     signatureCompared: false,
     signatureFraud: false,
     transactionProcessed: false
@@ -467,6 +468,7 @@ function App() {
   const resetVerificationState = () => {
     setVerificationState({
       accountLookedUp: false,
+      accountNotFound: false,
       signatureCompared: false,
       signatureFraud: false,
       transactionProcessed: false
@@ -510,6 +512,7 @@ function App() {
           playSound('legacy_processing');
           setTimeout(() => {
             if (currentCustomer.isFraud) {
+              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
                 "❌❌❌ ACCOUNT NOT FOUND ❌❌❌",
@@ -521,7 +524,7 @@ function App() {
             } else if (accountNum === currentCustomer.accountNumber) {
               const balance = Math.floor(Math.random() * 50000) + 5000;
               setAccountBalance(balance);
-              setVerificationState(prev => ({...prev, accountLookedUp: true}));
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
                 "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
@@ -531,6 +534,7 @@ function App() {
               ]);
               playSound('approve');
             } else {
+              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
                 "✗ ACCOUNT MISMATCH",
@@ -1811,9 +1815,12 @@ function App() {
                   }}
                   disabled={!currentCustomer}
                   style={{
-                    background: currentCustomer && verificationState.accountLookedUp ? 'rgba(0, 100, 0, 0.8)' : 'rgba(100, 100, 0, 0.6)',
-                    border: '2px solid ' + (currentCustomer && verificationState.accountLookedUp ? '#00ff00' : '#ffff00'),
-                    color: currentCustomer && verificationState.accountLookedUp ? '#00ff00' : '#ffff00',
+                    background: currentCustomer && verificationState.accountLookedUp ? 'rgba(0, 100, 0, 0.8)' : 
+                               currentCustomer && verificationState.accountNotFound ? 'rgba(100, 0, 0, 0.8)' : 'rgba(100, 100, 0, 0.6)',
+                    border: '2px solid ' + (currentCustomer && verificationState.accountLookedUp ? '#00ff00' : 
+                                           currentCustomer && verificationState.accountNotFound ? '#ff0000' : '#ffff00'),
+                    color: currentCustomer && verificationState.accountLookedUp ? '#00ff00' : 
+                           currentCustomer && verificationState.accountNotFound ? '#ff0000' : '#ffff00',
                     padding: '10px',
                     fontSize: '14px',
                     fontWeight: 'bold',
@@ -1822,7 +1829,8 @@ function App() {
                     fontFamily: 'monospace'
                   }}
                 >
-                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 
+                   verificationState.accountNotFound ? '✗ ACCOUNT NOT FOUND' : 'LOOKUP ACCOUNT'}
                 </button>
                 
                 <button
