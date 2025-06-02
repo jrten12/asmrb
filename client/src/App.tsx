@@ -114,6 +114,7 @@ function App() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [playerName, setPlayerName] = useState('');
+  const [showBankInfo, setShowBankInfo] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -1818,6 +1819,142 @@ function App() {
           )}
         </div>
 
+        {/* Expandable Bank System Information - Below Documents, Above Terminal */}
+        {currentCustomer && verificationState.accountLookedUp && (
+          <div style={{
+            background: 'rgba(0, 40, 0, 0.4)',
+            border: '3px solid #00ff00',
+            borderRadius: '6px',
+            padding: '12px',
+            marginBottom: '8px'
+          }}>
+            <button
+              onClick={() => setShowBankInfo(!showBankInfo)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#00ff00',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                padding: '8px',
+                fontFamily: 'monospace'
+              }}
+            >
+              <span>🏦 BANK SYSTEM RECORDS</span>
+              <span style={{ fontSize: '20px' }}>{showBankInfo ? '▼' : '▶'}</span>
+            </button>
+            
+            {showBankInfo && (
+              <div style={{ 
+                marginTop: '12px',
+                padding: '12px',
+                background: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: '4px',
+                border: '1px solid #00ff00'
+              }}>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', 
+                  gap: '16px' 
+                }}>
+                  {/* Personal Information */}
+                  <div style={{
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    border: '2px solid #00ff00',
+                    padding: window.innerWidth < 768 ? '10px' : '12px',
+                    borderRadius: '4px'
+                  }}>
+                    <div style={{ 
+                      fontSize: window.innerWidth < 768 ? '12px' : '14px', 
+                      fontWeight: 'bold', 
+                      color: '#00ff00', 
+                      marginBottom: '8px'
+                    }}>
+                      PERSONAL INFORMATION
+                    </div>
+                    <div style={{ 
+                      fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                      color: '#ffffff',
+                      lineHeight: '1.5',
+                      fontFamily: 'monospace'
+                    }}>
+                      <div><strong>NAME:</strong> {currentCustomer.name}</div>
+                      <div><strong>DOB:</strong> 1985-03-15</div>
+                      <div><strong>ADDRESS:</strong> 123 Main Street, Springfield, IL 62701</div>
+                      <div><strong>SSN:</strong> ***-**-1234</div>
+                    </div>
+                  </div>
+
+                  {/* Account Information */}
+                  <div style={{
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    border: '2px solid #00ff00',
+                    padding: window.innerWidth < 768 ? '10px' : '12px',
+                    borderRadius: '4px'
+                  }}>
+                    <div style={{ 
+                      fontSize: window.innerWidth < 768 ? '12px' : '14px', 
+                      fontWeight: 'bold', 
+                      color: '#00ff00', 
+                      marginBottom: '8px'
+                    }}>
+                      ACCOUNT INFORMATION
+                    </div>
+                    <div style={{ 
+                      fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                      color: '#ffffff',
+                      lineHeight: '1.5',
+                      fontFamily: 'monospace'
+                    }}>
+                      <div><strong>ACCOUNT:</strong> {currentCustomer.accountNumber}</div>
+                      <div><strong>TYPE:</strong> CHECKING</div>
+                      <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                      <div><strong>STATUS:</strong> ACTIVE</div>
+                      <div><strong>OPENED:</strong> 2020-01-15</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* NEXT CUSTOMER Button in expanded view */}
+                <div style={{
+                  marginTop: '16px',
+                  textAlign: 'center'
+                }}>
+                  <button
+                    onClick={() => {
+                      if (currentCustomer && verificationState.transactionProcessed) {
+                        playSound('button_click');
+                        handleCommand('NEXT');
+                      }
+                    }}
+                    disabled={!currentCustomer || !verificationState.transactionProcessed}
+                    style={{
+                      background: currentCustomer && verificationState.transactionProcessed ? 'rgba(0, 100, 0, 0.8)' : 'rgba(60, 60, 60, 0.6)',
+                      border: '3px solid ' + (currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#666666'),
+                      color: currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#999999',
+                      padding: window.innerWidth < 768 ? '12px 24px' : '16px 32px',
+                      fontSize: window.innerWidth < 768 ? '16px' : '18px',
+                      fontWeight: 'bold',
+                      cursor: currentCustomer && verificationState.transactionProcessed ? 'pointer' : 'not-allowed',
+                      borderRadius: '6px',
+                      fontFamily: 'monospace',
+                      textShadow: currentCustomer && verificationState.transactionProcessed ? '0 0 10px #00ff00' : 'none',
+                      minWidth: window.innerWidth < 768 ? '150px' : '200px'
+                    }}
+                  >
+                    🚶 NEXT CUSTOMER
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Terminal Section */}
         <div style={{
           flex: 1,
@@ -1989,126 +2126,7 @@ function App() {
 
               </div>
 
-              {/* Bank System Records - Only after account lookup */}
-              {verificationState.accountLookedUp && (
-                <div style={{
-                  background: 'rgba(0, 40, 0, 0.6)',
-                  border: '3px solid #00ff00',
-                  borderRadius: '6px',
-                  padding: window.innerWidth < 768 ? '12px' : '16px',
-                  marginBottom: '8px',
-                  cursor: 'default'
-                }}>
-                  <div style={{ 
-                    fontSize: window.innerWidth < 768 ? '14px' : '16px', 
-                    fontWeight: 'bold', 
-                    color: '#00ff00', 
-                    marginBottom: '12px',
-                    cursor: 'default'
-                  }}>
-                    🏦 BANK SYSTEM RECORDS
-                  </div>
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', 
-                    gap: '16px' 
-                  }}>
-                    {/* Personal Information */}
-                    <div style={{
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      border: '2px solid #00ff00',
-                      padding: window.innerWidth < 768 ? '10px' : '12px',
-                      borderRadius: '4px',
-                      cursor: 'default'
-                    }}>
-                      <div style={{ 
-                        fontSize: window.innerWidth < 768 ? '12px' : '14px', 
-                        fontWeight: 'bold', 
-                        color: '#00ff00', 
-                        marginBottom: '8px',
-                        cursor: 'default'
-                      }}>
-                        PERSONAL INFORMATION
-                      </div>
-                      <div style={{ 
-                        fontSize: window.innerWidth < 768 ? '11px' : '12px', 
-                        color: '#ffffff',
-                        lineHeight: '1.5',
-                        fontFamily: 'monospace',
-                        cursor: 'default'
-                      }}>
-                        <div><strong>NAME:</strong> {currentCustomer.name}</div>
-                        <div><strong>DOB:</strong> 1985-03-15</div>
-                        <div><strong>ADDRESS:</strong> 123 Main Street, Springfield, IL 62701</div>
-                        <div><strong>SSN:</strong> ***-**-1234</div>
-                      </div>
-                    </div>
 
-                    {/* Account Information */}
-                    <div style={{
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      border: '2px solid #00ff00',
-                      padding: window.innerWidth < 768 ? '10px' : '12px',
-                      borderRadius: '4px',
-                      cursor: 'default'
-                    }}>
-                      <div style={{ 
-                        fontSize: window.innerWidth < 768 ? '12px' : '14px', 
-                        fontWeight: 'bold', 
-                        color: '#00ff00', 
-                        marginBottom: '8px',
-                        cursor: 'default'
-                      }}>
-                        ACCOUNT INFORMATION
-                      </div>
-                      <div style={{ 
-                        fontSize: window.innerWidth < 768 ? '11px' : '12px', 
-                        color: '#ffffff',
-                        lineHeight: '1.5',
-                        fontFamily: 'monospace',
-                        cursor: 'default'
-                      }}>
-                        <div><strong>ACCOUNT:</strong> {currentCustomer.accountNumber}</div>
-                        <div><strong>TYPE:</strong> CHECKING</div>
-                        <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
-                        <div><strong>STATUS:</strong> ACTIVE</div>
-                        <div><strong>OPENED:</strong> 2020-01-15</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* NEXT CUSTOMER Button - Moved below bank system info */}
-                  <div style={{
-                    marginTop: '16px',
-                    textAlign: 'center'
-                  }}>
-                    <button
-                      onClick={() => {
-                        if (currentCustomer && verificationState.transactionProcessed) {
-                          playSound('button_click');
-                          handleCommand('NEXT');
-                        }
-                      }}
-                      disabled={!currentCustomer || !verificationState.transactionProcessed}
-                      style={{
-                        background: currentCustomer && verificationState.transactionProcessed ? 'rgba(0, 100, 0, 0.8)' : 'rgba(60, 60, 60, 0.6)',
-                        border: '3px solid ' + (currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#666666'),
-                        color: currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#999999',
-                        padding: window.innerWidth < 768 ? '12px 24px' : '16px 32px',
-                        fontSize: window.innerWidth < 768 ? '16px' : '18px',
-                        fontWeight: 'bold',
-                        cursor: currentCustomer && verificationState.transactionProcessed ? 'pointer' : 'not-allowed',
-                        borderRadius: '6px',
-                        fontFamily: 'monospace',
-                        textShadow: currentCustomer && verificationState.transactionProcessed ? '0 0 10px #00ff00' : 'none',
-                        minWidth: window.innerWidth < 768 ? '150px' : '200px'
-                      }}
-                    >
-                      🚶 NEXT CUSTOMER
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
