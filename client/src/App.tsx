@@ -39,24 +39,79 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
-    const names = ["Sarah L. Williams", "Michael Johnson", "Jennifer Rodriguez", "David Chen", "Emily Davis"];
+    const names = ["Sarah L. Williams", "Michael Johnson", "Jennifer Rodriguez", "David Chen", "Emily Davis", "Robert Thompson", "Lisa Parker", "James Wilson", "Amanda Davis", "Christopher Lee"];
     const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "ACCOUNT_UPDATE", "INQUIRY"];
     
     const name = names[Math.floor(Math.random() * names.length)];
-    const accountNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+    const baseAccountNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
     const transactionType = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
     const requestedAmount = transactionType === 'INQUIRY' ? 0 : Math.floor(100 + Math.random() * 5000);
     const destinationAccount = transactionType === 'WIRE_TRANSFER' ? Math.floor(100000000 + Math.random() * 900000000).toString() : undefined;
+    
+    // 30% chance of fraud with subtle differences
+    const isFraud = Math.random() < 0.3;
+    const fraudType = Math.floor(Math.random() * 4); // 0: DOB, 1: address, 2: signature, 3: account
+    
+    // System records (what should be correct)
+    const systemName = name;
+    const systemAccountNumber = baseAccountNumber;
+    const systemDOB = "1985-03-15";
+    const systemAddress = "123 Main Street, Springfield, IL 62701";
+    const systemSignature = name.split(' ')[0] + " " + name.split(' ')[name.split(' ').length - 1];
+    
+    // Document data (potentially fraudulent)
+    let documentName = systemName;
+    let documentAccountNumber = systemAccountNumber;
+    let documentDOB = systemDOB;
+    let documentAddress = systemAddress;
+    let documentSignature = systemSignature;
+    
+    // Introduce subtle fraud differences
+    if (isFraud) {
+      switch (fraudType) {
+        case 0: // Wrong DOB - subtle date differences
+          const fakeDOBs = ["1985-03-18", "1985-02-15", "1984-03-15", "1985-04-12", "1985-03-05"];
+          documentDOB = fakeDOBs[Math.floor(Math.random() * fakeDOBs.length)];
+          break;
+        case 1: // Wrong address - similar but different
+          const fakeAddresses = [
+            "123 Main Street, Springfield, IL 62702", // Wrong zip
+            "124 Main Street, Springfield, IL 62701", // Wrong number
+            "123 Oak Street, Springfield, IL 62701",  // Wrong street
+            "123 Main Street, Springfield, IN 62701"  // Wrong state
+          ];
+          documentAddress = fakeAddresses[Math.floor(Math.random() * fakeAddresses.length)];
+          break;
+        case 2: // Wrong signature - similar but slightly off
+          const firstName = name.split(' ')[0];
+          const lastName = name.split(' ')[name.split(' ').length - 1];
+          const fakeSignatures = [
+            firstName + " " + lastName.charAt(0) + ".",           // Last name abbreviated
+            firstName.charAt(0) + ". " + lastName,               // First name abbreviated  
+            firstName + " " + lastName + "son",                  // Extra letters
+            firstName.slice(0, -1) + "ie " + lastName,          // Slightly different spelling
+            firstName + " " + lastName.slice(0, -1) + "s"       // Modified last name
+          ];
+          documentSignature = fakeSignatures[Math.floor(Math.random() * fakeSignatures.length)];
+          break;
+        case 3: // Account number slightly off
+          const accountDigits = systemAccountNumber.split('');
+          const randomIndex = Math.floor(Math.random() * accountDigits.length);
+          accountDigits[randomIndex] = Math.floor(Math.random() * 10).toString();
+          documentAccountNumber = accountDigits.join('');
+          break;
+      }
+    }
     
     const documents: Document[] = [
       {
         type: "ID",
         title: "Driver's License",
         data: {
-          name: name,
+          name: documentName,
           licenseNumber: "DL-" + Math.floor(10000 + Math.random() * 90000),
-          dateOfBirth: "1985-03-15",
-          address: "123 Main Street, Springfield, IL 62701"
+          dateOfBirth: documentDOB,
+          address: documentAddress
         }
       },
       {
@@ -65,7 +120,7 @@ function App() {
                transactionType === 'ACCOUNT_UPDATE' ? "Account Update Form" :
                transactionType === 'INQUIRY' ? "Balance Inquiry Form" : "Transaction Slip",
         data: {
-          accountNumber: accountNumber,
+          accountNumber: documentAccountNumber,
           amount: requestedAmount,
           transactionType: transactionType,
           destinationAccount: destinationAccount || '',
@@ -76,20 +131,20 @@ function App() {
         type: "SIGNATURE",
         title: "Signature Card",
         data: {
-          signature: name.split(' ')[0] + " " + name.split(' ')[name.split(' ').length - 1]
+          signature: documentSignature
         }
       }
     ];
 
     return {
-      name,
-      accountNumber,
+      name: systemName,           // System knows the real name
+      accountNumber: systemAccountNumber, // System knows the real account
       transactionType,
       requestedAmount,
       destinationAccount,
-      documents,
-      isFraud: Math.random() < 0.3,
-      fraudType: Math.floor(Math.random() * 5)
+      documents,                  // Documents may contain fraudulent info
+      isFraud,
+      fraudType
     };
   };
 
@@ -770,40 +825,74 @@ function App() {
               margin: '0 0 16px 0', 
               color: '#00ff00', 
               textAlign: 'center',
-              fontSize: '20px'
+              fontSize: '18px'
             }}>
-              SIGNATURE COMPARISON
+              SIGNATURE VERIFICATION REQUIRED
             </h2>
             
-            <div style={{
-              background: '#ffffff',
-              border: '2px solid #00ff00',
-              padding: '16px',
-              borderRadius: '4px',
-              marginBottom: '16px',
-              textAlign: 'center',
-              minHeight: '80px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ color: '#ffff00', fontSize: '12px', marginBottom: '8px' }}>
+                CUSTOMER PROVIDED SIGNATURE:
+              </div>
               <div style={{
-                color: '#000000',
-                fontSize: '24px',
-                fontFamily: 'cursive',
-                fontWeight: 'bold'
+                background: '#ffffff',
+                border: '2px solid #ffff00',
+                padding: '20px',
+                borderRadius: '4px',
+                textAlign: 'center',
+                minHeight: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {signatureModal.signature}
+                <div style={{
+                  color: '#000000',
+                  fontSize: '26px',
+                  fontFamily: 'cursive',
+                  fontWeight: 'bold'
+                }}>
+                  {signatureModal.signature}
+                </div>
               </div>
             </div>
+
+            {currentCustomer && (
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ color: '#00ccff', fontSize: '12px', marginBottom: '8px' }}>
+                  SYSTEM SIGNATURE ON FILE:
+                </div>
+                <div style={{
+                  background: '#ffffff',
+                  border: '2px solid #00ccff',
+                  padding: '20px',
+                  borderRadius: '4px',
+                  textAlign: 'center',
+                  minHeight: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{
+                    color: '#000000',
+                    fontSize: '26px',
+                    fontFamily: 'cursive',
+                    fontWeight: 'bold'
+                  }}>
+                    {currentCustomer.name.split(' ')[0] + " " + currentCustomer.name.split(' ')[currentCustomer.name.split(' ').length - 1]}
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div style={{
-              color: '#ffff00',
-              fontSize: '14px',
+              color: '#ffaa00',
+              fontSize: '11px',
               textAlign: 'center',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              lineHeight: '1.3'
             }}>
-              Compare this signature with the customer's ID and signature card
+              Compare signatures carefully for differences in letter formation, spacing, and style.<br/>
+              Use APPROVE/REJECT buttons after comparison.
             </div>
             
             <div style={{
