@@ -51,6 +51,7 @@ function App() {
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     signatureCompared: false,
+    signatureFraud: false,
     transactionProcessed: false
   });
   const [signatureModal, setSignatureModal] = useState<{
@@ -467,6 +468,7 @@ function App() {
     setVerificationState({
       accountLookedUp: false,
       signatureCompared: false,
+      signatureFraud: false,
       transactionProcessed: false
     });
     setCurrentStep('lookup');
@@ -1780,6 +1782,70 @@ function App() {
         }}>
           <h3 style={{ margin: '0 0 12px 0', color: '#00ff00', fontSize: '18px' }}>BANK TERMINAL</h3>
           
+          {/* Verification Controls - Above Customer Console */}
+          {currentCustomer && (
+            <div style={{
+              marginBottom: '16px',
+              padding: '12px',
+              background: 'rgba(40, 0, 40, 0.4)',
+              border: '2px solid #aa00aa',
+              borderRadius: '6px'
+            }}>
+              <div style={{ fontSize: '14px', marginBottom: '12px', color: '#ff00ff', fontWeight: 'bold', textAlign: 'center' }}>
+                🔍 VERIFICATION CONTROLS
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    setTerminalOutput(prev => [...prev, "> LOOKUP", "Accessing bank database..."]);
+                    handleCommand('LOOKUP');
+                    playSound('button_click');
+                  }}
+                  disabled={!currentCustomer}
+                  style={{
+                    background: currentCustomer && verificationState.accountLookedUp ? 'rgba(0, 100, 0, 0.8)' : 'rgba(100, 100, 0, 0.6)',
+                    border: '2px solid ' + (currentCustomer && verificationState.accountLookedUp ? '#00ff00' : '#ffff00'),
+                    color: currentCustomer && verificationState.accountLookedUp ? '#00ff00' : '#ffff00',
+                    padding: '10px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setTerminalOutput(prev => [...prev, "> COMPARE", "Loading signature comparison..."]);
+                    handleCommand('COMPARE');
+                    playSound('button_click');
+                  }}
+                  disabled={!currentCustomer}
+                  style={{
+                    background: currentCustomer && verificationState.signatureCompared ? 
+                      (verificationState.signatureFraud ? 'rgba(100, 0, 0, 0.8)' : 'rgba(0, 100, 0, 0.8)') : 'rgba(100, 100, 0, 0.6)',
+                    border: '2px solid ' + (currentCustomer && verificationState.signatureCompared ? 
+                      (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : '#ffff00'),
+                    color: currentCustomer && verificationState.signatureCompared ? 
+                      (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : '#ffff00',
+                    padding: '10px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {verificationState.signatureCompared ? 
+                    (verificationState.signatureFraud ? '✗ SIGNATURE FRAUD' : '✓ SIGNATURE OK') : 'COMPARE SIGNATURE'}
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Customer Information Console */}
           {currentCustomer && (
             <div style={{
@@ -2472,6 +2538,7 @@ function App() {
               <button
                 onClick={() => {
                   setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
+                  setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: true}));
                   setTerminalOutput(prev => [...prev, 
                     "========== SIGNATURE REJECTED ==========",
                     "✗ SIGNATURES DO NOT MATCH",
@@ -2479,11 +2546,10 @@ function App() {
                     "✗ HANDWRITING ANALYSIS: SUSPICIOUS",
                     "STATUS: IDENTITY NOT CONFIRMED",
                     "*** POTENTIAL FRAUD DETECTED ***",
-                    "TRANSACTION DENIED - CALL SECURITY",
+                    "TELLER CAN PROCEED BUT WILL BE PENALIZED",
                     "======================================="
                   ]);
                   playSound('reject');
-                  handleError();
                 }}
                 style={{
                   background: 'rgba(120, 0, 0, 0.8)',
