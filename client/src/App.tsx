@@ -2117,6 +2117,37 @@ function App() {
                       </div>
                     </div>
                   </div>
+
+                  {/* NEXT CUSTOMER Button - Moved below bank system info */}
+                  <div style={{
+                    marginTop: '16px',
+                    textAlign: 'center'
+                  }}>
+                    <button
+                      onClick={() => {
+                        if (currentCustomer && verificationState.transactionProcessed) {
+                          playSound('button_click');
+                          handleCommand('NEXT');
+                        }
+                      }}
+                      disabled={!currentCustomer || !verificationState.transactionProcessed}
+                      style={{
+                        background: currentCustomer && verificationState.transactionProcessed ? 'rgba(0, 100, 0, 0.8)' : 'rgba(60, 60, 60, 0.6)',
+                        border: '3px solid ' + (currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#666666'),
+                        color: currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#999999',
+                        padding: window.innerWidth < 768 ? '12px 24px' : '16px 32px',
+                        fontSize: window.innerWidth < 768 ? '16px' : '18px',
+                        fontWeight: 'bold',
+                        cursor: currentCustomer && verificationState.transactionProcessed ? 'pointer' : 'not-allowed',
+                        borderRadius: '6px',
+                        fontFamily: 'monospace',
+                        textShadow: currentCustomer && verificationState.transactionProcessed ? '0 0 10px #00ff00' : 'none',
+                        minWidth: window.innerWidth < 768 ? '150px' : '200px'
+                      }}
+                    >
+                      🚶 NEXT CUSTOMER
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -2231,7 +2262,7 @@ function App() {
           {/* Main Action Buttons */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridTemplateColumns: '1fr',
             gap: '8px',
             marginBottom: '12px'
           }}>
@@ -2252,7 +2283,7 @@ function App() {
                 fontFamily: 'monospace'
               }}
             >
-              {currentCustomer ? 'NEXT CUSTOMER' : 'CALL CUSTOMER'}
+              {currentCustomer ? 'CONTINUE PROCESSING' : 'CALL CUSTOMER'}
             </button>
             
             <button
