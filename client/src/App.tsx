@@ -372,6 +372,29 @@ function App() {
           setTimeout(() => createTone(1600, 0.08, 0.04), 100);
           setTimeout(() => createTone(1800, 0.06, 0.03), 200);
           break;
+        case 'legacy_processing':
+          // Legacy system processing with authentic terminal sounds
+          for (let i = 0; i < 12; i++) {
+            setTimeout(() => {
+              createTone(1200 + (i % 4) * 200, 0.04, 0.06);
+              createNoise(0.01, 0.02);
+            }, i * 80);
+          }
+          setTimeout(() => createTone(1800, 0.15, 0.08), 960);
+          break;
+        case 'account_verification':
+          // Account verification processing
+          createTone(800, 0.1, 0.05);
+          setTimeout(() => createTone(1000, 0.08, 0.04), 150);
+          setTimeout(() => createTone(1200, 0.06, 0.03), 300);
+          setTimeout(() => createTone(1400, 0.1, 0.05), 450);
+          break;
+        case 'wire_confirmation':
+          // Wire transfer confirmation beeps
+          createTone(1600, 0.1, 0.06);
+          setTimeout(() => createTone(1800, 0.08, 0.05), 200);
+          setTimeout(() => createTone(2000, 0.06, 0.04), 400);
+          break;
         default:
           createTone(500, 0.1, 0.05);
       }
@@ -495,30 +518,113 @@ function App() {
       setVerificationState(prev => ({...prev, signatureCompared: true}));
       setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE VERIFICATION ==========", "STEP 1: Customer signing pad activated", "STEP 2: Ask customer to sign their name", "STEP 3: Compare fresh signature with card on file", "ANALYSIS POINTS:", "- Signature flow and speed", "- Letter formation style", "- Pressure points and spacing", "- Overall handwriting consistency", "Manual verification required - use visual judgment", "=========================================", ""]);
       playSound('paper_rustle');
-    } else if (cmd.startsWith('PROCESS ')) {
-      const transactionPart = cmd.replace('PROCESS ', '');
+    } else if (cmd.startsWith('DEPOSIT ')) {
+      const amount = cmd.substring(8).trim();
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (!verificationState.accountLookedUp || !verificationState.signatureCompared) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Complete verification first", "1. LOOKUP account", "2. COMPARE SIGNATURE"]);
+        playSound('reject');
+        return;
+      }
+      
+      playSound('legacy_processing');
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING DEPOSIT...", "VALIDATING FUNDS...", "UPDATING ACCOUNT BALANCE..."]);
+      
+      setTimeout(() => {
+        setVerificationState(prev => ({...prev, transactionProcessed: true}));
+        setTerminalOutput(prev => [...prev, 
+          "========== DEPOSIT PROCESSED ==========",
+          `AMOUNT: $${amount}`,
+          `ACCOUNT: ${currentCustomer.accountNumber}`,
+          `NEW BALANCE: $${(accountBalance + parseFloat(amount)).toLocaleString()}`,
+          "STATUS: READY FOR APPROVAL",
+          "======================================"
+        ]);
+        playSound('register_print');
+      }, 1500);
+      
+    } else if (cmd.startsWith('WITHDRAW ')) {
+      const amount = cmd.substring(9).trim();
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (!verificationState.accountLookedUp || !verificationState.signatureCompared) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Complete verification first"]);
+        playSound('reject');
+        return;
+      }
+      
+      const withdrawAmount = parseFloat(amount);
+      if (withdrawAmount > accountBalance) {
+        playSound('reject');
+        setTerminalOutput(prev => [...prev, "> " + command, "*** INSUFFICIENT FUNDS ***", `Requested: $${withdrawAmount.toLocaleString()}`, `Available: $${accountBalance.toLocaleString()}`, "TRANSACTION DENIED"]);
+        handleError();
+        return;
+      }
+      
+      playSound('legacy_processing');
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "PREPARING CASH DISPENSING..."]);
+      
+      setTimeout(() => {
+        setVerificationState(prev => ({...prev, transactionProcessed: true}));
+        setTerminalOutput(prev => [...prev, 
+          "========== WITHDRAWAL APPROVED ==========",
+          `AMOUNT: $${amount}`,
+          `ACCOUNT: ${currentCustomer.accountNumber}`,
+          `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
+          "STATUS: READY FOR CASH DISPENSING",
+          "========================================"
+        ]);
+        playSound('cash_counting');
+        setTimeout(() => playSound('register_print'), 800);
+      }, 1500);
+      
+    } else if (cmd.startsWith('WIRE ')) {
+      const parts = cmd.substring(5).trim().split(' ');
+      const amount = parts[0];
+      const destAccount = parts[1];
       
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
       }
       
-      setVerificationState(prev => ({...prev, transactionProcessed: true}));
-      
-      if (transactionPart.startsWith('DEPOSIT ')) {
-        const amount = transactionPart.replace('DEPOSIT ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing deposit: $" + amount, "Printing deposit receipt...", "Transaction prepared for approval"]);
-        playSound('dot_matrix_printer');
-      } else if (transactionPart.startsWith('WITHDRAWAL ')) {
-        const amount = transactionPart.replace('WITHDRAWAL ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing withdrawal: $" + amount, "Counting cash...", "Transaction prepared for approval"]);
-        playSound('paper_rustle');
-        setTimeout(() => playSound('stamp'), 800);
-      } else if (transactionPart.startsWith('WIRE ')) {
-        const amount = transactionPart.replace('WIRE ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing wire transfer: $" + amount, "International routing confirmed", "Transaction prepared for approval"]);
-        playSound('database_lookup');
+      if (!verificationState.accountLookedUp || !verificationState.signatureCompared) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Complete verification first"]);
+        playSound('reject');
+        return;
       }
+      
+      if (!destAccount || destAccount !== currentCustomer.destinationAccount) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Destination account mismatch", `Expected: ${currentCustomer.destinationAccount}`, `Entered: ${destAccount || 'NONE'}`, "WIRE TRANSFER DENIED"]);
+        playSound('reject');
+        handleError();
+        return;
+      }
+      
+      playSound('legacy_processing');
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WIRE TRANSFER...", "VALIDATING DESTINATION ACCOUNT...", "CONFIRMING INTERNATIONAL ROUTING..."]);
+      
+      setTimeout(() => {
+        setVerificationState(prev => ({...prev, transactionProcessed: true}));
+        setTerminalOutput(prev => [...prev, 
+          "========== WIRE TRANSFER READY ==========",
+          `AMOUNT: $${amount}`,
+          `FROM: ${currentCustomer.accountNumber}`,
+          `TO: ${destAccount}`,
+          `FEES: $25.00`,
+          `TOTAL DEBIT: $${(parseFloat(amount) + 25).toLocaleString()}`,
+          "STATUS: AWAITING FINAL APPROVAL",
+          "========================================"
+        ]);
+        playSound('wire_confirmation');
+      }, 2000);
     } else if (cmd === 'APPROVE') {
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
@@ -590,6 +696,7 @@ function App() {
         handleCommand(fullCommand);
         inputRef.current.value = '';
         setCommandPrefix('');
+        setShowFloatingInput(false);
       }
     }
   };
@@ -1340,7 +1447,7 @@ function App() {
         }}>
           <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: '14px' }}>TERMINAL</h3>
           
-          {/* Transaction Type Selector */}
+          {/* Verification Checklist */}
           {currentCustomer && (
             <div style={{
               marginBottom: '8px',
@@ -1349,51 +1456,87 @@ function App() {
               border: '1px solid #00aa00',
               borderRadius: '4px'
             }}>
-              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00cccc' }}>ESSENTIAL COMMANDS:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+              <div style={{ fontSize: '12px', marginBottom: '6px', color: '#00cccc' }}>VERIFICATION CHECKLIST:</div>
+              <div style={{ fontSize: '10px', lineHeight: '1.4' }}>
+                <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#666666' }}>
+                  {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup Complete
+                </div>
+                <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#666666' }}>
+                  {verificationState.signatureCompared ? '✓' : '○'} Signature Verified
+                </div>
+                <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#666666' }}>
+                  {verificationState.transactionProcessed ? '✓' : '○'} Transaction Processed
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transaction Processing Console */}
+          {currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && (
+            <div style={{
+              marginBottom: '8px',
+              padding: '8px',
+              background: 'rgba(0, 0, 40, 0.4)',
+              border: '2px solid #0088ff',
+              borderRadius: '4px'
+            }}>
+              <div style={{ fontSize: '12px', marginBottom: '6px', color: '#00aaff', fontWeight: 'bold' }}>
+                TRANSACTION CONSOLE:
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'LOOKUP ';
-                      inputRef.current.focus();
-                    }
+                    setCommandWithPrefix('DEPOSIT ', 'amount (e.g. 1500.00)');
                   }}
-                  disabled={!currentCustomer}
                   style={{
-                    background: currentCustomer ? 'rgba(0, 80, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #00aaaa',
-                    color: currentCustomer ? '#00ffff' : '#666666',
-                    padding: '10px',
-                    fontSize: '12px',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '4px',
+                    background: 'rgba(0, 100, 0, 0.8)',
+                    border: '1px solid #00aa00',
+                    color: '#00ff00',
+                    padding: '8px',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
                     fontFamily: 'monospace'
                   }}
                 >
-                  LOOKUP ACCOUNT
+                  DEPOSIT
                 </button>
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    if (inputRef.current) {
-                      inputRef.current.value = 'COMPARE SIGNATURE';
-                      inputRef.current.focus();
-                    }
+                    setCommandWithPrefix('WITHDRAW ', 'amount (e.g. 500.00)');
                   }}
-                  disabled={!currentCustomer}
                   style={{
-                    background: currentCustomer ? 'rgba(0, 0, 80, 0.8)' : 'rgba(30, 30, 30, 0.5)',
-                    border: '1px solid #0088ff',
-                    color: currentCustomer ? '#00aaff' : '#666666',
-                    padding: '10px',
-                    fontSize: '12px',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                    borderRadius: '4px',
+                    background: 'rgba(100, 100, 0, 0.8)',
+                    border: '1px solid #aaaa00',
+                    color: '#ffff00',
+                    padding: '8px',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
                     fontFamily: 'monospace'
                   }}
                 >
-                  SIGNATURE CHECK
+                  WITHDRAW
+                </button>
+                <button
+                  onClick={() => {
+                    playSound('button_click');
+                    setCommandWithPrefix('WIRE ', 'amount destination_account');
+                  }}
+                  style={{
+                    background: 'rgba(100, 0, 100, 0.8)',
+                    border: '1px solid #aa00aa',
+                    color: '#ff00ff',
+                    padding: '8px',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                    borderRadius: '3px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  WIRE
                 </button>
               </div>
             </div>
