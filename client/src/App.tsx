@@ -1829,7 +1829,7 @@ function App() {
                   onClick={() => {
                     if (currentCustomer) {
                       playSound('button_click');
-                      handleCommand('COMPARE');
+                      handleCommand('COMPARE SIGNATURE');
                     }
                   }}
                   disabled={!currentCustomer}
