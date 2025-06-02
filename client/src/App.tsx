@@ -1688,18 +1688,23 @@ function App() {
             
             <button
               onClick={() => {
-                setTerminalOutput(prev => [...prev, "> LOOKUP", "Enter account number to verify:"]);
-                if (inputRef.current) {
-                  inputRef.current.focus();
-                  inputRef.current.placeholder = "Type account number...";
+                if (verificationState.accountLookedUp && verificationState.signatureCompared) {
+                  setTerminalOutput(prev => [...prev, "> TRANSACTION CONSOLE", "DEPOSIT, WITHDRAW, or WIRE commands available", "Use transaction buttons above or type commands directly"]);
+                } else {
+                  setTerminalOutput(prev => [...prev, "> TRANSACTION CONSOLE", "ERROR: Complete verification first", "1. LOOKUP account", "2. COMPARE SIGNATURE"]);
+                  playSound('reject');
                 }
                 playSound('button_click');
               }}
               disabled={!currentCustomer}
               style={{
-                background: currentCustomer ? 'rgba(0, 80, 100, 0.6)' : 'rgba(50, 50, 50, 0.3)',
-                border: '2px solid #00aaff',
-                color: currentCustomer ? '#00aaff' : '#666666',
+                background: currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared 
+                  ? 'rgba(100, 0, 100, 0.6)' 
+                  : currentCustomer 
+                    ? 'rgba(80, 80, 0, 0.6)' 
+                    : 'rgba(50, 50, 50, 0.3)',
+                border: '2px solid #aa00aa',
+                color: currentCustomer ? '#ff00ff' : '#666666',
                 padding: '12px',
                 fontSize: '16px',
                 fontWeight: 'bold',
@@ -1708,7 +1713,7 @@ function App() {
                 fontFamily: 'monospace'
               }}
             >
-              LOOKUP ACCOUNT
+              TRANSACTION CONSOLE
             </button>
             
             <button
