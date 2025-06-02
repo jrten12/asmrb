@@ -52,7 +52,15 @@ function App() {
     signatureCompared: false,
     transactionProcessed: false
   });
-  const [signatureModal, setSignatureModal] = useState<{isOpen: boolean, signature: string}>({isOpen: false, signature: ''});
+  const [signatureModal, setSignatureModal] = useState<{
+    isOpen: boolean, 
+    bankSignature: string,
+    customerSignature: string
+  }>({
+    isOpen: false, 
+    bankSignature: '',
+    customerSignature: ''
+  });
   const [currentStep, setCurrentStep] = useState<'lookup' | 'signature' | 'process' | 'approve'>('lookup');
   const [waitingForInput, setWaitingForInput] = useState<string>('');
   const [commandPrefix, setCommandPrefix] = useState<string>('');
@@ -513,10 +521,61 @@ function App() {
         return;
       }
       
-      const signature = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature || 'No signature';
-      setSignatureModal({isOpen: true, signature: signature as string});
+      // Generate signatures for manual comparison
+      const name = currentCustomer.name;
+      const isFraudulent = Math.random() < 0.3; // 30% fraud rate distributed randomly
+      
+      // Bank signature (on file) - stylized versions
+      const bankSignatures = {
+        "John Smith": "𝒥𝑜𝒽𝓃 𝒮𝓂𝒾𝓉𝒽",
+        "Sarah Johnson": "𝒮𝒶𝓇𝒶𝒽 𝒥𝑜𝒽𝓃𝓈𝑜𝓃",
+        "Mike Wilson": "𝑀𝒾𝓀𝑒 𝒲𝒾𝓁𝓈𝑜𝓃",
+        "Lisa Parker": "𝐿𝒾𝓈𝒶 𝒫𝒶𝓇𝓀𝑒𝓇",
+        "David Brown": "𝒟𝒶𝓋𝒾𝒹 𝐵𝓇𝑜𝓌𝓃",
+        "Emily Davis": "𝐸𝓂𝒾𝓁𝓎 𝒟𝒶𝓋𝒾𝓈",
+        "James Wilson": "𝒥𝒶𝓂𝑒𝓈 𝒲𝒾𝓁𝓈𝑜𝓃",
+        "Jennifer Garcia": "𝒥𝑒𝓃𝓃𝒾𝒻𝑒𝓇 𝒢𝒶𝓇𝒸𝒾𝒶",
+        "Michael Johnson": "𝑀𝒾𝒸𝒽𝒶𝑒𝓁 𝒥𝑜𝒽𝓃𝓈𝑜𝓃",
+        "Ashley Martinez": "𝒜𝓈𝒽𝓁𝑒𝓎 𝑀𝒶𝓇𝓉𝒾𝓃𝑒𝓏",
+        "Christopher Lee": "𝒞𝒽𝓇𝒾𝓈𝓉𝑜𝓅𝒽𝑒𝓇 𝐿𝑒𝑒",
+        "Amanda Rodriguez": "𝒜𝓂𝒶𝓃𝒹𝒶 𝑅𝑜𝒹𝓇𝒾𝑔𝓊𝑒𝓏",
+        "Matthew Taylor": "𝑀𝒶𝓉𝓉𝒽𝑒𝓌 𝒯𝒶𝓎𝓁𝑜𝓇",
+        "Stephanie Thomas": "𝒮𝓉𝑒𝓅𝒽𝒶𝓃𝒾𝑒 𝒯𝒽𝑜𝓂𝒶𝓈",
+        "Robert Thompson": "𝑅𝑜𝒷𝑒𝓇𝓉 𝒯𝒽𝑜𝓂𝓅𝓈𝑜𝓃"
+      };
+      
+      const bankSignature = bankSignatures[name] || name;
+      let customerSignature = bankSignature;
+      
+      if (isFraudulent) {
+        // Fraudulent signatures - different but attempting to look similar
+        const fraudVariations = [
+          name.toUpperCase(),
+          name.toLowerCase(),
+          bankSignature.replace(/𝒶/g, 'a').replace(/𝑒/g, 'e').replace(/𝑜/g, 'o'),
+          name.split(' ')[0] + " " + name.split(' ')[1].slice(0, 1) + ".",
+          bankSignature.replace(/𝓃/g, 'n').replace(/𝓈/g, 's'),
+          name + "son",
+        ];
+        customerSignature = fraudVariations[Math.floor(Math.random() * fraudVariations.length)];
+      } else {
+        // Authentic signatures with natural variations
+        const naturalVariations = [
+          bankSignature,
+          bankSignature.replace(/𝒾/g, 'i'),
+          bankSignature + ".",
+          bankSignature.replace(/𝓈/g, 's'),
+        ];
+        customerSignature = naturalVariations[Math.floor(Math.random() * naturalVariations.length)];
+      }
+      
+      setSignatureModal({
+        isOpen: true, 
+        bankSignature, 
+        customerSignature
+      });
       setVerificationState(prev => ({...prev, signatureCompared: true}));
-      setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE VERIFICATION ==========", "STEP 1: Customer signing pad activated", "STEP 2: Ask customer to sign their name", "STEP 3: Compare fresh signature with card on file", "ANALYSIS POINTS:", "- Signature flow and speed", "- Letter formation style", "- Pressure points and spacing", "- Overall handwriting consistency", "Manual verification required - use visual judgment", "=========================================", ""]);
+      setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE COMPARISON ==========", "RETRIEVING SIGNATURE ON FILE...", "CUSTOMER SIGNING FRESH SIGNATURE...", "", "VISUAL COMPARISON REQUIRED", "EXAMINE BOTH SIGNATURES CAREFULLY", "LOOK FOR:", "- Letter formation differences", "- Spacing and flow variations", "- Pressure and pen strokes", "- Overall handwriting style", "", "USE YOUR JUDGMENT TO DETERMINE AUTHENTICITY", "========================================"]);
       playSound('paper_rustle');
     } else if (cmd.startsWith('DEPOSIT ')) {
       const amount = cmd.substring(8).trim();
@@ -1822,7 +1881,7 @@ function App() {
                   fontFamily: 'cursive',
                   fontWeight: 'bold'
                 }}>
-                  {signatureModal.signature}
+                  {signatureModal.customerSignature}
                 </div>
               </div>
             </div>
@@ -1849,7 +1908,7 @@ function App() {
                     fontFamily: 'cursive',
                     fontWeight: 'bold'
                   }}>
-                    {currentCustomer.name.split(' ')[0] + " " + currentCustomer.name.split(' ')[currentCustomer.name.split(' ').length - 1]}
+                    {signatureModal.bankSignature}
                   </div>
                 </div>
               </div>
