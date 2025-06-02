@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useMobileSound } from './hooks/useMobileSound';
 
 interface Customer {
   name: string;
@@ -48,6 +49,10 @@ function App() {
     consecutiveErrors: 0,
     errorDetails: [] as string[]
   });
+
+  // Mobile sound system
+  const { playSound, isReady: soundReady, unlock: unlockAudio } = useMobileSound();
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [shiftStartTime, setShiftStartTime] = useState<number>(0);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [showManagerWarning, setShowManagerWarning] = useState(false);
@@ -226,109 +231,55 @@ function App() {
     };
   };
 
-  const playSound = (type: string) => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
-      const createTone = (frequency: number, duration: number, volume: number = 0.1) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + duration);
-      };
+  // Audio unlock handler for mobile browsers
+  const handleFirstInteraction = () => {
+    if (!audioUnlocked && soundReady) {
+      unlockAudio();
+      setAudioUnlocked(true);
+      playSound('button_click');
+    }
+  };
 
-      const createNoise = (duration: number, volume: number = 0.05) => {
-        const bufferSize = audioContext.sampleRate * duration;
-        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-        const output = buffer.getChannelData(0);
-        
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-        
-        const source = audioContext.createBufferSource();
-        const gainNode = audioContext.createGain();
-        
-        source.buffer = buffer;
-        source.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-        
-        source.start(audioContext.currentTime);
-      };
+  // Enhanced button component with mobile-first design and sound
+  const MobileButton = ({ onClick, children, className = "", variant = "default", ...props }: any) => {
+    const handleClick = (e: any) => {
+      handleFirstInteraction();
+      playSound('button_click');
+      if (onClick) onClick(e);
+    };
 
-      switch (type) {
-        case 'keypress':
-          // Enhanced mechanical keyboard with medium hardness ASMR
-          createTone(1200 + Math.random() * 400, 0.015, 0.04);
-          createTone(800 + Math.random() * 200, 0.008, 0.025);
-          createNoise(0.012, 0.015);
-          setTimeout(() => createTone(600, 0.006, 0.015), 8);
-          setTimeout(() => createNoise(0.004, 0.008), 12);
-          break;
-        case 'button_click':
-          createTone(1200, 0.08, 0.1);
-          setTimeout(() => createTone(800, 0.06, 0.08), 30);
-          break;
-        case 'terminal_confirm':
-          createTone(1400, 0.12, 0.1);
-          setTimeout(() => createTone(1600, 0.08, 0.06), 60);
-          break;
-        case 'customer_approach':
-          createTone(600, 0.3, 0.08);
-          setTimeout(() => createTone(700, 0.2, 0.06), 150);
-          break;
-        case 'database_lookup':
-          createTone(1000, 0.15, 0.08);
-          setTimeout(() => createTone(1100, 0.12, 0.06), 80);
-          setTimeout(() => createTone(1200, 0.1, 0.04), 160);
-          break;
-        case 'approve':
-          createTone(880, 0.2, 0.1);
-          setTimeout(() => createTone(1100, 0.3, 0.12), 100);
-          break;
-        case 'reject':
-          createTone(220, 0.3, 0.1);
-          setTimeout(() => createTone(180, 0.25, 0.08), 150);
-          break;
-        case 'stamp':
-          createNoise(0.05, 0.15);
-          createTone(200, 0.08, 0.1);
-          break;
-        case 'paper_rustle':
-          createNoise(0.2, 0.04);
-          break;
-        case 'dot_matrix_printer':
-          // Enhanced ASMR dot matrix printer with authentic mechanical sounds
-          for (let i = 0; i < 25; i++) {
-            setTimeout(() => {
-              // Main printer head impact
-              createTone(1600 + (i % 4) * 150, 0.025, 0.04);
-              createTone(1200 + (i % 3) * 100, 0.015, 0.03);
-              // Mechanical noise and paper feed
-              createNoise(0.018, 0.025);
-              // Carriage movement
-              if (i % 8 === 0) createTone(800, 0.008, 0.02);
-            }, i * 60);
-          }
-          // Paper tear sound at the end
-          setTimeout(() => {
-            createNoise(0.15, 0.08);
-            createTone(400, 0.06, 0.04);
-            setTimeout(() => createNoise(0.08, 0.05), 80);
-          }, 25 * 60 + 200);
-          break;
-        case 'modal_close':
+    const handleTouch = (e: any) => {
+      handleFirstInteraction();
+      playSound('button_click');
+    };
+
+    return (
+      <button
+        className={`mobile-button ${className}`}
+        onClick={handleClick}
+        onTouchStart={handleTouch}
+        style={{
+          minHeight: '44px',
+          padding: '12px 16px',
+          fontSize: '16px',
+          fontFamily: 'Courier New, monospace',
+          border: '2px solid #00ff00',
+          backgroundColor: variant === 'success' ? 'rgba(0, 255, 0, 0.2)' : 
+                          variant === 'danger' ? 'rgba(255, 0, 0, 0.2)' : 
+                          'rgba(0, 100, 0, 0.3)',
+          color: '#00ff00',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          touchAction: 'manipulation',
+          width: '100%',
+          marginBottom: '8px'
+        }}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  };
           createTone(800, 0.1, 0.05);
           break;
         case 'easter_melody':
