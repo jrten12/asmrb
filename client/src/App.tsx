@@ -2071,43 +2071,7 @@ function App() {
 
 
 
-          {/* Verification Status - Compact */}
-          {currentCustomer && (
-            <div style={{
-              marginBottom: '8px',
-              padding: '8px',
-              background: 'rgba(0, 0, 40, 0.4)',
-              border: '2px solid #0088ff',
-              borderRadius: '4px'
-            }}>
-              <div style={{ fontSize: '12px', marginBottom: '4px', color: '#00aaff', fontWeight: 'bold' }}>VERIFICATION:</div>
-              <div style={{ fontSize: '11px', display: 'flex', gap: '12px' }}>
-                <span style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
-                  {verificationState.accountLookedUp ? '✓ ACCOUNT' : '○ ACCOUNT'}
-                </span>
-                <span style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888' }}>
-                  {verificationState.signatureCompared ? '✓ SIGNATURE' : '○ SIGNATURE'}
-                </span>
-                <span style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
-                  {verificationState.transactionProcessed ? '✓ PROCESSED' : '○ PROCESSED'}
-                </span>
-              </div>
-              {/* Account Info Display - Only when looked up */}
-              {verificationState.accountLookedUp && (
-                <div style={{
-                  marginTop: '6px',
-                  padding: '6px',
-                  background: 'rgba(0, 50, 0, 0.6)',
-                  border: '1px solid #00aa00',
-                  borderRadius: '3px',
-                  fontSize: '10px',
-                  color: '#00ff00'
-                }}>
-                  ✓ ACCT: {currentCustomer.accountNumber} | BAL: ${accountBalance.toLocaleString()} | STATUS: ACTIVE
-                </div>
-              )}
-            </div>
-          )}
+
 
           {/* Transaction Console */}
           {currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && (
