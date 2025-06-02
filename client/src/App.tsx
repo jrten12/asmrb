@@ -1732,6 +1732,99 @@ function App() {
         }}>
           <h3 style={{ margin: '0 0 12px 0', color: '#00ff00', fontSize: '18px' }}>BANK TERMINAL</h3>
           
+          {/* Customer Information Console */}
+          {currentCustomer && (
+            <div style={{
+              marginBottom: '12px',
+              padding: '12px',
+              background: 'rgba(0, 0, 40, 0.4)',
+              border: '2px solid #0088ff',
+              borderRadius: '6px'
+            }}>
+              <div style={{ fontSize: '14px', marginBottom: '12px', color: '#00aaff', fontWeight: 'bold', textAlign: 'center' }}>
+                CUSTOMER INFORMATION CONSOLE
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                {/* Customer Request */}
+                <div style={{
+                  background: 'rgba(40, 40, 0, 0.6)',
+                  border: '2px solid #ffff00',
+                  borderRadius: '4px',
+                  padding: '10px'
+                }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffff00', marginBottom: '6px' }}>
+                    📋 TRANSACTION REQUEST
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                    <div><strong>CUSTOMER:</strong> {currentCustomer.name}</div>
+                    <div><strong>TYPE:</strong> {currentCustomer.transactionType}</div>
+                    <div><strong>AMOUNT:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
+                    {currentCustomer.destinationAccount && (
+                      <div><strong>WIRE TO:</strong> {currentCustomer.destinationAccount}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Account Status */}
+                <div style={{
+                  background: verificationState.accountLookedUp ? 'rgba(0, 40, 0, 0.6)' : 'rgba(40, 0, 0, 0.6)',
+                  border: `2px solid ${verificationState.accountLookedUp ? '#00ff00' : '#ff0000'}`,
+                  borderRadius: '4px',
+                  padding: '10px'
+                }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: verificationState.accountLookedUp ? '#00ff00' : '#ff0000', marginBottom: '6px' }}>
+                    💳 ACCOUNT STATUS
+                  </div>
+                  {verificationState.accountLookedUp ? (
+                    <div style={{ fontSize: '11px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                      <div><strong>VERIFIED:</strong> ✓ YES</div>
+                      <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                      <div><strong>STATUS:</strong> ACTIVE</div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '11px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                      <div><strong>STATUS:</strong> NOT VERIFIED</div>
+                      <div><strong>ACTION:</strong> USE LOOKUP COMMAND</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Documents Review */}
+              <div style={{
+                background: 'rgba(40, 0, 40, 0.6)',
+                border: '2px solid #ff00ff',
+                borderRadius: '4px',
+                padding: '10px',
+                marginBottom: '12px'
+              }}>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ff00ff', marginBottom: '8px' }}>
+                  📄 CUSTOMER DOCUMENTS PRESENTED
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                  {currentCustomer.documents.map((doc, index) => (
+                    <div key={index} style={{
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      border: '1px solid #ff00ff',
+                      padding: '6px',
+                      borderRadius: '3px'
+                    }}>
+                      <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#ff00ff', marginBottom: '4px' }}>
+                        {doc.title}
+                      </div>
+                      {Object.entries(doc.data).map(([key, value]) => (
+                        <div key={key} style={{ fontSize: '9px', color: '#cccccc' }}>
+                          <strong>{key}:</strong> {value}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Essential Commands */}
           {currentCustomer && (
             <div style={{
