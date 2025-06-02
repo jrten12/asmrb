@@ -754,16 +754,23 @@ function App() {
 
 
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && inputRef.current) {
+  const submitCommand = () => {
+    if (inputRef.current) {
       const fullCommand = commandPrefix + inputRef.current.value;
       if (fullCommand.trim()) {
         playSound('terminal_confirm');
+        setTerminalOutput(prev => [...prev, "COMMAND SUBMITTED: " + fullCommand]);
         handleCommand(fullCommand);
         inputRef.current.value = '';
         setCommandPrefix('');
         setShowFloatingInput(false);
       }
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      submitCommand();
     }
   };
 
@@ -2127,6 +2134,23 @@ function App() {
                 outline: 'none'
               }}
             />
+            <button
+              onClick={submitCommand}
+              style={{
+                background: 'rgba(0, 150, 0, 0.8)',
+                border: '2px solid #00ff00',
+                color: '#00ff00',
+                padding: '10px 16px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                marginLeft: '8px'
+              }}
+            >
+              SEND
+            </button>
           </div>
         </div>
       )}
