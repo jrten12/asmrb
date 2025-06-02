@@ -297,12 +297,11 @@ function App() {
   const resetVerificationState = () => {
     setVerificationState({
       accountLookedUp: false,
-      nameVerified: false,
-      dobVerified: false,
-      addressVerified: false,
       signatureCompared: false,
       transactionProcessed: false
     });
+    setCurrentStep('lookup');
+    setWaitingForInput('');
   };
 
   const handleCommand = (command: string) => {
