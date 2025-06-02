@@ -1837,33 +1837,34 @@ function App() {
                 </div>
               </div>
 
-              {/* Documents Review */}
-              <div style={{
-                background: 'rgba(40, 0, 40, 0.6)',
-                border: '3px solid #ff00ff',
-                borderRadius: '6px',
-                padding: window.innerWidth < 768 ? '12px' : '16px',
-                marginBottom: '8px',
-                cursor: 'default'
-              }}>
-                <div style={{ 
-                  fontSize: window.innerWidth < 768 ? '14px' : '16px', 
-                  fontWeight: 'bold', 
-                  color: '#ff00ff', 
-                  marginBottom: '12px',
+              {/* Bank System Records - Only after account lookup */}
+              {verificationState.accountLookedUp && (
+                <div style={{
+                  background: 'rgba(0, 40, 0, 0.6)',
+                  border: '3px solid #00ff00',
+                  borderRadius: '6px',
+                  padding: window.innerWidth < 768 ? '12px' : '16px',
+                  marginBottom: '8px',
                   cursor: 'default'
                 }}>
-                  📄 CUSTOMER DOCUMENTS PRESENTED
-                </div>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
-                  gap: '12px' 
-                }}>
-                  {currentCustomer.documents.map((doc, index) => (
-                    <div key={index} style={{
+                  <div style={{ 
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px', 
+                    fontWeight: 'bold', 
+                    color: '#00ff00', 
+                    marginBottom: '12px',
+                    cursor: 'default'
+                  }}>
+                    🏦 BANK SYSTEM RECORDS
+                  </div>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)', 
+                    gap: '16px' 
+                  }}>
+                    {/* Personal Information */}
+                    <div style={{
                       background: 'rgba(0, 0, 0, 0.3)',
-                      border: '2px solid #ff00ff',
+                      border: '2px solid #00ff00',
                       padding: window.innerWidth < 768 ? '10px' : '12px',
                       borderRadius: '4px',
                       cursor: 'default'
@@ -1871,26 +1872,60 @@ function App() {
                       <div style={{ 
                         fontSize: window.innerWidth < 768 ? '12px' : '14px', 
                         fontWeight: 'bold', 
-                        color: '#ff00ff', 
+                        color: '#00ff00', 
                         marginBottom: '8px',
                         cursor: 'default'
                       }}>
-                        {doc.title}
+                        PERSONAL INFORMATION
                       </div>
-                      {Object.entries(doc.data).map(([key, value]) => (
-                        <div key={key} style={{ 
-                          fontSize: window.innerWidth < 768 ? '11px' : '12px', 
-                          color: '#cccccc',
-                          marginBottom: '4px',
-                          cursor: 'default'
-                        }}>
-                          <strong>{key}:</strong> {value}
-                        </div>
-                      ))}
+                      <div style={{ 
+                        fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                        color: '#ffffff',
+                        lineHeight: '1.5',
+                        fontFamily: 'monospace',
+                        cursor: 'default'
+                      }}>
+                        <div><strong>NAME:</strong> {currentCustomer.name}</div>
+                        <div><strong>DOB:</strong> 1985-03-15</div>
+                        <div><strong>ADDRESS:</strong> 123 Main Street, Springfield, IL 62701</div>
+                        <div><strong>SSN:</strong> ***-**-1234</div>
+                      </div>
                     </div>
-                  ))}
+
+                    {/* Account Information */}
+                    <div style={{
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      border: '2px solid #00ff00',
+                      padding: window.innerWidth < 768 ? '10px' : '12px',
+                      borderRadius: '4px',
+                      cursor: 'default'
+                    }}>
+                      <div style={{ 
+                        fontSize: window.innerWidth < 768 ? '12px' : '14px', 
+                        fontWeight: 'bold', 
+                        color: '#00ff00', 
+                        marginBottom: '8px',
+                        cursor: 'default'
+                      }}>
+                        ACCOUNT INFORMATION
+                      </div>
+                      <div style={{ 
+                        fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                        color: '#ffffff',
+                        lineHeight: '1.5',
+                        fontFamily: 'monospace',
+                        cursor: 'default'
+                      }}>
+                        <div><strong>ACCOUNT:</strong> {currentCustomer.accountNumber}</div>
+                        <div><strong>TYPE:</strong> CHECKING</div>
+                        <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                        <div><strong>STATUS:</strong> ACTIVE</div>
+                        <div><strong>OPENED:</strong> 2020-01-15</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
