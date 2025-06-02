@@ -40,14 +40,18 @@ function App() {
     "",
     "Ready for customer service"
   ]);
-  const [gameScore, setGameScore] = useState<GameScore>({
+  const [gameScore, setGameScore] = useState({
     score: 0,
     correctTransactions: 0,
     errors: 0,
-    timeOnShift: 0
+    timeOnShift: 0,
+    consecutiveErrors: 0,
+    errorDetails: [] as string[]
   });
   const [shiftStartTime, setShiftStartTime] = useState<number>(0);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
+  const [showManagerWarning, setShowManagerWarning] = useState(false);
+  const [managerMessage, setManagerMessage] = useState('');
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     accountNotFound: false,
