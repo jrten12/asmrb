@@ -499,9 +499,10 @@ function App() {
           setTimeout(() => {
             if (currentCustomer.isFraud) {
               setTerminalOutput(prev => [...prev, 
-                "\x1b[31m*** NO ACCOUNT EXISTS AT BANK ***\x1b[0m",
-                "\x1b[31mACCOUNT NUMBER: " + accountNum + " - INVALID\x1b[0m",
-                "\x1b[31mSTATUS: NOT IN SYSTEM\x1b[0m"
+                "> LOOKUP " + accountNum,
+                "*** ACCOUNT NOT FOUND ***",
+                "STATUS: INVALID - NO RECORD IN SYSTEM",
+                "RESULT: FRAUD DETECTED"
               ]);
               playSound('reject');
             } else if (accountNum === currentCustomer.accountNumber) {
@@ -509,29 +510,27 @@ function App() {
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true}));
               setTerminalOutput(prev => [...prev, 
-                "========== ACCOUNT VERIFICATION SUCCESS ==========",
-                "✓ ACCOUNT FOUND IN SYSTEM",
-                "",
-                "BANK RECORDS:",
+                "> LOOKUP " + accountNum,
+                "✓ ACCOUNT VERIFIED - RECORD FOUND",
                 `NAME: ${currentCustomer.name}`,
-                `ACCOUNT: ${currentCustomer.accountNumber}`,
-                `DOB: 1985-03-15`,
-                `ADDRESS: 123 Main Street, Springfield, IL 62701`,
                 `BALANCE: $${balance.toLocaleString()}`,
                 `STATUS: ACTIVE`,
                 "",
-                "CUSTOMER DOCUMENTS TO VERIFY:",
-                `ID NAME: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.name || 'N/A'}`,
-                `ID DOB: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || 'N/A'}`,
-                `ID ADDRESS: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}`,
-                `FORM ACCOUNT: ${currentCustomer.documents.find(d => d.type === 'SLIP')?.data.accountNumber || 'N/A'}`,
+                "CUSTOMER DOCUMENTS:",
+                `ID: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.name || 'N/A'}`,
+                `DOB: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || 'N/A'}`,
+                `ADDRESS: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}`,
+                `FORM ACCT: ${currentCustomer.documents.find(d => d.type === 'SLIP')?.data.accountNumber || 'N/A'}`,
                 "",
-                "COMPARE ALL DETAILS CAREFULLY",
-                "============================================="
+                "VERIFY ALL DETAILS MATCH"
               ]);
               playSound('approve');
             } else {
-              setTerminalOutput(prev => [...prev, "✗ ACCOUNT MISMATCH"]);
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✗ ACCOUNT MISMATCH",
+                "CUSTOMER ACCOUNT DOES NOT MATCH"
+              ]);
               playSound('reject');
             }
           }, 800);
