@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMobileSound } from './hooks/useMobileSound';
 
 interface Customer {
@@ -37,7 +37,6 @@ function App() {
     "Ready for customer service"
   ]);
   
-  // Verification workflow states
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     accountNotFound: false,
@@ -67,16 +66,13 @@ function App() {
   
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Mobile sound system with ASMR audio files
   const { playSound, isReady: soundReady, unlock: unlockAudio } = useMobileSound();
   const [audioUnlocked, setAudioUnlocked] = useState(false);
 
-  // Audio unlock handler for mobile browsers
   const handleFirstInteraction = () => {
     if (!audioUnlocked && soundReady) {
       unlockAudio();
       setAudioUnlocked(true);
-      playSound('keyboard');
     }
   };
 
@@ -90,18 +86,15 @@ function App() {
     const requestedAmount = transactionType === 'INQUIRY' ? 0 : Math.floor(100 + Math.random() * 5000);
     const destinationAccount = transactionType === 'WIRE_TRANSFER' ? Math.floor(100000000 + Math.random() * 900000000).toString() : undefined;
     
-    // 30% chance of fraud with subtle differences
     const isFraud = Math.random() < 0.3;
     const fraudType = Math.floor(Math.random() * 4);
     
-    // System records
     const systemName = name;
     const systemAccountNumber = baseAccountNumber;
     const systemDOB = "1985-03-15";
     const systemAddress = "123 Main Street, Springfield, IL 62701";
     const systemSignature = name.split(' ')[0] + " " + name.split(' ')[name.split(' ').length - 1];
     
-    // Document data (potentially fraudulent)
     let documentName = systemName;
     let documentAccountNumber = systemAccountNumber;
     let documentDOB = systemDOB;
@@ -110,16 +103,16 @@ function App() {
     
     if (isFraud) {
       switch (fraudType) {
-        case 0: // Name mismatch
+        case 0:
           documentName = name.replace(/Sarah/g, 'Sara').replace(/Michael/g, 'Mike').replace(/Jennifer/g, 'Jenny');
           break;
-        case 1: // Address mismatch
+        case 1:
           documentAddress = "456 Oak Avenue, Springfield, IL 62702";
           break;
-        case 2: // Signature mismatch
+        case 2:
           documentSignature = name.split(' ')[0] + "nie " + name.split(' ')[name.split(' ').length - 1];
           break;
-        case 3: // Account number mismatch
+        case 3:
           documentAccountNumber = (parseInt(baseAccountNumber) - 50000).toString();
           break;
       }
@@ -197,15 +190,13 @@ function App() {
     setInputPrompt('Enter account number for lookup:');
     setShowFloatingInput(true);
     
-    // Debug log
-    console.log('Setting showFloatingInput to true');
-    
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }, 100);
     
+    handleFirstInteraction();
     playSound('paper_rustle');
   };
 
@@ -218,7 +209,6 @@ function App() {
       const accountNumber = command.replace('LOOKUP ', '').trim();
       
       if (accountNumber === currentCustomer.accountNumber) {
-        // Successful lookup
         setAccountBalance(Math.floor(Math.random() * 50000) + 1000);
         setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
         setTerminalOutput(prev => [
@@ -248,7 +238,6 @@ function App() {
       }
     } else if (waitingForInput === 'signature_check') {
       if (command === 'SIGNATURE') {
-        // Open signature comparison modal
         const bankSig = currentCustomer.name.split(' ')[0] + " " + currentCustomer.name.split(' ')[currentCustomer.name.split(' ').length - 1];
         const customerSig = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature as string;
         
@@ -270,7 +259,6 @@ function App() {
       }
     }
     
-    // Clear input
     setShowFloatingInput(false);
     setCommandPrefix('');
     setInputPrompt('');
@@ -305,9 +293,7 @@ function App() {
         "Transaction rejected - Call security"
       ]);
       
-      // Handle fraud detection correctly
-      if (currentCustomer.isFraud) {
-        // Correct rejection of fraud
+      if (currentCustomer && currentCustomer.isFraud) {
         setGameScore(prev => ({ 
           ...prev, 
           score: prev.score + 150, 
@@ -315,7 +301,6 @@ function App() {
         }));
         setTerminalOutput(prev => [...prev, "✓ CORRECT FRAUD DETECTION +150 points"]);
       } else {
-        // Incorrect rejection of legitimate customer
         setGameScore(prev => ({ ...prev, errors: prev.errors + 1 }));
         setTerminalOutput(prev => [...prev, "✗ FALSE FRAUD ALERT - Customer was legitimate"]);
       }
@@ -332,11 +317,11 @@ function App() {
   const processTransaction = () => {
     if (!currentCustomer) return;
     
-    playSound('printer');
+    handleFirstInteraction();
+    playSound('receipt');
     
     setVerificationState(prev => ({ ...prev, transactionProcessed: true }));
     
-    // Generate receipt
     const receipt = {
       customerName: currentCustomer.name,
       accountNumber: currentCustomer.accountNumber,
@@ -358,15 +343,12 @@ function App() {
       "Printing receipt..."
     ]);
     
-    // Check if transaction was actually fraudulent
     setTimeout(() => {
       if (currentCustomer.isFraud) {
-        // Approved fraudulent transaction - major error
         setGameScore(prev => ({ ...prev, errors: prev.errors + 2 }));
         setTerminalOutput(prev => [...prev, "", "⚠️ SECURITY ALERT: Fraudulent transaction approved", "Major compliance violation"]);
         playSound('reject');
       } else {
-        // Correctly approved legitimate transaction
         setGameScore(prev => ({ 
           ...prev, 
           score: prev.score + 100, 
@@ -386,7 +368,8 @@ function App() {
   const startShift = () => {
     setGamePhase('working');
     setShiftStartTime(Date.now());
-    playSound('printer');
+    handleFirstInteraction();
+    playSound('button_click');
     setTerminalOutput(prev => [
       ...prev,
       "",
@@ -398,7 +381,8 @@ function App() {
   };
 
   const endShift = () => {
-    playSound('printer');
+    handleFirstInteraction();
+    playSound('button_click');
     const timeWorked = Math.floor((Date.now() - shiftStartTime) / 1000);
     setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
     
@@ -408,6 +392,8 @@ function App() {
       setGamePhase('leaderboard');
     }
   };
+
+  const isMobile = window.innerWidth < 768;
 
   if (gamePhase === 'punch_in') {
     return (
@@ -422,7 +408,7 @@ function App() {
         justifyContent: 'center',
         padding: '20px'
       }}>
-        <div className="mobile-panel" style={{
+        <div style={{
           background: 'rgba(0, 50, 0, 0.8)',
           border: '3px solid #00ff00',
           borderRadius: '8px',
@@ -445,16 +431,8 @@ function App() {
           </div>
           
           <button 
-            onClick={() => {
-              handleFirstInteraction();
-              playSound('button_click');
-              startShift();
-            }}
-            onTouchStart={() => {
-              handleFirstInteraction();
-              playSound('button_click');
-            }}
-            className="mobile-button"
+            onClick={startShift}
+            onTouchStart={handleFirstInteraction}
             style={{
               minHeight: '44px',
               padding: '12px 16px',
@@ -477,175 +455,210 @@ function App() {
   }
 
   return (
-    <div className="mobile-responsive" style={{
+    <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #001100 0%, #003300 50%, #001100 100%)',
       color: '#00ff00',
       fontFamily: 'Courier New, monospace',
-      padding: window.innerWidth < 768 ? '8px' : '20px'
+      padding: isMobile ? '10px' : '20px',
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      gap: isMobile ? '10px' : '20px'
     }}>
       
-      {/* Header */}
-      <div className="mobile-panel" style={{
-        background: 'rgba(0, 50, 0, 0.8)',
-        border: '2px solid #00ff00',
-        borderRadius: '6px',
-        padding: '12px',
-        marginBottom: '12px',
-        textAlign: 'center'
+      <div style={{ 
+        flex: '1',
+        marginBottom: isMobile ? '120px' : '0'
       }}>
-        <h1 style={{ margin: 0, fontSize: '20px' }}>🏦 TELLER'S WINDOW</h1>
-        <div style={{ fontSize: '14px', color: '#ffff00' }}>
-          Score: {gameScore.score} | Transactions: {gameScore.correctTransactions} | Errors: {gameScore.errors}
-        </div>
-        <button 
-          onClick={endShift}
-          style={{
-            marginTop: '8px',
-            padding: '4px 8px',
-            fontSize: '12px',
-            background: 'rgba(255, 0, 0, 0.2)',
-            border: '1px solid #ff0000',
-            color: '#ff0000',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          END SHIFT
-        </button>
-      </div>
-
-      {/* Customer Area */}
-      {!currentCustomer ? (
-        <div className="mobile-panel" style={{
-          background: 'rgba(0, 30, 0, 0.6)',
-          border: '2px solid #888888',
+        
+        <div style={{
+          background: 'rgba(0, 50, 0, 0.8)',
+          border: '2px solid #00ff00',
           borderRadius: '6px',
-          padding: '20px',
+          padding: '12px',
           marginBottom: '12px',
           textAlign: 'center'
         }}>
-          <h2 style={{ color: '#888888', margin: '0 0 16px 0' }}>NO CUSTOMER PRESENT</h2>
+          <h1 style={{ margin: 0, fontSize: isMobile ? '16px' : '20px' }}>🏦 TELLER'S WINDOW</h1>
+          <div style={{ fontSize: isMobile ? '12px' : '14px', color: '#ffff00' }}>
+            Score: {gameScore.score} | Transactions: {gameScore.correctTransactions} | Errors: {gameScore.errors}
+          </div>
           <button 
-            onClick={() => {
-              handleFirstInteraction();
-              playSound('button_click');
-              callCustomer();
-            }}
-            onTouchStart={() => {
-              handleFirstInteraction();
-              playSound('button_click');
-            }}
-            className="mobile-button"
+            onClick={endShift}
             style={{
-              minHeight: '44px',
-              padding: '12px 16px',
-              fontSize: '16px',
-              fontFamily: 'Courier New, monospace',
-              border: '2px solid #00ff00',
-              backgroundColor: 'rgba(0, 100, 0, 0.3)',
-              color: '#00ff00',
+              marginTop: '8px',
+              padding: '4px 8px',
+              fontSize: '12px',
+              background: 'rgba(255, 0, 0, 0.2)',
+              border: '1px solid #ff0000',
+              color: '#ff0000',
               borderRadius: '4px',
-              cursor: 'pointer',
-              touchAction: 'manipulation',
-              width: '100%',
-              marginBottom: '8px'
+              cursor: 'pointer'
             }}
           >
-            📞 CALL NEXT CUSTOMER
+            END SHIFT
           </button>
         </div>
-      ) : (
-        <div className="mobile-panel mobile-scroll" style={{
-          background: 'rgba(0, 60, 0, 0.8)',
-          border: '3px solid #ffff00',
-          borderRadius: '6px',
-          padding: '16px',
-          marginBottom: '12px'
-        }}>
-          <h2 style={{ color: '#ffff00', margin: '0 0 16px 0', textAlign: 'center' }}>
-            📋 CUSTOMER: {currentCustomer.name}
-          </h2>
-          
-          <div style={{ marginBottom: '16px', textAlign: 'center' }}>
-            <div><strong>Transaction:</strong> {currentCustomer.transactionType}</div>
-            <div><strong>Amount:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
-            <div><strong>Account:</strong> {currentCustomer.accountNumber}</div>
-            {currentCustomer.destinationAccount && (
-              <div><strong>To Account:</strong> {currentCustomer.destinationAccount}</div>
-            )}
-          </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <h3 style={{ color: '#ffff00', fontSize: '18px', marginBottom: '12px', textAlign: 'center' }}>📄 Customer Documents:</h3>
-            {currentCustomer.documents.map((doc, index) => (
-              <div key={index} style={{
-                background: 'rgba(255, 255, 0, 0.15)',
-                border: '2px solid #ffff00',
-                borderRadius: '6px',
-                padding: window.innerWidth < 768 ? '16px' : '12px',
-                marginBottom: '12px',
-                boxShadow: '0 2px 8px rgba(255, 255, 0, 0.3)'
+        {!currentCustomer ? (
+          <div style={{
+            background: 'rgba(0, 30, 0, 0.6)',
+            border: '2px solid #888888',
+            borderRadius: '6px',
+            padding: '20px',
+            marginBottom: '12px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ color: '#888888', margin: '0 0 16px 0', fontSize: isMobile ? '16px' : '18px' }}>NO CUSTOMER PRESENT</h2>
+            <button 
+              onClick={() => {
+                handleFirstInteraction();
+                playSound('button_click');
+                callCustomer();
+              }}
+              style={{
+                minHeight: '44px',
+                padding: '12px 16px',
+                fontSize: isMobile ? '14px' : '16px',
+                fontFamily: 'Courier New, monospace',
+                border: '2px solid #00ff00',
+                backgroundColor: 'rgba(0, 100, 0, 0.3)',
+                color: '#00ff00',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                width: '100%'
+              }}
+            >
+              📞 CALL NEXT CUSTOMER
+            </button>
+          </div>
+        ) : (
+          <div style={{
+            background: 'rgba(0, 60, 0, 0.8)',
+            border: '3px solid #ffff00',
+            borderRadius: '6px',
+            padding: '16px',
+            marginBottom: '12px',
+            maxHeight: isMobile ? '400px' : '600px',
+            overflowY: 'auto'
+          }}>
+            <h2 style={{ 
+              color: '#ffff00', 
+              margin: '0 0 16px 0', 
+              textAlign: 'center',
+              fontSize: isMobile ? '14px' : '16px'
+            }}>
+              📋 CUSTOMER: {currentCustomer.name}
+            </h2>
+            
+            <div style={{ marginBottom: '16px', textAlign: 'center', fontSize: isMobile ? '12px' : '14px' }}>
+              <div><strong>Transaction:</strong> {currentCustomer.transactionType}</div>
+              <div><strong>Amount:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
+              <div><strong>Account:</strong> {currentCustomer.accountNumber}</div>
+              {currentCustomer.destinationAccount && (
+                <div><strong>To Account:</strong> {currentCustomer.destinationAccount}</div>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <h3 style={{ 
+                color: '#ffff00', 
+                fontSize: isMobile ? '14px' : '16px', 
+                marginBottom: '12px', 
+                textAlign: 'center' 
               }}>
-                <div style={{ 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px', 
-                  fontSize: window.innerWidth < 768 ? '16px' : '14px',
-                  color: '#ffff00',
-                  textAlign: 'center',
-                  borderBottom: '1px solid #ffff00',
-                  paddingBottom: '4px'
+                📄 Customer Documents:
+              </h3>
+              {currentCustomer.documents.map((doc, index) => (
+                <div key={index} style={{
+                  background: 'rgba(255, 255, 0, 0.15)',
+                  border: '2px solid #ffff00',
+                  borderRadius: '6px',
+                  padding: isMobile ? '12px' : '16px',
+                  marginBottom: '12px',
+                  boxShadow: '0 2px 8px rgba(255, 255, 0, 0.3)'
                 }}>
-                  📋 {doc.title}
-                </div>
-                {Object.entries(doc.data).map(([key, value]) => (
-                  <div key={key} style={{ 
-                    fontSize: window.innerWidth < 768 ? '15px' : '14px',
-                    marginBottom: '6px',
-                    padding: '4px 8px',
-                    background: 'rgba(0, 0, 0, 0.2)',
-                    borderRadius: '3px',
-                    display: 'flex',
-                    flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-                    gap: window.innerWidth < 768 ? '2px' : '8px'
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '8px', 
+                    fontSize: isMobile ? '13px' : '16px',
+                    color: '#ffff00',
+                    textAlign: 'center',
+                    borderBottom: '1px solid #ffff00',
+                    paddingBottom: '4px'
                   }}>
-                    <span style={{ 
-                      color: '#00dddd', 
-                      fontWeight: 'bold',
-                      minWidth: window.innerWidth < 768 ? 'auto' : '120px'
-                    }}>
-                      {key}:
-                    </span>
-                    <span style={{ color: '#ffffff' }}>{value}</span>
+                    📋 {doc.title}
                   </div>
-                ))}
+                  {Object.entries(doc.data).map(([key, value]) => (
+                    <div key={key} style={{ 
+                      fontSize: isMobile ? '11px' : '13px',
+                      marginBottom: '6px',
+                      padding: '4px 8px',
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      borderRadius: '3px',
+                      display: 'flex',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      gap: '4px'
+                    }}>
+                      <span style={{ 
+                        color: '#00dddd', 
+                        fontWeight: 'bold',
+                        minWidth: isMobile ? 'auto' : '120px'
+                      }}>
+                        {key}:
+                      </span>
+                      <span style={{ color: '#ffffff' }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ fontSize: isMobile ? '10px' : '12px' }}>
+              <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
+                {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup
               </div>
-            ))}
-          </div>
-          
-          {/* Verification Progress */}
-          <div style={{ marginBottom: '16px', fontSize: '12px' }}>
-            <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
-              {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup
-            </div>
-            <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888' }}>
-              {verificationState.signatureCompared ? '✓' : '○'} Signature Verification
-            </div>
-            <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
-              {verificationState.transactionProcessed ? '✓' : '○'} Transaction Processing
+              <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888' }}>
+                {verificationState.signatureCompared ? '✓' : '○'} Signature Verification
+              </div>
+              <div style={{ color: verificationState.transactionProcessed ? '#00ff00' : '#888888' }}>
+                {verificationState.transactionProcessed ? '✓' : '○'} Transaction Processing
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Floating Input Panel */}
+      <div style={{ flex: '1' }}>
+        <div style={{
+          background: 'rgba(0, 30, 0, 0.4)',
+          border: '2px solid #00ff00',
+          borderRadius: '4px',
+          padding: '12px',
+          fontFamily: 'Courier New, monospace',
+          fontSize: isMobile ? '10px' : '12px',
+          height: isMobile ? '200px' : '600px',
+          overflowY: 'auto'
+        }}>
+          <h3 style={{ margin: '0 0 8px 0', color: '#00ff00', fontSize: isMobile ? '12px' : '14px' }}>
+            BANK TERMINAL
+          </h3>
+          {terminalOutput.map((line, index) => (
+            <div key={index} style={{ marginBottom: '2px' }}>
+              {line}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {showFloatingInput && (
         <div style={{
           position: 'fixed',
           bottom: '20px',
-          left: '20px',
-          right: '20px',
-          width: 'auto',
+          left: isMobile ? '10px' : '50%',
+          right: isMobile ? '10px' : 'auto',
+          transform: isMobile ? 'none' : 'translateX(-50%)',
+          width: isMobile ? 'auto' : '500px',
           background: 'rgba(0, 100, 0, 0.98)',
           border: '3px solid #ffff00',
           borderRadius: '8px',
@@ -653,34 +666,34 @@ function App() {
           zIndex: 9999,
           boxShadow: '0 -4px 20px rgba(255, 255, 0, 0.5)'
         }}>
-          <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: '16px', fontWeight: 'bold' }}>
+          <div style={{ 
+            marginBottom: '8px', 
+            color: '#ffff00', 
+            fontSize: isMobile ? '14px' : '16px', 
+            fontWeight: 'bold' 
+          }}>
             💻 TELLER TERMINAL INPUT
           </div>
-          <div style={{ marginBottom: '8px', color: '#ffff00' }}>{inputPrompt}</div>
+          <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: isMobile ? '12px' : '14px' }}>
+            {inputPrompt}
+          </div>
           <input
             ref={inputRef}
             type="text"
             placeholder={commandPrefix}
             onKeyPress={(e) => {
-              handleFirstInteraction();
               if (e.key !== 'Enter') {
+                handleFirstInteraction();
                 playSound('keyboard');
               }
               if (e.key === 'Enter') {
                 processCommand(e.currentTarget.value);
               }
             }}
-            onInput={() => {
-              handleFirstInteraction();
-              playSound('keyboard');
-            }}
-            onFocus={() => {
-              handleFirstInteraction();
-            }}
             style={{
               width: '100%',
               padding: '8px',
-              fontSize: '16px',
+              fontSize: isMobile ? '14px' : '16px',
               fontFamily: 'Courier New, monospace',
               background: '#001100',
               border: '1px solid #00ff00',
@@ -691,26 +704,23 @@ function App() {
           <button
             onClick={() => {
               handleFirstInteraction();
-              playSound('printer');
+              playSound('button_click');
               if (inputRef.current) {
                 processCommand(inputRef.current.value);
               }
-            }}
-            onTouchStart={() => {
-              handleFirstInteraction();
-              playSound('button_click');
             }}
             style={{
               marginTop: '8px',
               width: '100%',
               padding: '8px',
-              fontSize: '16px',
+              fontSize: isMobile ? '14px' : '16px',
               fontFamily: 'Courier New, monospace',
               background: 'rgba(0, 255, 0, 0.2)',
               border: '1px solid #00ff00',
               color: '#00ff00',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              minHeight: '44px'
             }}
           >
             EXECUTE
@@ -718,31 +728,41 @@ function App() {
         </div>
       )}
 
-      {/* Signature Comparison Modal */}
       {signatureModal.isOpen && (
         <div style={{
           position: 'fixed',
-          top: '10px',
-          left: '10px',
-          right: '10px',
+          top: isMobile ? '10px' : '50%',
+          left: isMobile ? '10px' : '50%',
+          right: isMobile ? '10px' : 'auto',
+          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
           background: 'rgba(0, 80, 0, 0.95)',
           border: '3px solid #ffff00',
           borderRadius: '8px',
           padding: '20px',
-          zIndex: 1000
+          zIndex: 1000,
+          width: isMobile ? 'auto' : '500px',
+          maxHeight: isMobile ? '80vh' : 'auto',
+          overflowY: isMobile ? 'auto' : 'visible'
         }}>
-          <h3 style={{ color: '#ffff00', textAlign: 'center', marginBottom: '16px' }}>
+          <h3 style={{ 
+            color: '#ffff00', 
+            textAlign: 'center', 
+            marginBottom: '16px',
+            fontSize: isMobile ? '14px' : '16px'
+          }}>
             SIGNATURE COMPARISON
           </h3>
           
           <div style={{ marginBottom: '16px' }}>
-            <div style={{ marginBottom: '8px', color: '#ffff00' }}>Bank Signature:</div>
+            <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: isMobile ? '12px' : '14px' }}>
+              Bank Signature:
+            </div>
             <div style={{
               background: '#001100',
               border: '1px solid #00ff00',
               padding: '12px',
               borderRadius: '4px',
-              fontSize: '18px',
+              fontSize: isMobile ? '14px' : '18px',
               fontStyle: 'italic',
               textAlign: 'center'
             }}>
@@ -751,13 +771,15 @@ function App() {
           </div>
           
           <div style={{ marginBottom: '20px' }}>
-            <div style={{ marginBottom: '8px', color: '#ffff00' }}>Customer Signature:</div>
+            <div style={{ marginBottom: '8px', color: '#ffff00', fontSize: isMobile ? '12px' : '14px' }}>
+              Customer Signature:
+            </div>
             <div style={{
               background: '#001100',
               border: '1px solid #00ff00',
               padding: '12px',
               borderRadius: '4px',
-              fontSize: '18px',
+              fontSize: isMobile ? '14px' : '18px',
               fontStyle: 'italic',
               textAlign: 'center'
             }}>
@@ -765,33 +787,47 @@ function App() {
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ 
+            display: 'flex', 
+            gap: '10px', 
+            flexDirection: isMobile ? 'column' : 'row' 
+          }}>
             <button
-              onClick={() => handleSignatureComparison(true)}
+              onClick={() => {
+                handleFirstInteraction();
+                playSound('approve');
+                handleSignatureComparison(true);
+              }}
               style={{
                 flex: 1,
                 padding: '12px',
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
                 background: 'rgba(0, 255, 0, 0.2)',
                 border: '2px solid #00ff00',
                 color: '#00ff00',
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                minHeight: '44px'
               }}
             >
               ✓ SIGNATURES MATCH
             </button>
             <button
-              onClick={() => handleSignatureComparison(false)}
+              onClick={() => {
+                handleFirstInteraction();
+                playSound('reject');
+                handleSignatureComparison(false);
+              }}
               style={{
                 flex: 1,
                 padding: '12px',
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
                 background: 'rgba(255, 0, 0, 0.2)',
                 border: '2px solid #ff0000',
                 color: '#ff0000',
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                minHeight: '44px'
               }}
             >
               ✗ FRAUD DETECTED
@@ -800,22 +836,28 @@ function App() {
         </div>
       )}
 
-      {/* Receipt Printer */}
       {showReceipt && receiptData && (
-        <div className="mobile-panel" style={{
-          background: 'rgba(255, 255, 255, 0.9)',
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'rgba(255, 255, 255, 0.95)',
           border: '2px solid #000000',
           borderRadius: '6px',
-          padding: '16px',
-          marginBottom: '12px',
+          padding: '20px',
           color: '#000000',
-          fontFamily: 'monospace'
+          fontFamily: 'monospace',
+          zIndex: 1000,
+          fontSize: isMobile ? '12px' : '14px',
+          maxWidth: isMobile ? '300px' : '400px',
+          animation: 'slideDown 0.5s ease-out'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '12px' }}>
             <strong>FIRST NATIONAL BANK</strong><br/>
             Transaction Receipt
           </div>
-          <div style={{ fontSize: '12px' }}>
+          <div>
             Customer: {receiptData.customerName}<br/>
             Account: {receiptData.accountNumber}<br/>
             Type: {receiptData.transactionType}<br/>
@@ -828,25 +870,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* Terminal Output */}
-      <div className="mobile-panel mobile-scroll" style={{
-        background: 'rgba(0, 30, 0, 0.4)',
-        border: '2px solid #00ff00',
-        borderRadius: '4px',
-        padding: '12px',
-        fontFamily: 'Courier New, monospace',
-        fontSize: '12px',
-        maxHeight: '200px',
-        overflowY: 'auto'
-      }}>
-        <h3 style={{ margin: '0 0 8px 0', color: '#00ff00' }}>BANK TERMINAL</h3>
-        {terminalOutput.map((line, index) => (
-          <div key={index} style={{ marginBottom: '2px' }}>
-            {line}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
