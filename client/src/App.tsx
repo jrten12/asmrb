@@ -488,6 +488,14 @@ function App() {
     } else if (cmd === 'LOOKUP' || cmd.startsWith('LOOKUP ')) {
       if (cmd === 'LOOKUP') {
         setTerminalOutput(prev => [...prev, "> " + command, "Enter account number to verify:", "Usage: LOOKUP [account_number]"]);
+        setCommandPrefix('LOOKUP ');
+        setInputPrompt('Enter account number...');
+        setShowFloatingInput(true);
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 100);
       } else {
         const accountNum = cmd.replace('LOOKUP ', '');
         if (!currentCustomer) {
