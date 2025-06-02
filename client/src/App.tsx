@@ -68,6 +68,8 @@ function App() {
   const [showBalanceWindow, setShowBalanceWindow] = useState(false);
   const [showFloatingInput, setShowFloatingInput] = useState(false);
   const [inputPrompt, setInputPrompt] = useState<string>('');
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<any>(null);
   const [cardPosition, setCardPosition] = useState({ x: 50, y: 400 });
   const [cardInSlot, setCardInSlot] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -402,6 +404,12 @@ function App() {
           createTone(1600, 0.1, 0.06);
           setTimeout(() => createTone(1800, 0.08, 0.05), 200);
           setTimeout(() => createTone(2000, 0.06, 0.04), 400);
+          break;
+
+        case 'paper_tear':
+          // Paper tearing sound
+          createNoise(0.3, 0.15);
+          setTimeout(() => createTone(200, 0.1, 0.05), 150);
           break;
         default:
           createTone(500, 0.1, 0.05);
@@ -817,6 +825,48 @@ function App() {
     const balance = Math.floor(Math.random() * 50000) + 1000;
     setAccountBalance(balance);
     return balance;
+  };
+
+  const processTransaction = () => {
+    if (!currentCustomer) return;
+    
+    const transactionId = Date.now().toString().slice(-6);
+    const timestamp = new Date().toLocaleString();
+    
+    const receipt = {
+      transactionId,
+      timestamp,
+      customerName: currentCustomer.name,
+      accountNumber: currentCustomer.accountNumber,
+      transactionType: currentCustomer.transactionType,
+      amount: currentCustomer.requestedAmount,
+      balance: accountBalance,
+      destinationAccount: currentCustomer.destinationAccount
+    };
+    
+    setReceiptData(receipt);
+    setShowReceipt(true);
+    
+    // Terminal feedback during printing
+    setTerminalOutput(prev => [...prev, 
+      "PROCESSING TRANSACTION...",
+      "PRINTING RECEIPT...",
+      "DOT MATRIX PRINTER ACTIVE"
+    ]);
+    
+    // Simulate dot matrix printer completion and tear-off after viewing
+    setTimeout(() => {
+      playSound('paper_tear');
+      setShowReceipt(false);
+      setReceiptData(null);
+      resetVerificationState();
+      setCurrentCustomer(null);
+      setTerminalOutput(prev => [...prev, 
+        "TRANSACTION COMPLETE",
+        "RECEIPT PRINTED AND TORN OFF",
+        "READY FOR NEXT CUSTOMER"
+      ]);
+    }, 5000);
   };
 
   const punchIn = () => {
@@ -1746,44 +1796,35 @@ function App() {
             
             <button
               onClick={() => {
-                playSound('approve');
-                handleCommand('APPROVE');
+                if (verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed) {
+                  playSound('dot_matrix_printer');
+                  processTransaction();
+                } else {
+                  setTerminalOutput(prev => [...prev, "ERROR: Complete all verification steps first"]);
+                  playSound('reject');
+                }
               }}
-              disabled={!currentCustomer}
+              disabled={!currentCustomer || !(verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed)}
               style={{
-                background: currentCustomer ? 'rgba(0, 100, 0, 0.6)' : 'rgba(50, 50, 50, 0.3)',
-                border: '2px solid #00ff00',
-                color: currentCustomer ? '#00ff00' : '#666666',
-                padding: '12px',
-                fontSize: '16px',
+                background: currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed 
+                  ? 'rgba(0, 150, 0, 0.8)' 
+                  : 'rgba(50, 50, 50, 0.3)',
+                border: '3px solid #00ff00',
+                color: currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed 
+                  ? '#00ff00' 
+                  : '#666666',
+                padding: '16px',
+                fontSize: '18px',
                 fontWeight: 'bold',
-                cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                borderRadius: '4px',
-                fontFamily: 'monospace'
+                cursor: currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed 
+                  ? 'pointer' 
+                  : 'not-allowed',
+                borderRadius: '6px',
+                fontFamily: 'monospace',
+                gridColumn: 'span 2'
               }}
             >
-              APPROVE
-            </button>
-            
-            <button
-              onClick={() => {
-                playSound('reject');
-                handleCommand('REJECT');
-              }}
-              disabled={!currentCustomer}
-              style={{
-                background: currentCustomer ? 'rgba(100, 0, 0, 0.6)' : 'rgba(50, 50, 50, 0.3)',
-                border: '2px solid #ff4444',
-                color: currentCustomer ? '#ff4444' : '#666666',
-                padding: '12px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: currentCustomer ? 'pointer' : 'not-allowed',
-                borderRadius: '4px',
-                fontFamily: 'monospace'
-              }}
-            >
-              REJECT
+              🖨️ PROCESS TRANSACTION
             </button>
           </div>
 
@@ -2151,6 +2192,79 @@ function App() {
             >
               SEND
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 80s Dot Matrix Receipt Printer Animation */}
+      {showReceipt && receiptData && (
+        <div style={{
+          position: 'fixed',
+          top: '10%',
+          right: '5%',
+          background: 'linear-gradient(145deg, #f8f8f8, #e0e0e0)',
+          border: '3px solid #333333',
+          borderRadius: '8px 8px 0 0',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '11px',
+          color: '#000000',
+          zIndex: 2000,
+          width: '280px',
+          boxShadow: '0 0 20px rgba(0, 0, 0, 0.5)',
+          animation: 'printReceipt 3s ease-out'
+        }}>
+          <div style={{
+            borderBottom: '2px dashed #333333',
+            paddingBottom: '10px',
+            marginBottom: '10px',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}>
+            FIRST NATIONAL BANK
+          </div>
+          
+          <div style={{ lineHeight: '1.4' }}>
+            <div>TRANSACTION ID: {receiptData.transactionId}</div>
+            <div>DATE: {receiptData.timestamp}</div>
+            <div style={{ margin: '8px 0', borderTop: '1px solid #333333', paddingTop: '8px' }}>
+              CUSTOMER: {receiptData.customerName}
+            </div>
+            <div>ACCOUNT: {receiptData.accountNumber}</div>
+            <div>TYPE: {receiptData.transactionType}</div>
+            <div style={{ fontWeight: 'bold', fontSize: '12px' }}>
+              AMOUNT: ${receiptData.amount.toLocaleString()}
+            </div>
+            {receiptData.destinationAccount && (
+              <div>TO ACCOUNT: {receiptData.destinationAccount}</div>
+            )}
+            <div style={{ margin: '8px 0', borderTop: '1px solid #333333', paddingTop: '8px' }}>
+              NEW BALANCE: ${receiptData.balance.toLocaleString()}
+            </div>
+          </div>
+          
+          <div style={{
+            marginTop: '15px',
+            borderTop: '2px dashed #333333',
+            paddingTop: '10px',
+            textAlign: 'center',
+            fontSize: '10px'
+          }}>
+            THANK YOU FOR YOUR BUSINESS
+          </div>
+          
+          <div style={{
+            position: 'absolute',
+            bottom: '-10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#333333',
+            color: '#ffffff',
+            padding: '4px 8px',
+            fontSize: '9px',
+            borderRadius: '0 0 4px 4px'
+          }}>
+            TEAR HERE
           </div>
         </div>
       )}
