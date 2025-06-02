@@ -52,6 +52,38 @@ function App() {
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [showManagerWarning, setShowManagerWarning] = useState(false);
   const [managerMessage, setManagerMessage] = useState('');
+
+  // Enhanced error tracking and scoring system
+  const addCorrectTransaction = () => {
+    setGameScore(prev => ({
+      ...prev,
+      score: prev.score + 100,
+      correctTransactions: prev.correctTransactions + 1,
+      consecutiveErrors: 0 // Reset consecutive errors on correct transaction
+    }));
+  };
+
+  const handleTransactionError = (errorType: string) => {
+    setGameScore(prev => {
+      const newErrors = prev.errors + 1;
+      const newConsecutiveErrors = prev.consecutiveErrors + 1;
+      const newErrorDetails = [...prev.errorDetails, errorType];
+      
+      // Check if we need to show manager warning (every 3 consecutive errors)
+      if (newConsecutiveErrors >= 3) {
+        setManagerMessage(`⚠️ BANK MANAGER NOTIFICATION ⚠️\n\nEmployee Warning: ${newConsecutiveErrors} consecutive errors detected!\n\nRecent violations:\n• ${newErrorDetails.slice(-3).join('\n• ')}\n\nRemaining errors before termination: ${6 - newConsecutiveErrors}\n\nPlease review bank procedures carefully.\n\n- Management`);
+        setShowManagerWarning(true);
+        playSound('reject');
+      }
+      
+      return {
+        ...prev,
+        errors: newErrors,
+        consecutiveErrors: newConsecutiveErrors,
+        errorDetails: newErrorDetails
+      };
+    });
+  };
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     accountNotFound: false,
@@ -2368,6 +2400,90 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Manager Warning Modal */}
+      {showManagerWarning && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1a0000 0%, #4a0000 50%, #1a0000 100%)',
+            border: '4px solid #ff0000',
+            borderRadius: '12px',
+            padding: '32px',
+            minWidth: '500px',
+            maxWidth: '90vw',
+            boxShadow: '0 0 30px rgba(255, 0, 0, 0.5)'
+          }}>
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '24px'
+            }}>
+              <div style={{
+                fontSize: '28px',
+                color: '#ff0000',
+                fontWeight: 'bold',
+                marginBottom: '16px',
+                textShadow: '0 0 10px rgba(255, 0, 0, 0.5)'
+              }}>
+                ⚠️ MANAGEMENT WARNING ⚠️
+              </div>
+            </div>
+            
+            <div style={{
+              background: '#000000',
+              border: '2px solid #ff0000',
+              padding: '20px',
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              <pre style={{
+                color: '#ff0000',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                margin: 0,
+                fontFamily: 'monospace',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {managerMessage}
+              </pre>
+            </div>
+            
+            <div style={{
+              textAlign: 'center'
+            }}>
+              <button
+                onClick={() => {
+                  setShowManagerWarning(false);
+                  playSound('button_click');
+                }}
+                style={{
+                  background: 'rgba(255, 0, 0, 0.8)',
+                  border: '2px solid #ff0000',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                ACKNOWLEDGE WARNING
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Signature Comparison Modal */}
       {signatureModal.isOpen && (
