@@ -115,6 +115,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [playerName, setPlayerName] = useState('');
   const [showBankInfo, setShowBankInfo] = useState(false);
+  const [showArrestAnimation, setShowArrestAnimation] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -351,6 +352,35 @@ function App() {
               createTone(800 + Math.random() * 1000, 0.05, 0.03);
             }, i * 50);
           }
+          break;
+        case 'police_radio':
+          // Authentic police radio dispatch sound with static
+          // Radio static burst
+          createNoise(0.4, 0.15);
+          setTimeout(() => createNoise(0.2, 0.1), 150);
+          
+          // Radio beep
+          setTimeout(() => createTone(800, 0.2, 0.05), 300);
+          
+          // Static crackle
+          setTimeout(() => {
+            for (let i = 0; i < 8; i++) {
+              setTimeout(() => createNoise(0.15, 0.03), i * 40);
+            }
+          }, 500);
+          
+          // Deep radio voice frequency simulation
+          setTimeout(() => {
+            createTone(180, 0.8, 0.08);
+            createTone(220, 0.6, 0.06);
+            createTone(160, 0.4, 0.04);
+          }, 800);
+          
+          // Radio squelch at end
+          setTimeout(() => {
+            createTone(1200, 0.15, 0.04);
+            createNoise(0.3, 0.08);
+          }, 1600);
           break;
         case 'secret_unlock':
           // Secret unlock sound sequence
@@ -2236,6 +2266,62 @@ function App() {
               {currentCustomer ? 'NEXT CUSTOMER' : 'CALL CUSTOMER'}
             </button>
             
+            {/* REPORT FRAUD Button */}
+            {currentCustomer && (
+              <button
+                onClick={() => {
+                  playSound('police_radio');
+                  setTerminalOutput(prev => [...prev, 
+                    "> FRAUD ALERT ACTIVATED",
+                    "*** CALLING BANK SECURITY ***",
+                    "Radio dispatch: Units responding...",
+                    "Customer being detained for investigation"
+                  ]);
+                  
+                  // Start arrest animation sequence
+                  setTimeout(() => {
+                    setShowArrestAnimation(true);
+                    
+                    // Close animation and proceed to next customer
+                    setTimeout(() => {
+                      setShowArrestAnimation(false);
+                      handleCorrectTransaction();
+                      
+                      // Generate next customer after brief pause
+                      setTimeout(() => {
+                        setCurrentCustomer(generateCustomer());
+                        setVerificationState({
+                          accountLookedUp: false,
+                          signatureCompared: false,
+                          documentsReviewed: false
+                        });
+                        setTerminalOutput(prev => [...prev, 
+                          "",
+                          "> Next customer approaching...",
+                          "Ready to process transaction"
+                        ]);
+                      }, 1000);
+                    }, 4000);
+                  }, 2000);
+                }}
+                style={{
+                  background: 'rgba(150, 0, 0, 0.8)',
+                  border: '3px solid #ff0000',
+                  color: '#ff0000',
+                  padding: '12px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  textShadow: '0 0 10px #ff0000',
+                  boxShadow: '0 0 15px rgba(255, 0, 0, 0.3)'
+                }}
+              >
+                🚨 REPORT FRAUD
+              </button>
+            )}
+            
             <button
               onClick={() => {
                 if (verificationState.accountLookedUp && verificationState.signatureCompared) {
@@ -2915,6 +3001,117 @@ function App() {
         </div>
       )}
 
+      {/* Arrest Animation Sequence */}
+      {showArrestAnimation && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(135deg, #000000 0%, #001122 50%, #000000 100%)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 3000,
+          animation: 'fadeInArrest 1s ease-in-out'
+        }}>
+          {/* Police Lights Effect */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '20px',
+            background: 'linear-gradient(90deg, #ff0000 25%, #0000ff 25%, #0000ff 75%, #ff0000 75%)',
+            animation: 'policeLights 0.5s infinite alternate'
+          }} />
+          
+          {/* Main Animation Scene */}
+          <div style={{
+            textAlign: 'center',
+            color: '#ffffff',
+            fontFamily: 'monospace',
+            position: 'relative'
+          }}>
+            {/* Customer Figure */}
+            <div style={{
+              fontSize: '120px',
+              marginBottom: '20px',
+              animation: 'arrestShake 0.3s infinite'
+            }}>
+              🧑‍💼
+            </div>
+            
+            {/* Handcuffs Animation */}
+            <div style={{
+              fontSize: '60px',
+              position: 'absolute',
+              top: '80px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              animation: 'handcuffsClick 2s ease-in-out infinite'
+            }}>
+              🔗
+            </div>
+            
+            {/* Police Officers */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-around',
+              margin: '40px 0',
+              fontSize: '80px'
+            }}>
+              <div style={{ animation: 'officerWalk 1s ease-in-out infinite' }}>👮‍♂️</div>
+              <div style={{ animation: 'officerWalk 1s ease-in-out infinite 0.5s' }}>👮‍♀️</div>
+            </div>
+            
+            {/* Dynamic Text */}
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#ff0000',
+              textShadow: '0 0 10px #ff0000',
+              animation: 'textPulse 1s ease-in-out infinite',
+              marginBottom: '20px'
+            }}>
+              🚨 FRAUD SUSPECT APPREHENDED 🚨
+            </div>
+            
+            <div style={{
+              fontSize: '18px',
+              color: '#00ff00',
+              lineHeight: '1.5'
+            }}>
+              Bank security protocols activated<br/>
+              Customer detained for investigation<br/>
+              Excellent work, Teller!
+            </div>
+            
+            {/* Badge Award */}
+            <div style={{
+              fontSize: '40px',
+              marginTop: '30px',
+              animation: 'badgeFloat 2s ease-in-out infinite'
+            }}>
+              🏆 FRAUD DETECTIVE BADGE EARNED
+            </div>
+          </div>
+          
+          {/* Auto-close animation */}
+          <div style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#888888',
+            fontSize: '14px'
+          }}>
+            Returning to station in 3 seconds...
+          </div>
+        </div>
+      )}
+
       {/* CSS Animations */}
       <style>{`
         @keyframes slideUp {
@@ -2926,6 +3123,42 @@ function App() {
             transform: translateX(-50%) translateY(0px);
             opacity: 1;
           }
+        }
+        
+        @keyframes fadeInArrest {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes policeLights {
+          0% { background: linear-gradient(90deg, #ff0000 25%, #0000ff 25%, #0000ff 75%, #ff0000 75%); }
+          100% { background: linear-gradient(90deg, #0000ff 25%, #ff0000 25%, #ff0000 75%, #0000ff 75%); }
+        }
+        
+        @keyframes arrestShake {
+          0%, 100% { transform: translateX(0px); }
+          25% { transform: translateX(-3px); }
+          75% { transform: translateX(3px); }
+        }
+        
+        @keyframes handcuffsClick {
+          0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+          50% { transform: translateX(-50%) scale(1.2) rotate(10deg); }
+        }
+        
+        @keyframes officerWalk {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes textPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        
+        @keyframes badgeFloat {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-10px) scale(1.1); }
         }
       `}</style>
     </div>
