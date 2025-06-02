@@ -1,3 +1,50 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile adaptations - preserves desktop exactly */
+@media (max-width: 768px) {
+  /* Stack layout vertically on mobile */
+  div[style*="display: flex"]:not([style*="flex-direction: column"]) {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  /* Adjust padding for mobile */
+  div[style*="padding: 20px"] {
+    padding: 10px !important;
+  }
+  
+  /* Mobile floating input positioning */
+  div[style*="position: fixed"][style*="bottom: 20px"] {
+    left: 10px !important;
+    right: 10px !important;
+    transform: none !important;
+    width: auto !important;
+  }
+  
+  /* Mobile modal positioning */
+  div[style*="position: fixed"][style*="top: 50%"] {
+    top: 10px !important;
+    left: 10px !important;
+    right: 10px !important;
+    transform: none !important;
+    width: auto !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Smaller heights for mobile */
+  div[style*="height: 600px"] {
+    height: 200px !important;
+  }
+  
+  div[style*="maxHeight: 600px"] {
+    max-height: 300px !important;
+  }
+  
+  /* Add space for floating input */
+  div[style*="flex: 1"]:first-child {
+    margin-bottom: 100px !important;
+  }
+}
