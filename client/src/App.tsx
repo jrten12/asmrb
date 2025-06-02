@@ -309,8 +309,8 @@ function App() {
           createNoise(0.2, 0.04);
           break;
         case 'dot_matrix_printer':
-          // Enhanced ASMR dot matrix printer with authentic mechanical sounds
-          for (let i = 0; i < 25; i++) {
+          // Enhanced ASMR dot matrix printer with authentic mechanical sounds - shortened
+          for (let i = 0; i < 10; i++) {
             setTimeout(() => {
               // Main printer head impact
               createTone(1600 + (i % 4) * 150, 0.025, 0.04);
@@ -318,15 +318,15 @@ function App() {
               // Mechanical noise and paper feed
               createNoise(0.018, 0.025);
               // Carriage movement
-              if (i % 8 === 0) createTone(800, 0.008, 0.02);
-            }, i * 60);
+              if (i % 4 === 0) createTone(800, 0.008, 0.02);
+            }, i * 50);
           }
           // Paper tear sound at the end
           setTimeout(() => {
             createNoise(0.15, 0.08);
             createTone(400, 0.06, 0.04);
-            setTimeout(() => createNoise(0.08, 0.05), 80);
-          }, 25 * 60 + 200);
+            setTimeout(() => createNoise(0.08, 0.05), 60);
+          }, 10 * 50 + 150);
           break;
         case 'modal_close':
           createTone(800, 0.1, 0.05);
@@ -478,15 +478,15 @@ function App() {
           break;
 
         case 'dot_matrix_printer':
-          // Authentic dot matrix printer with line feeds
-          for (let i = 0; i < 30; i++) {
+          // Authentic dot matrix printer with line feeds - shortened
+          for (let i = 0; i < 8; i++) {
             setTimeout(() => {
               createTone(800 + Math.random() * 400, 0.02, 0.08);
               createNoise(0.01, 0.04);
-              if (i % 5 === 0) {
+              if (i % 3 === 0) {
                 createTone(1200, 0.05, 0.03); // Line feed sound
               }
-            }, i * 100);
+            }, i * 80);
           }
           break;
         case 'paper_tear':
@@ -1679,35 +1679,38 @@ function App() {
                   </div>
                   <div style={{ 
                     display: 'grid', 
-                    gap: '4px',
-                    fontSize: window.innerWidth < 768 ? '12px' : '14px'
+                    gap: '6px',
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px'
                   }}>
                     {Object.entries(doc.data).map(([key, value]) => (
                       <div key={key} style={{ 
-                        padding: '4px 8px',
-                        background: 'rgba(0, 0, 0, 0.2)',
-                        borderRadius: '4px',
+                        padding: '6px 10px',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        borderRadius: '6px',
                         display: 'flex',
                         flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-                        gap: window.innerWidth < 768 ? '0' : '8px'
+                        gap: window.innerWidth < 768 ? '2px' : '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
                       }}>
                         <span style={{ 
                           color: '#00dddd', 
-                          fontSize: window.innerWidth < 768 ? '10px' : '12px',
+                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
                           fontWeight: 'bold',
-                          minWidth: window.innerWidth < 768 ? 'auto' : '100px'
+                          minWidth: window.innerWidth < 768 ? 'auto' : '120px',
+                          letterSpacing: '0.5px'
                         }}>
                           {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
                         </span>
                         <span style={{ 
                           color: '#ffffff', 
                           fontWeight: 'bold', 
-                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
+                          fontSize: window.innerWidth < 768 ? '14px' : '16px',
                           fontFamily: 'monospace',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          letterSpacing: '0.3px'
                         }}>
                           {value}
                         </span>
@@ -1870,7 +1873,7 @@ function App() {
                     borderRadius: '4px'
                   }}>
                     <div style={{ 
-                      fontSize: window.innerWidth < 768 ? '12px' : '14px', 
+                      fontSize: window.innerWidth < 768 ? '14px' : '16px', 
                       fontWeight: 'bold', 
                       color: '#00ff00', 
                       marginBottom: '8px'
@@ -1878,14 +1881,15 @@ function App() {
                       PERSONAL INFORMATION
                     </div>
                     <div style={{ 
-                      fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                      fontSize: window.innerWidth < 768 ? '13px' : '15px', 
                       color: '#ffffff',
-                      lineHeight: '1.5',
+                      lineHeight: '1.6',
                       fontFamily: 'monospace'
                     }}>
                       <div><strong>NAME:</strong> {currentCustomer.name}</div>
                       <div><strong>DOB:</strong> 1985-03-15</div>
                       <div><strong>ADDRESS:</strong> 123 Main Street, Springfield, IL 62701</div>
+                      <div><strong>LICENSE:</strong> DL-{Math.floor(10000 + Math.random() * 90000)}</div>
                       <div><strong>SSN:</strong> ***-**-1234</div>
                     </div>
                   </div>
@@ -1898,7 +1902,7 @@ function App() {
                     borderRadius: '4px'
                   }}>
                     <div style={{ 
-                      fontSize: window.innerWidth < 768 ? '12px' : '14px', 
+                      fontSize: window.innerWidth < 768 ? '14px' : '16px', 
                       fontWeight: 'bold', 
                       color: '#00ff00', 
                       marginBottom: '8px'
@@ -1906,9 +1910,9 @@ function App() {
                       ACCOUNT INFORMATION
                     </div>
                     <div style={{ 
-                      fontSize: window.innerWidth < 768 ? '11px' : '12px', 
+                      fontSize: window.innerWidth < 768 ? '13px' : '15px', 
                       color: '#ffffff',
-                      lineHeight: '1.5',
+                      lineHeight: '1.6',
                       fontFamily: 'monospace'
                     }}>
                       <div><strong>ACCOUNT:</strong> {currentCustomer.accountNumber}</div>
@@ -1918,37 +1922,6 @@ function App() {
                       <div><strong>OPENED:</strong> 2020-01-15</div>
                     </div>
                   </div>
-                </div>
-
-                {/* NEXT CUSTOMER Button in expanded view */}
-                <div style={{
-                  marginTop: '16px',
-                  textAlign: 'center'
-                }}>
-                  <button
-                    onClick={() => {
-                      if (currentCustomer && verificationState.transactionProcessed) {
-                        playSound('button_click');
-                        handleCommand('NEXT');
-                      }
-                    }}
-                    disabled={!currentCustomer || !verificationState.transactionProcessed}
-                    style={{
-                      background: currentCustomer && verificationState.transactionProcessed ? 'rgba(0, 100, 0, 0.8)' : 'rgba(60, 60, 60, 0.6)',
-                      border: '3px solid ' + (currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#666666'),
-                      color: currentCustomer && verificationState.transactionProcessed ? '#00ff00' : '#999999',
-                      padding: window.innerWidth < 768 ? '12px 24px' : '16px 32px',
-                      fontSize: window.innerWidth < 768 ? '16px' : '18px',
-                      fontWeight: 'bold',
-                      cursor: currentCustomer && verificationState.transactionProcessed ? 'pointer' : 'not-allowed',
-                      borderRadius: '6px',
-                      fontFamily: 'monospace',
-                      textShadow: currentCustomer && verificationState.transactionProcessed ? '0 0 10px #00ff00' : 'none',
-                      minWidth: window.innerWidth < 768 ? '150px' : '200px'
-                    }}
-                  >
-                    🚶 NEXT CUSTOMER
-                  </button>
                 </div>
               </div>
             )}
