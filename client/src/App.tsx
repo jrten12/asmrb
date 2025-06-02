@@ -406,6 +406,18 @@ function App() {
           setTimeout(() => createTone(2000, 0.06, 0.04), 400);
           break;
 
+        case 'dot_matrix_printer':
+          // Authentic dot matrix printer with line feeds
+          for (let i = 0; i < 30; i++) {
+            setTimeout(() => {
+              createTone(800 + Math.random() * 400, 0.02, 0.08);
+              createNoise(0.01, 0.04);
+              if (i % 5 === 0) {
+                createTone(1200, 0.05, 0.03); // Line feed sound
+              }
+            }, i * 100);
+          }
+          break;
         case 'paper_tear':
           // Paper tearing sound
           createNoise(0.3, 0.15);
