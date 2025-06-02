@@ -291,6 +291,52 @@ function App() {
           setTimeout(() => createTone(880, 0.2, 0.08), 200);
           setTimeout(() => createTone(1108, 0.4, 0.1), 400);
           break;
+        case 'card_insert':
+          // Soft card insertion with friction
+          createNoise(0.03, 0.1);
+          createTone(1200, 0.05, 0.08);
+          setTimeout(() => createTone(800, 0.04, 0.06), 50);
+          break;
+        case 'mechanical_whir':
+          // Internal mechanism engaging
+          createTone(400, 0.2, 0.12);
+          setTimeout(() => createTone(450, 0.15, 0.1), 60);
+          setTimeout(() => createTone(380, 0.1, 0.08), 120);
+          break;
+        case 'heavy_stamp':
+          // Powerful stamp impact
+          createTone(120, 0.4, 0.15);
+          createNoise(0.2, 0.1);
+          setTimeout(() => createTone(100, 0.3, 0.12), 40);
+          break;
+        case 'metal_clang':
+          // Metal components settling
+          createTone(800, 0.2, 0.08);
+          setTimeout(() => createTone(600, 0.15, 0.06), 30);
+          setTimeout(() => createTone(1000, 0.1, 0.04), 60);
+          break;
+        case 'spring_bounce':
+          // Mechanical spring release
+          createTone(600, 0.15, 0.05);
+          setTimeout(() => createTone(700, 0.12, 0.04), 40);
+          setTimeout(() => createTone(650, 0.08, 0.03), 80);
+          break;
+        case 'completion_bell':
+          // Satisfying completion chime
+          createTone(1200, 0.3, 0.2);
+          setTimeout(() => createTone(1600, 0.25, 0.15), 100);
+          setTimeout(() => createTone(2000, 0.2, 0.1), 200);
+          break;
+        case 'check_processing':
+          // Enhanced ASMR check processing terminal sounds
+          for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+              createTone(1400 + (i % 2) * 300, 0.04, 0.05);
+              createNoise(0.02, 0.01);
+            }, i * 120);
+          }
+          setTimeout(() => createTone(1800, 0.2, 0.08), 1000);
+          break;
         default:
           createTone(500, 0.1, 0.05);
       }
@@ -616,72 +662,70 @@ function App() {
     }
   };
 
-  // Punch Clock Interface
-  if (gamePhase === 'punch_in') {
-    const [cardPosition, setCardPosition] = useState({ x: 50, y: 400 });
-    const [cardInSlot, setCardInSlot] = useState(false);
-    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
+  const handleCardClick = () => {
+    if (!cardInSlot) {
+      // Animate card to slot
+      setCardPosition({ x: 200, y: 280 });
+      setTimeout(() => {
+        setCardInSlot(true);
+        playTimeclockPunch();
+      }, 500);
+    }
+  };
 
-    const handleCardClick = () => {
-      if (!cardInSlot) {
-        // Animate card to slot
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!cardInSlot) {
+      setIsDragging(true);
+      const rect = (e.target as HTMLElement).getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && !cardInSlot) {
+      setCardPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      });
+      
+      // Check if near slot (auto-snap)
+      if (Math.abs(e.clientX - 350) < 50 && Math.abs(e.clientY - 320) < 50) {
+        setCardPosition({ x: 200, y: 280 });
+      }
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setIsDragging(false);
+      
+      // Check if dropped in slot area
+      if (Math.abs(e.clientX - 350) < 60 && Math.abs(e.clientY - 320) < 60) {
         setCardPosition({ x: 200, y: 280 });
         setTimeout(() => {
           setCardInSlot(true);
           playTimeclockPunch();
-        }, 500);
+        }, 200);
       }
-    };
+    }
+  };
 
-    const handleMouseDown = (e: React.MouseEvent) => {
-      if (!cardInSlot) {
-        setIsDragging(true);
-        const rect = (e.target as HTMLElement).getBoundingClientRect();
-        setDragOffset({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      }
-    };
+  const playTimeclockPunch = () => {
+    // Enhanced multi-layered time clock punch sound sequence
+    playSound('card_insert');
+    setTimeout(() => playSound('mechanical_whir'), 150);
+    setTimeout(() => playSound('heavy_stamp'), 300);
+    setTimeout(() => playSound('metal_clang'), 350);
+    setTimeout(() => playSound('spring_bounce'), 450);
+    setTimeout(() => playSound('completion_bell'), 600);
+    setTimeout(() => punchIn(), 1000);
+  };
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-      if (isDragging && !cardInSlot) {
-        setCardPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y
-        });
-        
-        // Check if near slot (auto-snap)
-        if (Math.abs(e.clientX - 350) < 50 && Math.abs(e.clientY - 320) < 50) {
-          setCardPosition({ x: 200, y: 280 });
-        }
-      }
-    };
-
-    const handleMouseUp = (e: React.MouseEvent) => {
-      if (isDragging) {
-        setIsDragging(false);
-        
-        // Check if dropped in slot area
-        if (Math.abs(e.clientX - 350) < 60 && Math.abs(e.clientY - 320) < 60) {
-          setCardPosition({ x: 200, y: 280 });
-          setTimeout(() => {
-            setCardInSlot(true);
-            playTimeclockPunch();
-          }, 200);
-        }
-      }
-    };
-
-    const playTimeclockPunch = () => {
-      // Multi-layered time clock punch sound
-      playSound('mechanical_click');
-      setTimeout(() => playSound('metal_stamp'), 100);
-      setTimeout(() => playSound('card_slide'), 200);
-      setTimeout(() => playSound('bell_ding'), 400);
-      setTimeout(() => punchIn(), 800);
-    };
+  // Punch Clock Interface
+  if (gamePhase === 'punch_in') {
 
     return (
       <div 
@@ -866,7 +910,6 @@ function App() {
 
   // Leaderboard Interface
   if (gamePhase === 'leaderboard') {
-    const [playerName, setPlayerName] = useState('');
     const leaderboard = getLeaderboard();
     
     return (
