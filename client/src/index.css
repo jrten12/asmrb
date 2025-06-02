@@ -2,45 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Targeted mobile game layout fixes only */
+/* Clean mobile fixes that preserve punch card */
 @media (max-width: 600px) {
   body {
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow-x: hidden !important;
-  }
-  
-  /* Only target the main game layout, not punch screen */
-  .game-layout {
-    flex-direction: column !important;
-    width: 100vw !important;
-    height: auto !important;
-    min-height: auto !important;
-    gap: 8px !important;
-  }
-  
-  /* Game section heights on mobile */
-  .game-documents {
-    max-height: 120px !important;
-    min-height: 80px !important;
-  }
-  
-  .game-terminal {
-    min-height: 150px !important;
-    max-height: 200px !important;
-  }
-  
-  /* Game buttons only */
-  .game-button {
-    min-height: 44px !important;
-    width: 100% !important;
-    margin-bottom: 4px !important;
-  }
-  
-  /* Compact spacing for game panels */
-  .game-panel {
-    padding: 6px !important;
-    margin-bottom: 6px !important;
+    overflow-x: hidden;
   }
 }
 
