@@ -228,6 +228,18 @@ function App() {
         case 'paper_rustle':
           createNoise(0.2, 0.04);
           break;
+        case 'dot_matrix_printer':
+          // Authentic dot matrix printer sound for deposits
+          for (let i = 0; i < 12; i++) {
+            setTimeout(() => {
+              createTone(1800 + (i % 3) * 200, 0.03, 0.06);
+              createNoise(0.01, 0.02);
+            }, i * 80);
+          }
+          break;
+        case 'modal_close':
+          createTone(800, 0.1, 0.05);
+          break;
         default:
           createTone(500, 0.1, 0.05);
       }
@@ -249,7 +261,6 @@ function App() {
 
   const handleCommand = (command: string) => {
     const cmd = command.trim().toUpperCase();
-    playSound('keypress');
     
     if (cmd === 'NEXT') {
       const customer = generateCustomer();
@@ -365,16 +376,17 @@ function App() {
       
       if (transactionPart.startsWith('DEPOSIT ')) {
         const amount = transactionPart.replace('DEPOSIT ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing deposit: $" + amount, "Transaction prepared for approval"]);
-        playSound('cash_count');
+        setTerminalOutput(prev => [...prev, "> " + command, "Processing deposit: $" + amount, "Printing deposit receipt...", "Transaction prepared for approval"]);
+        playSound('dot_matrix_printer');
       } else if (transactionPart.startsWith('WITHDRAWAL ')) {
         const amount = transactionPart.replace('WITHDRAWAL ', '');
-        setTerminalOutput(prev => [...prev, "> " + command, "Processing withdrawal: $" + amount, "Transaction prepared for approval"]);
-        playSound('cash_count');
+        setTerminalOutput(prev => [...prev, "> " + command, "Processing withdrawal: $" + amount, "Counting cash...", "Transaction prepared for approval"]);
+        playSound('paper_rustle');
+        setTimeout(() => playSound('stamp'), 800);
       } else if (transactionPart.startsWith('WIRE ')) {
         const amount = transactionPart.replace('WIRE ', '');
         setTerminalOutput(prev => [...prev, "> " + command, "Processing wire transfer: $" + amount, "International routing confirmed", "Transaction prepared for approval"]);
-        playSound('processing');
+        playSound('database_lookup');
       }
     } else if (cmd === 'APPROVE') {
       if (!currentCustomer) {
