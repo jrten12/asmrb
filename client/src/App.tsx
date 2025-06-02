@@ -1195,9 +1195,7 @@ function App() {
 
   const playTimeclockPunch = () => {
     // Play your authentic punch clock audio immediately when card goes in
-    const punchAudio = new Audio('/punch-clock.mp3');
-    punchAudio.volume = 0.8;
-    punchAudio.play().catch(e => console.log('Audio play failed:', e));
+    playSound('button_click');
     
     // Show status after the punch sound
     setTimeout(() => {
