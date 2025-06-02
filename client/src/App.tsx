@@ -3043,150 +3043,76 @@ function App() {
             pointerEvents: 'none'
           }} />
           
-          {/* Bank Interior Scene */}
+          {/* Authentic Bank Security Response */}
           <div style={{
             width: '100%',
             height: '100%',
             position: 'relative',
             background: 'linear-gradient(180deg, #001100 0%, #002200 100%)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
-            {/* Bank Counter */}
+            {/* Security Alert Header */}
             <div style={{
-              position: 'absolute',
-              bottom: '0px',
-              left: '0px',
-              right: '0px',
-              height: '120px',
-              background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
-              border: '2px solid #00ff00',
-              borderBottom: 'none'
-            }} />
-            
-            {/* Teller Window */}
-            <div style={{
-              position: 'absolute',
-              bottom: '120px',
-              left: '20px',
-              width: '200px',
-              height: '100px',
-              border: '3px solid #00ff00',
-              background: 'rgba(0, 255, 0, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              color: '#00ff00'
-            }}>
-              TELLER<br/>WINDOW
-            </div>
-            
-            {/* Customer (Fraudster) */}
-            <div style={{
-              position: 'absolute',
-              bottom: '130px',
-              left: '300px',
-              width: '60px',
-              height: '100px',
-              color: '#ffaa00',
-              fontSize: '80px',
-              lineHeight: '100px',
-              textAlign: 'center',
-              animation: 'fraudsterPanic 0.2s infinite'
-            }}>
-              🧑‍💼
-            </div>
-            
-            {/* Police Officer Entering */}
-            <div style={{
-              position: 'absolute',
-              bottom: '130px',
-              right: '50px',
-              width: '60px',
-              height: '100px',
-              color: '#0088ff',
-              fontSize: '80px',
-              lineHeight: '100px',
-              textAlign: 'center',
-              animation: 'officerMarch 1s ease-in-out'
-            }}>
-              👮‍♂️
-            </div>
-            
-            {/* Handcuffs Effect */}
-            <div style={{
-              position: 'absolute',
-              bottom: '180px',
-              left: '320px',
-              fontSize: '40px',
-              color: '#cccccc',
-              animation: 'handcuffsSnap 1.5s ease-in-out 1s forwards'
-            }}>
-              ⛓️
-            </div>
-            
-            {/* Police Radio Chatter */}
-            <div style={{
-              position: 'absolute',
-              top: '50px',
-              left: '50px',
-              color: '#00ff00',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              animation: 'radioChatter 2s ease-in-out',
-              maxWidth: '300px'
-            }}>
-              *** POLICE RADIO ***<br/>
-              "Unit 23 responding to<br/>
-              fraud alert at First<br/>
-              National Bank..."
-            </div>
-            
-            {/* Arrest Text */}
-            <div style={{
-              position: 'absolute',
-              bottom: '50px',
-              left: '50%',
-              transform: 'translateX(-50%)',
               color: '#ff0000',
+              fontSize: '32px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: '40px',
+              animation: 'securityAlert 1s ease-in-out infinite',
+              textShadow: '0 0 20px #ff0000'
+            }}>
+              ⚠️ SECURITY ALERT ⚠️
+            </div>
+            
+            {/* Bank Security Protocol */}
+            <div style={{
+              color: '#00ff00',
+              fontSize: '18px',
+              textAlign: 'left',
+              lineHeight: '1.8',
+              maxWidth: '600px',
+              marginBottom: '40px',
+              animation: 'protocolText 3s ease-in-out'
+            }}>
+              &gt; FRAUD DETECTION SYSTEM ACTIVATED<br/>
+              &gt; Customer flagged for suspicious activity<br/>
+              &gt; Transaction blocked - Account frozen<br/>
+              &gt; Bank security notified<br/>
+              &gt; Law enforcement contacted<br/>
+              &gt; Customer escorted from premises<br/>
+              &gt; Investigation initiated
+            </div>
+            
+            {/* Success Message */}
+            <div style={{
+              color: '#ffff00',
               fontSize: '24px',
               fontWeight: 'bold',
               textAlign: 'center',
-              animation: 'arrestText 3s ease-in-out',
-              textShadow: '0 0 10px #ff0000'
-            }}>
-              SUSPECT ARRESTED<br/>
-              FRAUD PREVENTED
-            </div>
-            
-            {/* Bank Security Badge */}
-            <div style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              color: '#ffff00',
-              fontSize: '14px',
-              textAlign: 'center',
-              border: '2px solid #ffff00',
-              padding: '10px',
+              border: '3px solid #ffff00',
+              padding: '20px',
               background: 'rgba(255, 255, 0, 0.1)',
-              animation: 'badgePulse 2s ease-in-out infinite'
+              animation: 'successMessage 2s ease-in-out'
             }}>
-              BANK SECURITY<br/>
-              PROTOCOL<br/>
-              ACTIVATED
+              FRAUD ATTEMPT PREVENTED<br/>
+              BANK ASSETS PROTECTED<br/>
+              EXCELLENT WORK, TELLER
             </div>
             
-            {/* Floor Grid */}
+            {/* Return Notice */}
             <div style={{
               position: 'absolute',
-              bottom: '0px',
-              left: '0px',
-              right: '0px',
-              height: '10px',
-              background: 'repeating-linear-gradient(90deg, transparent, transparent 20px, #00ff00 20px, #00ff00 22px)',
-              opacity: 0.3
-            }} />
+              bottom: '40px',
+              color: '#888888',
+              fontSize: '16px',
+              animation: 'returnNotice 4s ease-in-out'
+            }}>
+              Returning to teller station...
+            </div>
           </div>
         </div>
       )}
@@ -3209,40 +3135,28 @@ function App() {
           to { opacity: 1; }
         }
         
-        @keyframes fraudsterPanic {
-          0%, 100% { transform: translateX(0px) rotate(0deg); }
-          25% { transform: translateX(-2px) rotate(-1deg); }
-          75% { transform: translateX(2px) rotate(1deg); }
+        @keyframes securityAlert {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
         }
         
-        @keyframes officerMarch {
-          0% { transform: translateX(300px); }
-          100% { transform: translateX(0px); }
+        @keyframes protocolText {
+          0% { opacity: 0; transform: translateY(20px); }
+          20% { opacity: 1; transform: translateY(0px); }
+          80% { opacity: 1; transform: translateY(0px); }
+          100% { opacity: 1; transform: translateY(0px); }
         }
         
-        @keyframes handcuffsSnap {
-          0% { opacity: 0; transform: scale(0) rotate(0deg); }
-          50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
-          100% { opacity: 1; transform: scale(1) rotate(360deg); }
+        @keyframes successMessage {
+          0% { opacity: 0; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
         }
         
-        @keyframes radioChatter {
+        @keyframes returnNotice {
           0% { opacity: 0; }
-          25% { opacity: 1; }
-          75% { opacity: 1; }
-          100% { opacity: 0.7; }
-        }
-        
-        @keyframes arrestText {
-          0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-          30% { opacity: 1; transform: translateX(-50%) translateY(0px); }
-          70% { opacity: 1; transform: translateX(-50%) translateY(0px); }
-          100% { opacity: 1; transform: translateX(-50%) translateY(0px); }
-        }
-        
-        @keyframes badgePulse {
-          0%, 100% { opacity: 0.8; }
-          50% { opacity: 1; }
+          70% { opacity: 0; }
+          100% { opacity: 1; }
         }
       `}</style>
     </div>
