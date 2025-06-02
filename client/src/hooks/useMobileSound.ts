@@ -12,20 +12,20 @@ export function useMobileSound(): SoundManager {
   const soundBuffersRef = useRef<Map<string, AudioBuffer>>(new Map());
   const isUnlockedRef = useRef(false);
 
-  // Sound file mappings
+  // Sound file mappings - proper ASMR sounds for each action
   const soundFiles = {
-    keyboard: '/keyboard-typing.mp3',
-    printer: '/dot-matrix-printer-73220.mp3',
-    button_click: '/keyboard-typing.mp3',
-    success: '/dot-matrix-printer-73220.mp3',
-    error: '/keyboard-typing.mp3',
-    approve: '/dot-matrix-printer-73220.mp3',
-    reject: '/keyboard-typing.mp3',
-    paper_rustle: '/keyboard-typing.mp3',
-    stamp: '/dot-matrix-printer-73220.mp3',
-    drawer: '/keyboard-typing.mp3',
-    cash: '/dot-matrix-printer-73220.mp3',
-    receipt: '/dot-matrix-printer-73220.mp3'
+    keyboard: '/keyboard-typing.mp3',          // Typing/keyboard sounds
+    printer: '/dot-matrix-printer-73220.mp3', // Dot matrix printing
+    button_click: '/punch-clock.mp3',          // Button presses
+    success: '/dot-matrix-printer-73220.mp3', // Success actions
+    error: '/punch-clock.mp3',                 // Error sounds
+    approve: '/dot-matrix-printer-73220.mp3', // Transaction approval
+    reject: '/punch-clock.mp3',                // Transaction rejection
+    paper_rustle: '/punch-clock.mp3',          // Paper handling
+    stamp: '/dot-matrix-printer-73220.mp3',   // Stamping documents
+    drawer: '/punch-clock.mp3',                // Cash drawer
+    cash: '/dot-matrix-printer-73220.mp3',    // Cash counting
+    receipt: '/dot-matrix-printer-73220.mp3'  // Receipt printing
   };
 
   // Initialize AudioContext

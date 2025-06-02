@@ -201,7 +201,7 @@ function App() {
       inputRef.current.focus();
     }
     
-    playSound('keyboard');
+    playSound('paper_rustle');
   };
 
   const processCommand = (input: string) => {
@@ -239,7 +239,7 @@ function App() {
           `✗ ACCOUNT NOT FOUND`,
           "Please verify account number"
         ]);
-        playSound('reject');
+        playSound('error');
       }
     } else if (waitingForInput === 'signature_check') {
       if (command === 'SIGNATURE') {
@@ -440,8 +440,15 @@ function App() {
           </div>
           
           <button 
-            onClick={startShift}
-            onTouchStart={() => playSound('keyboard')}
+            onClick={() => {
+              handleFirstInteraction();
+              playSound('button_click');
+              startShift();
+            }}
+            onTouchStart={() => {
+              handleFirstInteraction();
+              playSound('button_click');
+            }}
             className="mobile-button"
             style={{
               minHeight: '44px',
@@ -517,12 +524,12 @@ function App() {
           <button 
             onClick={() => {
               handleFirstInteraction();
-              playSound('keyboard');
+              playSound('button_click');
               callCustomer();
             }}
             onTouchStart={() => {
               handleFirstInteraction();
-              playSound('keyboard');
+              playSound('button_click');
             }}
             className="mobile-button"
             style={{
@@ -641,9 +648,19 @@ function App() {
             type="text"
             placeholder={commandPrefix}
             onKeyPress={(e) => {
+              handleFirstInteraction();
+              playSound('keyboard');
               if (e.key === 'Enter') {
                 processCommand(e.currentTarget.value);
               }
+            }}
+            onChange={() => {
+              handleFirstInteraction();
+              playSound('keyboard');
+            }}
+            onFocus={() => {
+              handleFirstInteraction();
+              playSound('keyboard');
             }}
             style={{
               width: '100%',
@@ -658,9 +675,15 @@ function App() {
           />
           <button
             onClick={() => {
+              handleFirstInteraction();
+              playSound('keyboard');
               if (inputRef.current) {
                 processCommand(inputRef.current.value);
               }
+            }}
+            onTouchStart={() => {
+              handleFirstInteraction();
+              playSound('keyboard');
             }}
             style={{
               marginTop: '8px',
