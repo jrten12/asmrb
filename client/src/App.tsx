@@ -230,10 +230,12 @@ function App() {
 
       switch (type) {
         case 'keypress':
-          // Soft, satisfying keyboard click
-          createTone(1800, 0.008, 0.03);
-          createNoise(0.003, 0.008);
-          setTimeout(() => createTone(1200, 0.006, 0.02), 2);
+          // Enhanced mechanical keyboard with medium hardness ASMR
+          createTone(1200 + Math.random() * 400, 0.015, 0.04);
+          createTone(800 + Math.random() * 200, 0.008, 0.025);
+          createNoise(0.012, 0.015);
+          setTimeout(() => createTone(600, 0.006, 0.015), 8);
+          setTimeout(() => createNoise(0.004, 0.008), 12);
           break;
         case 'button_click':
           createTone(1200, 0.08, 0.1);
@@ -268,13 +270,24 @@ function App() {
           createNoise(0.2, 0.04);
           break;
         case 'dot_matrix_printer':
-          // Authentic dot matrix printer sound for deposits
-          for (let i = 0; i < 12; i++) {
+          // Enhanced ASMR dot matrix printer with authentic mechanical sounds
+          for (let i = 0; i < 25; i++) {
             setTimeout(() => {
-              createTone(1800 + (i % 3) * 200, 0.03, 0.06);
-              createNoise(0.01, 0.02);
-            }, i * 80);
+              // Main printer head impact
+              createTone(1600 + (i % 4) * 150, 0.025, 0.04);
+              createTone(1200 + (i % 3) * 100, 0.015, 0.03);
+              // Mechanical noise and paper feed
+              createNoise(0.018, 0.025);
+              // Carriage movement
+              if (i % 8 === 0) createTone(800, 0.008, 0.02);
+            }, i * 60);
           }
+          // Paper tear sound at the end
+          setTimeout(() => {
+            createNoise(0.15, 0.08);
+            createTone(400, 0.06, 0.04);
+            setTimeout(() => createNoise(0.08, 0.05), 80);
+          }, 25 * 60 + 200);
           break;
         case 'modal_close':
           createTone(800, 0.1, 0.05);
@@ -311,6 +324,22 @@ function App() {
           createNoise(0.03, 0.1);
           createTone(1200, 0.05, 0.08);
           setTimeout(() => createTone(800, 0.04, 0.06), 50);
+          break;
+        case 'punch_clock_in':
+          // Beautiful mechanical punch clock - clocking in
+          createTone(800, 0.08, 0.06);
+          setTimeout(() => createTone(600, 0.12, 0.08), 60);
+          setTimeout(() => createNoise(0.025, 0.04), 120);
+          setTimeout(() => createTone(1000, 0.06, 0.04), 180);
+          setTimeout(() => createTone(1200, 0.08, 0.05), 220);
+          break;
+        case 'punch_clock_out':
+          // Beautiful mechanical punch clock - clocking out
+          createTone(1200, 0.08, 0.06);
+          setTimeout(() => createTone(1000, 0.12, 0.08), 60);
+          setTimeout(() => createNoise(0.025, 0.04), 120);
+          setTimeout(() => createTone(600, 0.06, 0.04), 180);
+          setTimeout(() => createTone(400, 0.08, 0.05), 220);
           break;
         case 'mechanical_whir':
           // Internal mechanism engaging
@@ -774,8 +803,33 @@ function App() {
         resetVerificationState();
         setTerminalOutput(prev => [...prev, "Next customer please."]);
       }, 1500);
+    } else if (cmd === 'PUNCH OUT') {
+      playSound('punch_clock_out');
+      setTerminalOutput(prev => [...prev, "> " + command, "PUNCHING OUT...", "CALCULATING SHIFT TIME...", "UPDATING TIMESHEET..."]);
+      
+      setTimeout(() => {
+        const shiftPerformance = score > 500 ? 'EXCELLENT' : score > 200 ? 'GOOD' : 'NEEDS IMPROVEMENT';
+        const statusColor = score > 500 ? 'green' : score > 200 ? 'yellow' : 'red';
+        
+        setTerminalOutput(prev => [...prev, 
+          "========== SHIFT COMPLETE ==========",
+          `PERFORMANCE: ${shiftPerformance}`,
+          `TRANSACTIONS: ${transactionsCompleted}`,
+          `SCORE: ${score}`,
+          `ERRORS: ${errors}`,
+          "RETURNING TO TIME CLOCK...",
+          "===================================="
+        ]);
+        
+        setTimeout(() => {
+          setGamePhase('punch');
+          setCurrentCustomer(null);
+          setPunchStatus(`CLOCKED OUT - ${statusColor.toUpperCase()}`);
+          setTerminalOutput([]);
+        }, 2000);
+      }, 1500);
     } else if (cmd === 'HELP') {
-      setTerminalOutput(prev => [...prev, "> " + command, "Manual Verification Commands:", "LOOKUP [account_number] - Get system data", "COMPARE SIGNATURE - View signatures", "PROCESS [DEPOSIT/WITHDRAWAL/WIRE] [amount]", "APPROVE - Approve after all verifications", "REJECT - Reject transaction"]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Manual Verification Commands:", "LOOKUP [account_number] - Get system data", "VERIFY NAME [name] - Compare signatures", "DEPOSIT $[amount] - Process deposit", "WITHDRAW $[amount] - Process withdrawal", "WIRE $[amount] TO [account] - Wire transfer", "PUNCH OUT - End shift", "APPROVE - Approve transaction", "REJECT - Reject transaction"]);
     } else if (cmd === 'KONAMI' || cmd === 'UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A') {
       setTerminalOutput(prev => [...prev, "> " + command, "=== EASTER EGG ACTIVATED ===", "You found the classic code!", "30 lives granted... wait, wrong system!", "=========================="]);
       playSound('easter_melody');
