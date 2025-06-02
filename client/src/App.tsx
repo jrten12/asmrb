@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMobileSound } from './hooks/useMobileSound';
 
 interface Customer {
@@ -21,6 +21,12 @@ interface Document {
 function App() {
   const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('punch_in');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
+  const [terminalOutput, setTerminalOutput] = useState<string[]>([
+    "FIRST NATIONAL BANK SYSTEM v2.1",
+    "TELLER AUTHENTICATION: APPROVED",
+    "",
+    "Ready for customer service"
+  ]);
   const [gameScore, setGameScore] = useState({
     score: 0,
     correctTransactions: 0,
@@ -29,31 +35,24 @@ function App() {
     consecutiveErrors: 0,
     errorDetails: [] as string[]
   });
-  
-  const [terminalOutput, setTerminalOutput] = useState<string[]>([
-    "FIRST NATIONAL BANK SYSTEM v2.1",
-    "TELLER AUTHENTICATION: APPROVED",
-    "",
-    "Ready for customer service"
-  ]);
-  
+
+  const { playSound, isReady: soundReady, unlock: unlockAudio } = useMobileSound();
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [shiftStartTime, setShiftStartTime] = useState<number>(0);
+  const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
+  const [showManagerWarning, setShowManagerWarning] = useState(false);
+  const [managerMessage, setManagerMessage] = useState('');
+
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     accountNotFound: false,
+    nameVerified: false,
+    dobVerified: false,
     signatureCompared: false,
     signatureFraud: false,
     transactionProcessed: false
   });
-  
-  const [currentStep, setCurrentStep] = useState<'lookup' | 'signature' | 'process' | 'approve'>('lookup');
-  const [waitingForInput, setWaitingForInput] = useState<string>('');
-  const [commandPrefix, setCommandPrefix] = useState<string>('');
-  const [accountBalance, setAccountBalance] = useState<number>(0);
-  const [showFloatingInput, setShowFloatingInput] = useState(false);
-  const [inputPrompt, setInputPrompt] = useState<string>('');
-  const [showReceipt, setShowReceipt] = useState(false);
-  const [receiptData, setReceiptData] = useState<any>(null);
-  const [shiftStartTime, setShiftStartTime] = useState<number>(0);
+
   const [signatureModal, setSignatureModal] = useState<{
     isOpen: boolean, 
     bankSignature: string,
@@ -63,17 +62,33 @@ function App() {
     bankSignature: '',
     customerSignature: ''
   });
+
+  const [showFloatingInput, setShowFloatingInput] = useState(false);
+  const [inputPrompt, setInputPrompt] = useState<string>('');
+  const [commandPrefix, setCommandPrefix] = useState<string>('');
+  const [accountBalance, setAccountBalance] = useState<number>(0);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<any>(null);
   
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const { playSound, isReady: soundReady, unlock: unlockAudio } = useMobileSound();
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   const handleFirstInteraction = () => {
     if (!audioUnlocked && soundReady) {
       unlockAudio();
       setAudioUnlocked(true);
     }
+  };
+
+  const resetVerificationState = () => {
+    setVerificationState({
+      accountLookedUp: false,
+      accountNotFound: false,
+      nameVerified: false,
+      dobVerified: false,
+      signatureCompared: false,
+      signatureFraud: false,
+      transactionProcessed: false
+    });
   };
 
   const generateCustomer = (): Customer => {
@@ -162,108 +177,177 @@ function App() {
     };
   };
 
-  const callCustomer = () => {
-    const customer = generateCustomer();
-    setCurrentCustomer(customer);
-    setVerificationState({
-      accountLookedUp: false,
-      accountNotFound: false,
-      signatureCompared: false,
-      signatureFraud: false,
-      transactionProcessed: false
-    });
-    setCurrentStep('lookup');
-    setWaitingForInput('account_lookup');
+  const handleCommand = (command: string) => {
+    const cmd = command.trim().toUpperCase();
     
-    setTerminalOutput(prev => [
-      ...prev,
-      "",
-      `> CUSTOMER ARRIVED: ${customer.name}`,
-      `> TRANSACTION: ${customer.transactionType}`,
-      `> AMOUNT: $${customer.requestedAmount.toLocaleString()}`,
-      "",
-      "Step 1: Look up customer account",
-      "Type: LOOKUP [account_number]"
-    ]);
-    
-    setCommandPrefix('LOOKUP ');
-    setInputPrompt('Enter account number for lookup:');
-    setShowFloatingInput(true);
-    
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 100);
-    
-    handleFirstInteraction();
-    playSound('paper_rustle');
-  };
-
-  const processCommand = (input: string) => {
-    if (!currentCustomer) return;
-    
-    const command = input.toUpperCase().trim();
-    
-    if (waitingForInput === 'account_lookup') {
-      const accountNumber = command.replace('LOOKUP ', '').trim();
-      
-      if (accountNumber === currentCustomer.accountNumber) {
-        setAccountBalance(Math.floor(Math.random() * 50000) + 1000);
-        setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
-        setTerminalOutput(prev => [
-          ...prev,
-          `> LOOKUP ${accountNumber}`,
-          `✓ ACCOUNT FOUND`,
-          `  Name: ${currentCustomer.name}`,
-          `  Balance: $${accountBalance.toLocaleString()}`,
-          `  Status: ACTIVE`,
-          "",
-          "Step 2: Compare signatures",
-          "Type: SIGNATURE to open comparison"
-        ]);
-        setCurrentStep('signature');
-        setWaitingForInput('signature_check');
-        setCommandPrefix('SIGNATURE');
-        setInputPrompt('Type SIGNATURE to compare signatures:');
-        playSound('approve');
+    if (cmd === 'NEXT') {
+      const customer = generateCustomer();
+      setCurrentCustomer(customer);
+      resetVerificationState();
+      setTerminalOutput(prev => [...prev, "> " + command, "Customer " + customer.name + " approaching window...", "REQUEST: " + customer.transactionType + " $" + customer.requestedAmount, "Please verify identity before processing."]);
+      console.log("Generated customer:", customer);
+      playSound('paper_rustle');
+    } else if (cmd === 'LOOKUP' || cmd.startsWith('LOOKUP ')) {
+      if (cmd === 'LOOKUP') {
+        setTerminalOutput(prev => [...prev, "> " + command, "Enter account number to verify:", "Usage: LOOKUP [account_number]"]);
+        setCommandPrefix('LOOKUP ');
+        setInputPrompt('Enter account number...');
+        setShowFloatingInput(true);
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 100);
       } else {
-        setTerminalOutput(prev => [
-          ...prev,
-          `> LOOKUP ${accountNumber}`,
-          `✗ ACCOUNT NOT FOUND`,
-          "Please verify account number"
-        ]);
-        playSound('error');
-      }
-    } else if (waitingForInput === 'signature_check') {
-      if (command === 'SIGNATURE') {
-        const bankSig = currentCustomer.name.split(' ')[0] + " " + currentCustomer.name.split(' ')[currentCustomer.name.split(' ').length - 1];
-        const customerSig = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature as string;
+        const accountNum = cmd.replace('LOOKUP ', '');
+        if (!currentCustomer) {
+          setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+          return;
+        }
         
-        setSignatureModal({
-          isOpen: true,
-          bankSignature: bankSig,
-          customerSignature: customerSig
-        });
+        playSound('keyboard');
+        setTerminalOutput(prev => [...prev, "> " + command, "CONNECTING TO DATABASE...", "SEARCHING..."]);
         
-        setTerminalOutput(prev => [
-          ...prev,
-          `> SIGNATURE COMPARISON OPENED`,
-          "Compare bank signature with customer signature"
-        ]);
+        setTimeout(() => {
+          playSound('approve');
+          setTimeout(() => {
+            if (currentCustomer.isFraud) {
+              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "❌❌❌ ACCOUNT NOT FOUND ❌❌❌",
+                "STATUS: INVALID - NO RECORD IN SYSTEM",
+                "WARNING: POTENTIAL FRAUD DETECTED",
+                "ACTION: REJECT TRANSACTION IMMEDIATELY"
+              ]);
+              playSound('reject');
+            } else if (accountNum === currentCustomer.accountNumber) {
+              const balance = Math.floor(Math.random() * 50000) + 5000;
+              setAccountBalance(balance);
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+                "STATUS: ACTIVE CUSTOMER",
+                "BALANCE: $" + balance.toLocaleString(),
+                "BANK RECORDS NOW DISPLAYED BELOW"
+              ]);
+              playSound('approve');
+            } else {
+              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✗ ACCOUNT MISMATCH",
+                "CUSTOMER ACCOUNT DOES NOT MATCH"
+              ]);
+              playSound('reject');
+            }
+          }, 800);
+        }, 1200);
       }
-    } else if (waitingForInput === 'process_transaction') {
-      if (command === 'PROCESS') {
-        processTransaction();
+    } else if (cmd.startsWith('VERIFY NAME ')) {
+      const enteredName = cmd.replace('VERIFY NAME ', '').trim();
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
       }
-    }
-    
-    setShowFloatingInput(false);
-    setCommandPrefix('');
-    setInputPrompt('');
-    if (inputRef.current) {
-      inputRef.current.value = '';
+      
+      if (!enteredName) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Name required", "Usage: VERIFY NAME [full name]"]);
+        playSound('reject');
+        return;
+      }
+      
+      playSound('keyboard');
+      setTimeout(() => {
+        if (currentCustomer.isFraud) {
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== FRAUD ALERT ==========", "*** NO CUSTOMER RECORD FOUND ***", "Name: '" + enteredName + "'", "SYSTEM STATUS: NOT IN DATABASE", "RECOMMENDATION: REJECT IMMEDIATELY", "SECURITY FLAG: POTENTIAL IDENTITY THEFT", "===============================", ""]);
+          playSound('reject');
+        } else {
+          const isMatch = enteredName.toUpperCase() === currentCustomer.name.toUpperCase();
+          if (isMatch) {
+            setVerificationState(prev => ({...prev, nameVerified: true}));
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION SUCCESS ==========", "✓ CUSTOMER NAME VERIFIED", "Input: " + enteredName, "System: " + currentCustomer.name, "STATUS: IDENTITY CONFIRMED", "NEXT STEP: VERIFY DATE OF BIRTH", "=======================================", ""]);
+            playSound('approve');
+          } else {
+            setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION FAILED ==========", "✗ NAME DOES NOT MATCH RECORDS", "You entered: " + enteredName, "System shows: " + currentCustomer.name, "STATUS: IDENTITY NOT CONFIRMED", "ACTION: RE-CHECK CUSTOMER DOCUMENTS", "====================================", ""]);
+            playSound('reject');
+          }
+        }
+      }, 1000);
+    } else if (cmd.startsWith('VERIFY DOB ')) {
+      const enteredDOB = cmd.replace('VERIFY DOB ', '').trim();
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (!enteredDOB) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Date of birth required", "Usage: VERIFY DOB [YYYY-MM-DD]"]);
+        playSound('reject');
+        return;
+      }
+      
+      playSound('keyboard');
+      setTimeout(() => {
+        const systemDOB = currentCustomer.documents.find(d => d.data.dateOfBirth)?.data.dateOfBirth || "1985-03-15";
+        
+        if (currentCustomer.isFraud) {
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== FRAUD ALERT ==========", "*** NO DATE OF BIRTH RECORD ***", "DOB: '" + enteredDOB + "'", "SYSTEM STATUS: NOT IN DATABASE", "RECOMMENDATION: REJECT TRANSACTION", "SECURITY FLAG: FRAUDULENT IDENTITY", "==============================", ""]);
+          playSound('reject');
+        } else if (enteredDOB === systemDOB) {
+          setVerificationState(prev => ({...prev, dobVerified: true}));
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION SUCCESS ==========", "✓ DATE OF BIRTH VERIFIED", "Input: " + enteredDOB, "System: " + systemDOB, "STATUS: DOB CONFIRMED", "NEXT STEP: COMPARE SIGNATURE", "=======================================", ""]);
+          playSound('approve');
+        } else {
+          setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== VERIFICATION FAILED ==========", "✗ DATE OF BIRTH MISMATCH", "You entered: " + enteredDOB, "System shows: " + systemDOB, "STATUS: DOB NOT CONFIRMED", "ACTION: RE-CHECK CUSTOMER ID", "====================================", ""]);
+          playSound('reject');
+        }
+      }, 1000);
+    } else if (cmd === 'COMPARE SIGNATURE') {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      const bankSig = currentCustomer.name.split(' ')[0] + " " + currentCustomer.name.split(' ')[currentCustomer.name.split(' ').length - 1];
+      const customerSig = currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature as string;
+      
+      setSignatureModal({
+        isOpen: true,
+        bankSignature: bankSig,
+        customerSignature: customerSig
+      });
+      
+      setTerminalOutput(prev => [...prev, "> " + command, "SIGNATURE COMPARISON OPENED", "Compare bank signature with customer signature"]);
+    } else if (cmd === 'PROCESS' && verificationState.accountLookedUp) {
+      processTransaction();
+    } else if (cmd === 'REJECT') {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (currentCustomer.isFraud) {
+        setGameScore(prev => ({ 
+          ...prev, 
+          score: prev.score + 150, 
+          correctTransactions: prev.correctTransactions + 1 
+        }));
+        setTerminalOutput(prev => [...prev, "> " + command, "✓ CORRECT FRAUD DETECTION +150 points", "Transaction rejected successfully"]);
+      } else {
+        setGameScore(prev => ({ ...prev, errors: prev.errors + 1 }));
+        setTerminalOutput(prev => [...prev, "> " + command, "✗ FALSE FRAUD ALERT - Customer was legitimate", "Error recorded"]);
+      }
+      
+      setTimeout(() => {
+        setCurrentCustomer(null);
+        setTerminalOutput(prev => [...prev, "", "Ready for next customer"]);
+      }, 2000);
+      
+      playSound('reject');
+    } else {
+      setTerminalOutput(prev => [...prev, "> " + command, "Unknown command. Available commands:", "NEXT - Call next customer", "LOOKUP [account] - Look up account", "VERIFY NAME [name] - Verify customer name", "VERIFY DOB [YYYY-MM-DD] - Verify date of birth", "COMPARE SIGNATURE - Compare signatures", "PROCESS - Process transaction", "REJECT - Reject transaction"]);
     }
   };
 
@@ -275,15 +359,10 @@ function App() {
       setTerminalOutput(prev => [
         ...prev,
         `✓ SIGNATURES MATCH`,
-        "",
-        "Step 3: Process transaction",
+        "Customer identity verified",
+        "Ready to process transaction",
         "Type: PROCESS to execute"
       ]);
-      setCurrentStep('process');
-      setWaitingForInput('process_transaction');
-      setCommandPrefix('PROCESS');
-      setInputPrompt('Type PROCESS to execute transaction:');
-      setShowFloatingInput(true);
       playSound('approve');
     } else {
       setVerificationState(prev => ({ ...prev, signatureFraud: true }));
@@ -376,7 +455,7 @@ function App() {
       "🕐 SHIFT STARTED",
       "Welcome to your teller station",
       "",
-      "Click 'Call Customer' to begin"
+      "Type 'NEXT' to call first customer"
     ]);
   };
 
@@ -494,39 +573,7 @@ function App() {
           </button>
         </div>
 
-        {!currentCustomer ? (
-          <div style={{
-            background: 'rgba(0, 30, 0, 0.6)',
-            border: '2px solid #888888',
-            borderRadius: '6px',
-            padding: '20px',
-            marginBottom: '12px',
-            textAlign: 'center'
-          }}>
-            <h2 style={{ color: '#888888', margin: '0 0 16px 0' }}>NO CUSTOMER PRESENT</h2>
-            <button 
-              onClick={() => {
-                handleFirstInteraction();
-                playSound('button_click');
-                callCustomer();
-              }}
-              style={{
-                minHeight: '44px',
-                padding: '12px 16px',
-                fontSize: '16px',
-                fontFamily: 'Courier New, monospace',
-                border: '2px solid #00ff00',
-                backgroundColor: 'rgba(0, 100, 0, 0.3)',
-                color: '#00ff00',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                width: '100%'
-              }}
-            >
-              📞 CALL NEXT CUSTOMER
-            </button>
-          </div>
-        ) : (
+        {currentCustomer && (
           <div style={{
             background: 'rgba(0, 60, 0, 0.8)',
             border: '3px solid #ffff00',
@@ -611,6 +658,12 @@ function App() {
               <div style={{ color: verificationState.accountLookedUp ? '#00ff00' : '#888888' }}>
                 {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup
               </div>
+              <div style={{ color: verificationState.nameVerified ? '#00ff00' : '#888888' }}>
+                {verificationState.nameVerified ? '✓' : '○'} Name Verification
+              </div>
+              <div style={{ color: verificationState.dobVerified ? '#00ff00' : '#888888' }}>
+                {verificationState.dobVerified ? '✓' : '○'} DOB Verification
+              </div>
               <div style={{ color: verificationState.signatureCompared ? '#00ff00' : '#888888' }}>
                 {verificationState.signatureCompared ? '✓' : '○'} Signature Verification
               </div>
@@ -642,6 +695,33 @@ function App() {
             </div>
           ))}
         </div>
+        
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Enter command..."
+          onKeyPress={(e) => {
+            if (e.key !== 'Enter') {
+              handleFirstInteraction();
+              playSound('keyboard');
+            }
+            if (e.key === 'Enter') {
+              handleCommand(e.currentTarget.value);
+              e.currentTarget.value = '';
+            }
+          }}
+          style={{
+            width: '100%',
+            marginTop: '10px',
+            padding: '8px',
+            fontSize: '14px',
+            fontFamily: 'Courier New, monospace',
+            background: '#001100',
+            border: '1px solid #00ff00',
+            color: '#00ff00',
+            borderRadius: '4px'
+          }}
+        />
       </div>
 
       {showFloatingInput && (
@@ -679,7 +759,9 @@ function App() {
                 playSound('keyboard');
               }
               if (e.key === 'Enter') {
-                processCommand(e.currentTarget.value);
+                handleCommand(e.currentTarget.value);
+                setShowFloatingInput(false);
+                e.currentTarget.value = '';
               }
             }}
             style={{
@@ -693,30 +775,6 @@ function App() {
               borderRadius: '4px'
             }}
           />
-          <button
-            onClick={() => {
-              handleFirstInteraction();
-              playSound('button_click');
-              if (inputRef.current) {
-                processCommand(inputRef.current.value);
-              }
-            }}
-            style={{
-              marginTop: '8px',
-              width: '100%',
-              padding: '8px',
-              fontSize: '16px',
-              fontFamily: 'Courier New, monospace',
-              background: 'rgba(0, 255, 0, 0.2)',
-              border: '1px solid #00ff00',
-              color: '#00ff00',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              minHeight: '44px'
-            }}
-          >
-            EXECUTE
-          </button>
         </div>
       )}
 
