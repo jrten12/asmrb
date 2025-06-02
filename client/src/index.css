@@ -2,44 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Clean mobile layout fixes */
-@media (max-width: 768px) {
+/* Mobile-first complete layout fix */
+@media (max-width: 600px) {
   body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
   }
   
-  /* Main container adjustments */
-  .mobile-game-container {
-    flex-direction: column !important;
-    gap: 8px !important;
-    padding: 4px !important;
-    height: auto !important;
+  .main-container, .panel, .section {
+    width: 100vw !important;
+    min-width: 0 !important;
+    margin: 0 0 10px 0 !important;
+    box-sizing: border-box;
+    position: static !important;
   }
   
-  /* Terminal panel */
-  .mobile-terminal {
-    width: 100% !important;
-    min-width: auto !important;
+  button, .btn {
+    min-height: 44px !important;
+    font-size: 1.1em !important;
+    width: 90vw !important;
     margin-bottom: 8px !important;
   }
   
-  /* Customer info panel */
-  .mobile-customer {
-    width: 100% !important;
-    min-width: auto !important;
+  h1, h2, h3, h4, .title, .console-title {
+    font-size: 1.3em !important;
+    margin-bottom: 8px;
   }
   
-  /* Button grids */
-  .mobile-buttons {
-    grid-template-columns: 1fr !important;
-    gap: 4px !important;
+  .transaction-request, .account-status {
+    margin: 0 0 10px 0 !important;
+    width: 100vw !important;
   }
   
-  /* Smaller text on mobile */
-  .mobile-text {
-    font-size: 12px !important;
+  /* Force all containers to stack vertically */
+  div[style*="display: flex"],
+  div[style*="display:flex"] {
+    flex-direction: column !important;
+    width: 100vw !important;
+    height: auto !important;
+    min-height: auto !important;
+    position: static !important;
+  }
+  
+  /* Remove all absolute positioning */
+  div[style*="position: absolute"],
+  div[style*="position:absolute"],
+  div[style*="position: fixed"],
+  div[style*="position:fixed"] {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
   }
 }
 
