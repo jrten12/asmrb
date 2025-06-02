@@ -80,7 +80,7 @@ function App() {
 
   const generateCustomer = (): Customer => {
     const names = ["Sarah L. Williams", "Michael Johnson", "Jennifer Rodriguez", "David Chen", "Emily Davis", "Robert Thompson", "Lisa Parker", "James Wilson", "Amanda Davis", "Christopher Lee"];
-    const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "ACCOUNT_UPDATE", "INQUIRY"];
+    const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "INQUIRY"];
     
     const name = names[Math.floor(Math.random() * names.length)];
     const baseAccountNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
@@ -157,7 +157,6 @@ function App() {
       {
         type: "SLIP",
         title: transactionType === 'WIRE_TRANSFER' ? "Wire Transfer Request" : 
-               transactionType === 'ACCOUNT_UPDATE' ? "Account Update Form" :
                transactionType === 'INQUIRY' ? "Balance Inquiry Form" : "Transaction Slip",
         data: {
           accountNumber: documentAccountNumber,
@@ -332,6 +331,18 @@ function App() {
           const punchAudio = new Audio('/punch-clock.mp3');
           punchAudio.volume = 0.7;
           punchAudio.play().catch(e => console.log('Audio play failed:', e));
+          break;
+        case 'dot_matrix_print':
+          // Play authentic dot matrix printer for 10 seconds
+          const printerAudio = new Audio('/dot-matrix-printer.mp3');
+          printerAudio.volume = 0.6;
+          printerAudio.currentTime = 0;
+          printerAudio.play().catch(e => console.log('Audio play failed:', e));
+          // Stop after 10 seconds
+          setTimeout(() => {
+            printerAudio.pause();
+            printerAudio.currentTime = 0;
+          }, 10000);
           break;
         case 'mechanical_whir':
           // Internal mechanism engaging
@@ -2158,7 +2169,7 @@ function App() {
             <button
               onClick={() => {
                 if (verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed) {
-                  playSound('dot_matrix_printer');
+                  playSound('dot_matrix_print');
                   processTransaction();
                 } else {
                   setTerminalOutput(prev => [...prev, "ERROR: Complete all verification steps first"]);
