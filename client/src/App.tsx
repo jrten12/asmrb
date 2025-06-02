@@ -1799,7 +1799,7 @@ function App() {
                   onClick={() => {
                     if (currentCustomer) {
                       playSound('button_click');
-                      handleCommand(`LOOKUP ${currentCustomer.accountNumber}`);
+                      handleCommand('LOOKUP');
                     }
                   }}
                   disabled={!currentCustomer}
