@@ -2349,55 +2349,7 @@ function App() {
 
 
 
-          {/* Enhanced Terminal Input with Command Prefix */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            marginTop: '8px',
-            background: 'linear-gradient(145deg, #000000, #001100)',
-            padding: window.innerWidth < 768 ? '10px' : '12px',
-            border: '2px solid #00ff00',
-            borderRadius: '6px',
-            boxShadow: '0 0 10px rgba(0, 255, 0, 0.2)'
-          }}>
-            <span style={{ 
-              marginRight: '8px', 
-              color: '#00ff00', 
-              fontWeight: 'bold',
-              fontSize: window.innerWidth < 768 ? '14px' : '16px'
-            }}>
-              &gt;
-            </span>
-            {commandPrefix && (
-              <span style={{
-                color: '#00ff00',
-                fontSize: window.innerWidth < 768 ? '14px' : '16px',
-                fontFamily: 'monospace',
-                fontWeight: 'bold'
-              }}>
-                {commandPrefix}
-              </span>
-            )}
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder={commandPrefix ? inputRef.current?.placeholder || 'enter value...' : getSmartPlaceholder()}
-              onKeyPress={handleKeyPress}
-              onKeyDown={handleKeyDown}
-              onFocus={() => playSound('terminal_focus')}
-              style={{
-                flex: 1,
-                background: 'rgba(0, 20, 0, 0.8)',
-                border: 'none',
-                color: '#00ff00',
-                padding: window.innerWidth < 768 ? '10px' : '12px',
-                fontSize: window.innerWidth < 768 ? '14px' : '16px',
-                fontFamily: 'monospace',
-                outline: 'none',
-                borderRadius: '4px'
-              }}
-            />
-          </div>
+
         </div>
       </div>
 
