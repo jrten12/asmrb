@@ -3024,105 +3024,169 @@ function App() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'linear-gradient(135deg, #000000 0%, #001122 50%, #000000 100%)',
+          background: '#000000',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 3000,
-          animation: 'fadeInArrest 1s ease-in-out'
+          animation: 'fadeInArrest 0.5s ease-in-out',
+          fontFamily: 'monospace'
         }}>
-          {/* Police Lights Effect */}
+          {/* CRT Scanlines */}
           <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            height: '20px',
-            background: 'linear-gradient(90deg, #ff0000 25%, #0000ff 25%, #0000ff 75%, #ff0000 75%)',
-            animation: 'policeLights 0.5s infinite alternate'
+            bottom: 0,
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
+            pointerEvents: 'none'
           }} />
           
-          {/* Main Animation Scene */}
+          {/* Bank Interior Scene */}
           <div style={{
-            textAlign: 'center',
-            color: '#ffffff',
-            fontFamily: 'monospace',
-            position: 'relative'
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+            background: 'linear-gradient(180deg, #001100 0%, #002200 100%)',
+            overflow: 'hidden'
           }}>
-            {/* Customer Figure */}
+            {/* Bank Counter */}
             <div style={{
-              fontSize: '120px',
-              marginBottom: '20px',
-              animation: 'arrestShake 0.3s infinite'
+              position: 'absolute',
+              bottom: '0px',
+              left: '0px',
+              right: '0px',
+              height: '120px',
+              background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
+              border: '2px solid #00ff00',
+              borderBottom: 'none'
+            }} />
+            
+            {/* Teller Window */}
+            <div style={{
+              position: 'absolute',
+              bottom: '120px',
+              left: '20px',
+              width: '200px',
+              height: '100px',
+              border: '3px solid #00ff00',
+              background: 'rgba(0, 255, 0, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              color: '#00ff00'
+            }}>
+              TELLER<br/>WINDOW
+            </div>
+            
+            {/* Customer (Fraudster) */}
+            <div style={{
+              position: 'absolute',
+              bottom: '130px',
+              left: '300px',
+              width: '60px',
+              height: '100px',
+              color: '#ffaa00',
+              fontSize: '80px',
+              lineHeight: '100px',
+              textAlign: 'center',
+              animation: 'fraudsterPanic 0.2s infinite'
             }}>
               🧑‍💼
             </div>
             
-            {/* Handcuffs Animation */}
+            {/* Police Officer Entering */}
             <div style={{
-              fontSize: '60px',
               position: 'absolute',
-              top: '80px',
+              bottom: '130px',
+              right: '50px',
+              width: '60px',
+              height: '100px',
+              color: '#0088ff',
+              fontSize: '80px',
+              lineHeight: '100px',
+              textAlign: 'center',
+              animation: 'officerMarch 1s ease-in-out'
+            }}>
+              👮‍♂️
+            </div>
+            
+            {/* Handcuffs Effect */}
+            <div style={{
+              position: 'absolute',
+              bottom: '180px',
+              left: '320px',
+              fontSize: '40px',
+              color: '#cccccc',
+              animation: 'handcuffsSnap 1.5s ease-in-out 1s forwards'
+            }}>
+              ⛓️
+            </div>
+            
+            {/* Police Radio Chatter */}
+            <div style={{
+              position: 'absolute',
+              top: '50px',
+              left: '50px',
+              color: '#00ff00',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              animation: 'radioChatter 2s ease-in-out',
+              maxWidth: '300px'
+            }}>
+              *** POLICE RADIO ***<br/>
+              "Unit 23 responding to<br/>
+              fraud alert at First<br/>
+              National Bank..."
+            </div>
+            
+            {/* Arrest Text */}
+            <div style={{
+              position: 'absolute',
+              bottom: '50px',
               left: '50%',
               transform: 'translateX(-50%)',
-              animation: 'handcuffsClick 2s ease-in-out infinite'
-            }}>
-              🔗
-            </div>
-            
-            {/* Police Officers */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-around',
-              margin: '40px 0',
-              fontSize: '80px'
-            }}>
-              <div style={{ animation: 'officerWalk 1s ease-in-out infinite' }}>👮‍♂️</div>
-              <div style={{ animation: 'officerWalk 1s ease-in-out infinite 0.5s' }}>👮‍♀️</div>
-            </div>
-            
-            {/* Dynamic Text */}
-            <div style={{
+              color: '#ff0000',
               fontSize: '24px',
               fontWeight: 'bold',
-              color: '#ff0000',
-              textShadow: '0 0 10px #ff0000',
-              animation: 'textPulse 1s ease-in-out infinite',
-              marginBottom: '20px'
+              textAlign: 'center',
+              animation: 'arrestText 3s ease-in-out',
+              textShadow: '0 0 10px #ff0000'
             }}>
-              🚨 FRAUD SUSPECT APPREHENDED 🚨
+              SUSPECT ARRESTED<br/>
+              FRAUD PREVENTED
             </div>
             
+            {/* Bank Security Badge */}
             <div style={{
-              fontSize: '18px',
-              color: '#00ff00',
-              lineHeight: '1.5'
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              color: '#ffff00',
+              fontSize: '14px',
+              textAlign: 'center',
+              border: '2px solid #ffff00',
+              padding: '10px',
+              background: 'rgba(255, 255, 0, 0.1)',
+              animation: 'badgePulse 2s ease-in-out infinite'
             }}>
-              Bank security protocols activated<br/>
-              Customer detained for investigation<br/>
-              Excellent work, Teller!
+              BANK SECURITY<br/>
+              PROTOCOL<br/>
+              ACTIVATED
             </div>
             
-            {/* Badge Award */}
+            {/* Floor Grid */}
             <div style={{
-              fontSize: '40px',
-              marginTop: '30px',
-              animation: 'badgeFloat 2s ease-in-out infinite'
-            }}>
-              🏆 FRAUD DETECTIVE BADGE EARNED
-            </div>
-          </div>
-          
-          {/* Auto-close animation */}
-          <div style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: '#888888',
-            fontSize: '14px'
-          }}>
-            Returning to station in 3 seconds...
+              position: 'absolute',
+              bottom: '0px',
+              left: '0px',
+              right: '0px',
+              height: '10px',
+              background: 'repeating-linear-gradient(90deg, transparent, transparent 20px, #00ff00 20px, #00ff00 22px)',
+              opacity: 0.3
+            }} />
           </div>
         </div>
       )}
@@ -3145,35 +3209,40 @@ function App() {
           to { opacity: 1; }
         }
         
-        @keyframes policeLights {
-          0% { background: linear-gradient(90deg, #ff0000 25%, #0000ff 25%, #0000ff 75%, #ff0000 75%); }
-          100% { background: linear-gradient(90deg, #0000ff 25%, #ff0000 25%, #ff0000 75%, #0000ff 75%); }
+        @keyframes fraudsterPanic {
+          0%, 100% { transform: translateX(0px) rotate(0deg); }
+          25% { transform: translateX(-2px) rotate(-1deg); }
+          75% { transform: translateX(2px) rotate(1deg); }
         }
         
-        @keyframes arrestShake {
-          0%, 100% { transform: translateX(0px); }
-          25% { transform: translateX(-3px); }
-          75% { transform: translateX(3px); }
+        @keyframes officerMarch {
+          0% { transform: translateX(300px); }
+          100% { transform: translateX(0px); }
         }
         
-        @keyframes handcuffsClick {
-          0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
-          50% { transform: translateX(-50%) scale(1.2) rotate(10deg); }
+        @keyframes handcuffsSnap {
+          0% { opacity: 0; transform: scale(0) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+          100% { opacity: 1; transform: scale(1) rotate(360deg); }
         }
         
-        @keyframes officerWalk {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+        @keyframes radioChatter {
+          0% { opacity: 0; }
+          25% { opacity: 1; }
+          75% { opacity: 1; }
+          100% { opacity: 0.7; }
         }
         
-        @keyframes textPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
+        @keyframes arrestText {
+          0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          30% { opacity: 1; transform: translateX(-50%) translateY(0px); }
+          70% { opacity: 1; transform: translateX(-50%) translateY(0px); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px); }
         }
         
-        @keyframes badgeFloat {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-10px) scale(1.1); }
+        @keyframes badgePulse {
+          0%, 100% { opacity: 0.8; }
+          50% { opacity: 1; }
         }
       `}</style>
     </div>
