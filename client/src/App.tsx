@@ -512,17 +512,8 @@ function App() {
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
                 "✓ ACCOUNT VERIFIED - RECORD FOUND",
-                `NAME: ${currentCustomer.name}`,
-                `BALANCE: $${balance.toLocaleString()}`,
-                `STATUS: ACTIVE`,
-                "",
-                "CUSTOMER DOCUMENTS:",
-                `ID: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.name || 'N/A'}`,
-                `DOB: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || 'N/A'}`,
-                `ADDRESS: ${currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}`,
-                `FORM ACCT: ${currentCustomer.documents.find(d => d.type === 'SLIP')?.data.accountNumber || 'N/A'}`,
-                "",
-                "VERIFY ALL DETAILS MATCH"
+                "COMPARISON PANEL ACTIVATED",
+                "CHECK DOCUMENTS SECTION FOR FRAUD DETECTION"
               ]);
               playSound('approve');
             } else {
@@ -1627,36 +1618,88 @@ function App() {
                 </div>
               ))}
               
-              {/* Quick Reference System Data */}
-              <div style={{
-                marginTop: '8px',
-                padding: '8px',
-                background: 'rgba(0, 100, 200, 0.2)',
-                border: '1px solid #0088ff',
-                borderRadius: '4px'
-              }}>
-                <div style={{ 
-                  fontSize: window.innerWidth < 768 ? '10px' : '11px', 
-                  color: '#00aaff',
-                  fontWeight: 'bold',
-                  marginBottom: '4px'
+              {/* Fraud Detection Comparison Panel - Only when account is looked up */}
+              {verificationState.accountLookedUp && (
+                <div style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  background: 'rgba(80, 0, 0, 0.3)',
+                  border: '3px solid #ff0000',
+                  borderRadius: '6px'
                 }}>
-                  💻 SYSTEM VERIFICATION DATA
+                  <div style={{ 
+                    fontSize: '14px', 
+                    color: '#ff0000',
+                    fontWeight: 'bold',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    textShadow: '0 0 10px #ff0000'
+                  }}>
+                    🔍 FRAUD DETECTION - COMPARE RECORDS
+                  </div>
+                  
+                  {/* Side-by-side comparison */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    
+                    {/* Bank System Records */}
+                    <div style={{
+                      background: 'rgba(0, 80, 0, 0.6)',
+                      border: '2px solid #00ff00',
+                      borderRadius: '4px',
+                      padding: '8px'
+                    }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#00ff00', marginBottom: '6px', textAlign: 'center' }}>
+                        🏦 BANK SYSTEM
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                        <div><strong>NAME:</strong> {currentCustomer.name}</div>
+                        <div><strong>ACCT:</strong> {currentCustomer.accountNumber}</div>
+                        <div><strong>DOB:</strong> 1985-03-15</div>
+                        <div><strong>ADDR:</strong> 123 Main St, Springfield, IL</div>
+                        <div><strong>BAL:</strong> ${accountBalance.toLocaleString()}</div>
+                        <div><strong>STATUS:</strong> ACTIVE</div>
+                      </div>
+                    </div>
+
+                    {/* Customer Documents */}
+                    <div style={{
+                      background: 'rgba(80, 80, 0, 0.6)',
+                      border: '2px solid #ffff00',
+                      borderRadius: '4px',
+                      padding: '8px'
+                    }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#ffff00', marginBottom: '6px', textAlign: 'center' }}>
+                        📄 CUSTOMER DOCS
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
+                        <div><strong>ID NAME:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.name || 'N/A'}</div>
+                        <div><strong>FORM ACCT:</strong> {currentCustomer.documents.find(d => d.type === 'SLIP')?.data.accountNumber || 'N/A'}</div>
+                        <div><strong>ID DOB:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || 'N/A'}</div>
+                        <div><strong>ID ADDR:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}</div>
+                        <div><strong>AMOUNT:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
+                        <div><strong>SIGNATURE:</strong> {currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature || 'N/A'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Detection Instructions */}
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '6px',
+                    background: 'rgba(100, 0, 100, 0.3)',
+                    border: '1px solid #ff00ff',
+                    borderRadius: '4px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '9px', color: '#ff00ff', fontWeight: 'bold' }}>
+                      LOOK FOR MISMATCHES - ANY DIFFERENCE = FRAUD
+                    </div>
+                    <div style={{ fontSize: '8px', color: '#cccccc', marginTop: '2px' }}>
+                      Names, accounts, addresses, DOB must match exactly
+                    </div>
+                  </div>
                 </div>
-                <div style={{ 
-                  fontSize: window.innerWidth < 768 ? '9px' : '10px', 
-                  color: '#cccccc', 
-                  lineHeight: '1.3',
-                  fontFamily: 'monospace'
-                }}>
-                  Account: {currentCustomer.accountNumber}<br/>
-                  Type: {currentCustomer.transactionType}<br/>
-                  Amount: ${currentCustomer.requestedAmount}<br/>
-                  {currentCustomer.destinationAccount && (
-                    <>Wire To: {currentCustomer.destinationAccount}<br/></>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             <div style={{
