@@ -1580,8 +1580,7 @@ function App() {
                 <div style={{ color: '#00ff00' }}>NEXT</div> - Call next customer to window<br/>
                 <div style={{ color: '#00ff00' }}>LOOKUP [account#]</div> - Verify account in database<br/>
                 <div style={{ color: '#00ff00' }}>COMPARE SIGNATURE</div> - Check signature authenticity<br/>
-                <div style={{ color: '#00ff00' }}>PROCESS [TYPE] [AMOUNT]</div> - Process transaction<br/>
-                <div style={{ color: '#00ff00' }}>APPROVE</div> - Approve legitimate transaction<br/>
+                <div style={{ color: '#00ff00' }}>PROCESS [TYPE] [AMOUNT]</div> - Process and approve transaction<br/>
                 <div style={{ color: '#ff0000' }}>REPORT FRAUD</div> - Report suspicious activity
               </div>
             </div>
@@ -1594,7 +1593,7 @@ function App() {
                 • Check for account number mismatches<br/>
                 • Compare signatures carefully for authenticity<br/>
                 • Verify customer name and date of birth<br/>
-                • Look for nervous behavior or document inconsistencies<br/>
+                • Look for document inconsistencies and suspicious details<br/>
                 • Trust your instincts - when in doubt, report fraud!
               </div>
             </div>
