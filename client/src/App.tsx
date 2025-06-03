@@ -2,6 +2,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import { analyzeSignature, generateCustomer } from './lib/customers';
 import type { Customer, Document as GameDocument } from './types/game';
 
+// Extend Window interface for AdMob and iOS WebKit
+declare global {
+  interface Window {
+    webkit?: {
+      messageHandlers?: {
+        admob?: {
+          postMessage: (message: any) => void;
+        };
+      };
+    };
+    admobEvents?: {
+      onInterstitialLoaded: () => void;
+      onInterstitialFailedToLoad: () => void;
+      onRewardedAdLoaded: () => void;
+      onRewardedAdFailedToLoad: () => void;
+      onRewardedAdRewarded: () => void;
+    };
+  }
+}
+
 interface GameScore {
   score: number;
   correctTransactions: number;
@@ -4522,6 +4542,101 @@ function App() {
         }
       `}</style>
 
+      {/* AdMob Ad Break Screen */}
+      {showAdBreak && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(45deg, #000000, #001100)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 5000,
+          color: '#00ff00',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            fontSize: '24px',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}>
+            AD BREAK
+          </div>
+          <div style={{
+            fontSize: '48px',
+            marginBottom: '20px',
+            color: '#00ff00',
+            textShadow: '0 0 10px #00ff00'
+          }}>
+            {adCountdown}
+          </div>
+          <div style={{
+            fontSize: '16px',
+            opacity: 0.7
+          }}>
+            Returning to game...
+          </div>
+        </div>
+      )}
+
+      {/* Rewarded Ad Button */}
+      {gamePhase === 'working' && isRewardedAdLoaded && (
+        <button
+          onClick={showRewardedAd}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: 'linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1))',
+            border: '2px solid #ffd700',
+            borderRadius: '8px',
+            color: '#ffd700',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            padding: '10px 15px',
+            cursor: 'pointer',
+            zIndex: 100,
+            fontFamily: 'monospace',
+            textShadow: '0 0 5px #ffd700',
+            boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.3)';
+          }}
+        >
+          🎬 Watch Ad (+50 Points)
+        </button>
+      )}
+
+      {/* AdMob Status Indicator */}
+      {gamePhase === 'working' && admobInitialized && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          border: '1px solid #00ff00',
+          borderRadius: '4px',
+          color: '#00ff00',
+          fontSize: '12px',
+          padding: '5px 10px',
+          fontFamily: 'monospace',
+          opacity: 0.6
+        }}>
+          AdMob Ready | Served: {customersServed}
+        </div>
+      )}
+
       {/* Warning Popup */}
       {showWarningPopup && (
         <div style={{
@@ -4543,6 +4658,101 @@ function App() {
           animation: 'fadeIn 0.3s ease-out'
         }}>
           ⚠️ {warningMessage} ⚠️
+        </div>
+      )}
+
+      {/* Google AdMob Ad Break Overlay */}
+      {showAdBreak && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.95)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 4000,
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #002200, #001100)',
+            border: '3px solid #00ff00',
+            borderRadius: '12px',
+            padding: '40px',
+            textAlign: 'center',
+            color: '#00ff00',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '20px' }}>
+              📺 AD BREAK 📺
+            </div>
+            <div style={{ fontSize: '18px', marginBottom: '20px' }}>
+              Thanks for playing Bank Teller 1988!
+            </div>
+            <div style={{ fontSize: '48px', color: '#ffff00', textShadow: '0 0 10px #ffff00' }}>
+              {adCountdown}
+            </div>
+            <div style={{ fontSize: '14px', marginTop: '20px', color: '#888888' }}>
+              Resuming in {adCountdown} seconds...
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rewarded Ad Button for Bonus Points */}
+      {gamePhase === 'working' && isRewardedAdLoaded && (
+        <button
+          onClick={showRewardedAd}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: 'linear-gradient(145deg, #ffaa00, #ff6600)',
+            border: '2px solid #ffaa00',
+            borderRadius: '8px',
+            color: '#ffffff',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            padding: '12px 16px',
+            cursor: 'pointer',
+            zIndex: 1000,
+            fontFamily: 'monospace',
+            boxShadow: '0 4px 12px rgba(255, 170, 0, 0.3)',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 170, 0, 0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 170, 0, 0.3)';
+          }}
+        >
+          🎬 Watch Ad<br/>+50 Points
+        </button>
+      )}
+
+      {/* AdMob Debug Info (Development Only) */}
+      {!admobInitialized && (
+        <div style={{
+          position: 'fixed',
+          bottom: '10px',
+          left: '10px',
+          background: 'rgba(0, 0, 0, 0.7)',
+          color: '#00ff00',
+          padding: '8px',
+          borderRadius: '4px',
+          fontSize: '12px',
+          fontFamily: 'monospace',
+          zIndex: 1000
+        }}>
+          AdMob: Initializing... ({customersServed}/5 until next ad)
         </div>
       )}
 
