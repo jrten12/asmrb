@@ -121,6 +121,12 @@ function App() {
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  const [stressLevel, setStressLevel] = useState(0); // 0-100 stress level
+  const [musicIntensity, setMusicIntensity] = useState(1); // 1-5 intensity levels
+  const [backgroundMusic, setBackgroundMusic] = useState<HTMLAudioElement | null>(null);
+  const [showAdBreak, setShowAdBreak] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(5);
+  const [customersServed, setCustomersServed] = useState(0);
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
   const [currentNumberInput, setCurrentNumberInput] = useState('');
