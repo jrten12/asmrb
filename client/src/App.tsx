@@ -1611,7 +1611,7 @@ function App() {
             borderTop: '1px solid #333333',
             marginTop: '15px'
           }}>
-            This is a fictional training simulation. All names, characters, businesses, places, events, and incidents are either products of imagination or used in a fictitious manner. Any resemblance to actual persons, living or dead, or actual events is purely coincidental.
+            This is a fictional simulation game. All names, characters, businesses, places, events, and incidents are either products of imagination or used in a fictitious manner. Any resemblance to actual persons, living or dead, or actual events is purely coincidental.
           </div>
         </div>
 
