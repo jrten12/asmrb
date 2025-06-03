@@ -1341,21 +1341,13 @@ function App() {
             src="/bank-teller-1988-logo.png" 
             alt="Bank Teller 1988"
             style={{
-              width: '400px',
+              width: window.innerWidth < 768 ? '280px' : '350px',
               height: 'auto',
-              marginBottom: '10px',
+              marginBottom: '20px',
               filter: 'drop-shadow(0 0 20px #00ff00)',
               imageRendering: 'pixelated'
             }}
           />
-          
-          <div style={{
-            fontSize: '16px',
-            color: '#00cccc',
-            marginBottom: '30px'
-          }}>
-            Fraud Detection Training Simulator
-          </div>
           
           <div style={{
             fontSize: '14px',
@@ -1497,16 +1489,13 @@ function App() {
               src="/bank-teller-1988-logo.png" 
               alt="Bank Teller 1988"
               style={{
-                width: '200px',
+                width: window.innerWidth < 768 ? '140px' : '180px',
                 height: 'auto',
                 marginTop: '5px',
                 filter: 'drop-shadow(0 0 10px #00ff00)',
                 imageRendering: 'pixelated'
               }}
             />
-            <div style={{ color: '#888888', fontSize: '12px', marginTop: '8px' }}>
-              Fraud Detection Training
-            </div>
             {/* Punch Status Display */}
             {punchStatus && (
               <div style={{
