@@ -1343,7 +1343,7 @@ function App() {
             marginBottom: '10px',
             textShadow: '0 0 20px #00ff00'
           }}>
-            FRAUD HUNTER
+            BANK TELLER 1988
           </div>
           
           <div style={{
@@ -1351,7 +1351,7 @@ function App() {
             color: '#00cccc',
             marginBottom: '30px'
           }}>
-            Bank Teller Training Simulator
+            Fraud Detection Training Simulator
           </div>
           
           <div style={{
@@ -1369,19 +1369,14 @@ function App() {
           </div>
           
           <div style={{
-            fontSize: '10px',
-            color: '#888888',
-            lineHeight: '1.4',
+            fontSize: '9px',
+            color: '#666666',
+            lineHeight: '1.3',
             textAlign: 'center',
-            padding: '15px',
-            border: '1px solid #333333',
-            borderRadius: '6px',
-            marginBottom: '25px',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            padding: '8px',
+            marginBottom: '20px'
           }}>
-            <strong>DISCLAIMER:</strong> This is a fictional training simulation. All names, characters, businesses, 
-            places, events, and incidents are either products of imagination or used in a fictitious manner. 
-            Any resemblance to actual persons, living or dead, or actual events is purely coincidental.
+            Fictional simulation. All names and events are coincidental.
           </div>
           
           <button
@@ -1496,10 +1491,10 @@ function App() {
               {new Date().toLocaleTimeString()}
             </div>
             <div style={{ color: '#00cccc', fontSize: '18px', marginTop: '5px', fontWeight: 'bold' }}>
-              FRAUD HUNTER
+              BANK TELLER 1988
             </div>
             <div style={{ color: '#888888', fontSize: '12px', marginTop: '3px' }}>
-              Bank Teller Training Simulator
+              Fraud Detection Training
             </div>
             {/* Punch Status Display */}
             {punchStatus && (
