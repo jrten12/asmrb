@@ -33,7 +33,7 @@ interface Document {
 }
 
 function App() {
-  const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('punch_in');
+  const [gamePhase, setGamePhase] = useState<'welcome' | 'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('welcome');
   const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
@@ -1301,6 +1301,120 @@ function App() {
     
     return "Type APPROVE or REJECT";
   };
+
+  // Welcome Screen with Terms and Conditions
+  if (gamePhase === 'welcome') {
+    return (
+      <div style={{
+        height: '100vh',
+        width: '100vw',
+        background: 'linear-gradient(135deg, #001100 0%, #002200 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'monospace',
+        color: '#00ff00',
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        {/* CRT Scanlines */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
+          pointerEvents: 'none'
+        }} />
+        
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.7)',
+          border: '3px solid #00ff00',
+          borderRadius: '12px',
+          padding: '40px',
+          maxWidth: '600px',
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)'
+        }}>
+          <div style={{
+            fontSize: '32px',
+            fontWeight: 'bold',
+            marginBottom: '10px',
+            textShadow: '0 0 20px #00ff00'
+          }}>
+            FRAUD HUNTER
+          </div>
+          
+          <div style={{
+            fontSize: '16px',
+            color: '#00cccc',
+            marginBottom: '30px'
+          }}>
+            Bank Teller Training Simulator
+          </div>
+          
+          <div style={{
+            fontSize: '14px',
+            color: '#cccccc',
+            lineHeight: '1.6',
+            marginBottom: '30px',
+            textAlign: 'left'
+          }}>
+            Welcome to an immersive 1980s bank teller experience. You'll process customer transactions, 
+            verify documents, and detect fraudulent activities using authentic banking procedures from the era.
+            <br/><br/>
+            Master the art of fraud detection through careful document examination, signature analysis, 
+            and database verification to protect your bank from criminal activity.
+          </div>
+          
+          <div style={{
+            fontSize: '10px',
+            color: '#888888',
+            lineHeight: '1.4',
+            textAlign: 'center',
+            padding: '15px',
+            border: '1px solid #333333',
+            borderRadius: '6px',
+            marginBottom: '25px',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}>
+            <strong>DISCLAIMER:</strong> This is a fictional training simulation. All names, characters, businesses, 
+            places, events, and incidents are either products of imagination or used in a fictitious manner. 
+            Any resemblance to actual persons, living or dead, or actual events is purely coincidental.
+          </div>
+          
+          <button
+            onClick={() => setGamePhase('punch_in')}
+            style={{
+              background: 'linear-gradient(145deg, #004400, #002200)',
+              border: '2px solid #00ff00',
+              color: '#00ff00',
+              padding: '15px 30px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              borderRadius: '6px',
+              fontFamily: 'monospace',
+              textShadow: '0 0 10px #00ff00',
+              boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = 'linear-gradient(145deg, #006600, #003300)';
+              e.target.style.boxShadow = '0 0 30px rgba(0, 255, 0, 0.5)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = 'linear-gradient(145deg, #004400, #002200)';
+              e.target.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
+            }}
+          >
+            BEGIN TRAINING
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Punch Clock Interface
   if (gamePhase === 'punch_in') {
