@@ -400,7 +400,7 @@ function App() {
         case 'punch_clock_in':
         case 'punch_clock_out':
           // Play ASMR punch clock audio file
-          const punchAudio = new Audio('/attached_assets/11L-Punching_in_to_a_pun-1748909724505.mp3');
+          const punchAudio = new Audio('/11L-Punching_in_to_a_pun-1748909724505.mp3');
           punchAudio.volume = 0.8;
           punchAudio.play().catch(e => console.log('Audio play failed:', e));
           break;
@@ -2441,7 +2441,7 @@ function App() {
             <button
               onClick={() => {
                 playSound('punch_clock_out');
-                handleCommand('PUNCH OUT');
+                setGamePhase('ended');
               }}
               style={{
                 marginTop: '12px',
