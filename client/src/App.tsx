@@ -1396,7 +1396,7 @@ function App() {
               e.target.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
             }}
           >
-            BEGIN TRAINING
+            GO TO WORK
           </button>
         </div>
       </div>
