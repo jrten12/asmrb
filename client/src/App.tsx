@@ -713,6 +713,12 @@ function App() {
         return;
       }
       
+      if (!verificationState.accountLookedUp) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Account must be verified first", "Please LOOKUP account before signature comparison"]);
+        playSound('reject');
+        return;
+      }
+      
       console.log("Current customer documents:", currentCustomer.documents);
       
       // Get the signature from customer documents (handle both old and new formats)
