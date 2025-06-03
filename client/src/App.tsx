@@ -2430,35 +2430,7 @@ function App() {
             </button>
           </div>
 
-          {/* Terminal Output */}
-          <div 
-            ref={(el) => {
-              if (el) {
-                el.scrollTop = el.scrollHeight;
-              }
-            }}
-            style={{
-              flex: 1,
-              background: '#000000',
-              border: '2px solid #00ff00',
-              padding: '12px',
-              borderRadius: '4px',
-              overflow: 'auto',
-              marginBottom: '12px',
-              fontSize: '15px',
-              fontFamily: 'monospace',
-              lineHeight: '1.5',
-              color: '#00ff00'
-            }}>
-            {terminalOutput.map((line, index) => (
-              <div key={index} style={{ 
-                marginBottom: '3px',
-                color: line.includes('*** NO ACCOUNT EXISTS') || line.includes('ACCOUNT NUMBER:') && line.includes('INVALID') || line.includes('STATUS: NOT IN SYSTEM') ? '#ff0000' : '#00ff00'
-              }}>
-                {line.replace(/\x1b\[[0-9;]*m/g, '')}
-              </div>
-            ))}
-          </div>
+
 
 
 
@@ -3603,14 +3575,14 @@ function App() {
         }
       `}</style>
 
-      {/* End of Shift Button - Always at bottom */}
+      {/* End of Shift Button - Below processing area */}
       {!showArrestAnimation && gamePhase === 'working' && (
         <div style={{
           position: 'fixed',
-          bottom: '10px',
+          bottom: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 1002
+          zIndex: 900
         }}>
           <button
             onClick={() => {
