@@ -399,9 +399,9 @@ function App() {
           break;
         case 'punch_clock_in':
         case 'punch_clock_out':
-          // Play authentic punch clock audio file
-          const punchAudio = new Audio('/punch-clock.mp3');
-          punchAudio.volume = 0.7;
+          // Play ASMR punch clock audio file
+          const punchAudio = new Audio('/attached_assets/11L-Punching_in_to_a_pun-1748909724505.mp3');
+          punchAudio.volume = 0.8;
           punchAudio.play().catch(e => console.log('Audio play failed:', e));
           break;
         case 'dot_matrix_print':
@@ -936,8 +936,8 @@ function App() {
         ]);
         
         setTimeout(() => {
-          // Play punch clock sound for clocking out
-          const punchAudio = new Audio('/punch-clock.mp3');
+          // Play ASMR punch clock sound for clocking out
+          const punchAudio = new Audio('/attached_assets/11L-Punching_in_to_a_pun-1748909724505.mp3');
           punchAudio.volume = 0.8;
           punchAudio.play().catch(e => console.log('Audio play failed:', e));
           
@@ -3600,6 +3600,48 @@ function App() {
           100% { opacity: 1; }
         }
       `}</style>
+
+      {/* End of Shift Button - Always at bottom */}
+      {!showArrestAnimation && gamePhase === 'working' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '60px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1002
+        }}>
+          <button
+            onClick={() => {
+              playSound('punch_clock_out');
+              handleCommand('PUNCH OUT');
+            }}
+            style={{
+              background: 'linear-gradient(145deg, rgba(200, 0, 0, 0.8), rgba(150, 0, 0, 0.9))',
+              border: '3px solid #ff4444',
+              borderRadius: '8px',
+              color: '#ffdddd',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontFamily: 'monospace',
+              textShadow: '0 0 8px #ff4444',
+              boxShadow: '0 0 15px rgba(255, 68, 68, 0.3)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 68, 68, 0.5)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.3)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            🕐 END SHIFT
+          </button>
+        </div>
+      )}
     </div>
   );
 }
