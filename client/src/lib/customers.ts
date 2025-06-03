@@ -122,15 +122,29 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
   const birthDay = Math.floor(Math.random() * 28) + 1; // Safe day range for all months
   const realBirthday = `${birthMonth.toString().padStart(2, '0')}/${birthDay.toString().padStart(2, '0')}/${birthYear}`;
   
-  // ID Document - 30% fraud rate for name, account, or DOB matching
-  const idFraud = Math.random() < 0.3;
+  // Only fraudulent customers (suspiciousLevel > 0) get fraudulent documents
+  const isFraudulentCustomer = suspiciousLevel > 0;
+  
+  // For fraudulent customers, select which documents will have errors (1-3 types of fraud)
+  let fraudDocumentTypes: string[] = [];
+  if (isFraudulentCustomer) {
+    const fraudTypes = ['id', 'slip', 'bank_book', 'signature'];
+    const numFraudTypes = Math.floor(Math.random() * 3) + 1; // 1-3 fraud types
+    
+    // Shuffle and pick fraud types
+    const shuffled = [...fraudTypes].sort(() => Math.random() - 0.5);
+    fraudDocumentTypes = shuffled.slice(0, numFraudTypes);
+  }
+  
+  // ID Document
+  const idHasFraud = fraudDocumentTypes.includes('id');
   let idName = customerName;
   let idAccountNumber = transaction.accountNumber;
   let idBirthday = realBirthday;
   let hasIdError = false;
   let errorType = '';
   
-  if (idFraud) {
+  if (idHasFraud) {
     // For fraud cases, mismatch name, account number, or birthday
     const fraudType = Math.floor(Math.random() * 3);
     if (fraudType === 0) {
@@ -166,12 +180,12 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     hasError: hasIdError ? errorType : undefined
   });
   
-  // Transaction Slip - 30% fraud rate for amount matching
-  const slipFraud = Math.random() < 0.3;
+  // Transaction Slip
+  const slipHasFraud = fraudDocumentTypes.includes('slip');
   let slipAmount = transaction.amount;
   let hasAmountError = false;
   
-  if (slipFraud) {
+  if (slipHasFraud) {
     slipAmount = transaction.amount + Math.floor(Math.random() * 200) - 100;
     hasAmountError = true;
   }
@@ -190,12 +204,12 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     hasError: hasAmountError ? 'Amount doesn\'t match bank book' : undefined
   });
   
-  // Bank Book - 30% fraud rate for account matching
-  const bookFraud = Math.random() < 0.3;
+  // Bank Book
+  const bookHasFraud = fraudDocumentTypes.includes('bank_book');
   let bookAccount = transaction.accountNumber;
   let hasAccountError = false;
   
-  if (bookFraud) {
+  if (bookHasFraud) {
     bookAccount = generateAccountNumber();
     hasAccountError = true;
   }
@@ -213,17 +227,17 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     hasError: hasAccountError ? 'Account number mismatch' : undefined
   });
   
-  // Signature - 30% fraud rate for signatures specifically
-  const signatureFraud = Math.random() < 0.3;
+  // Signature
+  const signatureHasFraud = fraudDocumentTypes.includes('signature');
   documents.push({
     id: 'signature',
     type: 'signature',
     data: {
-      signature: generateSignature(customerName, signatureFraud),
+      signature: generateSignature(customerName, signatureHasFraud),
       name: customerName
     },
-    isValid: !signatureFraud,
-    hasError: signatureFraud ? 'Signature doesn\'t match records' : undefined
+    isValid: !signatureHasFraud,
+    hasError: signatureHasFraud ? 'Signature doesn\'t match records' : undefined
   });
   
   return documents;
