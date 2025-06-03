@@ -1341,7 +1341,8 @@ function App() {
             src="/bank-teller-1988-logo.png" 
             alt="Bank Teller 1988"
             style={{
-              width: window.innerWidth < 768 ? '280px' : '350px',
+              width: window.innerWidth < 768 ? '240px' : '300px',
+              maxWidth: '90vw',
               height: 'auto',
               marginBottom: '20px',
               filter: 'drop-shadow(0 0 20px #00ff00)',
@@ -1489,7 +1490,8 @@ function App() {
               src="/bank-teller-1988-logo.png" 
               alt="Bank Teller 1988"
               style={{
-                width: window.innerWidth < 768 ? '140px' : '180px',
+                width: window.innerWidth < 768 ? '120px' : '150px',
+                maxWidth: '80vw',
                 height: 'auto',
                 marginTop: '5px',
                 filter: 'drop-shadow(0 0 10px #00ff00)',
