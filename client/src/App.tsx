@@ -1586,29 +1586,7 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* Score and Warnings Display - Hidden during arrest animation */}
-      {!showArrestAnimation && (
-        <div style={{
-          position: 'fixed',
-          bottom: '10px',
-          left: '10px',
-          right: '10px',
-          background: 'rgba(0, 0, 0, 0.9)',
-          border: '1px solid #00ff00',
-          padding: '8px 16px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          zIndex: 1001,
-          color: '#00ff00',
-          display: 'flex',
-          justifyContent: 'space-between'
-        }}>
-          <span>SCORE: {gameScore.score}</span>
-          <span style={{ color: gameScore.consecutiveErrors >= 6 ? '#ff0000' : gameScore.consecutiveErrors >= 3 ? '#ffaa00' : '#00ff00' }}>
-            WARNINGS: {Math.floor(gameScore.consecutiveErrors / 3)}/3
-          </span>
-        </div>
-      )}
+
       
       {/* CRT Scanline Effect */}
       <div style={{
@@ -2439,7 +2417,7 @@ function App() {
             }}>
               <div style={{ 
                 color: '#00ff00', 
-                fontSize: '14px', 
+                fontSize: '16px', 
                 fontWeight: 'bold',
                 marginBottom: '8px',
                 textAlign: 'center'
@@ -2450,7 +2428,7 @@ function App() {
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(2, 1fr)', 
                 gap: '8px',
-                fontSize: '12px'
+                fontSize: '15px'
               }}>
                 <div style={{ color: '#00cccc' }}>Score: {gameScore.score}</div>
                 <div style={{ color: '#00cccc' }}>Correct: {gameScore.correctTransactions}</div>
@@ -2468,25 +2446,25 @@ function App() {
               style={{
                 marginTop: '12px',
                 background: 'linear-gradient(145deg, rgba(200, 0, 0, 0.8), rgba(150, 0, 0, 0.9))',
-                border: '3px solid #ff4444',
-                borderRadius: '8px',
+                border: '2px solid #ff4444',
+                borderRadius: '6px',
                 color: '#ffdddd',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
-                padding: '12px 24px',
+                padding: '8px 16px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 fontFamily: 'monospace',
                 textShadow: '0 0 8px #ff4444',
-                boxShadow: '0 0 15px rgba(255, 68, 68, 0.3)',
+                boxShadow: '0 0 10px rgba(255, 68, 68, 0.3)',
                 width: '100%'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 68, 68, 0.5)';
-                e.currentTarget.style.transform = 'scale(1.02)';
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.5)';
+                e.currentTarget.style.transform = 'scale(1.01)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.3)';
+                e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.3)';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
