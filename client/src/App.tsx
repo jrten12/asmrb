@@ -3297,139 +3297,231 @@ function App() {
         </div>
       )}
 
-      {/* P5.js Arrest Animation */}
+      {/* Beautiful CSS Arrest Animation */}
       {showArrestAnimation && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: '#000000',
-          zIndex: 3000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div
-            id="p5-arrest-canvas"
-            ref={(el) => {
-              if (el && !el.querySelector('canvas')) {
-                // P5.js arrest animation
-                new (window as any).p5((p: any) => {
-                  let officer: any, suspect: any;
-                  let officerX = 20;
-                  let suspectX = 200;
-                  let arrestStage = 'approach';
-                  let frameCountLocal = 0;
-
-                  p.setup = () => {
-                    p.createCanvas(600, 300);
-                    p.frameRate(10);
-
-                    officer = {
-                      w: 30,
-                      h: 60,
-                      color: p.color(0, 100, 255)
-                    };
-
-                    suspect = {
-                      w: 30,
-                      h: 60,
-                      color: p.color(255, 100, 100)
-                    };
-                  };
-
-                  p.draw = () => {
-                    p.background(20);
-                    drawBankInterior();
-
-                    if (arrestStage === 'approach') {
-                      drawCharacter(officer, officerX, 180);
-                      drawCharacter(suspect, suspectX, 180);
-                      officerX += 6;
-                      if (officerX + officer.w >= suspectX) {
-                        arrestStage = 'arrest';
-                        frameCountLocal = 0;
-                      }
-                    } else if (arrestStage === 'arrest') {
-                      drawCharacter(officer, officerX, 180, true);
-                      drawCharacter(suspect, suspectX, 180, true);
-                      frameCountLocal++;
-                      if (frameCountLocal > 15) {
-                        arrestStage = 'escort';
-                      }
-                    } else if (arrestStage === 'escort') {
-                      drawCharacter(officer, officerX, 180);
-                      drawCharacter(suspect, suspectX, 180);
-                      officerX += 3;
-                      suspectX += 3;
-                      
-                      // End animation when characters move off screen
-                      if (officerX > p.width + 50) {
-                        // Close animation and generate new customer
-                        setTimeout(() => {
-                          setShowArrestAnimation(false);
-                          setCurrentCustomer(generateCustomer());
-                          setVerificationState({
-                            accountLookedUp: false,
-                            accountNotFound: false,
-                            signatureCompared: false,
-                            signatureFraud: false,
-                            transactionProcessed: false
-                          });
-                          setTerminalOutput(prev => [...prev, 
-                            "",
-                            "> Fraud suspect removed from premises",
-                            "> Next customer approaching window",
-                            "Ready to process transaction"
-                          ]);
-                        }, 500);
-                      }
-                    }
-                  };
-
-                  function drawCharacter(char: any, x: number, y: number, handcuffed = false) {
-                    p.fill(char.color);
-                    p.rect(x, y - char.h, char.w, char.h, 5);
-                    if (handcuffed) {
-                      p.stroke(255);
-                      p.strokeWeight(3);
-                      p.line(x + char.w, y - char.h + 30, x + char.w + 10, y - char.h + 30);
-                      p.noStroke();
-                    }
-                  }
-
-                  function drawBankInterior() {
-                    // Floor
-                    p.fill(50);
-                    p.rect(0, 240, p.width, 60);
-                    
-                    // Counter
-                    p.fill(80);
-                    p.rect(50, 120, 120, 150);
-                    
-                    // Sign
-                    p.rect(200, 80, 150, 30);
-                    p.fill(0, 255, 0);
-                    p.textSize(16);
-                    p.textAlign(p.CENTER);
-                    p.text("FIRST NATIONAL BANK", 275, 100);
-                    
-                    // Add "FRAUD DETECTED" text
-                    p.fill(255, 0, 0);
-                    p.textSize(20);
-                    p.text("FRAUD DETECTED", 300, 50);
-                  }
-                }, el);
-              }
-            }}
-          />
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(45deg, #000000, #001100)',
+            zIndex: 3000,
+            overflow: 'hidden'
+          }}
+          ref={(el) => {
+            if (el) {
+              // Auto-close animation after 6 seconds
+              setTimeout(() => {
+                setShowArrestAnimation(false);
+                setCurrentCustomer(generateCustomer());
+                setVerificationState({
+                  accountLookedUp: false,
+                  accountNotFound: false,
+                  signatureCompared: false,
+                  signatureFraud: false,
+                  transactionProcessed: false
+                });
+                setTerminalOutput(prev => [...prev, 
+                  "",
+                  "> Fraud suspect removed from premises",
+                  "> Next customer approaching window",
+                  "Ready to process transaction"
+                ]);
+              }, 6000);
+            }
+          }}
+        >
+          {/* CRT Scanlines */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
+            pointerEvents: 'none'
+          }} />
+          
+          {/* Bank Scene */}
+          <div style={{
+            position: 'absolute',
+            bottom: '0px',
+            left: '0px',
+            right: '0px',
+            height: '100px',
+            background: 'linear-gradient(180deg, #003300 0%, #001100 100%)',
+            border: '2px solid #00ff00',
+            borderBottom: 'none'
+          }} />
+          
+          {/* Teller Counter */}
+          <div style={{
+            position: 'absolute',
+            bottom: '100px',
+            left: '10%',
+            width: '200px',
+            height: '80px',
+            background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
+            border: '2px solid #00ff00'
+          }} />
+          
+          {/* FRAUD DETECTED Alert */}
+          <div style={{
+            position: 'absolute',
+            top: '50px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#ff0000',
+            fontSize: '32px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            animation: 'fraudAlert 2s infinite',
+            textShadow: '0 0 20px #ff0000',
+            fontFamily: 'monospace'
+          }}>
+            🚨 FRAUD DETECTED 🚨
+          </div>
+          
+          {/* Police Officer */}
+          <div style={{
+            position: 'absolute',
+            bottom: '180px',
+            right: '200px',
+            fontSize: '80px',
+            animation: 'officerApproach 3s ease-in-out forwards'
+          }}>
+            👮‍♂️
+          </div>
+          
+          {/* Fraudulent Customer */}
+          <div style={{
+            position: 'absolute',
+            bottom: '180px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '80px',
+            animation: 'customerArrest 4s ease-in-out forwards'
+          }}>
+            🧑‍💼
+          </div>
+          
+          {/* Handcuffs Effect */}
+          <div style={{
+            position: 'absolute',
+            bottom: '220px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '40px',
+            animation: 'handcuffsAppear 4s ease-in-out forwards',
+            opacity: 0
+          }}>
+            🔗
+          </div>
+          
+          {/* Police Car */}
+          <div style={{
+            position: 'absolute',
+            bottom: '180px',
+            right: '-200px',
+            fontSize: '60px',
+            animation: 'policeCarArrive 2s ease-in-out forwards'
+          }}>
+            🚔
+          </div>
+          
+          {/* Arrest Dialog */}
+          <div style={{
+            position: 'absolute',
+            bottom: '300px',
+            left: '50px',
+            color: '#ff4444',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            animation: 'arrestDialog 5s linear forwards',
+            opacity: 0
+          }}>
+            <div style={{ animation: 'textFadeIn 5s linear forwards' }}>
+              "You're under arrest for attempted fraud"
+            </div>
+          </div>
+          
+          {/* Success Message */}
+          <div style={{
+            position: 'absolute',
+            bottom: '120px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#00ff00',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            fontFamily: 'monospace',
+            animation: 'successMessage 6s linear forwards',
+            opacity: 0,
+            textShadow: '0 0 15px #00ff00'
+          }}>
+            FRAUD SUSPECT ARRESTED<br/>
+            EXCELLENT DETECTIVE WORK
+          </div>
         </div>
       )}
 
       {/* CSS Animations */}
       <style>{`
+        @keyframes fraudAlert {
+          0%, 50%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+          25%, 75% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
+        }
+        
+        @keyframes officerApproach {
+          0% { right: 100vw; }
+          60% { right: 200px; }
+          100% { right: 200px; }
+        }
+        
+        @keyframes customerArrest {
+          0% { transform: translateX(-50%) rotate(0deg); }
+          60% { transform: translateX(-50%) rotate(0deg); }
+          80% { transform: translateX(-50%) rotate(-10deg); }
+          100% { transform: translateX(-50%) rotate(0deg); }
+        }
+        
+        @keyframes handcuffsAppear {
+          0% { opacity: 0; }
+          60% { opacity: 0; }
+          70% { opacity: 1; transform: translateX(-50%) scale(1.5); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+        
+        @keyframes policeCarArrive {
+          0% { right: -200px; }
+          100% { right: 50px; }
+        }
+        
+        @keyframes arrestDialog {
+          0% { opacity: 0; }
+          30% { opacity: 0; }
+          40% { opacity: 1; }
+          100% { opacity: 1; }
+        }
+        
+        @keyframes textFadeIn {
+          0% { opacity: 0; }
+          50% { opacity: 0; }
+          60% { opacity: 1; }
+          100% { opacity: 1; }
+        }
+        
+        @keyframes successMessage {
+          0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          70% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          80% { opacity: 1; transform: translateX(-50%) translateY(0px); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px); }
+        }
+        
         @keyframes slideUp {
           from {
             transform: translateX(-50%) translateY(100px);
