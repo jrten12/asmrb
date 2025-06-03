@@ -28,6 +28,8 @@ interface Document {
   type: string;
   title: string;
   data: Record<string, string | number>;
+  isValid?: boolean;
+  hasError?: string;
 }
 
 function App() {
@@ -1888,16 +1890,21 @@ function App() {
                         })()}</div>
                         <div><strong>DOB:</strong> {(() => {
                           if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
-                          // For fraud cases, show the correct DOB that should be in bank records
-                          const idDoc = currentCustomer.documents.find(d => d.type === 'id');
-                          if (idDoc && !idDoc.isValid && idDoc.hasError?.includes('Date of birth mismatch')) {
-                            // Generate the "correct" bank DOB that differs from the fake ID
-                            const fakeDOB = String(idDoc.data.dateOfBirth);
-                            const [month, day, year] = fakeDOB.split('/');
-                            const correctYear = parseInt(year) + Math.floor(Math.random() * 6) - 3; // Different year
-                            return `${month}/${day}/${correctYear}`;
+                          
+                          const idDoc = currentCustomer.documents.find(d => d.type === 'ID' || d.type === 'id');
+                          if (!idDoc || !idDoc.data.dateOfBirth) return '03/15/1985';
+                          
+                          const customerDOB = String(idDoc.data.dateOfBirth);
+                          
+                          // For fraud cases with DOB-related fraud, show a different "bank record" DOB
+                          if (currentCustomer.isFraud && Math.random() < 0.3) {
+                            const [month, day, year] = customerDOB.split('/');
+                            const bankYear = parseInt(year) + Math.floor(Math.random() * 6) - 3;
+                            return `${month}/${day}/${bankYear}`;
                           }
-                          return idDoc?.data.dateOfBirth || '03/15/1985';
+                          
+                          // For legitimate customers, show their actual DOB
+                          return customerDOB;
                         })()}</div>
                         <div><strong>ADDR:</strong> {(() => {
                           if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
