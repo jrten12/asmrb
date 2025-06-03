@@ -1337,14 +1337,17 @@ function App() {
           maxWidth: '600px',
           boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)'
         }}>
-          <div style={{
-            fontSize: '32px',
-            fontWeight: 'bold',
-            marginBottom: '10px',
-            textShadow: '0 0 20px #00ff00'
-          }}>
-            BANK TELLER 1988
-          </div>
+          <img 
+            src="/bank-teller-1988-logo.png" 
+            alt="Bank Teller 1988"
+            style={{
+              width: '400px',
+              height: 'auto',
+              marginBottom: '10px',
+              filter: 'drop-shadow(0 0 20px #00ff00)',
+              imageRendering: 'pixelated'
+            }}
+          />
           
           <div style={{
             fontSize: '16px',
@@ -1490,10 +1493,18 @@ function App() {
             }}>
               {new Date().toLocaleTimeString()}
             </div>
-            <div style={{ color: '#00cccc', fontSize: '18px', marginTop: '5px', fontWeight: 'bold' }}>
-              BANK TELLER 1988
-            </div>
-            <div style={{ color: '#888888', fontSize: '12px', marginTop: '3px' }}>
+            <img 
+              src="/bank-teller-1988-logo.png" 
+              alt="Bank Teller 1988"
+              style={{
+                width: '200px',
+                height: 'auto',
+                marginTop: '5px',
+                filter: 'drop-shadow(0 0 10px #00ff00)',
+                imageRendering: 'pixelated'
+              }}
+            />
+            <div style={{ color: '#888888', fontSize: '12px', marginTop: '8px' }}>
               Fraud Detection Training
             </div>
             {/* Punch Status Display */}
