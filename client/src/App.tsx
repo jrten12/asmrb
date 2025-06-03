@@ -874,8 +874,20 @@ function App() {
       const withdrawAmount = parseFloat(amount);
       if (withdrawAmount > accountBalance) {
         playSound('reject');
-        setTerminalOutput(prev => [...prev, "> " + command, "*** INSUFFICIENT FUNDS ***", `Requested: $${withdrawAmount.toLocaleString()}`, `Available: $${accountBalance.toLocaleString()}`, "TRANSACTION DENIED"]);
-        handleError();
+        setTerminalOutput(prev => [...prev, "> " + command, "*** INSUFFICIENT FUNDS ***", `Requested: $${withdrawAmount.toLocaleString()}`, `Available: $${accountBalance.toLocaleString()}`, "TRANSACTION DENIED", "", "Customer: \"Oh, I'm sorry! I didn't realize.", "I must have miscalculated my balance.", "Thank you for checking. I'll come back later.\""]);
+        
+        // Customer leaves after insufficient funds
+        setTimeout(() => {
+          setCurrentCustomer(null);
+          setVerificationState({
+            accountLookedUp: false,
+            accountNotFound: false,
+            signatureCompared: false,
+            signatureFraud: false,
+            transactionProcessed: false
+          });
+          setTerminalOutput(prev => [...prev, "", "Customer has left the window", "Ready for next customer"]);
+        }, 3000);
         return;
       }
       
@@ -3716,8 +3728,20 @@ function App() {
                   } else {
                     playSound('reject');
                     setShowBalanceWindow(false);
-                    setTerminalOutput(prev => [...prev, "INSUFFICIENT FUNDS", "Withdrawal denied", "Customer must be rejected"]);
-                    handleError();
+                    setTerminalOutput(prev => [...prev, "INSUFFICIENT FUNDS", "Withdrawal denied", "", "Customer: \"Oh, I'm sorry! I didn't realize.", "I must have miscalculated my balance.", "Thank you for checking. I'll come back later.\""]);
+                    
+                    // Customer leaves after insufficient funds
+                    setTimeout(() => {
+                      setCurrentCustomer(null);
+                      setVerificationState({
+                        accountLookedUp: false,
+                        accountNotFound: false,
+                        signatureCompared: false,
+                        signatureFraud: false,
+                        transactionProcessed: false
+                      });
+                      setTerminalOutput(prev => [...prev, "", "Customer has left the window", "Ready for next customer"]);
+                    }, 3000);
                   }
                 }}
                 disabled={currentCustomer.requestedAmount > accountBalance}
