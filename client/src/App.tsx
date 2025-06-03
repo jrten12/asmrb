@@ -2862,36 +2862,51 @@ function App() {
         </div>
       )}
 
-      {/* Wire Transfer Input Modal */}
+      {/* Wire Transfer Input Panel */}
       {showWireInput && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 3000
+          bottom: '20px',
+          right: '20px',
+          background: 'rgba(0, 20, 0, 0.95)',
+          border: '3px solid #aa00aa',
+          borderRadius: '8px',
+          padding: '16px',
+          boxShadow: '0 0 20px rgba(170, 0, 170, 0.6)',
+          zIndex: 1500,
+          width: '300px',
+          backdropFilter: 'none'
         }}>
-          <div style={{
-            background: 'linear-gradient(145deg, #001100, #002200)',
-            border: '3px solid #aa00aa',
-            borderRadius: '8px',
-            padding: '24px',
-            minWidth: window.innerWidth < 768 ? '90%' : '450px',
-            maxWidth: '500px'
-          }}>
             <div style={{
-              color: '#ff00ff',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              marginBottom: '20px',
-              textAlign: 'center'
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '15px'
             }}>
-              🔄 WIRE TRANSFER SETUP
+              <div style={{
+                color: '#ff00ff',
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}>
+                🔄 WIRE TRANSFER SETUP
+              </div>
+              <button
+                onClick={() => {
+                  setShowWireInput(false);
+                  playSound('modal_close');
+                }}
+                style={{
+                  background: 'none',
+                  border: '1px solid #ff4444',
+                  color: '#ff4444',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  borderRadius: '3px'
+                }}
+              >
+                ✕
+              </button>
             </div>
             
             <div style={{ marginBottom: '16px' }}>
@@ -3001,7 +3016,6 @@ function App() {
                 CANCEL
               </button>
             </div>
-          </div>
         </div>
       )}
 
