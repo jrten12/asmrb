@@ -1138,9 +1138,12 @@ function App() {
   };
 
   const resetGame = () => {
-    setGameScore({ score: 0, correctTransactions: 0, errors: 0, timeOnShift: 0 });
+    setGameScore({ score: 0, correctTransactions: 0, errors: 0, timeOnShift: 0, consecutiveErrors: 0, errorDetails: [] });
     setCurrentCustomer(null);
     resetVerificationState();
+    setCardInSlot(false);
+    setCardPosition({ x: 50, y: 400 });
+    setPunchStatus('');
     setTerminalOutput([
       "SHIFT ENDED",
       "Thank you for your service",
