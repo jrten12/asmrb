@@ -399,8 +399,8 @@ function App() {
           break;
         case 'punch_clock_in':
         case 'punch_clock_out':
-          // Play ASMR punch clock audio file
-          const punchAudio = new Audio('/11L-Punching_in_to_a_pun-1748909724505.mp3');
+          // Play ASMR punch clock audio file from attached assets
+          const punchAudio = new Audio('/attached_assets/11L-Punching_in_to_a_pun-1748909724505.mp3');
           punchAudio.volume = 0.8;
           punchAudio.play().catch(e => console.log('Audio play failed:', e));
           break;
@@ -2409,26 +2409,26 @@ function App() {
 
             {/* Score Display - Below process button */}
             <div style={{
-              marginTop: '16px',
-              padding: '12px',
+              marginTop: '12px',
+              padding: '8px',
               background: 'rgba(0, 20, 0, 0.6)',
-              border: '2px solid #00aa00',
+              border: '1px solid #00aa00',
               borderRadius: '4px'
             }}>
               <div style={{ 
                 color: '#00ff00', 
-                fontSize: '16px', 
+                fontSize: '13px', 
                 fontWeight: 'bold',
-                marginBottom: '8px',
+                marginBottom: '6px',
                 textAlign: 'center'
               }}>
-                📊 SHIFT PERFORMANCE
+                SHIFT PERFORMANCE
               </div>
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(2, 1fr)', 
-                gap: '8px',
-                fontSize: '15px'
+                gap: '6px',
+                fontSize: '12px'
               }}>
                 <div style={{ color: '#00cccc' }}>Score: {gameScore.score}</div>
                 <div style={{ color: '#00cccc' }}>Correct: {gameScore.correctTransactions}</div>
@@ -2441,34 +2441,34 @@ function App() {
             <button
               onClick={() => {
                 playSound('punch_clock_out');
-                setGamePhase('ended');
+                setGamePhase('punch_out');
               }}
               style={{
-                marginTop: '12px',
+                marginTop: '8px',
                 background: 'linear-gradient(145deg, rgba(200, 0, 0, 0.8), rgba(150, 0, 0, 0.9))',
-                border: '2px solid #ff4444',
-                borderRadius: '6px',
+                border: '1px solid #ff4444',
+                borderRadius: '4px',
                 color: '#ffdddd',
-                fontSize: '14px',
+                fontSize: '12px',
                 fontWeight: 'bold',
-                padding: '8px 16px',
+                padding: '6px 12px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 fontFamily: 'monospace',
-                textShadow: '0 0 8px #ff4444',
-                boxShadow: '0 0 10px rgba(255, 68, 68, 0.3)',
+                textShadow: '0 0 6px #ff4444',
+                boxShadow: '0 0 8px rgba(255, 68, 68, 0.3)',
                 width: '100%'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.5)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(255, 68, 68, 0.5)';
                 e.currentTarget.style.transform = 'scale(1.01)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.3)';
+                e.currentTarget.style.boxShadow = '0 0 8px rgba(255, 68, 68, 0.3)';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
-              🕐 END SHIFT
+              END SHIFT
             </button>
           </div>
 
