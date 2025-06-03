@@ -1341,8 +1341,8 @@ function App() {
             src="/bank-teller-1988-logo.png" 
             alt="Bank Teller 1988"
             style={{
-              width: window.innerWidth < 768 ? '240px' : '300px',
-              maxWidth: '90vw',
+              width: window.innerWidth < 768 ? '180px' : '220px',
+              maxWidth: '80vw',
               height: 'auto',
               marginBottom: '20px',
               filter: 'drop-shadow(0 0 20px #00ff00)',
@@ -1354,14 +1354,10 @@ function App() {
             fontSize: '14px',
             color: '#cccccc',
             lineHeight: '1.6',
-            marginBottom: '30px',
-            textAlign: 'left'
+            marginBottom: '25px',
+            textAlign: 'center'
           }}>
-            Welcome to an immersive 1980s bank teller experience. You'll process customer transactions, 
-            verify documents, and detect fraudulent activities using authentic banking procedures from the era.
-            <br/><br/>
-            Master the art of fraud detection through careful document examination, signature analysis, 
-            and database verification to protect your bank from criminal activity.
+            Process transactions, verify documents, and detect fraud using 1980s banking procedures.
           </div>
           
           <div style={{
@@ -1490,8 +1486,8 @@ function App() {
               src="/bank-teller-1988-logo.png" 
               alt="Bank Teller 1988"
               style={{
-                width: window.innerWidth < 768 ? '120px' : '150px',
-                maxWidth: '80vw',
+                width: window.innerWidth < 768 ? '100px' : '120px',
+                maxWidth: '70vw',
                 height: 'auto',
                 marginTop: '5px',
                 filter: 'drop-shadow(0 0 10px #00ff00)',
