@@ -59,11 +59,13 @@ export function generateCustomer(level: number): Customer {
   const id = Math.random().toString(36).substr(2, 9);
   const name = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
   
-  // 30% fraud rate consistently
-  const isFraud = Math.random() < 0.3;
+  const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
+  
+  // No fraud for deposits (customers giving money TO the bank)
+  // 30% fraud rate for withdrawals and transfers only
+  const isFraud = transaction.type !== 'deposit' && Math.random() < 0.3;
   const suspiciousLevel = isFraud ? Math.floor(Math.random() * 3) + 1 : 0;
   
-  const transaction = generateTransaction(level, suspiciousLevel);
   const documents = generateDocuments(name, transaction, suspiciousLevel);
   
   return {
