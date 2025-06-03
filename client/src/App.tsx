@@ -122,24 +122,52 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
-    const names = ["Sarah L. Williams", "Michael Johnson", "Jennifer Rodriguez", "David Chen", "Emily Davis", "Robert Thompson", "Lisa Parker", "James Wilson", "Amanda Davis", "Christopher Lee"];
     const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "INQUIRY"];
+    const transactionType = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
+    
+    // Generate customer using the new fictional address system
+    const names = [
+      'John Smith', 'Mary Johnson', 'Robert Brown', 'Patricia Davis',
+      'Michael Wilson', 'Linda Miller', 'William Moore', 'Elizabeth Taylor',
+      'David Anderson', 'Barbara Thomas', 'Richard Jackson', 'Susan White',
+      'Charles Harris', 'Jessica Martin', 'Joseph Thompson', 'Sarah Garcia',
+      'Christopher Martinez', 'Nancy Rodriguez', 'Matthew Lopez', 'Betty Lee',
+      'Anthony Gonzalez', 'Helen Clark', 'Mark Lewis', 'Sandra Robinson',
+      'Paul Walker', 'Donna Hall', 'Steven Allen', 'Carol Young'
+    ];
+    
+    const towns = [
+      'Millbrook', 'Riverside', 'Fairview', 'Cedar Falls', 'Pine Ridge',
+      'Oakwood', 'Sunset Valley', 'Green Hills', 'Silver Creek', 'Maple Grove'
+    ];
+    
+    const streets = [
+      'Oak Street', 'Pine Avenue', 'Elm Drive', 'Cedar Lane', 'Maple Court',
+      'Birch Road', 'Willow Way', 'Cherry Street', 'Spruce Avenue', 'Ash Drive',
+      'River Road', 'Hill Street', 'Park Avenue', 'Garden Lane', 'Valley Drive'
+    ];
     
     const name = names[Math.floor(Math.random() * names.length)];
     const baseAccountNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
-    const transactionType = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
     const requestedAmount = transactionType === 'INQUIRY' ? 0 : Math.floor(100 + Math.random() * 5000);
     const destinationAccount = transactionType === 'WIRE_TRANSFER' ? Math.floor(100000000 + Math.random() * 900000000).toString() : undefined;
     
-    // 30% chance of fraud with subtle differences
-    const isFraud = Math.random() < 0.3;
-    const fraudType = Math.floor(Math.random() * 4); // 0: DOB, 1: address, 2: signature, 3: account
+    // Generate fictional address
+    const streetNumber = Math.floor(Math.random() * 9999) + 1;
+    const street = streets[Math.floor(Math.random() * streets.length)];
+    const town = towns[Math.floor(Math.random() * towns.length)];
+    const zipCode = Math.floor(Math.random() * 90000) + 10000;
+    const address = `${streetNumber} ${street}, ${town}, Westfield ${zipCode}`;
     
-    // System records (what should be correct)
+    // 30% chance of fraud
+    const isFraud = Math.random() < 0.3;
+    const fraudType = Math.floor(Math.random() * 4);
+    
+    // System records (correct data)
     const systemName = name;
     const systemAccountNumber = baseAccountNumber;
     const systemDOB = "1985-03-15";
-    const systemAddress = "123 Main Street, Springfield, IL 62701";
+    const systemAddress = address;
     const systemSignature = name.split(' ')[0] + " " + name.split(' ')[name.split(' ').length - 1];
     
     // Document data (potentially fraudulent)
@@ -156,14 +184,12 @@ function App() {
           const fakeDOBs = ["1985-03-18", "1985-02-15", "1984-03-15", "1985-04-12", "1985-03-05"];
           documentDOB = fakeDOBs[Math.floor(Math.random() * fakeDOBs.length)];
           break;
-        case 1: // Wrong address - similar but different
-          const fakeAddresses = [
-            "123 Main Street, Springfield, IL 62702", // Wrong zip
-            "124 Main Street, Springfield, IL 62701", // Wrong number
-            "123 Oak Street, Springfield, IL 62701",  // Wrong street
-            "123 Main Street, Springfield, IN 62701"  // Wrong state
-          ];
-          documentAddress = fakeAddresses[Math.floor(Math.random() * fakeAddresses.length)];
+        case 1: // Wrong address - similar but different using fictional locations
+          const fakeStreetNumber = streetNumber + Math.floor(Math.random() * 10) - 5;
+          const fakeStreet = streets[Math.floor(Math.random() * streets.length)];
+          const fakeTown = towns[Math.floor(Math.random() * towns.length)];
+          const fakeZip = zipCode + Math.floor(Math.random() * 100) - 50;
+          documentAddress = `${fakeStreetNumber} ${fakeStreet}, ${fakeTown}, Westfield ${fakeZip}`;
           break;
         case 2: // Wrong signature - similar but slightly off
           const firstName = name.split(' ')[0];
