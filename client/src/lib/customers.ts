@@ -11,7 +11,25 @@ const CUSTOMER_NAMES = [
   'Kenneth King', 'Ruth Wright', 'Joshua Scott', 'Sharon Green',
   'Kevin Adams', 'Michelle Baker', 'Brian Nelson', 'Lisa Hill',
   'George Ramirez', 'Karen Campbell', 'Edward Mitchell', 'Emily Roberts',
-  'Ronald Carter', 'Kimberly Phillips', 'Timothy Evans', 'Deborah Turner'
+  'Ronald Carter', 'Kimberly Phillips', 'Timothy Evans', 'Deborah Turner',
+  'James Washington', 'Maria Fernandez', 'Thomas Anderson', 'Jennifer Clark',
+  'Daniel Rodriguez', 'Lisa Martinez', 'Andrew Thompson', 'Angela White',
+  'Joshua Williams', 'Amanda Jones', 'Christopher Davis', 'Stephanie Miller',
+  'Matthew Garcia', 'Michelle Wilson', 'Anthony Moore', 'Kimberly Taylor',
+  'Mark Johnson', 'Amy Brown', 'Steven Jackson', 'Rebecca Lee',
+  'Kevin Martin', 'Laura Anderson', 'Brian Thompson', 'Sarah Wilson',
+  'Gary Harris', 'Nicole Young', 'Jeffrey King', 'Jessica Scott',
+  'Ryan Adams', 'Ashley Green', 'Jacob Baker', 'Samantha Nelson',
+  'Nicholas Hill', 'Brittany Wright', 'Jonathan Campbell', 'Megan Roberts',
+  'Justin Mitchell', 'Kayla Carter', 'Brandon Phillips', 'Danielle Evans',
+  'Tyler Collins', 'Rachel Stewart', 'Aaron Morris', 'Heather Rogers',
+  'Jose Reed', 'Julie Cook', 'Adam Bailey', 'Christina Cooper',
+  'Nathan Ward', 'Lauren Richardson', 'Zachary Cox', 'Melissa Howard',
+  'Jeremy Ward', 'Kelly Torres', 'Sean Peterson', 'Andrea Gray',
+  'Luke Ramirez', 'Tiffany James', 'Benjamin Watson', 'Crystal Brooks',
+  'Alexander Kelly', 'Vanessa Sanders', 'Samuel Price', 'Amber Bennett',
+  'Frank Wood', 'Theresa Barnes', 'Gregory Ross', 'Marie Henderson',
+  'Raymond Coleman', 'Diana Jenkins', 'Jesse Perry', 'Janet Powell'
 ];
 
 const TOWNS = [
