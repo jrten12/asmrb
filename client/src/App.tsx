@@ -714,10 +714,13 @@ function App() {
       }
       
       if (!verificationState.accountLookedUp) {
+        console.log("Account not looked up, verification state:", verificationState);
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Account must be verified first", "Please LOOKUP account before signature comparison"]);
         playSound('reject');
         return;
       }
+      
+      console.log("Account lookup verified, proceeding with signature comparison");
       
       console.log("Current customer documents:", currentCustomer.documents);
       
