@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { analyzeSignature } from './lib/customers';
 
 interface Customer {
   name: string;
@@ -96,7 +97,13 @@ function App() {
   const [signatureModal, setSignatureModal] = useState<{
     isOpen: boolean, 
     bankSignature: string,
-    customerSignature: string
+    customerSignature: string,
+    analysis?: {
+      isAuthentic: boolean;
+      confidence: number;
+      notes: string[];
+      fraudIndicators: string[];
+    }
   }>({
     isOpen: false, 
     bankSignature: '',
@@ -713,11 +720,20 @@ function App() {
         return;
       }
       
-      // Generate signatures for manual comparison
-      const name = currentCustomer.name;
-      const isFraudulent = Math.random() < 0.3; // 30% fraud rate distributed randomly
+      // Get the signature from customer documents (using enhanced system)
+      const signatureDoc = currentCustomer.documents.find(d => d.type === 'signature');
+      if (!signatureDoc) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No signature document available"]);
+        return;
+      }
       
-      // Bank signature (on file) - stylized versions  
+      const customerSignatureData = signatureDoc.data.signature as string;
+      const name = currentCustomer.name;
+      
+      // Analyze signature using enhanced system
+      const analysis = analyzeSignature(customerSignatureData, name);
+      
+      // Generate stylized bank signature for display
       const bankSignatures: Record<string, string> = {
         "John Smith": "𝒥𝑜𝒽𝓃 𝒮𝓂𝒾𝓉𝒽",
         "Sarah Johnson": "𝒮𝒶𝓇𝒶𝒽 𝒥𝑜𝒽𝓃𝓈𝑜𝓃",
@@ -737,36 +753,81 @@ function App() {
       };
       
       const bankSignature = bankSignatures[name] || name;
-      let customerSignature = bankSignature;
       
-      if (isFraudulent) {
-        // Fraudulent signatures - different but attempting to look similar
-        const fraudVariations = [
-          name.toUpperCase(),
-          name.toLowerCase(),
-          bankSignature.replace(/𝒶/g, 'a').replace(/𝑒/g, 'e').replace(/𝑜/g, 'o'),
-          name.split(' ')[0] + " " + name.split(' ')[1].slice(0, 1) + ".",
-          bankSignature.replace(/𝓃/g, 'n').replace(/𝓈/g, 's'),
-          name + "son",
-        ];
-        customerSignature = fraudVariations[Math.floor(Math.random() * fraudVariations.length)];
+      // Generate customer signature display based on analysis
+      let displaySignature = name;
+      if (analysis.isAuthentic) {
+        // Show variations for authentic signatures
+        if (customerSignatureData.includes('_cursive')) {
+          displaySignature = bankSignature;
+        } else if (customerSignatureData.includes('_print')) {
+          displaySignature = name.toUpperCase();
+        } else if (customerSignatureData.includes('_mixed')) {
+          displaySignature = name.split(' ').map((part, i) => i === 0 ? part : part.toUpperCase()).join(' ');
+        } else if (customerSignatureData.includes('_elaborate')) {
+          displaySignature = bankSignature + "✦";
+        } else if (customerSignatureData.includes('_initials')) {
+          displaySignature = name.split(' ').map(part => part[0]).join('.');
+        }
       } else {
-        // Authentic signatures with natural variations
-        const naturalVariations = [
-          bankSignature,
-          bankSignature.replace(/𝒾/g, 'i'),
-          bankSignature + ".",
-          bankSignature.replace(/𝓈/g, 's'),
-        ];
-        customerSignature = naturalVariations[Math.floor(Math.random() * naturalVariations.length)];
+        // Show fraud patterns for fraudulent signatures
+        if (customerSignatureData.includes('_fraud_wrong')) {
+          const wrongNames = ["Jane Doe", "Bob Smith", "Mary Jones"];
+          displaySignature = wrongNames[Math.floor(Math.random() * wrongNames.length)];
+        } else if (customerSignatureData.includes('_fraud_misspelled')) {
+          displaySignature = name.replace(/[aeiou]/g, (match, offset) => 
+            offset === 0 ? match : String.fromCharCode(97 + Math.floor(Math.random() * 26))
+          );
+        } else if (customerSignatureData.includes('_fraud_partial')) {
+          displaySignature = name.split(' ')[Math.floor(Math.random() * name.split(' ').length)];
+        } else if (customerSignatureData.includes('_fraud_shaky')) {
+          displaySignature = name.split('').map(char => char + (Math.random() < 0.3 ? '~' : '')).join('');
+        }
       }
       
       setSignatureModal({
         isOpen: true, 
         bankSignature, 
-        customerSignature
+        customerSignature: displaySignature,
+        analysis
       });
-      setTerminalOutput(prev => [...prev, "> " + command, "========== SIGNATURE COMPARISON ==========", "RETRIEVING SIGNATURE ON FILE...", "CUSTOMER SIGNING FRESH SIGNATURE...", "", "VISUAL COMPARISON REQUIRED", "EXAMINE BOTH SIGNATURES CAREFULLY", "LOOK FOR:", "- Letter formation differences", "- Spacing and flow variations", "- Pressure and pen strokes", "- Overall handwriting style", "", "USE YOUR JUDGMENT TO DETERMINE AUTHENTICITY", "========================================"]);
+      
+      const terminalOutput = [
+        "> " + command,
+        "========== SIGNATURE COMPARISON ==========",
+        "RETRIEVING SIGNATURE ON FILE...",
+        "CUSTOMER SIGNING FRESH SIGNATURE...",
+        "",
+        `SYSTEM CONFIDENCE: ${analysis.confidence}%`,
+        ""
+      ];
+      
+      if (analysis.notes.length > 0) {
+        terminalOutput.push("ANALYSIS NOTES:");
+        analysis.notes.forEach(note => terminalOutput.push(`- ${note}`));
+        terminalOutput.push("");
+      }
+      
+      if (analysis.fraudIndicators.length > 0) {
+        terminalOutput.push("⚠️ FRAUD INDICATORS:");
+        analysis.fraudIndicators.forEach(indicator => terminalOutput.push(`- ${indicator}`));
+        terminalOutput.push("");
+      }
+      
+      terminalOutput.push(
+        "VISUAL COMPARISON REQUIRED",
+        "EXAMINE BOTH SIGNATURES CAREFULLY",
+        "LOOK FOR:",
+        "- Letter formation differences",
+        "- Spacing and flow variations", 
+        "- Pressure and pen strokes",
+        "- Overall handwriting style",
+        "",
+        "USE YOUR JUDGMENT TO DETERMINE AUTHENTICITY",
+        "========================================"
+      );
+      
+      setTerminalOutput(prev => [...prev, ...terminalOutput]);
       playSound('paper_rustle');
     } else if (cmd.startsWith('DEPOSIT $')) {
       const amount = cmd.substring(9).trim();
