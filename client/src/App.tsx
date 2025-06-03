@@ -1878,12 +1878,39 @@ function App() {
                         🏦 BANK SYSTEM
                       </div>
                       <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
-                        <div><strong>NAME:</strong> {currentCustomer.name}</div>
-                        <div><strong>ACCT:</strong> {currentCustomer.accountNumber}</div>
-                        <div><strong>DOB:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15'}</div>
-                        <div><strong>ADDR:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}</div>
-                        <div><strong>BAL:</strong> ${accountBalance.toLocaleString()}</div>
-                        <div><strong>STATUS:</strong> ACTIVE</div>
+                        <div><strong>NAME:</strong> {(() => {
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD FOUND";
+                          return currentCustomer.name;
+                        })()}</div>
+                        <div><strong>ACCT:</strong> {(() => {
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "INVALID";
+                          return currentCustomer.accountNumber;
+                        })()}</div>
+                        <div><strong>DOB:</strong> {(() => {
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 0) return "1985-03-15"; // System shows correct DOB
+                          return currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15';
+                        })()}</div>
+                        <div><strong>ADDR:</strong> {(() => {
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 1) {
+                            // System shows correct address, document shows wrong one
+                            const correctStreetNumber = Math.floor(Math.random() * 9999) + 1;
+                            const correctStreet = ['Oak Street', 'Pine Avenue', 'Elm Drive'][Math.floor(Math.random() * 3)];
+                            const correctTown = ['Millbrook', 'Riverside', 'Fairview'][Math.floor(Math.random() * 3)];
+                            const correctZip = Math.floor(Math.random() * 90000) + 10000;
+                            return `${correctStreetNumber} ${correctStreet}, ${correctTown}, Westfield ${correctZip}`;
+                          }
+                          return currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A';
+                        })()}</div>
+                        <div><strong>BAL:</strong> {(() => {
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "$0.00";
+                          return `$${accountBalance.toLocaleString()}`;
+                        })()}</div>
+                        <div><strong>STATUS:</strong> {(() => {
+                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "INVALID ACCOUNT";
+                          return "ACTIVE";
+                        })()}</div>
                       </div>
                     </div>
 
