@@ -1329,6 +1329,18 @@ function App() {
           pointerEvents: 'none'
         }} />
         
+        {/* Moving CRT Scanline */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.6), transparent)',
+          pointerEvents: 'none',
+          animation: 'scanlineMove 3s linear infinite'
+        }} />
+        
         <div style={{
           background: 'rgba(0, 0, 0, 0.7)',
           border: '3px solid #00ff00',
@@ -3956,6 +3968,11 @@ function App() {
             transform: translateX(-50%) translateY(0px);
             opacity: 1;
           }
+        }
+        
+        @keyframes scanlineMove {
+          0% { top: 0%; }
+          100% { top: 100%; }
         }
         
         @keyframes fadeInArrest {
