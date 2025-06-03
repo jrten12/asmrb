@@ -83,12 +83,21 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
 function generateDocuments(customerName: string, transaction: Transaction, suspiciousLevel: number): Document[] {
   const documents: Document[] = [];
   
-  // ID Document
+  // ID Document - 30% fraud rate for both name and account matching
+  const idFraud = Math.random() < 0.3;
   let idName = customerName;
-  let hasNameError = false;
-  if (suspiciousLevel > 0 && Math.random() < 0.4) {
-    idName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-    hasNameError = true;
+  let idAccountNumber = transaction.accountNumber;
+  let hasIdError = false;
+  
+  if (idFraud) {
+    // For fraud cases, mismatch either name or account number
+    if (Math.random() < 0.5) {
+      idName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+      hasIdError = true;
+    } else {
+      idAccountNumber = generateAccountNumber();
+      hasIdError = true;
+    }
   }
   
   documents.push({
@@ -96,16 +105,19 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     type: 'id',
     data: {
       name: idName,
+      accountNumber: idAccountNumber,
       idNumber: Math.random().toString(36).substr(2, 9).toUpperCase()
     },
-    isValid: !hasNameError,
-    hasError: hasNameError ? 'Name mismatch with transaction slip' : undefined
+    isValid: !hasIdError,
+    hasError: hasIdError ? (idName !== customerName ? 'Name mismatch with transaction slip' : 'Account number mismatch') : undefined
   });
   
-  // Transaction Slip
+  // Transaction Slip - 30% fraud rate for amount matching
+  const slipFraud = Math.random() < 0.3;
   let slipAmount = transaction.amount;
   let hasAmountError = false;
-  if (suspiciousLevel > 0 && Math.random() < 0.3) {
+  
+  if (slipFraud) {
     slipAmount = transaction.amount + Math.floor(Math.random() * 200) - 100;
     hasAmountError = true;
   }
@@ -124,10 +136,12 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     hasError: hasAmountError ? 'Amount doesn\'t match bank book' : undefined
   });
   
-  // Bank Book
+  // Bank Book - 30% fraud rate for account matching
+  const bookFraud = Math.random() < 0.3;
   let bookAccount = transaction.accountNumber;
   let hasAccountError = false;
-  if (suspiciousLevel > 0 && Math.random() < 0.25) {
+  
+  if (bookFraud) {
     bookAccount = generateAccountNumber();
     hasAccountError = true;
   }
