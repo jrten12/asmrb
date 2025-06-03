@@ -3255,9 +3255,12 @@ function App() {
                   // Play beautiful ASMR processing sound
                   playSound('legacy_processing');
                   setTimeout(() => {
-                    submitCommand();
+                    // Process the lookup with the entered number
+                    const fullCommand = 'LOOKUP ' + currentNumberInput;
+                    handleCommand(fullCommand);
                     setShowNumberPad(false);
                     setCurrentNumberInput('');
+                    setCommandPrefix('');
                   }, 100);
                 } else {
                   submitCommand();
