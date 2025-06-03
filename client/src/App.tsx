@@ -2475,7 +2475,7 @@ function App() {
             <button
               onClick={() => {
                 playSound('punch_clock_out');
-                setGamePhase('punch_out');
+                punchOut();
               }}
               style={{
                 marginTop: '8px',
