@@ -2428,6 +2428,70 @@ function App() {
             >
               🖨️ PROCESS TRANSACTION
             </button>
+
+            {/* Score Display - Below process button */}
+            <div style={{
+              marginTop: '16px',
+              padding: '12px',
+              background: 'rgba(0, 20, 0, 0.6)',
+              border: '2px solid #00aa00',
+              borderRadius: '4px'
+            }}>
+              <div style={{ 
+                color: '#00ff00', 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '8px',
+                textAlign: 'center'
+              }}>
+                📊 SHIFT PERFORMANCE
+              </div>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: '8px',
+                fontSize: '12px'
+              }}>
+                <div style={{ color: '#00cccc' }}>Score: {gameScore.score}</div>
+                <div style={{ color: '#00cccc' }}>Correct: {gameScore.correctTransactions}</div>
+                <div style={{ color: '#00cccc' }}>Errors: {gameScore.errors}</div>
+                <div style={{ color: '#00cccc' }}>Time: {Math.floor(gameScore.timeOnShift / 60)}:{(gameScore.timeOnShift % 60).toString().padStart(2, '0')}</div>
+              </div>
+            </div>
+
+            {/* End of Shift Button - Below score */}
+            <button
+              onClick={() => {
+                playSound('punch_clock_out');
+                handleCommand('PUNCH OUT');
+              }}
+              style={{
+                marginTop: '12px',
+                background: 'linear-gradient(145deg, rgba(200, 0, 0, 0.8), rgba(150, 0, 0, 0.9))',
+                border: '3px solid #ff4444',
+                borderRadius: '8px',
+                color: '#ffdddd',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                padding: '12px 24px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: 'monospace',
+                textShadow: '0 0 8px #ff4444',
+                boxShadow: '0 0 15px rgba(255, 68, 68, 0.3)',
+                width: '100%'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 68, 68, 0.5)';
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.3)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              🕐 END SHIFT
+            </button>
           </div>
 
 
@@ -3575,47 +3639,7 @@ function App() {
         }
       `}</style>
 
-      {/* End of Shift Button - Below processing area */}
-      {!showArrestAnimation && gamePhase === 'working' && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 900
-        }}>
-          <button
-            onClick={() => {
-              playSound('punch_clock_out');
-              handleCommand('PUNCH OUT');
-            }}
-            style={{
-              background: 'linear-gradient(145deg, rgba(200, 0, 0, 0.8), rgba(150, 0, 0, 0.9))',
-              border: '3px solid #ff4444',
-              borderRadius: '8px',
-              color: '#ffdddd',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              padding: '12px 24px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              fontFamily: 'monospace',
-              textShadow: '0 0 8px #ff4444',
-              boxShadow: '0 0 15px rgba(255, 68, 68, 0.3)'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 68, 68, 0.5)';
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.3)';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            🕐 END SHIFT
-          </button>
-        </div>
-      )}
+
     </div>
   );
 }
