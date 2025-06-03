@@ -2815,18 +2815,22 @@ function App() {
                       waitingForInput.toLowerCase().includes('number') || /\d/.test(e.target.value) ||
                       commandPrefix.toLowerCase().includes('account') || commandPrefix.toLowerCase().includes('amount') ||
                       inputPrompt.toLowerCase().includes('account') || inputPrompt.toLowerCase().includes('number')) {
-                    const rect = e.target.getBoundingClientRect();
+                    // Center the number pad on screen
                     setNumberPadPosition({ 
-                      x: Math.max(10, Math.min(window.innerWidth - 300, rect.left - 150)), 
-                      y: Math.max(10, Math.min(window.innerHeight - 350, rect.bottom + 10))
+                      x: (window.innerWidth - 300) / 2, 
+                      y: (window.innerHeight - 400) / 2
                     });
                     setShowNumberPad(true);
                   }
                 }
               }}
               onBlur={() => {
-                // Hide number pad when input loses focus (with delay to allow button clicks)
-                setTimeout(() => setShowNumberPad(false), 200);
+                // Don't hide number pad when clicking buttons
+                setTimeout(() => {
+                  if (!document.activeElement?.closest('.number-pad')) {
+                    setShowNumberPad(false);
+                  }
+                }, 100);
               }}
               style={{
                 flex: 1,
@@ -3063,7 +3067,7 @@ function App() {
 
       {/* CRT-Style Number Pad */}
       {showNumberPad && (
-        <div style={{
+        <div className="number-pad" style={{
           position: 'fixed',
           left: `${numberPadPosition.x}px`,
           top: `${numberPadPosition.y}px`,
@@ -3101,6 +3105,8 @@ function App() {
                   if (inputRef.current) {
                     inputRef.current.value += num.toString();
                     inputRef.current.focus();
+                    // Keep number pad visible
+                    setShowNumberPad(true);
                   }
                   playSound('keypress');
                 }}
@@ -3150,6 +3156,7 @@ function App() {
                 if (inputRef.current && inputRef.current.value.length > 0) {
                   inputRef.current.value = inputRef.current.value.slice(0, -1);
                   inputRef.current.focus();
+                  setShowNumberPad(true);
                 }
                 playSound('keypress');
               }}
@@ -3174,6 +3181,7 @@ function App() {
                 if (inputRef.current) {
                   inputRef.current.value += '0';
                   inputRef.current.focus();
+                  setShowNumberPad(true);
                 }
                 playSound('keypress');
               }}
