@@ -1381,8 +1381,11 @@ function App() {
             }}>
               {new Date().toLocaleTimeString()}
             </div>
-            <div style={{ color: '#00cccc', fontSize: '14px', marginTop: '5px' }}>
-              FIRST NATIONAL BANK
+            <div style={{ color: '#00cccc', fontSize: '18px', marginTop: '5px', fontWeight: 'bold' }}>
+              FRAUD HUNTER
+            </div>
+            <div style={{ color: '#888888', fontSize: '12px', marginTop: '3px' }}>
+              Bank Teller Training Simulator
             </div>
             {/* Punch Status Display */}
             {punchStatus && (
@@ -1477,6 +1480,19 @@ function App() {
           }}>
             Click or drag your punch card to the slot<br/>
             to begin your banking shift
+          </div>
+          
+          {/* Terms and Conditions */}
+          <div style={{
+            fontSize: '10px',
+            color: '#666666',
+            lineHeight: '1.3',
+            textAlign: 'center',
+            padding: '8px',
+            borderTop: '1px solid #333333',
+            marginTop: '15px'
+          }}>
+            This is a fictional training simulation. All names, characters, businesses, places, events, and incidents are either products of imagination or used in a fictitious manner. Any resemblance to actual persons, living or dead, or actual events is purely coincidental.
           </div>
         </div>
 
