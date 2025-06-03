@@ -2807,6 +2807,27 @@ function App() {
               placeholder={inputPrompt}
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
+              onFocus={(e) => {
+                if (inputRef.current) {
+                  inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  // Show number pad if input involves numbers
+                  if (waitingForInput.toLowerCase().includes('account') || waitingForInput.toLowerCase().includes('amount') || 
+                      waitingForInput.toLowerCase().includes('number') || /\d/.test(e.target.value) ||
+                      commandPrefix.toLowerCase().includes('account') || commandPrefix.toLowerCase().includes('amount') ||
+                      inputPrompt.toLowerCase().includes('account') || inputPrompt.toLowerCase().includes('number')) {
+                    const rect = e.target.getBoundingClientRect();
+                    setNumberPadPosition({ 
+                      x: Math.max(10, Math.min(window.innerWidth - 300, rect.left - 150)), 
+                      y: Math.max(10, Math.min(window.innerHeight - 350, rect.bottom + 10))
+                    });
+                    setShowNumberPad(true);
+                  }
+                }
+              }}
+              onBlur={() => {
+                // Hide number pad when input loses focus (with delay to allow button clicks)
+                setTimeout(() => setShowNumberPad(false), 200);
+              }}
               style={{
                 flex: 1,
                 background: 'transparent',
@@ -3036,6 +3057,165 @@ function App() {
                 ✗ REJECT TRANSACTION
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CRT-Style Number Pad */}
+      {showNumberPad && (
+        <div style={{
+          position: 'fixed',
+          left: `${numberPadPosition.x}px`,
+          top: `${numberPadPosition.y}px`,
+          background: 'linear-gradient(145deg, #001a00, #003300)',
+          border: '3px solid #00ff00',
+          borderRadius: '12px',
+          padding: '20px',
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.6), inset 0 0 20px rgba(0, 255, 0, 0.1)',
+          zIndex: 2500,
+          width: '280px',
+          animation: 'slideUp 0.2s ease-out',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            color: '#00ff00',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginBottom: '15px',
+            textShadow: '0 0 10px #00ff00'
+          }}>
+            NUMBER PAD
+          </div>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '8px',
+            marginBottom: '15px'
+          }}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+              <button
+                key={num}
+                onClick={() => {
+                  if (inputRef.current) {
+                    inputRef.current.value += num.toString();
+                    inputRef.current.focus();
+                  }
+                  playSound('keypress');
+                }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0, 255, 0, 0.15), rgba(0, 255, 0, 0.05))',
+                  border: '2px solid #00aa00',
+                  borderRadius: '8px',
+                  color: '#00ff00',
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  padding: '15px',
+                  cursor: 'pointer',
+                  transition: 'all 0.1s ease',
+                  fontFamily: 'monospace',
+                  textShadow: '0 0 5px #00ff00',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                }}
+                onMouseDown={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(145deg, rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.2))';
+                  e.currentTarget.style.boxShadow = 'inset 0 2px 5px rgba(0, 0, 0, 0.3)';
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(145deg, rgba(0, 255, 0, 0.15), rgba(0, 255, 0, 0.05))';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = '#00ff00';
+                  e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 255, 0, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = '#00aa00';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                }}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 2fr 1fr',
+            gap: '8px'
+          }}>
+            <button
+              onClick={() => {
+                if (inputRef.current && inputRef.current.value.length > 0) {
+                  inputRef.current.value = inputRef.current.value.slice(0, -1);
+                  inputRef.current.focus();
+                }
+                playSound('keypress');
+              }}
+              style={{
+                background: 'linear-gradient(145deg, rgba(255, 100, 0, 0.15), rgba(255, 100, 0, 0.05))',
+                border: '2px solid #ff6600',
+                borderRadius: '8px',
+                color: '#ff6600',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                padding: '15px 8px',
+                cursor: 'pointer',
+                transition: 'all 0.1s ease',
+                fontFamily: 'monospace'
+              }}
+            >
+              ⌫
+            </button>
+            
+            <button
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value += '0';
+                  inputRef.current.focus();
+                }
+                playSound('keypress');
+              }}
+              style={{
+                background: 'linear-gradient(145deg, rgba(0, 255, 0, 0.15), rgba(0, 255, 0, 0.05))',
+                border: '2px solid #00aa00',
+                borderRadius: '8px',
+                color: '#00ff00',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                padding: '15px',
+                cursor: 'pointer',
+                transition: 'all 0.1s ease',
+                fontFamily: 'monospace',
+                textShadow: '0 0 5px #00ff00'
+              }}
+            >
+              0
+            </button>
+            
+            <button
+              onClick={() => {
+                submitCommand();
+                setShowNumberPad(false);
+              }}
+              style={{
+                background: 'linear-gradient(145deg, rgba(0, 255, 100, 0.25), rgba(0, 255, 100, 0.15))',
+                border: '2px solid #00ff66',
+                borderRadius: '8px',
+                color: '#00ff66',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                padding: '15px 8px',
+                cursor: 'pointer',
+                transition: 'all 0.1s ease',
+                fontFamily: 'monospace',
+                textShadow: '0 0 8px #00ff66',
+                boxShadow: '0 0 15px rgba(0, 255, 100, 0.3)'
+              }}
+            >
+              ✓
+            </button>
           </div>
         </div>
       )}
