@@ -2978,7 +2978,48 @@ function App() {
               </div>
             </div>
 
-            {/* End of Shift Button - Below score */}
+            {/* Terminal Output Display */}
+            <div style={{
+              marginTop: '12px',
+              marginBottom: '12px',
+              background: 'rgba(0, 0, 0, 0.8)',
+              border: '2px solid #00ff00',
+              borderRadius: '4px',
+              padding: '12px',
+              minHeight: '150px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '12px'
+            }}>
+              <div style={{ 
+                color: '#00ff00', 
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                marginBottom: '8px',
+                borderBottom: '1px solid #00ff00',
+                paddingBottom: '4px'
+              }}>
+                TERMINAL OUTPUT:
+              </div>
+              <div>
+                {terminalOutput.map((line, index) => (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      color: line.startsWith('ERROR:') ? '#ff0000' : 
+                             line.startsWith('> ') ? '#ffff00' : '#00ff00',
+                      marginBottom: '2px',
+                      lineHeight: '1.3'
+                    }}
+                  >
+                    {line}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* End of Shift Button - Below terminal */}
             <button
               onClick={() => {
                 playSound('punch_clock_out');
