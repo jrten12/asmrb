@@ -1662,8 +1662,8 @@ function App() {
           padding: window.innerWidth < 768 ? '12px' : '16px',
           borderRadius: '8px',
           marginBottom: '16px',
-          minHeight: window.innerWidth < 768 ? '200px' : '240px',
-          maxHeight: window.innerWidth < 768 ? '300px' : '320px',
+          minHeight: window.innerWidth < 768 ? '280px' : '320px',
+          maxHeight: window.innerWidth < 768 ? '380px' : '420px',
           overflowY: 'auto',
           boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
           WebkitOverflowScrolling: 'touch' // iOS smooth scrolling
@@ -1712,7 +1712,10 @@ function App() {
                     borderBottom: '1px solid #ffff00',
                     paddingBottom: '4px'
                   }}>
-                    📄 {doc.title}
+                    {doc.type === 'ID Card' ? '🆔' : 
+                     doc.type === 'Transaction Slip' ? '📝' : 
+                     doc.type === 'Bank Book' ? '📖' : 
+                     doc.type === 'Signature Card' ? '✍️' : '📄'} {doc.title}
                   </div>
                   <div style={{ 
                     display: 'grid', 
