@@ -115,6 +115,8 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
+  const [showWarningPopup, setShowWarningPopup] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
   const [currentNumberInput, setCurrentNumberInput] = useState('');
@@ -714,14 +716,15 @@ function App() {
       }
       
       if (!verificationState.accountLookedUp) {
-        console.log("Account not looked up, verification state:", verificationState);
-        console.log("Setting error message in terminal");
-        setTerminalOutput(prev => {
-          const newOutput = [...prev, "> " + command, "ERROR: Account must be verified first", "Please LOOKUP account before signature comparison"];
-          console.log("New terminal output:", newOutput);
-          return newOutput;
-        });
+        setWarningMessage("LOOKUP account first");
+        setShowWarningPopup(true);
         playSound('reject');
+        
+        // Auto-close popup after 2 seconds
+        setTimeout(() => {
+          setShowWarningPopup(false);
+        }, 2000);
+        
         return;
       }
       
@@ -4373,6 +4376,29 @@ function App() {
         }
       `}</style>
 
+      {/* Warning Popup */}
+      {showWarningPopup && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'rgba(255, 0, 0, 0.9)',
+          border: '3px solid #ff0000',
+          borderRadius: '8px',
+          padding: '20px',
+          color: '#ffffff',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          zIndex: 3000,
+          fontFamily: 'monospace',
+          boxShadow: '0 0 20px rgba(255, 0, 0, 0.5)',
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          ⚠️ {warningMessage} ⚠️
+        </div>
+      )}
 
     </div>
   );
