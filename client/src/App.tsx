@@ -1888,8 +1888,16 @@ function App() {
                         })()}</div>
                         <div><strong>DOB:</strong> {(() => {
                           if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 0) return "1985-03-15"; // System shows correct DOB
-                          return currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15';
+                          // For fraud cases, show the correct DOB that should be in bank records
+                          const idDoc = currentCustomer.documents.find(d => d.type === 'id');
+                          if (idDoc && !idDoc.isValid && idDoc.hasError?.includes('Date of birth mismatch')) {
+                            // Generate the "correct" bank DOB that differs from the fake ID
+                            const fakeDOB = idDoc.data.dateOfBirth;
+                            const [month, day, year] = fakeDOB.split('/');
+                            const correctYear = parseInt(year) + Math.floor(Math.random() * 6) - 3; // Different year
+                            return `${month}/${day}/${correctYear}`;
+                          }
+                          return idDoc?.data.dateOfBirth || '03/15/1985';
                         })()}</div>
                         <div><strong>ADDR:</strong> {(() => {
                           if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";

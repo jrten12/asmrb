@@ -97,20 +97,40 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
 function generateDocuments(customerName: string, transaction: Transaction, suspiciousLevel: number): Document[] {
   const documents: Document[] = [];
   
-  // ID Document - 30% fraud rate for both name and account matching
+  // Generate a realistic birthday (ages 18-80)
+  const currentYear = new Date().getFullYear();
+  const birthYear = currentYear - Math.floor(Math.random() * 62) - 18; // 18-80 years old
+  const birthMonth = Math.floor(Math.random() * 12) + 1;
+  const birthDay = Math.floor(Math.random() * 28) + 1; // Safe day range for all months
+  const realBirthday = `${birthMonth.toString().padStart(2, '0')}/${birthDay.toString().padStart(2, '0')}/${birthYear}`;
+  
+  // ID Document - 30% fraud rate for name, account, or DOB matching
   const idFraud = Math.random() < 0.3;
   let idName = customerName;
   let idAccountNumber = transaction.accountNumber;
+  let idBirthday = realBirthday;
   let hasIdError = false;
+  let errorType = '';
   
   if (idFraud) {
-    // For fraud cases, mismatch either name or account number
-    if (Math.random() < 0.5) {
+    // For fraud cases, mismatch name, account number, or birthday
+    const fraudType = Math.floor(Math.random() * 3);
+    if (fraudType === 0) {
       idName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
       hasIdError = true;
-    } else {
+      errorType = 'Name mismatch with transaction slip';
+    } else if (fraudType === 1) {
       idAccountNumber = generateAccountNumber();
       hasIdError = true;
+      errorType = 'Account number mismatch';
+    } else {
+      // Generate a different birthday (within 5 years)
+      const altYear = birthYear + Math.floor(Math.random() * 10) - 5;
+      const altMonth = Math.floor(Math.random() * 12) + 1;
+      const altDay = Math.floor(Math.random() * 28) + 1;
+      idBirthday = `${altMonth.toString().padStart(2, '0')}/${altDay.toString().padStart(2, '0')}/${altYear}`;
+      hasIdError = true;
+      errorType = 'Date of birth mismatch with bank records';
     }
   }
   
@@ -121,10 +141,11 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
       name: idName,
       accountNumber: idAccountNumber,
       address: generateAddress(),
+      dateOfBirth: idBirthday,
       idNumber: Math.random().toString(36).substr(2, 9).toUpperCase()
     },
     isValid: !hasIdError,
-    hasError: hasIdError ? (idName !== customerName ? 'Name mismatch with transaction slip' : 'Account number mismatch') : undefined
+    hasError: hasIdError ? errorType : undefined
   });
   
   // Transaction Slip - 30% fraud rate for amount matching
