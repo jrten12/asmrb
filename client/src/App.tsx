@@ -790,7 +790,7 @@ function App() {
         bankSignature, 
         customerSignature: displaySignature,
         analysis
-      });
+      } as any);
       
       const terminalOutput = [
         "> " + command,
