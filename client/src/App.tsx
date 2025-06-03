@@ -3113,7 +3113,7 @@ function App() {
               minHeight: '24px',
               letterSpacing: '2px'
             }}>
-              {inputRef.current?.value || '_'}
+              {currentNumberInput || '_'}
             </div>
           )}
           
@@ -3185,13 +3185,19 @@ function App() {
           }}>
             <button
               onClick={() => {
-                if (inputRef.current && inputRef.current.value.length > 0) {
-                  inputRef.current.value = inputRef.current.value.slice(0, -1);
-                  if (commandPrefix !== 'LOOKUP ') {
-                    inputRef.current.focus();
+                if (commandPrefix === 'LOOKUP ') {
+                  if (currentNumberInput.length > 0) {
+                    const newValue = currentNumberInput.slice(0, -1);
+                    setCurrentNumberInput(newValue);
+                    if (inputRef.current) {
+                      inputRef.current.value = newValue;
+                    }
                   }
-                  setShowNumberPad(true);
+                } else if (inputRef.current && inputRef.current.value.length > 0) {
+                  inputRef.current.value = inputRef.current.value.slice(0, -1);
+                  inputRef.current.focus();
                 }
+                setShowNumberPad(true);
                 playSound('keypress');
               }}
               style={{
@@ -3213,9 +3219,8 @@ function App() {
             <button
               onClick={() => {
                 if (commandPrefix === 'LOOKUP ') {
-                  // For account lookup, build the number without showing command line
-                  const currentValue = inputRef.current?.value || '';
-                  const newValue = currentValue + '0';
+                  const newValue = currentNumberInput + '0';
+                  setCurrentNumberInput(newValue);
                   if (inputRef.current) {
                     inputRef.current.value = newValue;
                   }
@@ -3246,25 +3251,44 @@ function App() {
             
             <button
               onClick={() => {
-                submitCommand();
-                setShowNumberPad(false);
+                if (commandPrefix === 'LOOKUP ') {
+                  // Play beautiful ASMR processing sound
+                  playSound('legacy_processing');
+                  setTimeout(() => {
+                    submitCommand();
+                    setShowNumberPad(false);
+                    setCurrentNumberInput('');
+                  }, 100);
+                } else {
+                  submitCommand();
+                  setShowNumberPad(false);
+                }
               }}
               style={{
-                background: 'linear-gradient(145deg, rgba(0, 255, 100, 0.25), rgba(0, 255, 100, 0.15))',
-                border: '2px solid #00ff66',
-                borderRadius: '8px',
+                background: 'linear-gradient(145deg, rgba(0, 255, 100, 0.35), rgba(0, 255, 100, 0.25))',
+                border: '3px solid #00ff66',
+                borderRadius: '12px',
                 color: '#00ff66',
-                fontSize: '16px',
+                fontSize: commandPrefix === 'LOOKUP ' ? '24px' : '16px',
                 fontWeight: 'bold',
-                padding: '15px 8px',
+                padding: commandPrefix === 'LOOKUP ' ? '20px 12px' : '15px 8px',
                 cursor: 'pointer',
                 transition: 'all 0.1s ease',
                 fontFamily: 'monospace',
-                textShadow: '0 0 8px #00ff66',
-                boxShadow: '0 0 15px rgba(0, 255, 100, 0.3)'
+                textShadow: '0 0 12px #00ff66',
+                boxShadow: '0 0 20px rgba(0, 255, 100, 0.5)',
+                transform: commandPrefix === 'LOOKUP ' ? 'scale(1.1)' : 'scale(1)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 100, 0.7)';
+                e.currentTarget.style.transform = commandPrefix === 'LOOKUP ' ? 'scale(1.15)' : 'scale(1.05)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 100, 0.5)';
+                e.currentTarget.style.transform = commandPrefix === 'LOOKUP ' ? 'scale(1.1)' : 'scale(1)';
               }}
             >
-              ✓
+              {commandPrefix === 'LOOKUP ' ? '✓ LOOKUP' : '✓'}
             </button>
           </div>
         </div>
