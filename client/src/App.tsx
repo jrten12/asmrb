@@ -397,7 +397,7 @@ function App() {
         case 'punch_clock_in':
         case 'punch_clock_out':
           // Play authentic punch clock audio file
-          const punchAudio = new Audio('/11L-the_punching_of_a_a_-1748837411444.mp3');
+          const punchAudio = new Audio('/punch-clock.mp3');
           punchAudio.volume = 0.7;
           punchAudio.play().catch(e => console.log('Audio play failed:', e));
           break;
@@ -1580,6 +1580,22 @@ function App() {
       left: 0,
       boxSizing: 'border-box'
     }}>
+      
+      {/* Score Display */}
+      <div style={{
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        border: '1px solid #00ff00',
+        padding: '8px 12px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        zIndex: 1001,
+        color: '#00ff00'
+      }}>
+        SCORE: {gameScore.score}
+      </div>
       
       {/* CRT Scanline Effect */}
       <div style={{
