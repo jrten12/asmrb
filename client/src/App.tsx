@@ -1239,9 +1239,13 @@ function App() {
         y: e.clientY - dragOffset.y
       });
       
+      // Get slot position dynamically
+      const slotCenterX = window.innerWidth / 2;
+      const slotCenterY = window.innerHeight / 2 - 50;
+      
       // Check if near slot (auto-snap)
-      if (Math.abs(e.clientX - 350) < 50 && Math.abs(e.clientY - 320) < 50) {
-        setCardPosition({ x: 200, y: 280 });
+      if (Math.abs(e.clientX - slotCenterX) < 80 && Math.abs(e.clientY - slotCenterY) < 80) {
+        setCardPosition({ x: slotCenterX - 80, y: slotCenterY - 50 });
       }
     }
   };
@@ -1250,9 +1254,13 @@ function App() {
     if (isDragging) {
       setIsDragging(false);
       
+      // Get slot position dynamically
+      const slotCenterX = window.innerWidth / 2;
+      const slotCenterY = window.innerHeight / 2 - 50;
+      
       // Check if dropped in slot area
-      if (Math.abs(e.clientX - 350) < 60 && Math.abs(e.clientY - 320) < 60) {
-        setCardPosition({ x: 200, y: 280 });
+      if (Math.abs(e.clientX - slotCenterX) < 100 && Math.abs(e.clientY - slotCenterY) < 100) {
+        setCardPosition({ x: slotCenterX - 80, y: slotCenterY - 50 });
         setTimeout(() => {
           setCardInSlot(true);
           playTimeclockPunch();
@@ -1326,9 +1334,14 @@ function App() {
           if (isDragging && e.changedTouches.length > 0) {
             setIsDragging(false);
             const touch = e.changedTouches[0];
+            
+            // Get slot position dynamically
+            const slotCenterX = window.innerWidth / 2;
+            const slotCenterY = window.innerHeight / 2 - 50;
+            
             // Check if dropped in slot area
-            if (Math.abs(touch.clientX - 350) < 80 && Math.abs(touch.clientY - 320) < 80) {
-              setCardPosition({ x: 200, y: 280 });
+            if (Math.abs(touch.clientX - slotCenterX) < 120 && Math.abs(touch.clientY - slotCenterY) < 120) {
+              setCardPosition({ x: slotCenterX - 80, y: slotCenterY - 50 });
               setTimeout(() => {
                 setCardInSlot(true);
                 playTimeclockPunch();
