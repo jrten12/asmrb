@@ -116,6 +116,8 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
+  const [showNumberPad, setShowNumberPad] = useState(false);
+  const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -1639,7 +1641,7 @@ function App() {
           <h1 style={{ margin: '0 0 8px 0', fontSize: '22px', color: '#ffff00' }}>
             CUSTOMER: {currentCustomer.name}
           </h1>
-          <div style={{ color: '#ffffff', marginBottom: '4px', fontSize: '16px' }}>
+          <div style={{ color: '#00ff00', marginBottom: '4px', fontSize: '24px', fontWeight: 'bold', letterSpacing: '2px' }}>
             ACCOUNT: {currentCustomer.accountNumber}
           </div>
           <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '18px' }}>
