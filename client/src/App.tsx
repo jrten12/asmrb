@@ -527,6 +527,7 @@ function App() {
           createNoise(0.3, 0.15);
           setTimeout(() => createTone(200, 0.1, 0.05), 150);
           break;
+
         default:
           createTone(500, 0.1, 0.05);
       }
@@ -2957,7 +2958,8 @@ function App() {
           background: 'rgba(0, 0, 0, 0.9)',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: 'flex-end',
+          paddingBottom: '120px',
           zIndex: 1500
         }}>
           <div style={{
@@ -3605,7 +3607,7 @@ function App() {
       {!showArrestAnimation && gamePhase === 'working' && (
         <div style={{
           position: 'fixed',
-          bottom: '60px',
+          bottom: '10px',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1002
