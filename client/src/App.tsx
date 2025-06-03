@@ -558,15 +558,15 @@ function App() {
       playSound('customer_approach');
     } else if (cmd === 'LOOKUP' || cmd.startsWith('LOOKUP ')) {
       if (cmd === 'LOOKUP') {
-        setTerminalOutput(prev => [...prev, "> " + command, "Enter account number to verify:", "Usage: LOOKUP [account_number]"]);
+        setTerminalOutput(prev => [...prev, "> " + command, "Enter account number to verify:"]);
+        // Show only number pad for account lookup
+        setNumberPadPosition({ 
+          x: (window.innerWidth - 300) / 2, 
+          y: (window.innerHeight - 400) / 2
+        });
+        setShowNumberPad(true);
         setCommandPrefix('LOOKUP ');
-        setInputPrompt('Enter account number...');
-        setShowFloatingInput(true);
-        setTimeout(() => {
-          if (inputRef.current) {
-            inputRef.current.focus();
-          }
-        }, 100);
+        // Don't show floating input, just number pad
       } else {
         const accountNum = cmd.replace('LOOKUP ', '');
         if (!currentCustomer) {
