@@ -1561,13 +1561,22 @@ function App() {
             color: '#cccccc'
           }}>
             <div style={{ marginBottom: '20px' }}>
+              <div style={{ color: '#ff4444', fontWeight: 'bold', marginBottom: '8px' }}>
+                ⚠️ WHAT IS BANK FRAUD:
+              </div>
+              <div style={{ marginLeft: '15px' }}>
+                Bank fraud occurs when someone uses false identity, forged documents, or stolen account information to illegally obtain money from the bank. This includes fake IDs, mismatched signatures, and using someone else's account details.
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
               <div style={{ color: '#ffff00', fontWeight: 'bold', marginBottom: '8px' }}>
                 🏦 YOUR JOB AS A BANK TELLER:
               </div>
               <div style={{ marginLeft: '15px' }}>
                 • Process customer transactions safely and accurately<br/>
                 • Verify customer identity using documents and signatures<br/>
-                • Detect and report fraudulent activity (30% fraud rate)<br/>
+                • Many customers are legitimate, but some are trying to defraud the bank<br/>
                 • Use authentic 1980s banking technology and procedures
               </div>
             </div>
