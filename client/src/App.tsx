@@ -39,7 +39,9 @@ function App() {
     errors: 0,
     timeOnShift: 0,
     consecutiveErrors: 0,
-    errorDetails: [] as string[]
+    errorDetails: [] as string[],
+    customersCalledWithoutService: 0,
+    dismissalWarningGiven: false
   });
   const [shiftStartTime, setShiftStartTime] = useState<number>(0);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
@@ -52,7 +54,9 @@ function App() {
       ...prev,
       score: prev.score + 100,
       correctTransactions: prev.correctTransactions + 1,
-      consecutiveErrors: 0 // Reset consecutive errors on correct transaction
+      consecutiveErrors: 0, // Reset consecutive errors on correct transaction
+      customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
+      dismissalWarningGiven: false // Reset warning flag
     }));
   };
 
@@ -1232,7 +1236,16 @@ function App() {
   };
 
   const resetGame = () => {
-    setGameScore({ score: 0, correctTransactions: 0, errors: 0, timeOnShift: 0, consecutiveErrors: 0, errorDetails: [] });
+    setGameScore({ 
+      score: 0, 
+      correctTransactions: 0, 
+      errors: 0, 
+      timeOnShift: 0, 
+      consecutiveErrors: 0, 
+      errorDetails: [],
+      customersCalledWithoutService: 0,
+      dismissalWarningGiven: false
+    });
     setCurrentCustomer(null);
     resetVerificationState();
     setCardInSlot(false);
@@ -2799,7 +2812,46 @@ function App() {
           }}>
             <button
               onClick={() => {
-                // Always call next customer
+                // Check if current customer was dismissed without service
+                if (currentCustomer && !verificationState.transactionProcessed) {
+                  setGameScore(prev => {
+                    const newCount = prev.customersCalledWithoutService + 1;
+                    
+                    // First warning at 3 dismissals
+                    if (newCount === 3 && !prev.dismissalWarningGiven) {
+                      setWarningMessage("Stop dismissing customers without service!");
+                      setShowWarningPopup(true);
+                      setTimeout(() => setShowWarningPopup(false), 3000);
+                      playSound('reject');
+                      
+                      return {
+                        ...prev,
+                        customersCalledWithoutService: newCount,
+                        dismissalWarningGiven: true
+                      };
+                    }
+                    
+                    // Fire at 5 dismissals
+                    if (newCount >= 5) {
+                      setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis is unacceptable behavior that violates bank policy.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
+                      setShowManagerWarning(true);
+                      playSound('reject');
+                      
+                      // End the shift automatically after warning
+                      setTimeout(() => {
+                        setShowManagerWarning(false);
+                        punchOut();
+                      }, 8000);
+                    }
+                    
+                    return {
+                      ...prev,
+                      customersCalledWithoutService: newCount
+                    };
+                  });
+                }
+                
+                // Call next customer
                 setCurrentCustomer(generateCustomer());
                 setVerificationState({
                   accountLookedUp: false,
