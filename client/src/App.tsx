@@ -1878,12 +1878,12 @@ function App() {
                         🏦 BANK SYSTEM
                       </div>
                       <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
-                        <div><strong>NAME:</strong> {currentCustomer.isFraud ? "NO RECORD FOUND" : currentCustomer.name}</div>
-                        <div><strong>ACCT:</strong> {currentCustomer.isFraud ? "INVALID" : currentCustomer.accountNumber}</div>
-                        <div><strong>DOB:</strong> {currentCustomer.isFraud ? "NO RECORD" : (currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15')}</div>
-                        <div><strong>ADDR:</strong> {currentCustomer.isFraud ? "NO RECORD" : (currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A')}</div>
-                        <div><strong>BAL:</strong> {currentCustomer.isFraud ? "$0.00" : `$${accountBalance.toLocaleString()}`}</div>
-                        <div><strong>STATUS:</strong> {currentCustomer.isFraud ? "INVALID ACCOUNT" : "ACTIVE"}</div>
+                        <div><strong>NAME:</strong> {currentCustomer.name}</div>
+                        <div><strong>ACCT:</strong> {currentCustomer.accountNumber}</div>
+                        <div><strong>DOB:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15'}</div>
+                        <div><strong>ADDR:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}</div>
+                        <div><strong>BAL:</strong> ${accountBalance.toLocaleString()}</div>
+                        <div><strong>STATUS:</strong> ACTIVE</div>
                       </div>
                     </div>
 
@@ -2006,11 +2006,11 @@ function App() {
                       lineHeight: '1.6',
                       fontFamily: 'monospace'
                     }}>
-                      <div><strong>NAME:</strong> {currentCustomer.isFraud ? "NO RECORD FOUND" : currentCustomer.name}</div>
-                      <div><strong>DOB:</strong> {currentCustomer.isFraud ? "NO RECORD" : (currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15')}</div>
-                      <div><strong>ADDRESS:</strong> {currentCustomer.isFraud ? "NO RECORD" : (currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A')}</div>
-                      <div><strong>LICENSE:</strong> {currentCustomer.isFraud ? "NO RECORD" : (currentCustomer.documents.find(d => d.type === 'ID')?.data.licenseNumber || 'DL-12345')}</div>
-                      <div><strong>SSN:</strong> {currentCustomer.isFraud ? "NO RECORD" : "***-**-1234"}</div>
+                      <div><strong>NAME:</strong> {currentCustomer.name}</div>
+                      <div><strong>DOB:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15'}</div>
+                      <div><strong>ADDRESS:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}</div>
+                      <div><strong>LICENSE:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.licenseNumber || 'DL-12345'}</div>
+                      <div><strong>SSN:</strong> ***-**-1234</div>
                     </div>
                   </div>
 
