@@ -4,7 +4,14 @@ const CUSTOMER_NAMES = [
   'John Smith', 'Mary Johnson', 'Robert Brown', 'Patricia Davis',
   'Michael Wilson', 'Linda Miller', 'William Moore', 'Elizabeth Taylor',
   'David Anderson', 'Barbara Thomas', 'Richard Jackson', 'Susan White',
-  'Charles Harris', 'Jessica Martin', 'Joseph Thompson', 'Sarah Garcia'
+  'Charles Harris', 'Jessica Martin', 'Joseph Thompson', 'Sarah Garcia',
+  'Christopher Martinez', 'Nancy Rodriguez', 'Matthew Lopez', 'Betty Lee',
+  'Anthony Gonzalez', 'Helen Clark', 'Mark Lewis', 'Sandra Robinson',
+  'Paul Walker', 'Donna Hall', 'Steven Allen', 'Carol Young',
+  'Kenneth King', 'Ruth Wright', 'Joshua Scott', 'Sharon Green',
+  'Kevin Adams', 'Michelle Baker', 'Brian Nelson', 'Lisa Hill',
+  'George Ramirez', 'Karen Campbell', 'Edward Mitchell', 'Emily Roberts',
+  'Ronald Carter', 'Kimberly Phillips', 'Timothy Evans', 'Deborah Turner'
 ];
 
 const SUSPICIOUS_PATTERNS = [
@@ -19,7 +26,10 @@ const SUSPICIOUS_PATTERNS = [
 export function generateCustomer(level: number): Customer {
   const id = Math.random().toString(36).substr(2, 9);
   const name = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-  const suspiciousLevel = Math.random() < (level * 0.15) ? Math.floor(Math.random() * 3) + 1 : 0;
+  
+  // 30% fraud rate consistently
+  const isFraud = Math.random() < 0.3;
+  const suspiciousLevel = isFraud ? Math.floor(Math.random() * 3) + 1 : 0;
   
   const transaction = generateTransaction(level, suspiciousLevel);
   const documents = generateDocuments(name, transaction, suspiciousLevel);
@@ -27,7 +37,7 @@ export function generateCustomer(level: number): Customer {
   return {
     id,
     name,
-    sprite: `customer_${Math.floor(Math.random() * 4) + 1}`,
+    sprite: `customer_${Math.floor(Math.random() * 6) + 1}`,
     transaction,
     documents,
     suspiciousLevel,
@@ -40,10 +50,23 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
   const types: Transaction['type'][] = ['deposit', 'withdrawal', 'transfer'];
   const type = types[Math.floor(Math.random() * types.length)];
   
-  let amount = Math.floor(Math.random() * 1000) + 50;
-  if (level > 3) amount *= 2;
-  if (suspiciousLevel > 0 && Math.random() < 0.3) {
-    amount *= 10; // Suspiciously large amount
+  // More varied transaction amounts
+  const amountRanges = [
+    { min: 50, max: 500 },      // Small transactions
+    { min: 500, max: 2000 },    // Medium transactions
+    { min: 2000, max: 10000 },  // Large transactions
+    { min: 10000, max: 50000 }  // Very large transactions
+  ];
+  
+  const range = amountRanges[Math.floor(Math.random() * amountRanges.length)];
+  let amount = Math.floor(Math.random() * (range.max - range.min)) + range.min;
+  
+  // Adjust for level
+  if (level > 3) amount = Math.floor(amount * 1.5);
+  
+  // Suspiciously large amounts for fraud cases
+  if (suspiciousLevel > 0 && Math.random() < 0.4) {
+    amount *= 3; // Very suspicious large amount
   }
   
   const accountNumber = generateAccountNumber();
@@ -122,17 +145,17 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     hasError: hasAccountError ? 'Account number mismatch' : undefined
   });
   
-  // Signature
-  const isValidSignature = suspiciousLevel === 0 || Math.random() > 0.4;
+  // Signature - 30% fraud rate for signatures specifically
+  const signatureFraud = Math.random() < 0.3;
   documents.push({
     id: 'signature',
     type: 'signature',
     data: {
-      signature: generateSignature(customerName),
+      signature: generateSignature(customerName, signatureFraud),
       name: customerName
     },
-    isValid: isValidSignature,
-    hasError: !isValidSignature ? 'Signature doesn\'t match records' : undefined
+    isValid: !signatureFraud,
+    hasError: signatureFraud ? 'Signature doesn\'t match records' : undefined
   });
   
   return documents;
@@ -142,9 +165,20 @@ function generateAccountNumber(): string {
   return Math.floor(Math.random() * 900000000 + 100000000).toString();
 }
 
-function generateSignature(name: string): string {
-  // Generate a simple signature representation
-  return name.split(' ').map(n => n.charAt(0)).join('') + '_signature';
+function generateSignature(name: string, isFraud: boolean = false): string {
+  const styles = [
+    'cursive', 'print', 'mixed', 'stylized', 'simple', 'elaborate'
+  ];
+  const style = styles[Math.floor(Math.random() * styles.length)];
+  
+  if (isFraud) {
+    // Generate mismatched signature for fraud cases
+    const fakeName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+    return `${fakeName}_${style}_sig`;
+  }
+  
+  // Generate matching signature
+  return `${name}_${style}_sig`;
 }
 
 export function validateDocuments(documents: Document[]): { isValid: boolean; errors: string[] } {
