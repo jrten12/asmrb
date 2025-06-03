@@ -1310,6 +1310,29 @@ function App() {
         }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onTouchMove={(e) => {
+          if (isDragging && !cardInSlot && e.touches.length > 0) {
+            const touch = e.touches[0];
+            setCardPosition({
+              x: touch.clientX - dragOffset.x,
+              y: touch.clientY - dragOffset.y
+            });
+          }
+        }}
+        onTouchEnd={(e) => {
+          if (isDragging && e.changedTouches.length > 0) {
+            setIsDragging(false);
+            const touch = e.changedTouches[0];
+            // Check if dropped in slot area
+            if (Math.abs(touch.clientX - 350) < 80 && Math.abs(touch.clientY - 320) < 80) {
+              setCardPosition({ x: 200, y: 280 });
+              setTimeout(() => {
+                setCardInSlot(true);
+                playTimeclockPunch();
+              }, 200);
+            }
+          }
+        }}
       >
         {/* Time Clock Machine */}
         <div style={{
@@ -1458,6 +1481,18 @@ function App() {
               zIndex: 1000
             }}
             onMouseDown={handleMouseDown}
+            onTouchStart={(e) => {
+              if (!cardInSlot) {
+                setIsDragging(true);
+                const touch = e.touches[0];
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                setDragOffset({
+                  x: touch.clientX - rect.left,
+                  y: touch.clientY - rect.top
+                });
+                e.preventDefault();
+              }
+            }}
             onClick={handleCardClick}
           >
             {/* Card Content */}
