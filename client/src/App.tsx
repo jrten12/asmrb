@@ -537,15 +537,15 @@ function App() {
           break;
 
         case 'dot_matrix_printer':
-          // Authentic dot matrix printer with line feeds - shortened
-          for (let i = 0; i < 8; i++) {
+          // Authentic dot matrix printer with line feeds - shortened by 3 seconds
+          for (let i = 0; i < 5; i++) {
             setTimeout(() => {
               createTone(800 + Math.random() * 400, 0.02, 0.08);
               createNoise(0.01, 0.04);
-              if (i % 3 === 0) {
+              if (i % 2 === 0) {
                 createTone(1200, 0.05, 0.03); // Line feed sound
               }
-            }, i * 80);
+            }, i * 60);
           }
           break;
         case 'paper_tear':
@@ -2470,7 +2470,7 @@ function App() {
             <button
               onClick={() => {
                 playSound('punch_clock_out');
-                setGamePhase('punch_out');
+                setGamePhase('ended');
               }}
               style={{
                 marginTop: '8px',
