@@ -119,6 +119,9 @@ function App() {
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
   const [currentNumberInput, setCurrentNumberInput] = useState('');
+  const [showWireInput, setShowWireInput] = useState(false);
+  const [wireAmount, setWireAmount] = useState('');
+  const [wireDestAccount, setWireDestAccount] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -2227,7 +2230,9 @@ function App() {
                 <button
                   onClick={() => {
                     playSound('button_click');
-                    setCommandWithPrefix('WIRE $', '1000.00 TO 123456789');
+                    setShowWireInput(true);
+                    setWireAmount('');
+                    setWireDestAccount('');
                   }}
                   style={{
                     background: 'rgba(120, 0, 120, 0.8)',
@@ -2773,6 +2778,149 @@ function App() {
                 }}
               >
                 CLOSE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Wire Transfer Input Modal */}
+      {showWireInput && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 3000
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #001100, #002200)',
+            border: '3px solid #aa00aa',
+            borderRadius: '8px',
+            padding: '24px',
+            minWidth: window.innerWidth < 768 ? '90%' : '450px',
+            maxWidth: '500px'
+          }}>
+            <div style={{
+              color: '#ff00ff',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              marginBottom: '20px',
+              textAlign: 'center'
+            }}>
+              🔄 WIRE TRANSFER SETUP
+            </div>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                color: '#ff00ff',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                marginBottom: '8px'
+              }}>
+                TRANSFER AMOUNT ($):
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={wireAmount}
+                onChange={(e) => setWireAmount(e.target.value)}
+                placeholder="Enter amount"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: '16px',
+                  background: 'rgba(0, 0, 0, 0.8)',
+                  border: '2px solid #aa00aa',
+                  borderRadius: '4px',
+                  color: '#ffffff',
+                  fontFamily: 'monospace'
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                color: '#ff00ff',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                marginBottom: '8px'
+              }}>
+                DESTINATION ACCOUNT:
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={wireDestAccount}
+                onChange={(e) => setWireDestAccount(e.target.value)}
+                placeholder="Enter destination account"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: '16px',
+                  background: 'rgba(0, 0, 0, 0.8)',
+                  border: '2px solid #aa00aa',
+                  borderRadius: '4px',
+                  color: '#ffffff',
+                  fontFamily: 'monospace'
+                }}
+              />
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={() => {
+                  if (wireAmount && wireDestAccount) {
+                    handleCommand(`WIRE $${wireAmount} TO ${wireDestAccount}`);
+                    setShowWireInput(false);
+                    playSound('button_click');
+                  }
+                }}
+                disabled={!wireAmount || !wireDestAccount}
+                style={{
+                  background: (wireAmount && wireDestAccount) ? 'rgba(120, 0, 120, 0.8)' : 'rgba(60, 60, 60, 0.5)',
+                  border: '2px solid #aa00aa',
+                  color: (wireAmount && wireDestAccount) ? '#ff00ff' : '#666666',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: (wireAmount && wireDestAccount) ? 'pointer' : 'not-allowed',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                PROCESS WIRE
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowWireInput(false);
+                  playSound('modal_close');
+                }}
+                style={{
+                  background: 'rgba(60, 60, 60, 0.8)',
+                  border: '2px solid #888888',
+                  color: '#cccccc',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace'
+                }}
+              >
+                CANCEL
               </button>
             </div>
           </div>
