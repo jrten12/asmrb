@@ -1,16 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { analyzeSignature } from './lib/customers';
-
-interface Customer {
-  name: string;
-  accountNumber: string;
-  transactionType: 'DEPOSIT' | 'WITHDRAWAL' | 'WIRE_TRANSFER' | 'ACCOUNT_UPDATE' | 'INQUIRY';
-  requestedAmount: number;
-  destinationAccount?: string;
-  documents: Document[];
-  isFraud: boolean;
-  fraudType: number;
-}
+import { analyzeSignature, generateCustomer } from './lib/customers';
+import type { Customer, Document } from './types/game';
 
 interface GameScore {
   score: number;
@@ -588,6 +578,7 @@ function App() {
 
   const handleCommand = (command: string) => {
     const cmd = command.trim().toUpperCase();
+    console.log("Handling command:", cmd, "Current customer:", currentCustomer);
     
     if (cmd === 'NEXT') {
       const customer = generateCustomer();
@@ -715,17 +706,24 @@ function App() {
         }
       }, 1000);
     } else if (cmd === 'COMPARE SIGNATURE') {
+      console.log("COMPARE SIGNATURE command triggered");
       if (!currentCustomer) {
+        console.log("No current customer");
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
       }
       
+      console.log("Current customer documents:", currentCustomer.documents);
+      
       // Get the signature from customer documents (using enhanced system)
-      const signatureDoc = currentCustomer.documents.find(d => d.type === 'signature');
+      const signatureDoc = currentCustomer.documents.find(d => d.type === 'signature' || d.type === 'SIGNATURE');
       if (!signatureDoc) {
+        console.log("No signature document found");
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No signature document available"]);
         return;
       }
+      
+      console.log("Found signature document:", signatureDoc);
       
       const customerSignatureData = signatureDoc.data.signature as string;
       const name = currentCustomer.name;
