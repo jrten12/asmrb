@@ -118,6 +118,7 @@ function App() {
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
+  const [currentNumberInput, setCurrentNumberInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomer = (): Customer => {
@@ -566,6 +567,7 @@ function App() {
         });
         setShowNumberPad(true);
         setCommandPrefix('LOOKUP ');
+        setCurrentNumberInput('');
         // Don't show floating input, just number pad
       } else {
         const accountNum = cmd.replace('LOOKUP ', '');
@@ -2825,6 +2827,11 @@ function App() {
                 }
               }}
               onBlur={() => {
+                // Keep number pad visible during account lookup
+                if (commandPrefix === 'LOOKUP ') {
+                  // Don't hide during account lookup
+                  return;
+                }
                 // Don't hide number pad when clicking buttons
                 setTimeout(() => {
                   if (!document.activeElement?.closest('.number-pad')) {
@@ -3089,8 +3096,26 @@ function App() {
             marginBottom: '15px',
             textShadow: '0 0 10px #00ff00'
           }}>
-            NUMBER PAD
+            {commandPrefix === 'LOOKUP ' ? 'ENTER ACCOUNT NUMBER' : 'NUMBER PAD'}
           </div>
+          
+          {commandPrefix === 'LOOKUP ' && (
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00aa00',
+              borderRadius: '6px',
+              padding: '12px',
+              marginBottom: '15px',
+              textAlign: 'center',
+              fontSize: '18px',
+              fontFamily: 'monospace',
+              color: '#00ff00',
+              minHeight: '24px',
+              letterSpacing: '2px'
+            }}>
+              {inputRef.current?.value || '_'}
+            </div>
+          )}
           
           <div style={{
             display: 'grid',
@@ -3102,10 +3127,17 @@ function App() {
               <button
                 key={num}
                 onClick={() => {
-                  if (inputRef.current) {
+                  if (commandPrefix === 'LOOKUP ') {
+                    // For account lookup, update the display state
+                    const newValue = currentNumberInput + num.toString();
+                    setCurrentNumberInput(newValue);
+                    if (inputRef.current) {
+                      inputRef.current.value = newValue;
+                    }
+                    setShowNumberPad(true);
+                  } else if (inputRef.current) {
                     inputRef.current.value += num.toString();
                     inputRef.current.focus();
-                    // Keep number pad visible
                     setShowNumberPad(true);
                   }
                   playSound('keypress');
@@ -3155,7 +3187,9 @@ function App() {
               onClick={() => {
                 if (inputRef.current && inputRef.current.value.length > 0) {
                   inputRef.current.value = inputRef.current.value.slice(0, -1);
-                  inputRef.current.focus();
+                  if (commandPrefix !== 'LOOKUP ') {
+                    inputRef.current.focus();
+                  }
                   setShowNumberPad(true);
                 }
                 playSound('keypress');
@@ -3178,7 +3212,15 @@ function App() {
             
             <button
               onClick={() => {
-                if (inputRef.current) {
+                if (commandPrefix === 'LOOKUP ') {
+                  // For account lookup, build the number without showing command line
+                  const currentValue = inputRef.current?.value || '';
+                  const newValue = currentValue + '0';
+                  if (inputRef.current) {
+                    inputRef.current.value = newValue;
+                  }
+                  setShowNumberPad(true);
+                } else if (inputRef.current) {
                   inputRef.current.value += '0';
                   inputRef.current.focus();
                   setShowNumberPad(true);
