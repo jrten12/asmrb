@@ -2819,7 +2819,7 @@ function App() {
                     
                     // First warning at 3 dismissals
                     if (newCount === 3 && !prev.dismissalWarningGiven) {
-                      setWarningMessage("Stop dismissing customers without service!");
+                      setWarningMessage("You're fired!");
                       setShowWarningPopup(true);
                       setTimeout(() => setShowWarningPopup(false), 3000);
                       playSound('reject');
