@@ -1369,7 +1369,7 @@ function App() {
             marginBottom: '25px',
             textAlign: 'center'
           }}>
-            Process transactions, verify documents, and detect fraud using 1980s banking procedures.
+            Process transactions, review documents, and stop suspicious activity—all using satisfying 1980s banking tech
           </div>
           
           <div style={{
