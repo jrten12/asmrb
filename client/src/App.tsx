@@ -34,7 +34,7 @@ interface Document {
 }
 
 function App() {
-  const [gamePhase, setGamePhase] = useState<'welcome' | 'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('welcome');
+  const [gamePhase, setGamePhase] = useState<'welcome' | 'tutorial' | 'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('welcome');
   const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
@@ -1444,8 +1444,188 @@ function App() {
             Fictional simulation. All names and events are coincidental.
           </div>
           
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+            <button
+              onClick={() => setGamePhase('tutorial')}
+              style={{
+                background: 'linear-gradient(145deg, #444400, #222200)',
+                border: '2px solid #ffff00',
+                color: '#ffff00',
+                padding: '15px 25px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                borderRadius: '6px',
+                fontFamily: 'monospace',
+                textShadow: '0 0 10px #ffff00',
+                boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                (e.target as HTMLElement).style.background = 'linear-gradient(145deg, #555500, #333300)';
+                (e.target as HTMLElement).style.boxShadow = '0 0 30px rgba(255, 255, 0, 0.5)';
+              }}
+              onMouseOut={(e) => {
+                (e.target as HTMLElement).style.background = 'linear-gradient(145deg, #444400, #222200)';
+                (e.target as HTMLElement).style.boxShadow = '0 0 20px rgba(255, 255, 0, 0.3)';
+              }}
+            >
+              TUTORIAL
+            </button>
+            
+            <button
+              onClick={() => setGamePhase('punch_in')}
+              style={{
+                background: 'linear-gradient(145deg, #004400, #002200)',
+                border: '2px solid #00ff00',
+                color: '#00ff00',
+                padding: '15px 30px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                borderRadius: '6px',
+                fontFamily: 'monospace',
+                textShadow: '0 0 10px #00ff00',
+                boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                (e.target as HTMLElement).style.background = 'linear-gradient(145deg, #006600, #003300)';
+                (e.target as HTMLElement).style.boxShadow = '0 0 30px rgba(0, 255, 0, 0.5)';
+              }}
+              onMouseOut={(e) => {
+                (e.target as HTMLElement).style.background = 'linear-gradient(145deg, #004400, #002200)';
+                (e.target as HTMLElement).style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
+              }}
+            >
+              GO TO WORK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Tutorial Page
+  if (gamePhase === 'tutorial') {
+    return (
+      <div style={{
+        height: '100vh',
+        width: '100vw',
+        background: 'linear-gradient(135deg, #001100 0%, #002200 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontFamily: 'monospace',
+        color: '#00ff00',
+        padding: '20px',
+        overflowY: 'auto'
+      }}>
+        {/* CRT Scanlines */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
+          pointerEvents: 'none'
+        }} />
+        
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.8)',
+          border: '3px solid #00ff00',
+          borderRadius: '12px',
+          padding: '30px',
+          maxWidth: '800px',
+          width: '100%',
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)',
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <div style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginBottom: '25px',
+            color: '#00ff00',
+            textShadow: '0 0 10px #00ff00'
+          }}>
+            BANK TELLER 1988 - HOW TO PLAY
+          </div>
+          
+          <div style={{
+            fontSize: '14px',
+            lineHeight: '1.6',
+            color: '#cccccc'
+          }}>
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ color: '#ffff00', fontWeight: 'bold', marginBottom: '8px' }}>
+                🏦 YOUR JOB AS A BANK TELLER:
+              </div>
+              <div style={{ marginLeft: '15px' }}>
+                • Process customer transactions safely and accurately<br/>
+                • Verify customer identity using documents and signatures<br/>
+                • Detect and report fraudulent activity (30% fraud rate)<br/>
+                • Use authentic 1980s banking technology and procedures
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ color: '#ffff00', fontWeight: 'bold', marginBottom: '8px' }}>
+                💻 TERMINAL COMMANDS:
+              </div>
+              <div style={{ marginLeft: '15px', fontFamily: 'monospace' }}>
+                <div style={{ color: '#00ff00' }}>NEXT</div> - Call next customer to window<br/>
+                <div style={{ color: '#00ff00' }}>LOOKUP [account#]</div> - Verify account in database<br/>
+                <div style={{ color: '#00ff00' }}>COMPARE SIGNATURE</div> - Check signature authenticity<br/>
+                <div style={{ color: '#00ff00' }}>PROCESS [TYPE] [AMOUNT]</div> - Process transaction<br/>
+                <div style={{ color: '#00ff00' }}>APPROVE</div> - Approve legitimate transaction<br/>
+                <div style={{ color: '#ff0000' }}>REPORT FRAUD</div> - Report suspicious activity
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ color: '#ffff00', fontWeight: 'bold', marginBottom: '8px' }}>
+                🔍 FRAUD DETECTION:
+              </div>
+              <div style={{ marginLeft: '15px' }}>
+                • Check for account number mismatches<br/>
+                • Compare signatures carefully for authenticity<br/>
+                • Verify customer name and date of birth<br/>
+                • Look for nervous behavior or document inconsistencies<br/>
+                • Trust your instincts - when in doubt, report fraud!
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ color: '#ffff00', fontWeight: 'bold', marginBottom: '8px' }}>
+                📋 TRANSACTION TYPES:
+              </div>
+              <div style={{ marginLeft: '15px' }}>
+                • <span style={{ color: '#00ff00' }}>DEPOSITS</span> - Accept cash and update balance<br/>
+                • <span style={{ color: '#ff8800' }}>WITHDRAWALS</span> - Verify sufficient funds<br/>
+                • <span style={{ color: '#ff4444' }}>WIRE TRANSFERS</span> - High-risk, verify carefully<br/>
+                • <span style={{ color: '#4488ff' }}>INQUIRIES</span> - Balance information requests
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '25px' }}>
+              <div style={{ color: '#ffff00', fontWeight: 'bold', marginBottom: '8px' }}>
+                📈 SCORING:
+              </div>
+              <div style={{ marginLeft: '15px' }}>
+                • +100 points for correctly identifying fraud<br/>
+                • +50 points for processing legitimate transactions<br/>
+                • -100 points for approving fraud (3 strikes = fired)<br/>
+                • -25 points for rejecting legitimate customers
+              </div>
+            </div>
+          </div>
+          
           <button
-            onClick={() => setGamePhase('punch_in')}
+            onClick={() => setGamePhase('welcome')}
             style={{
               background: 'linear-gradient(145deg, #004400, #002200)',
               border: '2px solid #00ff00',
@@ -1458,18 +1638,20 @@ function App() {
               fontFamily: 'monospace',
               textShadow: '0 0 10px #00ff00',
               boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              display: 'block',
+              margin: '0 auto'
             }}
             onMouseOver={(e) => {
-              e.target.style.background = 'linear-gradient(145deg, #006600, #003300)';
-              e.target.style.boxShadow = '0 0 30px rgba(0, 255, 0, 0.5)';
+              (e.target as HTMLElement).style.background = 'linear-gradient(145deg, #006600, #003300)';
+              (e.target as HTMLElement).style.boxShadow = '0 0 30px rgba(0, 255, 0, 0.5)';
             }}
             onMouseOut={(e) => {
-              e.target.style.background = 'linear-gradient(145deg, #004400, #002200)';
-              e.target.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
+              (e.target as HTMLElement).style.background = 'linear-gradient(145deg, #004400, #002200)';
+              (e.target as HTMLElement).style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
             }}
           >
-            GO TO WORK
+            ← BACK TO MAIN MENU
           </button>
         </div>
       </div>
