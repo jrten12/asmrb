@@ -715,7 +715,12 @@ function App() {
       
       if (!verificationState.accountLookedUp) {
         console.log("Account not looked up, verification state:", verificationState);
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Account must be verified first", "Please LOOKUP account before signature comparison"]);
+        console.log("Setting error message in terminal");
+        setTerminalOutput(prev => {
+          const newOutput = [...prev, "> " + command, "ERROR: Account must be verified first", "Please LOOKUP account before signature comparison"];
+          console.log("New terminal output:", newOutput);
+          return newOutput;
+        });
         playSound('reject');
         return;
       }
