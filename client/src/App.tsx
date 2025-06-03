@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { analyzeSignature, generateCustomer } from './lib/customers';
-import type { Customer, Document } from './types/game';
+import type { Customer, Document as GameDocument } from './types/game';
 
 interface GameScore {
   score: number;
@@ -15,7 +15,7 @@ interface LeaderboardEntry {
   date: string;
 }
 
-interface Document {
+interface LegacyDocument {
   type: string;
   title: string;
   data: Record<string, string | number>;
@@ -715,10 +715,14 @@ function App() {
       
       console.log("Current customer documents:", currentCustomer.documents);
       
-      // Get the signature from customer documents (using enhanced system)
-      const signatureDoc = currentCustomer.documents.find(d => d.type === 'signature' || d.type === 'SIGNATURE');
+      // Get the signature from customer documents (handle both old and new formats)
+      const signatureDoc = currentCustomer.documents.find(d => 
+        d.type === 'signature' || 
+        d.type === 'SIGNATURE' || 
+        (d as any).title === 'Signature Card'
+      );
       if (!signatureDoc) {
-        console.log("No signature document found");
+        console.log("No signature document found", currentCustomer.documents);
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No signature document available"]);
         return;
       }
