@@ -14,6 +14,20 @@ const CUSTOMER_NAMES = [
   'Ronald Carter', 'Kimberly Phillips', 'Timothy Evans', 'Deborah Turner'
 ];
 
+const TOWNS = [
+  'Millbrook', 'Riverside', 'Fairview', 'Cedar Falls', 'Pine Ridge',
+  'Oakwood', 'Sunset Valley', 'Green Hills', 'Silver Creek', 'Maple Grove'
+];
+
+const STREET_NAMES = [
+  'Oak Street', 'Pine Avenue', 'Elm Drive', 'Cedar Lane', 'Maple Court',
+  'Birch Road', 'Willow Way', 'Cherry Street', 'Spruce Avenue', 'Ash Drive',
+  'River Road', 'Hill Street', 'Park Avenue', 'Garden Lane', 'Valley Drive',
+  'Forest Street', 'Lake Avenue', 'Spring Road', 'Sunset Boulevard', 'Dawn Street'
+];
+
+const STATE_NAME = 'Westfield';
+
 const SUSPICIOUS_PATTERNS = [
   { type: 'name_mismatch', description: 'ID name doesn\'t match transaction slip' },
   { type: 'amount_mismatch', description: 'Amounts don\'t match between documents' },
@@ -106,6 +120,7 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
     data: {
       name: idName,
       accountNumber: idAccountNumber,
+      address: generateAddress(),
       idNumber: Math.random().toString(36).substr(2, 9).toUpperCase()
     },
     isValid: !hasIdError,
@@ -177,6 +192,15 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
 
 function generateAccountNumber(): string {
   return Math.floor(Math.random() * 900000000 + 100000000).toString();
+}
+
+function generateAddress(): string {
+  const streetNumber = Math.floor(Math.random() * 9999) + 1;
+  const street = STREET_NAMES[Math.floor(Math.random() * STREET_NAMES.length)];
+  const town = TOWNS[Math.floor(Math.random() * TOWNS.length)];
+  const zipCode = Math.floor(Math.random() * 90000) + 10000;
+  
+  return `${streetNumber} ${street}, ${town}, ${STATE_NAME} ${zipCode}`;
 }
 
 function generateSignature(name: string, isFraud: boolean = false): string {
