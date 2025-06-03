@@ -63,122 +63,118 @@ function App() {
     setCustomersServed(prev => {
       const newCount = prev + 1;
       if (newCount % 5 === 0) {
-        showAdBreakScreen();
+        showInterstitialAd();
       }
       return newCount;
     });
   };
 
-  // Dynamic background music intensity system
+  // Google AdMob Integration for iOS Monetization
+  const [admobInitialized, setAdmobInitialized] = useState(false);
+  const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
+  const [isRewardedAdLoaded, setIsRewardedAdLoaded] = useState(false);
+
+  // Initialize Google AdMob
   useEffect(() => {
-    const initializeBackgroundMusic = () => {
-      const bgMusic = new Audio('/attached_assets/dot-matrix-printer-73220.mp3');
-      bgMusic.volume = 0.1;
-      bgMusic.loop = true;
-      bgMusic.preload = 'auto';
-      setBackgroundMusic(bgMusic);
-      
-      // Start playing background music when game starts
-      if (gamePhase === 'working') {
-        bgMusic.play().catch(e => console.log('Background music play failed:', e));
+    const initializeAdMob = () => {
+      // Check if running in iOS app environment
+      if (window.webkit && window.webkit.messageHandlers) {
+        // Initialize AdMob for iOS
+        window.webkit.messageHandlers.admob?.postMessage({
+          action: 'initialize',
+          appId: 'ca-app-pub-3940256099942544~1458002511', // Test App ID for development
+          testDeviceIds: ['2077ef9a63d2b398840261c8221a0c9b'] // Test device ID
+        });
+        
+        // Set up ad event listeners
+        window.admobEvents = {
+          onInterstitialLoaded: () => setIsInterstitialLoaded(true),
+          onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false),
+          onRewardedAdLoaded: () => setIsRewardedAdLoaded(true),
+          onRewardedAdFailedToLoad: () => setIsRewardedAdLoaded(false),
+          onRewardedAdRewarded: () => {
+            // Give player bonus for watching ad
+            setGameScore(prev => ({
+              ...prev,
+              score: prev.score + 50
+            }));
+          }
+        };
+        
+        setAdmobInitialized(true);
+      } else {
+        // Fallback for web testing
+        console.log('AdMob: Running in web environment, using test mode');
+        setAdmobInitialized(true);
+        setIsInterstitialLoaded(true);
+        setIsRewardedAdLoaded(true);
       }
     };
 
-    initializeBackgroundMusic();
-    
-    return () => {
-      if (backgroundMusic) {
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-      }
-    };
-  }, [gamePhase]);
+    initializeAdMob();
+  }, []);
 
-  // Calculate stress level based on game factors
-  useEffect(() => {
-    const calculateStressLevel = () => {
-      let stress = 0;
-      
-      // Customer patience pressure (0-40 points)
-      if (currentCustomer) {
-        const patienceRatio = currentCustomer.patience / currentCustomer.maxPatience;
-        stress += (1 - patienceRatio) * 40;
-      }
-      
-      // Consecutive errors (0-30 points)
-      stress += Math.min(gameScore.consecutiveErrors * 10, 30);
-      
-      // Time pressure based on shift progress (0-20 points)
-      const timeElapsed = Date.now() - shiftStartTime;
-      const timeStress = Math.min((timeElapsed / 1000) / 300, 1) * 20; // Max stress after 5 minutes
-      stress += timeStress;
-      
-      // Dismissal warning stress (0-10 points)
-      if (gameScore.dismissalWarningGiven) {
-        stress += 10;
-      }
-      
-      setStressLevel(Math.min(stress, 100));
-    };
-
-    if (gamePhase === 'working') {
-      calculateStressLevel();
+  // Load interstitial ad
+  const loadInterstitialAd = () => {
+    if (window.webkit && window.webkit.messageHandlers.admob) {
+      window.webkit.messageHandlers.admob.postMessage({
+        action: 'loadInterstitial',
+        adUnitId: 'ca-app-pub-3940256099942544/4411468910' // Test Interstitial Ad Unit ID
+      });
     }
-  }, [currentCustomer, gameScore, shiftStartTime, gamePhase]);
+  };
 
-  // Update music intensity based on stress level
-  useEffect(() => {
-    if (!backgroundMusic) return;
-    
-    let newIntensity = 1;
-    let newVolume = 0.1;
-    let newPlaybackRate = 1.0;
-    
-    if (stressLevel <= 20) {
-      newIntensity = 1; // Calm
-      newVolume = 0.08;
-      newPlaybackRate = 0.9;
-    } else if (stressLevel <= 40) {
-      newIntensity = 2; // Slightly tense
-      newVolume = 0.12;
-      newPlaybackRate = 1.0;
-    } else if (stressLevel <= 60) {
-      newIntensity = 3; // Moderate stress
-      newVolume = 0.16;
-      newPlaybackRate = 1.1;
-    } else if (stressLevel <= 80) {
-      newIntensity = 4; // High stress
-      newVolume = 0.20;
-      newPlaybackRate = 1.2;
-    } else {
-      newIntensity = 5; // Maximum stress
-      newVolume = 0.25;
-      newPlaybackRate = 1.3;
+  // Show interstitial ad every 5 customers
+  const showInterstitialAd = () => {
+    if (isInterstitialLoaded) {
+      if (window.webkit && window.webkit.messageHandlers.admob) {
+        window.webkit.messageHandlers.admob.postMessage({
+          action: 'showInterstitial'
+        });
+      } else {
+        // Fallback for web testing
+        showAdBreakScreen();
+      }
+      setIsInterstitialLoaded(false);
+      // Load next ad
+      setTimeout(loadInterstitialAd, 1000);
     }
-    
-    setMusicIntensity(newIntensity);
-    backgroundMusic.volume = newVolume;
-    backgroundMusic.playbackRate = newPlaybackRate;
-  }, [stressLevel, backgroundMusic]);
+  };
 
+  // Load rewarded ad
+  const loadRewardedAd = () => {
+    if (window.webkit && window.webkit.messageHandlers.admob) {
+      window.webkit.messageHandlers.admob.postMessage({
+        action: 'loadRewarded',
+        adUnitId: 'ca-app-pub-3940256099942544/1712485313' // Test Rewarded Ad Unit ID
+      });
+    }
+  };
+
+  // Show rewarded ad for bonus points
+  const showRewardedAd = () => {
+    if (isRewardedAdLoaded) {
+      if (window.webkit && window.webkit.messageHandlers.admob) {
+        window.webkit.messageHandlers.admob.postMessage({
+          action: 'showRewarded'
+        });
+      }
+      setIsRewardedAdLoaded(false);
+      // Load next ad
+      setTimeout(loadRewardedAd, 1000);
+    }
+  };
+
+  // Fallback ad break screen for web testing
   const showAdBreakScreen = () => {
     setShowAdBreak(true);
     setAdCountdown(5);
-    
-    // Pause background music during ad
-    if (backgroundMusic) {
-      backgroundMusic.pause();
-    }
     
     const countdown = setInterval(() => {
       setAdCountdown(prev => {
         if (prev <= 1) {
           clearInterval(countdown);
           setShowAdBreak(false);
-          // Resume background music after ad
-          if (backgroundMusic && gamePhase === 'working') {
-            backgroundMusic.play().catch(e => console.log('Music resume failed:', e));
-          }
           return 5;
         }
         return prev - 1;
@@ -186,98 +182,15 @@ function App() {
     }, 1000);
   };
 
-  // Dynamic Background Music Intensity System
-  const calculateStressLevel = () => {
-    let stress = 0;
-    
-    // Customer patience affects stress (0-40 points)
-    if (currentCustomer) {
-      const patienceRatio = currentCustomer.patience / currentCustomer.maxPatience;
-      stress += (1 - patienceRatio) * 40;
-    }
-    
-    // Recent errors increase stress (0-30 points)
-    stress += Math.min(gameScore.consecutiveErrors * 10, 30);
-    
-    // High error count increases stress (0-20 points)
-    if (gameScore.errors > 5) {
-      stress += Math.min((gameScore.errors - 5) * 5, 20);
-    }
-    
-    // Time pressure (last 2 minutes of shift) (0-10 points)
-    const timeRemaining = 1800 - gameScore.timeOnShift; // 30 min shift
-    if (timeRemaining < 120) {
-      stress += (120 - timeRemaining) / 12;
-    }
-    
-    return Math.min(Math.max(stress, 0), 100);
-  };
-
-  const updateMusicIntensity = (stress: number) => {
-    let newIntensity;
-    if (stress < 20) newIntensity = 1;      // Calm
-    else if (stress < 40) newIntensity = 2; // Slightly tense
-    else if (stress < 60) newIntensity = 3; // Moderate stress
-    else if (stress < 80) newIntensity = 4; // High stress
-    else newIntensity = 5;                  // Maximum stress
-    
-    if (newIntensity !== musicIntensity) {
-      setMusicIntensity(newIntensity);
-      adjustBackgroundMusic(newIntensity);
-    }
-  };
-
-  const adjustBackgroundMusic = (intensity: number) => {
-    if (!backgroundMusic) return;
-    
-    // Adjust playback rate and volume based on intensity
-    const baseRate = 1.0;
-    const rateMultiplier = 1 + (intensity - 1) * 0.1; // 1.0 to 1.4x speed
-    const volume = 0.1 + (intensity - 1) * 0.05; // 0.1 to 0.3 volume
-    
-    backgroundMusic.playbackRate = baseRate * rateMultiplier;
-    backgroundMusic.volume = Math.min(volume, 0.3);
-    
-    // Add subtle effects for higher stress levels
-    if (intensity >= 4) {
-      // Could add audio filter effects here for maximum stress
-      playSound('warning');
-    }
-  };
-
-  // Initialize background music system
+  // Load ads when AdMob is initialized
   useEffect(() => {
-    if (gamePhase === 'working' && !backgroundMusic) {
-      const bgMusic = new Audio('/attached_assets/dot-matrix-printer-73220.mp3');
-      bgMusic.volume = 0.1;
-      bgMusic.loop = true;
-      bgMusic.preload = 'auto';
-      setBackgroundMusic(bgMusic);
-      
-      // Start playing background music
-      bgMusic.play().catch(e => console.log('Background music failed to start:', e));
+    if (admobInitialized) {
+      loadInterstitialAd();
+      loadRewardedAd();
     }
-    
-    return () => {
-      if (backgroundMusic) {
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-      }
-    };
-  }, [gamePhase]);
+  }, [admobInitialized]);
 
-  // Continuously update stress level and music intensity
-  useEffect(() => {
-    if (gamePhase === 'working') {
-      const interval = setInterval(() => {
-        const newStressLevel = calculateStressLevel();
-        setStressLevel(newStressLevel);
-        updateMusicIntensity(newStressLevel);
-      }, 2000); // Update every 2 seconds
-      
-      return () => clearInterval(interval);
-    }
-  }, [gamePhase, currentCustomer, gameScore, musicIntensity]);
+
 
   const handleTransactionError = (errorType: string) => {
     setGameScore(prev => {
