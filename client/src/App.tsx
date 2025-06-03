@@ -1585,27 +1585,29 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* Score and Warnings Display */}
-      <div style={{
-        position: 'fixed',
-        bottom: '10px',
-        left: '10px',
-        right: '10px',
-        background: 'rgba(0, 0, 0, 0.9)',
-        border: '1px solid #00ff00',
-        padding: '8px 16px',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        zIndex: 1001,
-        color: '#00ff00',
-        display: 'flex',
-        justifyContent: 'space-between'
-      }}>
-        <span>SCORE: {gameScore.score}</span>
-        <span style={{ color: gameScore.consecutiveErrors >= 6 ? '#ff0000' : gameScore.consecutiveErrors >= 3 ? '#ffaa00' : '#00ff00' }}>
-          WARNINGS: {Math.floor(gameScore.consecutiveErrors / 3)}/3
-        </span>
-      </div>
+      {/* Score and Warnings Display - Hidden during arrest animation */}
+      {!showArrestAnimation && (
+        <div style={{
+          position: 'fixed',
+          bottom: '10px',
+          left: '10px',
+          right: '10px',
+          background: 'rgba(0, 0, 0, 0.9)',
+          border: '1px solid #00ff00',
+          padding: '8px 16px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          zIndex: 1001,
+          color: '#00ff00',
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}>
+          <span>SCORE: {gameScore.score}</span>
+          <span style={{ color: gameScore.consecutiveErrors >= 6 ? '#ff0000' : gameScore.consecutiveErrors >= 3 ? '#ffaa00' : '#00ff00' }}>
+            WARNINGS: {Math.floor(gameScore.consecutiveErrors / 3)}/3
+          </span>
+        </div>
+      )}
       
       {/* CRT Scanline Effect */}
       <div style={{
