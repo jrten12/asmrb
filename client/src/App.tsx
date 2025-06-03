@@ -1581,20 +1581,26 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* Score Display */}
+      {/* Score and Warnings Display */}
       <div style={{
         position: 'fixed',
-        top: '10px',
+        bottom: '10px',
+        left: '10px',
         right: '10px',
-        background: 'rgba(0, 0, 0, 0.8)',
+        background: 'rgba(0, 0, 0, 0.9)',
         border: '1px solid #00ff00',
-        padding: '8px 12px',
+        padding: '8px 16px',
         fontSize: '14px',
         fontWeight: 'bold',
         zIndex: 1001,
-        color: '#00ff00'
+        color: '#00ff00',
+        display: 'flex',
+        justifyContent: 'space-between'
       }}>
-        SCORE: {gameScore.score}
+        <span>SCORE: {gameScore.score}</span>
+        <span style={{ color: gameScore.consecutiveErrors >= 6 ? '#ff0000' : gameScore.consecutiveErrors >= 3 ? '#ffaa00' : '#00ff00' }}>
+          WARNINGS: {Math.floor(gameScore.consecutiveErrors / 3)}/3
+        </span>
       </div>
       
       {/* CRT Scanline Effect */}
@@ -3032,7 +3038,7 @@ function App() {
         </div>
       )}
 
-      {/* Arrest Animation Sequence */}
+      {/* P5.js Arrest Animation */}
       {showArrestAnimation && (
         <div style={{
           position: 'fixed',
@@ -3042,150 +3048,124 @@ function App() {
           bottom: 0,
           background: '#000000',
           zIndex: 3000,
-          animation: 'fadeInArrest 0.5s ease-in-out',
-          fontFamily: 'monospace'
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}>
-          {/* CRT Scanlines */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
-            pointerEvents: 'none'
-          }} />
-          
-          {/* Bank Scene with Arrest Animation */}
-          <div style={{
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-            background: 'linear-gradient(180deg, #001100 0%, #002200 100%)',
-            overflow: 'hidden'
-          }}>
-            {/* Bank Floor */}
-            <div style={{
-              position: 'absolute',
-              bottom: '0px',
-              left: '0px',
-              right: '0px',
-              height: '60px',
-              background: 'linear-gradient(180deg, #003300 0%, #001100 100%)',
-              border: '2px solid #00ff00',
-              borderBottom: 'none'
-            }} />
-            
-            {/* Teller Counter */}
-            <div style={{
-              position: 'absolute',
-              bottom: '60px',
-              left: '50px',
-              width: '250px',
-              height: '80px',
-              background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
-              border: '2px solid #00ff00'
-            }} />
-            
-            {/* Customer Being Arrested */}
-            <div style={{
-              position: 'absolute',
-              bottom: '140px',
-              left: '400px',
-              fontSize: '60px',
-              color: '#ffaa00',
-              animation: 'customerArrest 4s linear forwards'
-            }}>
-              🧑‍💼
-            </div>
-            
-            {/* Police Officer 1 */}
-            <div style={{
-              position: 'absolute',
-              bottom: '140px',
-              right: '200px',
-              fontSize: '60px',
-              color: '#0088ff',
-              animation: 'officer1Approach 2s linear forwards'
-            }}>
-              👮‍♂️
-            </div>
-            
-            {/* Police Officer 2 */}
-            <div style={{
-              position: 'absolute',
-              bottom: '140px',
-              right: '600px',
-              fontSize: '60px',
-              color: '#0088ff',
-              animation: 'officer2Approach 2.5s linear forwards'
-            }}>
-              👮‍♀️
-            </div>
-            
-            {/* Handcuffs Animation */}
-            <div style={{
-              position: 'absolute',
-              bottom: '180px',
-              left: '420px',
-              fontSize: '30px',
-              color: '#cccccc',
-              animation: 'handcuffsApply 6s linear forwards',
-              opacity: 0
-            }}>
-              🔗
-            </div>
-            
-            {/* Police Car Outside */}
-            <div style={{
-              position: 'absolute',
-              bottom: '140px',
-              right: '-200px',
-              fontSize: '40px',
-              color: '#0066cc',
-              animation: 'policeCarArrive 1.5s linear forwards'
-            }}>
-              🚔
-            </div>
-            
-            {/* Arrest Text Sequence */}
-            <div style={{
-              position: 'absolute',
-              top: '50px',
-              left: '50px',
-              color: '#ff0000',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              animation: 'arrestDialog 6s linear forwards'
-            }}>
-              <div style={{ animation: 'textStep1 6s linear forwards' }}>
-                "You're under arrest for attempted fraud"
-              </div>
-              <div style={{ animation: 'textStep2 6s linear forwards', animationDelay: '2s' }}>
-                "You have the right to remain silent"
-              </div>
-              <div style={{ animation: 'textStep3 6s linear forwards', animationDelay: '4s' }}>
-                "Customer escorted to police vehicle"
-              </div>
-            </div>
-            
-            {/* Success Message */}
-            <div style={{
-              position: 'absolute',
-              bottom: '50px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: '#00ff00',
-              fontSize: '24px',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              animation: 'finalMessage 6s linear forwards',
-              opacity: 0
-            }}>
-              FRAUD SUSPECT ARRESTED<br/>
-              EXCELLENT DETECTIVE WORK
-            </div>
-          </div>
+          <div
+            id="p5-arrest-canvas"
+            ref={(el) => {
+              if (el && !el.querySelector('canvas')) {
+                // P5.js arrest animation
+                new (window as any).p5((p: any) => {
+                  let officer: any, suspect: any;
+                  let officerX = 20;
+                  let suspectX = 200;
+                  let arrestStage = 'approach';
+                  let frameCountLocal = 0;
+
+                  p.setup = () => {
+                    p.createCanvas(600, 300);
+                    p.frameRate(10);
+
+                    officer = {
+                      w: 30,
+                      h: 60,
+                      color: p.color(0, 100, 255)
+                    };
+
+                    suspect = {
+                      w: 30,
+                      h: 60,
+                      color: p.color(255, 100, 100)
+                    };
+                  };
+
+                  p.draw = () => {
+                    p.background(20);
+                    drawBankInterior();
+
+                    if (arrestStage === 'approach') {
+                      drawCharacter(officer, officerX, 180);
+                      drawCharacter(suspect, suspectX, 180);
+                      officerX += 6;
+                      if (officerX + officer.w >= suspectX) {
+                        arrestStage = 'arrest';
+                        frameCountLocal = 0;
+                      }
+                    } else if (arrestStage === 'arrest') {
+                      drawCharacter(officer, officerX, 180, true);
+                      drawCharacter(suspect, suspectX, 180, true);
+                      frameCountLocal++;
+                      if (frameCountLocal > 15) {
+                        arrestStage = 'escort';
+                      }
+                    } else if (arrestStage === 'escort') {
+                      drawCharacter(officer, officerX, 180);
+                      drawCharacter(suspect, suspectX, 180);
+                      officerX += 3;
+                      suspectX += 3;
+                      
+                      // End animation when characters move off screen
+                      if (officerX > p.width + 50) {
+                        // Close animation and generate new customer
+                        setTimeout(() => {
+                          setShowArrestAnimation(false);
+                          setCurrentCustomer(generateCustomer());
+                          setVerificationState({
+                            accountLookedUp: false,
+                            accountNotFound: false,
+                            signatureCompared: false,
+                            signatureFraud: false,
+                            transactionProcessed: false
+                          });
+                          setTerminalOutput(prev => [...prev, 
+                            "",
+                            "> Fraud suspect removed from premises",
+                            "> Next customer approaching window",
+                            "Ready to process transaction"
+                          ]);
+                        }, 500);
+                      }
+                    }
+                  };
+
+                  function drawCharacter(char: any, x: number, y: number, handcuffed = false) {
+                    p.fill(char.color);
+                    p.rect(x, y - char.h, char.w, char.h, 5);
+                    if (handcuffed) {
+                      p.stroke(255);
+                      p.strokeWeight(3);
+                      p.line(x + char.w, y - char.h + 30, x + char.w + 10, y - char.h + 30);
+                      p.noStroke();
+                    }
+                  }
+
+                  function drawBankInterior() {
+                    // Floor
+                    p.fill(50);
+                    p.rect(0, 240, p.width, 60);
+                    
+                    // Counter
+                    p.fill(80);
+                    p.rect(50, 120, 120, 150);
+                    
+                    // Sign
+                    p.rect(200, 80, 150, 30);
+                    p.fill(0, 255, 0);
+                    p.textSize(16);
+                    p.textAlign(p.CENTER);
+                    p.text("FIRST NATIONAL BANK", 275, 100);
+                    
+                    // Add "FRAUD DETECTED" text
+                    p.fill(255, 0, 0);
+                    p.textSize(20);
+                    p.text("FRAUD DETECTED", 300, 50);
+                  }
+                }, el);
+              }
+            }}
+          />
         </div>
       )}
 
