@@ -589,9 +589,9 @@ function App() {
         case 'punch_clock_in':
         case 'punch_clock_out':
           // Play ASMR punch clock audio file from attached assets
-          const punchAudio = new Audio('/attached_assets/11L-Punching_in_to_a_pun-1748909724505.mp3');
-          punchAudio.volume = 0.8;
-          punchAudio.play().catch(e => console.log('Audio play failed:', e));
+          const punchOutAudio = new Audio('/punch-clock.mp3');
+          punchOutAudio.volume = 0.8;
+          punchOutAudio.play().catch(e => console.log('Audio play failed:', e));
           break;
         case 'dot_matrix_print':
           // Play authentic dot matrix printer for 10 seconds
@@ -700,10 +700,10 @@ function App() {
           break;
         case 'punch_clock':
           // Play the authentic punch clock sound
-          const punchAudio = new Audio('/punch-clock.mp3');
-          punchAudio.volume = 0.7;
-          punchAudio.currentTime = 0;
-          punchAudio.play().catch(e => console.log('Punch clock audio play failed:', e));
+          const punchClockAudio = new Audio('/punch-clock.mp3');
+          punchClockAudio.volume = 0.7;
+          punchClockAudio.currentTime = 0;
+          punchClockAudio.play().catch(e => console.log('Punch clock audio play failed:', e));
           break;
 
         case 'dot_matrix_printer':
@@ -1363,6 +1363,10 @@ function App() {
       setReceiptData(null);
       resetVerificationState();
       setCurrentCustomer(null);
+      
+      // Call handleCorrectTransaction to reset dismissal counter and update score
+      handleCorrectTransaction();
+      
       setTerminalOutput(prev => [...prev, 
         "TRANSACTION COMPLETE",
         "RECEIPT PRINTED AND TORN OFF",
@@ -1450,8 +1454,20 @@ function App() {
     setGameScore(prev => ({
       ...prev,
       score: prev.score + 100,
-      correctTransactions: prev.correctTransactions + 1
+      correctTransactions: prev.correctTransactions + 1,
+      consecutiveErrors: 0, // Reset consecutive errors on correct transaction
+      customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
+      dismissalWarningGiven: false // Reset warning flag
     }));
+    
+    // Check if ad should be shown every 5 customers
+    setCustomersServed(prev => {
+      const newCount = prev + 1;
+      if (newCount % 5 === 0) {
+        showInterstitialAd();
+      }
+      return newCount;
+    });
   };
 
   const handleError = () => {
