@@ -653,19 +653,28 @@ function App() {
           break;
         case 'punch_clock_in':
         case 'punch_clock_out':
-          // Play ASMR punch clock audio file from attached assets
+          // Short punch clock sound synchronized with animation
           try {
             const punchOutAudio = new Audio('/punch-clock.mp3');
-            punchOutAudio.volume = 0.8;
-            punchOutAudio.play().catch(e => {
-              console.log('Punch clock audio play failed:', e);
-              // Fallback to synthesized sound
-              createTone(200, 0.3, 0.15);
-              setTimeout(() => createTone(150, 0.2, 0.1), 150);
-            });
+            punchOutAudio.volume = 0.6;
+            punchOutAudio.currentTime = 0;
+            const playPromise = punchOutAudio.play();
+            if (playPromise) {
+              playPromise.catch(e => {
+                console.log('Punch clock audio play failed:', e);
+                // Fallback to synthesized sound
+                createTone(200, 0.2, 0.15);
+                createTone(150, 0.15, 0.1);
+              });
+              // Stop audio after punch animation (0.5 seconds)
+              setTimeout(() => {
+                punchOutAudio.pause();
+                punchOutAudio.currentTime = 0;
+              }, 500);
+            }
           } catch (e) {
             console.log('Punch clock audio creation failed:', e);
-            createTone(200, 0.3, 0.15);
+            createTone(200, 0.2, 0.15);
           }
           break;
         case 'dot_matrix_print':
@@ -1480,16 +1489,12 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.12; // Quiet background volume
+        backgroundMusicRef.current.volume = 0.06; // Much quieter background volume
         backgroundMusicRef.current.preload = 'auto';
         
-        // Add error handler to try alternate paths
+        // Add error handler for music loading
         backgroundMusicRef.current.addEventListener('error', () => {
-          console.log('Trying alternate music path...');
-          if (musicPaths[1]) {
-            backgroundMusicRef.current!.src = musicPaths[1];
-            backgroundMusicRef.current!.load();
-          }
+          console.log('Background music file not found or failed to load');
         });
       }
       
@@ -1517,19 +1522,27 @@ function App() {
   };
 
   const punchOut = () => {
-    playSound('punch_clock');
+    playSound('punch_clock_out');
     const timeWorked = Math.floor((Date.now() - shiftStartTime) / 60000);
     setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
     
     // Stop background music when shift ends
     stopBackgroundMusic();
     
-    if (gameScore.score >= getMinScoreForLeaderboard()) {
-      setGamePhase('leaderboard');
-    } else {
-      setGamePhase('punch_in');
-      resetGame();
-    }
+    // Always show punch-out screen first, then decide next phase
+    setGamePhase('punch_out');
+    setPunchStatus('ENDING SHIFT');
+    
+    // After punch animation, decide next phase
+    setTimeout(() => {
+      if (gameScore.score >= getMinScoreForLeaderboard()) {
+        setGamePhase('leaderboard');
+      } else {
+        setGamePhase('punch_in');
+        resetGame();
+      }
+      setPunchStatus(null);
+    }, 2000);
   };
 
   const resetGame = () => {
