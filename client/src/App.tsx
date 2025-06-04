@@ -335,7 +335,7 @@ function App() {
 
   const generateCustomerLocal = (): Customer => {
     // Use the centralized customer generation from customers.ts to ensure unique account numbers
-    return generateCustomer(gameLevel);
+    return generateCustomer(1); // Use level 1 for consistent generation
   };
 
   const playSound = (type: string) => {
@@ -3140,7 +3140,7 @@ function App() {
                 }
                 
                 // Call next customer
-                setCurrentCustomer(generateCustomer());
+                setCurrentCustomer(generateCustomerLocal());
                 setVerificationState({
                   accountLookedUp: false,
                   accountNotFound: false,
@@ -3193,7 +3193,7 @@ function App() {
                       
                       // Generate next customer after brief pause
                       setTimeout(() => {
-                        setCurrentCustomer(generateCustomer());
+                        setCurrentCustomer(generateCustomerLocal());
                         setVerificationState({
                           accountLookedUp: false,
                           accountNotFound: false,
@@ -4385,7 +4385,7 @@ function App() {
               // Auto-close animation after 6 seconds
               setTimeout(() => {
                 setShowArrestAnimation(false);
-                setCurrentCustomer(generateCustomer());
+                setCurrentCustomer(generateCustomerLocal());
                 setVerificationState({
                   accountLookedUp: false,
                   accountNotFound: false,
