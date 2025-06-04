@@ -278,6 +278,7 @@ function App() {
   const [customersServed, setCustomersServed] = useState(0);
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
+  const [isTerminated, setIsTerminated] = useState(false);
   const [currentNumberInput, setCurrentNumberInput] = useState('');
   const [showWireInput, setShowWireInput] = useState(false);
   const [wireAmount, setWireAmount] = useState('');
@@ -3008,13 +3009,14 @@ function App() {
             <button
               onClick={() => {
                 // Check if current customer was dismissed without service
-                if (currentCustomer && !verificationState.transactionProcessed) {
+                if (currentCustomer && !verificationState.transactionProcessed && !isTerminated) {
                   setGameScore(prev => {
                     const newCount = prev.customersCalledWithoutService + 1;
                     
                     // Fire at 5 dismissals - immediate termination
                     if (newCount >= 5) {
                       console.log('FIRING EMPLOYEE - 5 dismissals reached');
+                      setIsTerminated(true);
                       setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nDespite previous warnings, you continue this unacceptable behavior.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
                       setShowManagerWarning(true);
                       playSound('reject');
@@ -3022,10 +3024,10 @@ function App() {
                       // Immediate termination - end shift
                       setTimeout(() => {
                         setShowManagerWarning(false);
-                        punchOut();
+                        setGamePhase('punch_out');
+                        setCurrentCustomer(null);
                       }, 8000);
                       
-                      // Don't continue with other logic
                       return {
                         ...prev,
                         customersCalledWithoutService: newCount
