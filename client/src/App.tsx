@@ -67,17 +67,62 @@ function App() {
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
   const [showManagerWarning, setShowManagerWarning] = useState(false);
   const [managerMessage, setManagerMessage] = useState('');
+  const [showBadgePopup, setShowBadgePopup] = useState(false);
+  const [currentBadge, setCurrentBadge] = useState<{
+    name: string;
+    description: string;
+    icon: string;
+    color: string;
+    tier: string;
+  } | null>(null);
+
+  // Achievement badge definitions
+  const badges = [
+    { milestone: 1, name: "First Steps", description: "Successfully processed your first transaction", icon: "🎯", color: "#4CAF50", tier: "Bronze" },
+    { milestone: 5, name: "Steady Service", description: "Completed 5 successful transactions", icon: "⭐", color: "#FF9800", tier: "Bronze" },
+    { milestone: 9, name: "Reliable Teller", description: "Achieved 9 successful transactions", icon: "💎", color: "#2196F3", tier: "Silver" },
+    { milestone: 16, name: "Expert Banker", description: "Mastered 16 successful transactions", icon: "🏆", color: "#9C27B0", tier: "Silver" },
+    { milestone: 23, name: "Transaction Master", description: "Completed 23 successful transactions", icon: "👑", color: "#FF5722", tier: "Gold" },
+    { milestone: 30, name: "Banking Elite", description: "Achieved elite status with 30+ transactions", icon: "⚡", color: "#FFD700", tier: "Elite" }
+  ];
+
+  // Check for badge achievements
+  const checkBadgeAchievement = (transactionCount: number) => {
+    const earnedBadge = badges.find(badge => badge.milestone === transactionCount);
+    if (earnedBadge) {
+      setCurrentBadge(earnedBadge);
+      setShowBadgePopup(true);
+      
+      // Play achievement sound
+      const achievementAudio = new Audio('/attached_assets/11L-Punching_in_to_a_pun-1748909724505.mp3');
+      achievementAudio.volume = 0.3;
+      achievementAudio.play().catch(e => console.log('Achievement audio failed:', e));
+      
+      // Auto-hide after 7 seconds
+      setTimeout(() => {
+        setShowBadgePopup(false);
+        setCurrentBadge(null);
+      }, 7000);
+    }
+  };
 
   // Enhanced error tracking and scoring system
   const addCorrectTransaction = () => {
-    setGameScore(prev => ({
-      ...prev,
-      score: prev.score + 100,
-      correctTransactions: prev.correctTransactions + 1,
-      consecutiveErrors: 0, // Reset consecutive errors on correct transaction
-      customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
-      dismissalWarningGiven: false // Reset warning flag
-    }));
+    setGameScore(prev => {
+      const newTransactionCount = prev.correctTransactions + 1;
+      
+      // Check for badge achievement
+      checkBadgeAchievement(newTransactionCount);
+      
+      return {
+        ...prev,
+        score: prev.score + 100,
+        correctTransactions: newTransactionCount,
+        consecutiveErrors: 0, // Reset consecutive errors on correct transaction
+        customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
+        dismissalWarningGiven: false // Reset warning flag
+      };
+    });
     
     // Check if ad should be shown every 5 customers
     setCustomersServed(prev => {
@@ -4728,7 +4773,156 @@ function App() {
         </div>
       )}
 
+      {/* Achievement Badge Popup */}
+      {showBadgePopup && currentBadge && (
+        <div style={{
+          position: 'fixed',
+          top: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: `linear-gradient(145deg, ${currentBadge.color}22, ${currentBadge.color}11)`,
+          border: `4px solid ${currentBadge.color}`,
+          borderRadius: '20px',
+          padding: '30px',
+          textAlign: 'center',
+          zIndex: 6000,
+          maxWidth: '400px',
+          boxShadow: `0 0 40px ${currentBadge.color}66, inset 0 0 20px ${currentBadge.color}22`,
+          animation: 'badgePopup 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          fontFamily: 'monospace'
+        }}>
+          {/* Badge Icon */}
+          <div style={{
+            fontSize: '80px',
+            marginBottom: '15px',
+            filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.5))',
+            animation: 'badgeGlow 2s ease-in-out infinite alternate'
+          }}>
+            {currentBadge.icon}
+          </div>
+          
+          {/* Achievement Title */}
+          <div style={{
+            color: currentBadge.color,
+            fontSize: '24px',
+            fontWeight: 'bold',
+            marginBottom: '10px',
+            textShadow: `0 0 15px ${currentBadge.color}`,
+            letterSpacing: '1px'
+          }}>
+            ACHIEVEMENT UNLOCKED!
+          </div>
+          
+          {/* Badge Name */}
+          <div style={{
+            color: '#ffffff',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            marginBottom: '8px',
+            textShadow: '0 0 10px rgba(255,255,255,0.8)'
+          }}>
+            {currentBadge.name}
+          </div>
+          
+          {/* Badge Tier */}
+          <div style={{
+            color: currentBadge.color,
+            fontSize: '14px',
+            fontWeight: 'bold',
+            marginBottom: '12px',
+            padding: '4px 12px',
+            border: `2px solid ${currentBadge.color}`,
+            borderRadius: '20px',
+            display: 'inline-block',
+            background: `${currentBadge.color}22`
+          }}>
+            {currentBadge.tier.toUpperCase()} TIER
+          </div>
+          
+          {/* Badge Description */}
+          <div style={{
+            color: '#cccccc',
+            fontSize: '16px',
+            lineHeight: '1.4',
+            marginBottom: '20px'
+          }}>
+            {currentBadge.description}
+          </div>
+          
+          {/* Sparkle Effects */}
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '20px',
+            fontSize: '20px',
+            animation: 'sparkle1 1.5s ease-in-out infinite'
+          }}>✨</div>
+          <div style={{
+            position: 'absolute',
+            bottom: '15px',
+            left: '25px',
+            fontSize: '16px',
+            animation: 'sparkle2 1.8s ease-in-out infinite'
+          }}>⭐</div>
+          <div style={{
+            position: 'absolute',
+            top: '25px',
+            left: '15px',
+            fontSize: '14px',
+            animation: 'sparkle3 2.1s ease-in-out infinite'
+          }}>💫</div>
+          
+          {/* Progress Indicator */}
+          <div style={{
+            color: '#888888',
+            fontSize: '12px',
+            marginTop: '10px'
+          }}>
+            Transaction #{currentBadge.milestone} completed
+          </div>
+        </div>
+      )}
 
+      <style>{`
+        @keyframes badgePopup {
+          0% { 
+            transform: translateX(-50%) scale(0.3) rotate(-10deg);
+            opacity: 0;
+          }
+          50% { 
+            transform: translateX(-50%) scale(1.1) rotate(5deg);
+            opacity: 0.8;
+          }
+          100% { 
+            transform: translateX(-50%) scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes badgeGlow {
+          0% { 
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)) brightness(1);
+          }
+          100% { 
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) brightness(1.2);
+          }
+        }
+        
+        @keyframes sparkle1 {
+          0%, 100% { opacity: 0; transform: rotate(0deg) scale(0.8); }
+          50% { opacity: 1; transform: rotate(180deg) scale(1.2); }
+        }
+        
+        @keyframes sparkle2 {
+          0%, 100% { opacity: 0; transform: rotate(0deg) scale(0.6); }
+          50% { opacity: 1; transform: rotate(-180deg) scale(1.1); }
+        }
+        
+        @keyframes sparkle3 {
+          0%, 100% { opacity: 0; transform: rotate(0deg) scale(0.7); }
+          50% { opacity: 1; transform: rotate(360deg) scale(1.3); }
+        }
+      `}</style>
 
     </div>
   );
