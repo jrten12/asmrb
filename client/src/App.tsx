@@ -3009,56 +3009,77 @@ function App() {
               onClick={() => {
                 // Check if current customer was dismissed without service
                 if (currentCustomer && !verificationState.transactionProcessed && !isTerminated) {
-                  setGameScore(prev => {
-                    const newCount = prev.customersCalledWithoutService + 1;
+                  const currentDismissals = gameScore.customersCalledWithoutService + 1;
+                  
+                  // Fire at 5 dismissals - immediate termination
+                  if (currentDismissals >= 5) {
+                    console.log('FIRING EMPLOYEE - 5 dismissals reached');
+                    playSound('reject');
                     
-                    // Fire at 5 dismissals - immediate termination
-                    if (newCount >= 5) {
-                      console.log('FIRING EMPLOYEE - 5 dismissals reached');
-                      setIsTerminated(true);
-                      setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nDespite previous warnings, you continue this unacceptable behavior.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
-                      setShowManagerWarning(true);
-                      playSound('reject');
-                      
-                      // Force immediate game restart after showing termination message
-                      setTimeout(() => {
-                        localStorage.clear();
-                        sessionStorage.clear();
-                        window.location.reload();
-                      }, 8000);
-                      
-                      return {
-                        ...prev,
-                        customersCalledWithoutService: newCount
-                      };
-                    }
+                    // Create termination overlay and force restart
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = `
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      width: 100vw;
+                      height: 100vh;
+                      background: rgba(0,0,0,0.95);
+                      color: #ff0000;
+                      font-family: 'Courier New', monospace;
+                      font-size: 20px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      text-align: center;
+                      z-index: 9999;
+                      line-height: 1.5;
+                    `;
+                    overlay.innerHTML = `
+                      <div>
+                        ⚠️ TERMINATION NOTICE ⚠️<br><br>
+                        Employee ID: ${Math.floor(Math.random() * 10000)}<br>
+                        Violation: Customer Service Abandonment<br><br>
+                        You have dismissed ${currentDismissals} customers without completing their transactions.<br><br>
+                        Despite previous warnings, you continue this unacceptable behavior.<br><br>
+                        Your employment is hereby TERMINATED.<br><br>
+                        Security will escort you from the premises.<br><br>
+                        - Bank Management<br><br>
+                        <div style="color: #00ff00; margin-top: 30px;">Game restarting in 8 seconds...</div>
+                      </div>
+                    `;
                     
-                    // Warning at exactly 3 dismissals
-                    else if (newCount === 3 && !prev.dismissalWarningGiven) {
-                      console.log('WARNING EMPLOYEE - 3 dismissals reached');
-                      setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
-                      setShowManagerWarning(true);
-                      playSound('reject');
-                      
-                      setTimeout(() => setShowManagerWarning(false), 4000);
-                      
-                      return {
-                        ...prev,
-                        customersCalledWithoutService: newCount,
-                        dismissalWarningGiven: true
-                      };
-                    }
+                    document.body.appendChild(overlay);
                     
-                    return {
+                    setTimeout(() => {
+                      localStorage.clear();
+                      sessionStorage.clear();
+                      window.location.reload();
+                    }, 8000);
+                    
+                    return;
+                  }
+                  
+                  // Warning at exactly 3 dismissals
+                  if (currentDismissals === 3 && !gameScore.dismissalWarningGiven) {
+                    console.log('WARNING EMPLOYEE - 3 dismissals reached');
+                    setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${currentDismissals} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
+                    setShowManagerWarning(true);
+                    playSound('reject');
+                    
+                    setTimeout(() => setShowManagerWarning(false), 4000);
+                    
+                    setGameScore(prev => ({
                       ...prev,
-                      customersCalledWithoutService: newCount
-                    };
-                  });
-                }
-                
-                // Don't generate new customer if terminated
-                if (isTerminated) {
-                  return;
+                      customersCalledWithoutService: currentDismissals,
+                      dismissalWarningGiven: true
+                    }));
+                  } else {
+                    setGameScore(prev => ({
+                      ...prev,
+                      customersCalledWithoutService: currentDismissals
+                    }));
+                  }
                 }
                 
                 // Call next customer
