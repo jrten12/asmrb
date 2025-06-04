@@ -482,9 +482,9 @@ function App() {
       }
       const audioContext = window.gameAudioContext;
       
-      // Resume audio context if suspended (required by browser policies)
-      if (audioContext.state === 'suspended') {
-        audioContext.resume();
+      // Always try to resume audio context (browsers suspend it)
+      if (audioContext.state !== 'running') {
+        audioContext.resume().catch(() => {});
       }
       
       const createTone = (frequency: number, duration: number, volume: number = 0.1) => {
@@ -534,8 +534,9 @@ function App() {
           setTimeout(() => createNoise(0.004, 0.008), 12);
           break;
         case 'button_click':
-          createTone(1200, 0.08, 0.1);
-          setTimeout(() => createTone(800, 0.06, 0.08), 30);
+          // Immediate reliable button click sound
+          createTone(1200, 0.1, 0.15);
+          createTone(800, 0.08, 0.12);
           break;
         case 'terminal_confirm':
           createTone(1400, 0.12, 0.1);
@@ -1476,10 +1477,20 @@ function App() {
   const startBackgroundMusic = () => {
     try {
       if (!backgroundMusicRef.current) {
-        backgroundMusicRef.current = new Audio('/attached_assets/The Currency Hypnosis.mp3');
+        // Use the correct path for the background music file
+        backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.15; // Quiet background volume
+        backgroundMusicRef.current.volume = 0.12; // Quiet background volume
         backgroundMusicRef.current.preload = 'auto';
+        
+        // Add error handler to try alternate paths
+        backgroundMusicRef.current.addEventListener('error', () => {
+          console.log('Trying alternate music path...');
+          if (musicPaths[1]) {
+            backgroundMusicRef.current!.src = musicPaths[1];
+            backgroundMusicRef.current!.load();
+          }
+        });
       }
       
       backgroundMusicRef.current.play().catch(e => {
@@ -1491,6 +1502,7 @@ function App() {
           }
         };
         document.addEventListener('click', tryAgain, { once: true });
+        document.addEventListener('keydown', tryAgain, { once: true });
       });
     } catch (error) {
       console.log('Background music initialization failed:', error);
