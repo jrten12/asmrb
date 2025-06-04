@@ -2980,7 +2980,7 @@ function App() {
                     padding: '10px',
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    cursor: currentCustomer ? 'pointer' : 'not-allowed',
+                    cursor: (currentCustomer && verificationState.accountLookedUp) ? 'pointer' : 'not-allowed',
                     borderRadius: '4px',
                     fontFamily: 'monospace'
                   }}
