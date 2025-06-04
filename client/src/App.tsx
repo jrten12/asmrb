@@ -331,7 +331,7 @@ function App() {
   const [wireDestAccount, setWireDestAccount] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
-  const [musicMuted, setMusicMuted] = useState(false);
+  const [musicMuted, setMusicMuted] = useState(true); // Start muted by default
 
   const generateCustomer = (): Customer => {
     const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "INQUIRY"];
@@ -1488,11 +1488,14 @@ function App() {
       }
       
       if (!musicMuted) {
+        // Ensure volume is extremely low before playing
+        backgroundMusicRef.current.volume = 0.001;
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
           // Try again after user interaction
           const tryAgain = () => {
             if (backgroundMusicRef.current && !musicMuted) {
+              backgroundMusicRef.current.volume = 0.001; // Set volume again
               backgroundMusicRef.current.play().catch(() => {});
             }
           };
@@ -1513,8 +1516,9 @@ function App() {
         backgroundMusicRef.current.pause();
         backgroundMusicRef.current.currentTime = 0;
       } else {
-        // Unmuting: restart from beginning
+        // Unmuting: restart from beginning with ultra quiet volume
         backgroundMusicRef.current.currentTime = 0;
+        backgroundMusicRef.current.volume = 0.001;
         backgroundMusicRef.current.play().catch(() => {});
       }
     }
