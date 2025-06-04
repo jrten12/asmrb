@@ -1528,25 +1528,20 @@ function App() {
   };
 
   const punchOut = () => {
-
     const timeWorked = Math.floor((Date.now() - shiftStartTime) / 60000);
     setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
     
     // Stop background music when shift ends
     stopBackgroundMusic();
     
-    // Always show punch-out screen first, then decide next phase
+    // Always show punch-out screen, then go back to punch in
     setGamePhase('punch_out');
     setPunchStatus('ENDING SHIFT');
     
-    // After punch animation, decide next phase
+    // After punch animation, always go back to main menu
     setTimeout(() => {
-      if (gameScore.score >= getMinScoreForLeaderboard()) {
-        setGamePhase('leaderboard');
-      } else {
-        setGamePhase('punch_in');
-        resetGame();
-      }
+      setGamePhase('punch_in');
+      resetGame();
       setPunchStatus(null);
     }, 2000);
   };
