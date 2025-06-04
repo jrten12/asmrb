@@ -1472,7 +1472,7 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.005; // Extremely quiet background volume
+        backgroundMusicRef.current.volume = 0.001; // Ultra quiet background volume
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
