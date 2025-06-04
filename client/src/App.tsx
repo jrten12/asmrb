@@ -2997,7 +2997,7 @@ function App() {
                     
                     // First warning at 3 dismissals
                     if (newCount === 3 && !prev.dismissalWarningGiven) {
-                      setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nThis is your FINAL WARNING.\n\nFurther violations will result in immediate termination.\n\n- Bank Management`);
+                      setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
                       setShowManagerWarning(true);
                       playSound('reject');
                       
