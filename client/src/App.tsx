@@ -1223,22 +1223,8 @@ function App() {
           
           setPunchStatus('ENDING SHIFT');
           setTimeout(() => {
-            // Skip leaderboard and go directly to start screen
-            setGamePhase('welcome');
-            setCurrentCustomer(null);
-            setTerminalOutput([]);
-            setIsTerminated(false);
-            // Reset all game state
-            setGameScore({
-              score: 0,
-              correctTransactions: 0,
-              errors: 0,
-              timeOnShift: 0,
-              consecutiveErrors: 0,
-              errorDetails: [],
-              customersCalledWithoutService: 0,
-              dismissalWarningGiven: false
-            });
+            // Force page reload to skip leaderboard entirely
+            window.location.reload();
           }, 1500);
         }, 2000);
       }, 1500);
