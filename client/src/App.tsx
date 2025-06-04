@@ -698,6 +698,13 @@ function App() {
           setTimeout(() => createTone(1800, 0.08, 0.05), 200);
           setTimeout(() => createTone(2000, 0.06, 0.04), 400);
           break;
+        case 'punch_clock':
+          // Play the authentic punch clock sound
+          const punchAudio = new Audio('/punch-clock.mp3');
+          punchAudio.volume = 0.7;
+          punchAudio.currentTime = 0;
+          punchAudio.play().catch(e => console.log('Punch clock audio play failed:', e));
+          break;
 
         case 'dot_matrix_printer':
           // Authentic dot matrix printer with line feeds - shortened by 8 seconds total
