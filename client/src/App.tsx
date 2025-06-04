@@ -48,7 +48,7 @@ function App() {
   const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
-    "FIRST NATIONAL BANK SYSTEM v2.1",
+    "WESTRIDGE LEDGER BANK SYSTEM v2.1",
     "TELLER AUTHENTICATION: APPROVED",
     "",
     "Ready for customer service"
@@ -1381,7 +1381,7 @@ function App() {
     setGamePhase('working');
     setTerminalOutput([
       "SHIFT STARTED - " + new Date().toLocaleTimeString(),
-      "Welcome to First National Bank",
+      "Welcome to Westridge Ledger Bank",
       "Ready for customer service",
       "",
       "Type HELP for commands or click CALL CUSTOMER"
@@ -2137,7 +2137,7 @@ function App() {
               </div>
               <div>
                 TELLER WORKSTATION<br/>
-                FIRST NATIONAL BANK
+                WESTRIDGE LEDGER BANK
               </div>
               <div style={{ 
                 borderTop: '1px solid #999999', 
@@ -3845,7 +3845,7 @@ function App() {
             textAlign: 'center',
             fontWeight: 'bold'
           }}>
-            FIRST NATIONAL BANK
+            WESTRIDGE LEDGER BANK
           </div>
           
           <div style={{ lineHeight: '1.4' }}>
