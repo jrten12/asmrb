@@ -1472,7 +1472,7 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.001; // Ultra quiet background volume
+        backgroundMusicRef.current.volume = 0.0; // Completely silent by default
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
@@ -1488,14 +1488,14 @@ function App() {
       }
       
       if (!musicMuted) {
-        // Ensure volume is extremely low before playing
-        backgroundMusicRef.current.volume = 0.001;
+        // Ensure volume is completely silent before playing
+        backgroundMusicRef.current.volume = 0.0;
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
           // Try again after user interaction
           const tryAgain = () => {
             if (backgroundMusicRef.current && !musicMuted) {
-              backgroundMusicRef.current.volume = 0.001; // Set volume again
+              backgroundMusicRef.current.volume = 0.0; // Set volume again
               backgroundMusicRef.current.play().catch(() => {});
             }
           };
@@ -1518,7 +1518,7 @@ function App() {
       } else {
         // Unmuting: restart from beginning with ultra quiet volume
         backgroundMusicRef.current.currentTime = 0;
-        backgroundMusicRef.current.volume = 0.001;
+        backgroundMusicRef.current.volume = 0.05;
         backgroundMusicRef.current.play().catch(() => {});
       }
     }
