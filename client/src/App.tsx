@@ -1223,9 +1223,22 @@ function App() {
           
           setPunchStatus('ENDING SHIFT');
           setTimeout(() => {
-            setGamePhase('punch_out');
+            // Skip leaderboard and go directly to start screen
+            setGamePhase('welcome');
             setCurrentCustomer(null);
             setTerminalOutput([]);
+            setIsTerminated(false);
+            // Reset all game state
+            setGameScore({
+              score: 0,
+              correctTransactions: 0,
+              errors: 0,
+              timeOnShift: 0,
+              consecutiveErrors: 0,
+              errorDetails: [],
+              customersCalledWithoutService: 0,
+              dismissalWarningGiven: false
+            });
           }, 1500);
         }, 2000);
       }, 1500);
@@ -3021,11 +3034,23 @@ function App() {
                       setShowManagerWarning(true);
                       playSound('reject');
                       
-                      // Immediate termination - end shift
+                      // Skip leaderboard and go straight to punch out
                       setTimeout(() => {
                         setShowManagerWarning(false);
-                        setGamePhase('punch_out');
+                        setGamePhase('welcome');
                         setCurrentCustomer(null);
+                        setIsTerminated(false);
+                        // Reset all game state
+                        setGameScore({
+                          score: 0,
+                          correctTransactions: 0,
+                          errors: 0,
+                          timeOnShift: 0,
+                          consecutiveErrors: 0,
+                          errorDetails: [],
+                          customersCalledWithoutService: 0,
+                          dismissalWarningGiven: false
+                        });
                       }, 8000);
                       
                       return {
