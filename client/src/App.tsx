@@ -1487,15 +1487,15 @@ function App() {
         backgroundMusicRef.current.currentTime = 0;
       }
       
+      // Only play music if not muted
       if (!musicMuted) {
-        // Ensure volume is completely silent before playing
-        backgroundMusicRef.current.volume = 0.0;
+        backgroundMusicRef.current.volume = 0.01; // Set to 1% when unmuted
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
           // Try again after user interaction
           const tryAgain = () => {
             if (backgroundMusicRef.current && !musicMuted) {
-              backgroundMusicRef.current.volume = 0.0; // Set volume again
+              backgroundMusicRef.current.volume = 0.01;
               backgroundMusicRef.current.play().catch(() => {});
             }
           };
@@ -1518,7 +1518,7 @@ function App() {
       } else {
         // Unmuting: restart from beginning with ultra quiet volume
         backgroundMusicRef.current.currentTime = 0;
-        backgroundMusicRef.current.volume = 0.05;
+        backgroundMusicRef.current.volume = 0.01;
         backgroundMusicRef.current.play().catch(() => {});
       }
     }
@@ -2961,19 +2961,22 @@ function App() {
                 
                 <button
                   onClick={() => {
-                    if (currentCustomer) {
+                    if (currentCustomer && verificationState.accountLookedUp) {
                       playSound('button_click');
                       handleCommand('COMPARE SIGNATURE');
                     }
                   }}
-                  disabled={!currentCustomer}
+                  disabled={!currentCustomer || !verificationState.accountLookedUp}
                   style={{
                     background: currentCustomer && verificationState.signatureCompared ? 
-                      (verificationState.signatureFraud ? 'rgba(100, 0, 0, 0.8)' : 'rgba(0, 100, 0, 0.8)') : 'rgba(100, 100, 0, 0.6)',
+                      (verificationState.signatureFraud ? 'rgba(100, 0, 0, 0.8)' : 'rgba(0, 100, 0, 0.8)') : 
+                      (!currentCustomer || !verificationState.accountLookedUp) ? 'rgba(50, 50, 50, 0.3)' : 'rgba(100, 100, 0, 0.6)',
                     border: '2px solid ' + (currentCustomer && verificationState.signatureCompared ? 
-                      (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : '#ffff00'),
+                      (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : 
+                      (!currentCustomer || !verificationState.accountLookedUp) ? '#666666' : '#ffff00'),
                     color: currentCustomer && verificationState.signatureCompared ? 
-                      (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : '#ffff00',
+                      (verificationState.signatureFraud ? '#ff0000' : '#00ff00') : 
+                      (!currentCustomer || !verificationState.accountLookedUp) ? '#666666' : '#ffff00',
                     padding: '10px',
                     fontSize: '14px',
                     fontWeight: 'bold',
