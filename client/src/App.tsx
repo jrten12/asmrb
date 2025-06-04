@@ -331,6 +331,7 @@ function App() {
   const [wireDestAccount, setWireDestAccount] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+  const [musicMuted, setMusicMuted] = useState(false);
 
   const generateCustomer = (): Customer => {
     const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "INQUIRY"];
@@ -653,29 +654,9 @@ function App() {
           break;
         case 'punch_clock_in':
         case 'punch_clock_out':
-          // Short punch clock sound synchronized with animation
-          try {
-            const punchOutAudio = new Audio('/punch-clock.mp3');
-            punchOutAudio.volume = 0.6;
-            punchOutAudio.currentTime = 0;
-            const playPromise = punchOutAudio.play();
-            if (playPromise) {
-              playPromise.catch(e => {
-                console.log('Punch clock audio play failed:', e);
-                // Fallback to synthesized sound
-                createTone(200, 0.2, 0.15);
-                createTone(150, 0.15, 0.1);
-              });
-              // Stop audio after punch animation (0.5 seconds)
-              setTimeout(() => {
-                punchOutAudio.pause();
-                punchOutAudio.currentTime = 0;
-              }, 500);
-            }
-          } catch (e) {
-            console.log('Punch clock audio creation failed:', e);
-            createTone(200, 0.2, 0.15);
-          }
+          // Very short punch clock sound - only during animation
+          createTone(400, 0.15, 0.1);
+          createTone(300, 0.1, 0.08);
           break;
         case 'dot_matrix_print':
           // Play authentic dot matrix printer for 10 seconds
@@ -1484,12 +1465,14 @@ function App() {
   };
 
   const startBackgroundMusic = () => {
+    if (musicMuted) return;
+    
     try {
       if (!backgroundMusicRef.current) {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.06; // Much quieter background volume
+        backgroundMusicRef.current.volume = 0.02; // Very quiet background volume
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
@@ -1498,19 +1481,32 @@ function App() {
         });
       }
       
-      backgroundMusicRef.current.play().catch(e => {
-        console.log('Background music failed to start:', e);
-        // Try again after user interaction
-        const tryAgain = () => {
-          if (backgroundMusicRef.current) {
-            backgroundMusicRef.current.play().catch(() => {});
-          }
-        };
-        document.addEventListener('click', tryAgain, { once: true });
-        document.addEventListener('keydown', tryAgain, { once: true });
-      });
+      if (!musicMuted) {
+        backgroundMusicRef.current.play().catch(e => {
+          console.log('Background music failed to start:', e);
+          // Try again after user interaction
+          const tryAgain = () => {
+            if (backgroundMusicRef.current && !musicMuted) {
+              backgroundMusicRef.current.play().catch(() => {});
+            }
+          };
+          document.addEventListener('click', tryAgain, { once: true });
+          document.addEventListener('keydown', tryAgain, { once: true });
+        });
+      }
     } catch (error) {
       console.log('Background music initialization failed:', error);
+    }
+  };
+
+  const toggleMusic = () => {
+    setMusicMuted(!musicMuted);
+    if (backgroundMusicRef.current) {
+      if (!musicMuted) {
+        backgroundMusicRef.current.pause();
+      } else {
+        backgroundMusicRef.current.play().catch(() => {});
+      }
     }
   };
 
