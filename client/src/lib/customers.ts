@@ -46,6 +46,10 @@ const STREET_NAMES = [
 
 const STATE_NAME = 'Westfield';
 
+// Track used account numbers to prevent duplicates
+const usedAccountNumbers = new Set<string>();
+let accountNumberCounter = 100000000;
+
 const SUSPICIOUS_PATTERNS = [
   { type: 'name_mismatch', description: 'ID name doesn\'t match transaction slip' },
   { type: 'amount_mismatch', description: 'Amounts don\'t match between documents' },
@@ -247,7 +251,34 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
 }
 
 function generateAccountNumber(): string {
-  return Math.floor(Math.random() * 900000000 + 100000000).toString();
+  let accountNumber: string;
+  let attempts = 0;
+  const maxAttempts = 50;
+  
+  do {
+    // Use a mix of counter and randomness for uniqueness
+    const baseNumber = accountNumberCounter + Math.floor(Math.random() * 1000);
+    accountNumber = baseNumber.toString();
+    
+    // Ensure it's 9 digits
+    if (accountNumber.length < 9) {
+      accountNumber = accountNumber.padStart(9, '1');
+    } else if (accountNumber.length > 9) {
+      accountNumber = accountNumber.substring(0, 9);
+    }
+    
+    attempts++;
+    if (attempts >= maxAttempts) {
+      // Fallback: use counter directly to guarantee uniqueness
+      accountNumber = accountNumberCounter.toString().padStart(9, '1');
+      break;
+    }
+  } while (usedAccountNumbers.has(accountNumber));
+  
+  usedAccountNumbers.add(accountNumber);
+  accountNumberCounter += Math.floor(Math.random() * 100) + 1; // Increment by 1-100
+  
+  return accountNumber;
 }
 
 function generateAddress(): string {
