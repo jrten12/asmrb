@@ -1282,7 +1282,7 @@ function App() {
         setTerminalOutput(prev => [...prev, "Next customer please."]);
       }, 1500);
     } else if (cmd === 'PUNCH OUT') {
-      playSound('punch_clock_out');
+
       setTerminalOutput(prev => [...prev, "> " + command, "PUNCHING OUT...", "CALCULATING SHIFT TIME...", "UPDATING TIMESHEET..."]);
       
       setTimeout(() => {
@@ -1449,7 +1449,7 @@ function App() {
   };
 
   const punchIn = () => {
-    playSound('punch_clock');
+
     setShiftStartTime(Date.now());
     setGamePhase('working');
     setTerminalOutput([
@@ -1481,6 +1481,12 @@ function App() {
         });
       }
       
+      // Stop any existing music first to prevent overlapping
+      if (backgroundMusicRef.current.currentTime > 0) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
+      
       if (!musicMuted) {
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
@@ -1503,8 +1509,12 @@ function App() {
     setMusicMuted(!musicMuted);
     if (backgroundMusicRef.current) {
       if (!musicMuted) {
+        // Muting: stop the music completely
         backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
       } else {
+        // Unmuting: restart from beginning
+        backgroundMusicRef.current.currentTime = 0;
         backgroundMusicRef.current.play().catch(() => {});
       }
     }
@@ -1518,7 +1528,7 @@ function App() {
   };
 
   const punchOut = () => {
-    playSound('punch_clock_out');
+
     const timeWorked = Math.floor((Date.now() - shiftStartTime) / 60000);
     setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
     
@@ -3425,7 +3435,6 @@ function App() {
             {/* End of Shift Button - Below score */}
             <button
               onClick={() => {
-                playSound('punch_clock_out');
                 punchOut();
               }}
               style={{
