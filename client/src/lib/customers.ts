@@ -61,10 +61,9 @@ export function generateCustomer(level: number): Customer {
   
   const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
   
-  // No fraud for deposits (customers giving money TO the bank)
-  // 30% fraud rate for withdrawals and transfers only
-  const isFraud = transaction.type !== 'deposit' && Math.random() < 0.3;
-  const suspiciousLevel = isFraud ? Math.floor(Math.random() * 3) + 1 : 0;
+  // 30% fraud rate across all transaction types for realistic challenge
+  const isFraud = Math.random() < 0.3;
+  const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
   
   const documents = generateDocuments(name, transaction, suspiciousLevel);
   
@@ -117,9 +116,11 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
 function generateDocuments(customerName: string, transaction: Transaction, suspiciousLevel: number): Document[] {
   const documents: Document[] = [];
   
-  // Generate a realistic birthday (ages 18-80)
+  // Generate a realistic birthday (ages 18-80, but not after 2005)
   const currentYear = new Date().getFullYear();
-  const birthYear = currentYear - Math.floor(Math.random() * 62) - 18; // 18-80 years old
+  const maxBirthYear = Math.min(2005, currentYear - 18); // No one born after 2005
+  const minBirthYear = currentYear - 80; // Maximum 80 years old
+  const birthYear = Math.floor(Math.random() * (maxBirthYear - minBirthYear + 1)) + minBirthYear;
   const birthMonth = Math.floor(Math.random() * 12) + 1;
   const birthDay = Math.floor(Math.random() * 28) + 1; // Safe day range for all months
   const realBirthday = `${birthMonth.toString().padStart(2, '0')}/${birthDay.toString().padStart(2, '0')}/${birthYear}`;

@@ -375,7 +375,14 @@ function App() {
     // System records (correct data)
     const systemName = name;
     const systemAccountNumber = baseAccountNumber;
-    const systemDOB = "1985-03-15";
+    // Generate realistic random birthdate (ages 18-80, not after 2005)
+    const currentYear = new Date().getFullYear();
+    const maxBirthYear = Math.min(2005, currentYear - 18);
+    const minBirthYear = currentYear - 80;
+    const birthYear = Math.floor(Math.random() * (maxBirthYear - minBirthYear + 1)) + minBirthYear;
+    const birthMonth = Math.floor(Math.random() * 12) + 1;
+    const birthDay = Math.floor(Math.random() * 28) + 1;
+    const systemDOB = `${birthMonth.toString().padStart(2, '0')}/${birthDay.toString().padStart(2, '0')}/${birthYear}`;
     const systemAddress = address;
     const systemSignature = name.split(' ')[0] + " " + name.split(' ')[name.split(' ').length - 1];
     
