@@ -4583,59 +4583,7 @@ function App() {
         </div>
       )}
 
-      {/* Rewarded Ad Button */}
-      {gamePhase === 'working' && isRewardedAdLoaded && (
-        <button
-          onClick={showRewardedAd}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: 'linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1))',
-            border: '2px solid #ffd700',
-            borderRadius: '8px',
-            color: '#ffd700',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            padding: '10px 15px',
-            cursor: 'pointer',
-            zIndex: 100,
-            fontFamily: 'monospace',
-            textShadow: '0 0 5px #ffd700',
-            boxShadow: '0 0 10px rgba(255, 215, 0, 0.3)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.5)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.3)';
-          }}
-        >
-          🎬 Watch Ad (+50 Points)
-        </button>
-      )}
 
-      {/* AdMob Status Indicator */}
-      {gamePhase === 'working' && admobInitialized && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: 'rgba(0, 0, 0, 0.8)',
-          border: '1px solid #00ff00',
-          borderRadius: '4px',
-          color: '#00ff00',
-          fontSize: '12px',
-          padding: '5px 10px',
-          fontFamily: 'monospace',
-          opacity: 0.6
-        }}>
-          AdMob Ready | Served: {customersServed}
-        </div>
-      )}
 
       {/* Warning Popup */}
       {showWarningPopup && (
@@ -4704,57 +4652,7 @@ function App() {
         </div>
       )}
 
-      {/* Rewarded Ad Button for Bonus Points */}
-      {gamePhase === 'working' && isRewardedAdLoaded && (
-        <button
-          onClick={showRewardedAd}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: 'linear-gradient(145deg, #ffaa00, #ff6600)',
-            border: '2px solid #ffaa00',
-            borderRadius: '8px',
-            color: '#ffffff',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            padding: '12px 16px',
-            cursor: 'pointer',
-            zIndex: 1000,
-            fontFamily: 'monospace',
-            boxShadow: '0 4px 12px rgba(255, 170, 0, 0.3)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 170, 0, 0.5)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 170, 0, 0.3)';
-          }}
-        >
-          🎬 Watch Ad<br/>+50 Points
-        </button>
-      )}
 
-      {/* AdMob Debug Info (Development Only) */}
-      {!admobInitialized && (
-        <div style={{
-          position: 'fixed',
-          bottom: '10px',
-          left: '10px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          color: '#00ff00',
-          padding: '8px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          zIndex: 1000
-        }}>
-          AdMob: Initializing... ({customersServed}/5 until next ad)
-        </div>
-      )}
 
     </div>
   );
