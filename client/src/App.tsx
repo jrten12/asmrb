@@ -330,6 +330,7 @@ function App() {
   const [wireAmount, setWireAmount] = useState('');
   const [wireDestAccount, setWireDestAccount] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
 
   const generateCustomer = (): Customer => {
     const transactionTypes: Customer['transactionType'][] = ["DEPOSIT", "WITHDRAWAL", "WIRE_TRANSFER", "INQUIRY"];
@@ -1467,12 +1468,49 @@ function App() {
       "",
       "Type HELP for commands or click CALL CUSTOMER"
     ]);
+    
+    // Start background music
+    startBackgroundMusic();
+  };
+
+  const startBackgroundMusic = () => {
+    try {
+      if (!backgroundMusicRef.current) {
+        backgroundMusicRef.current = new Audio('/attached_assets/The Currency Hypnosis.mp3');
+        backgroundMusicRef.current.loop = true;
+        backgroundMusicRef.current.volume = 0.15; // Quiet background volume
+        backgroundMusicRef.current.preload = 'auto';
+      }
+      
+      backgroundMusicRef.current.play().catch(e => {
+        console.log('Background music failed to start:', e);
+        // Try again after user interaction
+        const tryAgain = () => {
+          if (backgroundMusicRef.current) {
+            backgroundMusicRef.current.play().catch(() => {});
+          }
+        };
+        document.addEventListener('click', tryAgain, { once: true });
+      });
+    } catch (error) {
+      console.log('Background music initialization failed:', error);
+    }
+  };
+
+  const stopBackgroundMusic = () => {
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
+    }
   };
 
   const punchOut = () => {
     playSound('punch_clock');
     const timeWorked = Math.floor((Date.now() - shiftStartTime) / 60000);
     setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
+    
+    // Stop background music when shift ends
+    stopBackgroundMusic();
     
     if (gameScore.score >= getMinScoreForLeaderboard()) {
       setGamePhase('leaderboard');
