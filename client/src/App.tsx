@@ -3034,23 +3034,9 @@ function App() {
                       setShowManagerWarning(true);
                       playSound('reject');
                       
-                      // Skip leaderboard and go straight to punch out
+                      // Force immediate game restart after showing termination message
                       setTimeout(() => {
-                        setShowManagerWarning(false);
-                        setGamePhase('welcome');
-                        setCurrentCustomer(null);
-                        setIsTerminated(false);
-                        // Reset all game state
-                        setGameScore({
-                          score: 0,
-                          correctTransactions: 0,
-                          errors: 0,
-                          timeOnShift: 0,
-                          consecutiveErrors: 0,
-                          errorDetails: [],
-                          customersCalledWithoutService: 0,
-                          dismissalWarningGiven: false
-                        });
+                        window.location.reload();
                       }, 8000);
                       
                       return {
