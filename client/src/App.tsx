@@ -1485,14 +1485,21 @@ function App() {
   };
 
   const handleCorrectTransaction = () => {
-    setGameScore(prev => ({
-      ...prev,
-      score: prev.score + 100,
-      correctTransactions: prev.correctTransactions + 1,
-      consecutiveErrors: 0, // Reset consecutive errors on correct transaction
-      customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
-      dismissalWarningGiven: false // Reset warning flag
-    }));
+    setGameScore(prev => {
+      const newTransactionCount = prev.correctTransactions + 1;
+      
+      // Check for badge achievement
+      checkBadgeAchievement(newTransactionCount);
+      
+      return {
+        ...prev,
+        score: prev.score + 100,
+        correctTransactions: newTransactionCount,
+        consecutiveErrors: 0, // Reset consecutive errors on correct transaction
+        customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
+        dismissalWarningGiven: false // Reset warning flag
+      };
+    });
     
     // Check if ad should be shown every 5 customers
     setCustomersServed(prev => {
