@@ -19,6 +19,7 @@ declare global {
       onRewardedAdFailedToLoad: () => void;
       onRewardedAdRewarded: () => void;
     };
+    gameAudioContext?: AudioContext;
   }
 }
 
@@ -474,7 +475,16 @@ function App() {
 
   const playSound = (type: string) => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Create or reuse audio context
+      if (!window.gameAudioContext) {
+        window.gameAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const audioContext = window.gameAudioContext;
+      
+      // Resume audio context if suspended (required by browser policies)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
       
       const createTone = (frequency: number, duration: number, volume: number = 0.1) => {
         const oscillator = audioContext.createOscillator();
@@ -642,21 +652,51 @@ function App() {
         case 'punch_clock_in':
         case 'punch_clock_out':
           // Play ASMR punch clock audio file from attached assets
-          const punchOutAudio = new Audio('/punch-clock.mp3');
-          punchOutAudio.volume = 0.8;
-          punchOutAudio.play().catch(e => console.log('Audio play failed:', e));
+          try {
+            const punchOutAudio = new Audio('/punch-clock.mp3');
+            punchOutAudio.volume = 0.8;
+            punchOutAudio.play().catch(e => {
+              console.log('Punch clock audio play failed:', e);
+              // Fallback to synthesized sound
+              createTone(200, 0.3, 0.15);
+              setTimeout(() => createTone(150, 0.2, 0.1), 150);
+            });
+          } catch (e) {
+            console.log('Punch clock audio creation failed:', e);
+            createTone(200, 0.3, 0.15);
+          }
           break;
         case 'dot_matrix_print':
           // Play authentic dot matrix printer for 10 seconds
-          const printerAudio = new Audio('/dot-matrix-printer.mp3');
-          printerAudio.volume = 0.6;
-          printerAudio.currentTime = 0;
-          printerAudio.play().catch(e => console.log('Audio play failed:', e));
-          // Stop after 10 seconds
-          setTimeout(() => {
-            printerAudio.pause();
+          try {
+            const printerAudio = new Audio('/dot-matrix-printer.mp3');
+            printerAudio.volume = 0.6;
             printerAudio.currentTime = 0;
-          }, 10000);
+            printerAudio.play().catch(e => {
+              console.log('Dot matrix audio play failed:', e);
+              // Fallback to synthesized printer sound
+              for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                  createTone(1600 + (i % 4) * 150, 0.025, 0.04);
+                  createNoise(0.018, 0.025);
+                }, i * 50);
+              }
+            });
+            // Stop after 10 seconds
+            setTimeout(() => {
+              printerAudio.pause();
+              printerAudio.currentTime = 0;
+            }, 10000);
+          } catch (e) {
+            console.log('Dot matrix audio creation failed:', e);
+            // Fallback synthesized sound
+            for (let i = 0; i < 15; i++) {
+              setTimeout(() => {
+                createTone(1600 + (i % 4) * 150, 0.025, 0.04);
+                createNoise(0.018, 0.025);
+              }, i * 50);
+            }
+          }
           break;
         case 'mechanical_whir':
           // Internal mechanism engaging
