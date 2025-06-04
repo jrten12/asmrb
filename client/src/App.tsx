@@ -78,12 +78,12 @@ function App() {
 
   // Achievement badge definitions
   const badges = [
-    { milestone: 1, name: "First Steps", description: "Successfully processed your first transaction", icon: "🎯", color: "#4CAF50", tier: "Bronze" },
-    { milestone: 5, name: "Steady Service", description: "Completed 5 successful transactions", icon: "⭐", color: "#FF9800", tier: "Bronze" },
-    { milestone: 9, name: "Reliable Teller", description: "Achieved 9 successful transactions", icon: "💎", color: "#2196F3", tier: "Silver" },
-    { milestone: 16, name: "Expert Banker", description: "Mastered 16 successful transactions", icon: "🏆", color: "#9C27B0", tier: "Silver" },
-    { milestone: 23, name: "Transaction Master", description: "Completed 23 successful transactions", icon: "👑", color: "#FF5722", tier: "Gold" },
-    { milestone: 30, name: "Banking Elite", description: "Achieved elite status with 30+ transactions", icon: "⚡", color: "#FFD700", tier: "Elite" }
+    { milestone: 1, name: "Rookie Banker", description: "Successfully processed your first customer transaction", icon: "🥉", color: "#CD7F32", tier: "Bronze" },
+    { milestone: 5, name: "Teller Trainee", description: "Handled 5 customers with growing confidence", icon: "📊", color: "#C0C0C0", tier: "Silver" },
+    { milestone: 9, name: "Branch Professional", description: "Processed 9 transactions with expert precision", icon: "🥈", color: "#4169E1", tier: "Gold" },
+    { milestone: 16, name: "Senior Teller", description: "Mastered 16 complex banking transactions", icon: "💼", color: "#4B0082", tier: "Platinum" },
+    { milestone: 23, name: "Branch Manager", description: "Excellence across 23 perfect transactions", icon: "👑", color: "#8B008B", tier: "Diamond" },
+    { milestone: 30, name: "Banking Legend", description: "Legendary service - 30 flawless transactions", icon: "🏆", color: "#FF0080", tier: "Elite" }
   ];
 
   // Check for badge achievements
@@ -98,11 +98,11 @@ function App() {
       achievementAudio.volume = 0.3;
       achievementAudio.play().catch(e => console.log('Achievement audio failed:', e));
       
-      // Auto-hide after 7 seconds
+      // Auto-hide after 8 seconds
       setTimeout(() => {
         setShowBadgePopup(false);
         setCurrentBadge(null);
-      }, 7000);
+      }, 8000);
     }
   };
 
@@ -4784,20 +4784,34 @@ function App() {
       {showBadgePopup && currentBadge && (
         <div style={{
           position: 'fixed',
-          top: '20%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: `linear-gradient(145deg, ${currentBadge.color}22, ${currentBadge.color}11)`,
-          border: `4px solid ${currentBadge.color}`,
-          borderRadius: '20px',
-          padding: '30px',
-          textAlign: 'center',
+          top: '0',
+          left: '0',
+          right: '0',
+          bottom: '0',
+          background: 'rgba(0, 0, 0, 0.85)',
           zIndex: 6000,
-          maxWidth: '400px',
-          boxShadow: `0 0 40px ${currentBadge.color}66, inset 0 0 20px ${currentBadge.color}22`,
-          animation: 'badgePopup 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          fontFamily: 'monospace'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'fadeInBackground 0.5s ease-out'
         }}>
+          <div style={{
+            background: `linear-gradient(145deg, rgba(0, 20, 0, 0.98), rgba(0, 40, 0, 0.95))`,
+            border: `6px solid ${currentBadge.color}`,
+            borderRadius: '25px',
+            padding: '40px',
+            textAlign: 'center',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: `
+              0 0 60px ${currentBadge.color}aa,
+              inset 0 0 30px rgba(0, 255, 0, 0.1),
+              0 20px 40px rgba(0, 0, 0, 0.7)
+            `,
+            animation: 'badgePopupEnhanced 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            fontFamily: 'monospace',
+            backdropFilter: 'blur(10px)'
+          }}>
           {/* Badge Icon */}
           <div style={{
             fontSize: '80px',
@@ -4886,6 +4900,7 @@ function App() {
             marginTop: '10px'
           }}>
             Transaction #{currentBadge.milestone} completed
+          </div>
           </div>
         </div>
       )}
