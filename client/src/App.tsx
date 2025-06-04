@@ -3022,6 +3022,8 @@ function App() {
                       
                       // Force immediate game restart after showing termination message
                       setTimeout(() => {
+                        localStorage.clear();
+                        sessionStorage.clear();
                         window.location.reload();
                       }, 8000);
                       
@@ -3052,6 +3054,11 @@ function App() {
                       customersCalledWithoutService: newCount
                     };
                   });
+                }
+                
+                // Don't generate new customer if terminated
+                if (isTerminated) {
+                  return;
                 }
                 
                 // Call next customer
