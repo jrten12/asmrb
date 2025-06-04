@@ -2278,6 +2278,25 @@ function App() {
       
 
       
+      {/* Westridge Ledger Bank Logo - Subtle placement */}
+      <div style={{
+        position: 'absolute',
+        top: '8px',
+        right: '8px',
+        zIndex: 100,
+        opacity: 0.6
+      }}>
+        <img 
+          src="/westridge-logo.png" 
+          alt="Westridge Ledger Bank"
+          style={{
+            width: '40px',
+            height: 'auto',
+            filter: 'brightness(0.8) hue-rotate(120deg)'
+          }}
+        />
+      </div>
+
       {/* CRT Scanline Effect */}
       <div style={{
         position: 'fixed',
