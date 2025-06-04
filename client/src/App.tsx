@@ -706,18 +706,7 @@ function App() {
           punchClockAudio.play().catch(e => console.log('Punch clock audio play failed:', e));
           break;
 
-        case 'dot_matrix_printer':
-          // Authentic dot matrix printer with line feeds - shortened by 8 seconds total
-          for (let i = 0; i < 3; i++) {
-            setTimeout(() => {
-              createTone(800 + Math.random() * 400, 0.02, 0.06);
-              createNoise(0.01, 0.03);
-              if (i % 2 === 0) {
-                createTone(1200, 0.04, 0.02); // Line feed sound
-              }
-            }, i * 40);
-          }
-          break;
+
         case 'paper_tear':
           // Paper tearing sound
           createNoise(0.3, 0.15);
@@ -2284,15 +2273,24 @@ function App() {
         top: '8px',
         right: '8px',
         zIndex: 100,
-        opacity: 0.6
+        opacity: 0.7
       }}>
         <img 
-          src="/westridge-logo.png" 
+          src="./westridge-logo.png" 
           alt="Westridge Ledger Bank"
           style={{
-            width: '40px',
+            width: '45px',
             height: 'auto',
-            filter: 'brightness(0.8) hue-rotate(120deg)'
+            filter: 'brightness(1.2) sepia(1) hue-rotate(90deg) saturate(2)'
+          }}
+          onError={(e) => {
+            console.log('Logo failed to load:', e);
+            // Fallback to text-based logo
+            e.currentTarget.style.display = 'none';
+            const parent = e.currentTarget.parentElement;
+            if (parent) {
+              parent.innerHTML = '<div style="color: #00ff00; font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">WESTRIDGE<br/>LEDGER<br/>BANK</div>';
+            }
           }}
         />
       </div>
@@ -3014,24 +3012,9 @@ function App() {
                   setGameScore(prev => {
                     const newCount = prev.customersCalledWithoutService + 1;
                     
-                    // First warning at 3 dismissals
-                    if (newCount === 3 && !prev.dismissalWarningGiven) {
-                      setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
-                      setShowManagerWarning(true);
-                      playSound('reject');
-                      
-                      setTimeout(() => setShowManagerWarning(false), 4000);
-                      
-                      return {
-                        ...prev,
-                        customersCalledWithoutService: newCount,
-                        dismissalWarningGiven: true
-                      };
-                    }
-                    
-                    // Fire at 5 dismissals
-                    if (newCount >= 5) {
-                      setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nDespite previous warnings, you continue this unacceptable behavior.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
+                    // Fire at 3 dismissals
+                    if (newCount >= 3) {
+                      setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
                       setShowManagerWarning(true);
                       playSound('reject');
                       
