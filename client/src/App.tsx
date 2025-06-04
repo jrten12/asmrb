@@ -3012,7 +3012,25 @@ function App() {
                   setGameScore(prev => {
                     const newCount = prev.customersCalledWithoutService + 1;
                     
-                    // Warning at 3 dismissals
+                    // Fire at 5 dismissals - check this FIRST
+                    if (newCount >= 5) {
+                      setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nDespite previous warnings, you continue this unacceptable behavior.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
+                      setShowManagerWarning(true);
+                      playSound('reject');
+                      
+                      // End the shift automatically after warning
+                      setTimeout(() => {
+                        setShowManagerWarning(false);
+                        punchOut();
+                      }, 8000);
+                      
+                      return {
+                        ...prev,
+                        customersCalledWithoutService: newCount
+                      };
+                    }
+                    
+                    // Warning at 3 dismissals - only if not fired
                     if (newCount === 3 && !prev.dismissalWarningGiven) {
                       setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
                       setShowManagerWarning(true);
@@ -3025,19 +3043,6 @@ function App() {
                         customersCalledWithoutService: newCount,
                         dismissalWarningGiven: true
                       };
-                    }
-                    
-                    // Fire at 5 dismissals
-                    if (newCount >= 5) {
-                      setManagerMessage(`⚠️ TERMINATION NOTICE ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Abandonment\n\nYou have dismissed ${newCount} customers without completing their transactions.\n\nDespite previous warnings, you continue this unacceptable behavior.\n\nYour employment is hereby TERMINATED.\n\nSecurity will escort you from the premises.\n\n- Bank Management`);
-                      setShowManagerWarning(true);
-                      playSound('reject');
-                      
-                      // End the shift automatically after warning
-                      setTimeout(() => {
-                        setShowManagerWarning(false);
-                        punchOut();
-                      }, 8000);
                     }
                     
                     return {
