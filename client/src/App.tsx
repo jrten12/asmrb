@@ -1472,7 +1472,7 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.02; // Very quiet background volume
+        backgroundMusicRef.current.volume = 0.005; // Extremely quiet background volume
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
@@ -1818,7 +1818,7 @@ function App() {
             Fictional simulation. All names and events are coincidental.
           </div>
           
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center' }}>
             <button
               onClick={() => setGamePhase('tutorial')}
               style={{
@@ -1873,6 +1873,30 @@ function App() {
               }}
             >
               GO TO WORK
+            </button>
+            
+            <button
+              onClick={toggleMusic}
+              style={{
+                background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
+                border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+                borderRadius: '50%',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                padding: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
+                transition: 'all 0.2s',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title={musicMuted ? "Unmute music" : "Mute music"}
+            >
+              {musicMuted ? '🔇' : '🎵'}
             </button>
           </div>
         </div>
