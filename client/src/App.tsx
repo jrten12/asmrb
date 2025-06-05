@@ -46,6 +46,7 @@ interface LegacyDocument {
 
 function App() {
   const [gamePhase, setGamePhase] = useState<'welcome' | 'tutorial' | 'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('welcome');
+  const [gameInitialized, setGameInitialized] = useState(false);
   const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([

@@ -65,8 +65,8 @@ export function generateCustomer(level: number): Customer {
   
   const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
   
-  // 30% fraud rate across all transaction types for realistic challenge
-  const isFraud = Math.random() < 0.3;
+  // 40% fraud rate for more challenging gameplay and pattern recognition
+  const isFraud = Math.random() < 0.4;
   const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
   
   const documents = generateDocuments(name, transaction, suspiciousLevel);
@@ -193,7 +193,18 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
   let hasAmountError = false;
   
   if (slipHasFraud) {
-    slipAmount = transaction.amount + Math.floor(Math.random() * 200) - 100;
+    // Create subtle amount discrepancies for pattern recognition
+    const discrepancyTypes = [
+      () => transaction.amount + Math.floor(Math.random() * 50) + 10, // Small addition
+      () => transaction.amount - Math.floor(Math.random() * 30) - 5,  // Small subtraction
+      () => Math.floor(transaction.amount * 1.1), // 10% increase
+      () => Math.floor(transaction.amount * 0.95), // 5% decrease
+      () => transaction.amount + (Math.random() < 0.5 ? 100 : -100), // Flat $100 difference
+      () => transaction.amount * 10, // Decimal point error
+      () => Math.floor(transaction.amount / 10) // Missing zero
+    ];
+    const discrepancyMethod = discrepancyTypes[Math.floor(Math.random() * discrepancyTypes.length)];
+    slipAmount = discrepancyMethod();
     hasAmountError = true;
   }
   
