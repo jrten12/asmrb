@@ -466,12 +466,8 @@ function App() {
 
       switch (type) {
         case 'keypress':
-          // Enhanced mechanical keyboard with medium hardness ASMR
-          createTone(1200 + Math.random() * 400, 0.015, 0.04);
-          createTone(800 + Math.random() * 200, 0.008, 0.025);
-          createNoise(0.012, 0.015);
-          setTimeout(() => createTone(600, 0.006, 0.015), 8);
-          setTimeout(() => createNoise(0.004, 0.008), 12);
+          // Clean, simple keypress sound
+          createTone(1000, 0.08, 0.15);
           break;
         case 'button_click':
           // Immediate reliable button click sound
@@ -700,14 +696,10 @@ function App() {
           setTimeout(() => createTone(1800, 0.06, 0.03), 200);
           break;
         case 'legacy_processing':
-          // Legacy system processing with authentic terminal sounds
-          for (let i = 0; i < 12; i++) {
-            setTimeout(() => {
-              createTone(1200 + (i % 4) * 200, 0.04, 0.06);
-              createNoise(0.01, 0.02);
-            }, i * 80);
-          }
-          setTimeout(() => createTone(1800, 0.15, 0.08), 960);
+          // Clean processing sound without weird jingle
+          createTone(1200, 0.1, 0.08);
+          setTimeout(() => createTone(1400, 0.08, 0.06), 200);
+          setTimeout(() => createTone(1600, 0.06, 0.04), 400);
           break;
         case 'account_verification':
           // Account verification processing
