@@ -852,9 +852,7 @@ function App() {
       
       // Get the signature from customer documents (handle both old and new formats)
       const signatureDoc = currentCustomer.documents.find(d => 
-        d.type === 'signature' || 
-        d.type === 'SIGNATURE' || 
-        (d as any).title === 'Signature Card'
+        d.type === 'signature'
       );
       if (!signatureDoc) {
         console.log("No signature document found", currentCustomer.documents);
@@ -2488,10 +2486,10 @@ function App() {
                     borderBottom: '1px solid #ffff00',
                     paddingBottom: '4px'
                   }}>
-                    {doc.type === 'ID Card' ? '🆔' : 
-                     doc.type === 'Transaction Slip' ? '📝' : 
-                     doc.type === 'Bank Book' ? '📖' : 
-                     doc.type === 'Signature Card' ? '✍️' : '📄'} {doc.title}
+                    {doc.type === 'id' ? '🆔' : 
+                     doc.type === 'slip' ? '📝' : 
+                     doc.type === 'bank_book' ? '📖' : 
+                     doc.type === 'signature' ? '✍️' : '📄'} {doc.type.toUpperCase()}
                   </div>
                   <div style={{ 
                     display: 'grid', 
@@ -2591,7 +2589,7 @@ function App() {
                           const customerDOB = String(idDoc.data.dateOfBirth);
                           
                           // For fraud cases with DOB-related fraud, show a different "bank record" DOB
-                          if (currentCustomer.isFraud && Math.random() < 0.3) {
+                          if (currentCustomer.suspiciousLevel > 0 && Math.random() < 0.3) {
                             const [month, day, year] = customerDOB.split('/');
                             const bankYear = parseInt(year) + Math.floor(Math.random() * 6) - 3;
                             return `${month}/${day}/${bankYear}`;
@@ -2610,7 +2608,7 @@ function App() {
                             const correctZip = Math.floor(Math.random() * 90000) + 10000;
                             return `${correctStreetNumber} ${correctStreet}, ${correctTown}, Westfield ${correctZip}`;
                           }
-                          return currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A';
+                          return currentCustomer.documents.find(d => d.type === 'id')?.data.address || 'N/A';
                         })()}</div>
                         <div><strong>BAL:</strong> {(() => {
                           if (currentCustomer.suspiciousLevel > 2) return "$0.00";
@@ -2743,9 +2741,9 @@ function App() {
                       fontFamily: 'monospace'
                     }}>
                       <div><strong>NAME:</strong> {currentCustomer.name}</div>
-                      <div><strong>DOB:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || '1985-03-15'}</div>
-                      <div><strong>ADDRESS:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}</div>
-                      <div><strong>LICENSE:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.licenseNumber || 'DL-12345'}</div>
+                      <div><strong>DOB:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.dateOfBirth || '1985-03-15'}</div>
+                      <div><strong>ADDRESS:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.address || 'N/A'}</div>
+                      <div><strong>LICENSE:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.licenseNumber || 'DL-12345'}</div>
                       <div><strong>SSN:</strong> ***-**-1234</div>
                     </div>
                   </div>
