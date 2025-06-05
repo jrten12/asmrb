@@ -2634,12 +2634,12 @@ function App() {
                         📄 CUSTOMER DOCS
                       </div>
                       <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
-                        <div><strong>FORM ACCT:</strong> {currentCustomer.documents.find(d => d.type === 'SLIP')?.data.accountNumber || 'N/A'}</div>
-                        <div><strong>ID NAME:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.name || 'N/A'}</div>
-                        <div><strong>ID DOB:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.dateOfBirth || 'N/A'}</div>
-                        <div><strong>ID ADDR:</strong> {currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A'}</div>
-                        <div><strong>AMOUNT:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
-                        <div><strong>SIGNATURE:</strong> {currentCustomer.documents.find(d => d.type === 'SIGNATURE')?.data.signature || 'N/A'}</div>
+                        <div><strong>FORM ACCT:</strong> {currentCustomer.documents.find(d => d.type === 'slip')?.data.accountNumber || 'N/A'}</div>
+                        <div><strong>ID NAME:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.name || 'N/A'}</div>
+                        <div><strong>ID DOB:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.dateOfBirth || 'N/A'}</div>
+                        <div><strong>ID ADDR:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.address || 'N/A'}</div>
+                        <div><strong>AMOUNT:</strong> ${currentCustomer.transaction.amount.toLocaleString()}</div>
+                        <div><strong>SIGNATURE:</strong> {currentCustomer.documents.find(d => d.type === 'signature')?.data.signature || 'N/A'}</div>
                       </div>
                     </div>
                   </div>
@@ -2771,11 +2771,11 @@ function App() {
                       lineHeight: '1.6',
                       fontFamily: 'monospace'
                     }}>
-                      <div><strong>ACCOUNT:</strong> {currentCustomer.isFraud ? "INVALID" : currentCustomer.accountNumber}</div>
-                      <div><strong>TYPE:</strong> {currentCustomer.isFraud ? "NO RECORD" : "CHECKING"}</div>
-                      <div><strong>BALANCE:</strong> {currentCustomer.isFraud ? "$0.00" : `$${accountBalance.toLocaleString()}`}</div>
-                      <div><strong>STATUS:</strong> {currentCustomer.isFraud ? "INVALID ACCOUNT" : "ACTIVE"}</div>
-                      <div><strong>OPENED:</strong> {currentCustomer.isFraud ? "NO RECORD" : "2020-01-15"}</div>
+                      <div><strong>ACCOUNT:</strong> {currentCustomer.suspiciousLevel > 0 ? "INVALID" : currentCustomer.transaction.accountNumber}</div>
+                      <div><strong>TYPE:</strong> {currentCustomer.suspiciousLevel > 0 ? "NO RECORD" : "CHECKING"}</div>
+                      <div><strong>BALANCE:</strong> {currentCustomer.suspiciousLevel > 0 ? "$0.00" : `$${accountBalance.toLocaleString()}`}</div>
+                      <div><strong>STATUS:</strong> {currentCustomer.suspiciousLevel > 0 ? "INVALID ACCOUNT" : "ACTIVE"}</div>
+                      <div><strong>OPENED:</strong> {currentCustomer.suspiciousLevel > 0 ? "NO RECORD" : "2020-01-15"}</div>
                     </div>
                   </div>
                 </div>
@@ -2947,10 +2947,10 @@ function App() {
                     cursor: 'default'
                   }}>
                     <div><strong>CUSTOMER:</strong> {currentCustomer.name}</div>
-                    <div><strong>TYPE:</strong> {currentCustomer.transactionType}</div>
-                    <div><strong>AMOUNT:</strong> ${currentCustomer.requestedAmount.toLocaleString()}</div>
-                    {currentCustomer.destinationAccount && (
-                      <div><strong>WIRE TO:</strong> {currentCustomer.destinationAccount}</div>
+                    <div><strong>TYPE:</strong> {currentCustomer.transaction.type.toUpperCase()}</div>
+                    <div><strong>AMOUNT:</strong> ${currentCustomer.transaction.amount.toLocaleString()}</div>
+                    {currentCustomer.transaction.targetAccount && (
+                      <div><strong>WIRE TO:</strong> {currentCustomer.transaction.targetAccount}</div>
                     )}
                   </div>
                 </div>
@@ -3040,7 +3040,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
-                    if (currentCustomer && currentCustomer.transactionType === 'INQUIRY') {
+                    if (currentCustomer && currentCustomer.transaction.type === 'inquiry') {
                       playSound('button_click');
                       setTerminalOutput(prev => [...prev, "> BALANCE INQUIRY", "Processing balance inquiry..."]);
                       handleCommand('INQUIRY');
@@ -3049,14 +3049,14 @@ function App() {
                       playSound('reject');
                     }
                   }}
-                  disabled={!currentCustomer || currentCustomer.transactionType !== 'INQUIRY'}
+                  disabled={!currentCustomer || currentCustomer.transaction.type !== 'inquiry'}
                   style={{
-                    background: currentCustomer && currentCustomer.transactionType === 'INQUIRY' ? 'rgba(120, 120, 0, 0.8)' : 'rgba(50, 50, 50, 0.3)',
+                    background: currentCustomer && currentCustomer.transaction.type === 'inquiry' ? 'rgba(120, 120, 0, 0.8)' : 'rgba(50, 50, 50, 0.3)',
                     border: '2px solid #aaaa00',
-                    color: currentCustomer && currentCustomer.transactionType === 'INQUIRY' ? '#ffff00' : '#666666',
+                    color: currentCustomer && currentCustomer.transaction.type === 'inquiry' ? '#ffff00' : '#666666',
                     padding: '12px',
                     fontSize: '12px',
-                    cursor: currentCustomer && currentCustomer.transactionType === 'INQUIRY' ? 'pointer' : 'not-allowed',
+                    cursor: currentCustomer && currentCustomer.transaction.type === 'inquiry' ? 'pointer' : 'not-allowed',
                     borderRadius: '4px',
                     fontFamily: 'monospace',
                     fontWeight: 'bold'
@@ -4056,7 +4056,7 @@ function App() {
               marginBottom: '20px'
             }}>
               <div style={{ color: '#00cccc', marginBottom: '10px' }}>
-                Account: {currentCustomer.accountNumber}
+                Account: {currentCustomer.transaction.accountNumber}
               </div>
               <div style={{ color: '#00cccc', marginBottom: '10px' }}>
                 Customer: {currentCustomer.name}
@@ -4078,7 +4078,7 @@ function App() {
                 marginTop: '10px',
                 textAlign: 'center'
               }}>
-                Requested Withdrawal: ${currentCustomer.requestedAmount.toLocaleString()}
+                Requested Withdrawal: ${currentCustomer.transaction.amount.toLocaleString()}
               </div>
             </div>
             
@@ -4090,7 +4090,7 @@ function App() {
             }}>
               <button
                 onClick={() => {
-                  if (currentCustomer.requestedAmount <= accountBalance) {
+                  if (currentCustomer.transaction.amount <= accountBalance) {
                     playSound('cash_counting');
                     setTimeout(() => playSound('register_print'), 800);
                     setTimeout(() => {
@@ -4117,14 +4117,14 @@ function App() {
                     }, 3000);
                   }
                 }}
-                disabled={currentCustomer.requestedAmount > accountBalance}
+                disabled={currentCustomer.transaction.amount > accountBalance}
                 style={{
-                  background: currentCustomer.requestedAmount <= accountBalance ? 'rgba(0, 255, 0, 0.2)' : 'rgba(100, 100, 100, 0.2)',
-                  border: '2px solid ' + (currentCustomer.requestedAmount <= accountBalance ? '#00ff00' : '#666666'),
-                  color: currentCustomer.requestedAmount <= accountBalance ? '#00ff00' : '#666666',
+                  background: currentCustomer.transaction.amount <= accountBalance ? 'rgba(0, 255, 0, 0.2)' : 'rgba(100, 100, 100, 0.2)',
+                  border: '2px solid ' + (currentCustomer.transaction.amount <= accountBalance ? '#00ff00' : '#666666'),
+                  color: currentCustomer.transaction.amount <= accountBalance ? '#00ff00' : '#666666',
                   padding: '15px 30px',
                   fontSize: '16px',
-                  cursor: currentCustomer.requestedAmount <= accountBalance ? 'pointer' : 'not-allowed',
+                  cursor: currentCustomer.transaction.amount <= accountBalance ? 'pointer' : 'not-allowed',
                   borderRadius: '6px',
                   fontFamily: 'monospace'
                 }}
