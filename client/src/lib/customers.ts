@@ -135,11 +135,11 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
   // Only fraudulent customers (suspiciousLevel > 0) get fraudulent documents
   const isFraudulentCustomer = suspiciousLevel > 0;
   
-  // For fraudulent customers, select which documents will have errors (1-3 types of fraud)
+  // For fraudulent customers, select which documents will have errors (1-2 types of fraud max)
   let fraudDocumentTypes: string[] = [];
   if (isFraudulentCustomer) {
     const fraudTypes = ['id', 'slip', 'bank_book', 'signature'];
-    const numFraudTypes = Math.floor(Math.random() * 3) + 1; // 1-3 fraud types
+    const numFraudTypes = Math.floor(Math.random() * 2) + 1; // 1-2 fraud types maximum
     
     // Shuffle and pick fraud types
     const shuffled = [...fraudTypes].sort(() => Math.random() - 0.5);
@@ -184,7 +184,8 @@ function generateDocuments(customerName: string, transaction: Transaction, suspi
       accountNumber: idAccountNumber,
       address: generateAddress(),
       dateOfBirth: idBirthday,
-      idNumber: Math.random().toString(36).substr(2, 9).toUpperCase()
+      idNumber: Math.random().toString(36).substr(2, 9).toUpperCase(),
+      licenseNumber: 'DL-' + Math.random().toString(36).substr(2, 8).toUpperCase()
     },
     isValid: !hasIdError,
     hasError: hasIdError ? errorType : undefined

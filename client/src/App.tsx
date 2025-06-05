@@ -383,6 +383,7 @@ function App() {
   const [showAdBreak, setShowAdBreak] = useState(false);
   const [adCountdown, setAdCountdown] = useState(5);
   const [customersServed, setCustomersServed] = useState(0);
+  const [fraudTracker, setFraudTracker] = useState<boolean[]>([]);
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
   const [isTerminated, setIsTerminated] = useState(false);
