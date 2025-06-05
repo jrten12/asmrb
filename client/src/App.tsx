@@ -1675,11 +1675,23 @@ function App() {
   };
 
   const punchOut = () => {
+    console.log('Punch out function called');
+    playSound('punch_clock_out');
+    
     const timeWorked = Math.floor((Date.now() - shiftStartTime) / 60000);
     setGameScore(prev => ({ ...prev, timeOnShift: timeWorked }));
     
     // Stop background music when shift ends
     stopBackgroundMusic();
+    
+    // Clear any active states
+    setCurrentCustomer(null);
+    setSelectedDocument(null);
+    setShowCashDrawer(false);
+    setCashDrawerOpen(false);
+    setBillsOnCounter([]);
+    setTotalCounted(0);
+    setTerminalOutput([]);
     
     // Always show punch-out screen, then go back to punch in
     setGamePhase('punch_out');
