@@ -813,7 +813,7 @@ function App() {
       setTimeout(() => {
         const systemDOB = currentCustomer.documents.find(d => d.data.dateOfBirth)?.data.dateOfBirth || "1985-03-15";
         
-        if (currentCustomer.isFraud) {
+        if (currentCustomer.suspiciousLevel > 0) {
           setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== FRAUD ALERT ==========", "*** NO DATE OF BIRTH RECORD ***", "DOB: '" + enteredDOB + "'", "SYSTEM STATUS: NOT IN DATABASE", "RECOMMENDATION: REJECT TRANSACTION", "SECURITY FLAG: FRAUDULENT IDENTITY", "==============================", ""]);
           playSound('reject');
         } else if (enteredDOB === systemDOB) {
@@ -987,7 +987,7 @@ function App() {
         setTerminalOutput(prev => [...prev, 
           "========== DEPOSIT PROCESSED ==========",
           `AMOUNT: $${amount}`,
-          `ACCOUNT: ${currentCustomer.accountNumber}`,
+          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `NEW BALANCE: $${(accountBalance + parseFloat(amount)).toLocaleString()}`,
           "STATUS: READY FOR APPROVAL",
           "======================================"
@@ -1036,7 +1036,7 @@ function App() {
         setTerminalOutput(prev => [...prev, 
           "========== WITHDRAWAL APPROVED ==========",
           `AMOUNT: $${amount}`,
-          `ACCOUNT: ${currentCustomer.accountNumber}`,
+          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
           "STATUS: READY FOR CASH DISPENSING",
           "========================================"
@@ -1062,8 +1062,8 @@ function App() {
         return;
       }
       
-      if (!destAccount || destAccount !== currentCustomer.destinationAccount) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Destination account mismatch", `Expected: ${currentCustomer.destinationAccount}`, `Entered: ${destAccount || 'NONE'}`, "WIRE TRANSFER DENIED"]);
+      if (!destAccount || destAccount !== currentCustomer.transaction.targetAccount) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Destination account mismatch", `Expected: ${currentCustomer.transaction.targetAccount}`, `Entered: ${destAccount || 'NONE'}`, "WIRE TRANSFER DENIED"]);
         playSound('reject');
         handleError();
         return;
@@ -1077,7 +1077,7 @@ function App() {
         setTerminalOutput(prev => [...prev, 
           "========== WIRE TRANSFER READY ==========",
           `AMOUNT: $${amount}`,
-          `FROM: ${currentCustomer.accountNumber}`,
+          `FROM: ${currentCustomer.transaction.accountNumber}`,
           `TO: ${destAccount}`,
           `FEES: $25.00`,
           `TOTAL DEBIT: $${(parseFloat(amount) + 25).toLocaleString()}`,
@@ -1093,7 +1093,7 @@ function App() {
         return;
       }
       
-      if (currentCustomer.transactionType !== 'INQUIRY') {
+      if (currentCustomer.transaction.type !== 'inquiry') {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer not requesting balance inquiry"]);
         playSound('reject');
         return;
