@@ -109,6 +109,11 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
     amount *= 3; // Very suspicious large amount
   }
   
+  // Cap withdrawal amounts at $1000 for cash register functionality
+  if (type === 'withdrawal' && amount > 1000) {
+    amount = Math.floor(Math.random() * 900) + 100; // $100 to $1000
+  }
+  
   const accountNumber = generateAccountNumber();
   const targetAccount = type === 'transfer' ? generateAccountNumber() : undefined;
   
