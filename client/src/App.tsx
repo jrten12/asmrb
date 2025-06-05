@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { analyzeSignature, generateCustomer } from './lib/customers';
+import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import type { Customer, Document as GameDocument } from './types/game';
 
 // Extend Window interface for AdMob and iOS WebKit
@@ -396,8 +396,31 @@ function App() {
   const [musicMuted, setMusicMuted] = useState(true); // Start muted by default
 
   const generateCustomerLocal = (): Customer => {
-    // Use the centralized customer generation from customers.ts to ensure unique account numbers
-    return generateCustomer(1); // Use level 1 for consistent generation
+    // Implement scattered 40% fraud distribution (4 out of every 10 customers)
+    const fraudPattern = [false, true, false, false, true, false, true, false, false, true]; // Exactly 40% fraud, scattered
+    const currentIndex = fraudTracker.length % fraudPattern.length;
+    const shouldBeFraud = fraudPattern[currentIndex];
+    
+    // Track fraud distribution
+    setFraudTracker(prev => [...prev, shouldBeFraud]);
+    
+    // Generate customer with controlled fraud rate
+    let customer = generateCustomer(1);
+    
+    // Override fraud status to ensure 40% rate with scattered distribution
+    if (shouldBeFraud && customer.suspiciousLevel === 0) {
+      // Force fraud for this customer
+      customer.suspiciousLevel = Math.floor(Math.random() * 2) + 1; // 1-2 fraud types
+      // Regenerate documents with fraud
+      customer.documents = generateDocuments(customer.name, customer.transaction, customer.suspiciousLevel);
+    } else if (!shouldBeFraud && customer.suspiciousLevel > 0) {
+      // Force legitimate for this customer
+      customer.suspiciousLevel = 0;
+      // Regenerate documents without fraud
+      customer.documents = generateDocuments(customer.name, customer.transaction, 0);
+    }
+    
+    return customer;
   };
 
   // Initialize game properly on first mount
@@ -2719,6 +2742,7 @@ function App() {
                         <div><strong>ID NAME:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.name || 'N/A'}</div>
                         <div><strong>ID DOB:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.dateOfBirth || 'N/A'}</div>
                         <div><strong>ID ADDR:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.address || 'N/A'}</div>
+                        <div><strong>DL#:</strong> {currentCustomer.documents.find(d => d.type === 'id')?.data.licenseNumber || 'N/A'}</div>
                         <div><strong>AMOUNT:</strong> ${currentCustomer.transaction.amount.toLocaleString()}</div>
                         <div><strong>SIGNATURE:</strong> {currentCustomer.documents.find(d => d.type === 'signature')?.data.signature || 'N/A'}</div>
                       </div>

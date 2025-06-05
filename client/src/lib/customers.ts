@@ -120,7 +120,7 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
   };
 }
 
-function generateDocuments(customerName: string, transaction: Transaction, suspiciousLevel: number): Document[] {
+export function generateDocuments(customerName: string, transaction: Transaction, suspiciousLevel: number): Document[] {
   const documents: Document[] = [];
   
   // Generate a realistic birthday (ages 18-80, but not after 2005)
