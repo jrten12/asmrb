@@ -793,7 +793,17 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            if (currentCustomer.suspiciousLevel > 0) {
+            // Check if account number matches any of the customer's documents
+            const customerAccountNumber = currentCustomer.transaction.accountNumber;
+            const idCardAccount = currentCustomer.documents.find(d => d.type === 'id')?.data.accountNumber;
+            const bankBookAccount = currentCustomer.documents.find(d => d.type === 'bank_book')?.data.accountNumber;
+            
+            // Account is valid if it matches the transaction account or any document account
+            const isValidAccount = accountNum === customerAccountNumber || 
+                                 accountNum === idCardAccount || 
+                                 accountNum === bankBookAccount;
+            
+            if (currentCustomer.suspiciousLevel > 0 && !isValidAccount) {
               setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
@@ -803,7 +813,7 @@ function App() {
                 "ACTION: REJECT TRANSACTION IMMEDIATELY"
               ]);
               playSound('reject');
-            } else if (accountNum === currentCustomer.transaction.accountNumber) {
+            } else if (isValidAccount) {
               const balance = Math.floor(Math.random() * 50000) + 5000;
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
