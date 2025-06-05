@@ -87,7 +87,7 @@ export function generateCustomer(level: number): Customer {
 }
 
 function generateTransaction(level: number, suspiciousLevel: number): Transaction {
-  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'transfer'];
+  const types: Transaction['type'][] = ['deposit', 'withdrawal'];
   const type = types[Math.floor(Math.random() * types.length)];
   
   // More varied transaction amounts
