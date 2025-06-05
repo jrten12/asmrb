@@ -47,7 +47,6 @@ interface LegacyDocument {
 function App() {
   const [gamePhase, setGamePhase] = useState<'welcome' | 'tutorial' | 'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('welcome');
   const [gameInitialized, setGameInitialized] = useState(false);
-  const [preventGlitches, setPreventGlitches] = useState(false);
   const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
@@ -733,7 +732,7 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            if (currentCustomer.isFraud) {
+            if (currentCustomer.suspiciousLevel > 0) {
               setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
@@ -743,7 +742,7 @@ function App() {
                 "ACTION: REJECT TRANSACTION IMMEDIATELY"
               ]);
               playSound('reject');
-            } else if (accountNum === currentCustomer.accountNumber) {
+            } else if (accountNum === currentCustomer.transaction.accountNumber) {
               const balance = Math.floor(Math.random() * 50000) + 5000;
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
@@ -782,7 +781,7 @@ function App() {
       
       playSound('database_lookup');
       setTimeout(() => {
-        if (currentCustomer.isFraud) {
+        if (currentCustomer.suspiciousLevel > 0) {
           setTerminalOutput(prev => [...prev, "> " + command, "SEARCHING DATABASE...", "========== FRAUD ALERT ==========", "*** NO CUSTOMER RECORD FOUND ***", "Name: '" + enteredName + "'", "SYSTEM STATUS: NOT IN DATABASE", "RECOMMENDATION: REJECT IMMEDIATELY", "SECURITY FLAG: POTENTIAL IDENTITY THEFT", "===============================", ""]);
           playSound('reject');
         } else {
@@ -2402,10 +2401,10 @@ function App() {
             CUSTOMER: {currentCustomer.name}
           </h1>
           <div style={{ color: '#00ff00', marginBottom: '4px', fontSize: '24px', fontWeight: 'bold', letterSpacing: '2px' }}>
-            ACCOUNT: {currentCustomer.accountNumber}
+            ACCOUNT: {currentCustomer.transaction.accountNumber}
           </div>
           <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '18px' }}>
-            REQUEST: {currentCustomer.transactionType} ${currentCustomer.requestedAmount}
+            REQUEST: {currentCustomer.transaction.type.toUpperCase()} ${currentCustomer.transaction.amount}
           </div>
         </div>
       ) : (
