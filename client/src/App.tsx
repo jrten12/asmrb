@@ -351,7 +351,7 @@ function App() {
       console.log('Generating customer for working phase');
       setCurrentCustomer(generateCustomerLocal());
     }
-  }, [gamePhase, currentCustomer, gameInitialized]);
+  }, [gamePhase, gameInitialized]);
 
   const playSound = (type: string) => {
     try {
@@ -2573,14 +2573,17 @@ function App() {
                       </div>
                       <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
                         <div><strong>NAME:</strong> {(() => {
+                          if (!currentCustomer) return "NO CUSTOMER";
                           if (currentCustomer.suspiciousLevel > 2) return "NO RECORD FOUND";
                           return currentCustomer.name;
                         })()}</div>
                         <div><strong>ACCT:</strong> {(() => {
+                          if (!currentCustomer) return "N/A";
                           if (currentCustomer.suspiciousLevel > 2) return "INVALID";
                           return currentCustomer.transaction.accountNumber;
                         })()}</div>
                         <div><strong>DOB:</strong> {(() => {
+                          if (!currentCustomer) return "N/A";
                           if (currentCustomer.suspiciousLevel > 2) return "NO RECORD";
                           
                           const idDoc = currentCustomer.documents.find(d => d.type === 'id');
@@ -2599,6 +2602,7 @@ function App() {
                           return customerDOB;
                         })()}</div>
                         <div><strong>ADDR:</strong> {(() => {
+                          if (!currentCustomer) return "N/A";
                           if (currentCustomer.suspiciousLevel > 2) return "NO RECORD";
                           if (currentCustomer.suspiciousLevel === 1) {
                             // System shows correct address, document shows wrong one
@@ -2611,10 +2615,12 @@ function App() {
                           return currentCustomer.documents.find(d => d.type === 'id')?.data.address || 'N/A';
                         })()}</div>
                         <div><strong>BAL:</strong> {(() => {
+                          if (!currentCustomer) return "$0.00";
                           if (currentCustomer.suspiciousLevel > 2) return "$0.00";
                           return `$${accountBalance.toLocaleString()}`;
                         })()}</div>
                         <div><strong>STATUS:</strong> {(() => {
+                          if (!currentCustomer) return "N/A";
                           if (currentCustomer.suspiciousLevel > 2) return "INVALID ACCOUNT";
                           return "ACTIVE";
                         })()}</div>
