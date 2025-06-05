@@ -302,105 +302,161 @@ function generateAddress(): string {
 }
 
 function generateSignature(name: string, isFraud: boolean = false): string {
-  const signatureTypes = [
-    'full_cursive',     // Complete cursive script
-    'print_style',      // Block letter printing
-    'mixed_case',       // Mix of cursive and print
-    'stylized_loops',   // Decorative with loops
-    'simple_script',    // Basic cursive
-    'elaborate_flourish', // Ornate with flourishes
-    'initials_only',    // Just initials
-    'compact_dense',    // Cramped writing
-    'loose_flowing',    // Spread out script
-    'angular_sharp'     // Sharp, geometric style
-  ];
+  const nameParts = name.split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts[nameParts.length - 1] || '';
   
-  const style = signatureTypes[Math.floor(Math.random() * signatureTypes.length)];
+  // Realistic signature characteristics
+  const characteristics = {
+    pressure: Math.random() < 0.7 ? 'medium' : Math.random() < 0.5 ? 'heavy' : 'light',
+    speed: Math.random() < 0.6 ? 'normal' : Math.random() < 0.5 ? 'fast' : 'slow',
+    slant: Math.random() < 0.4 ? 'forward' : Math.random() < 0.3 ? 'backward' : 'upright',
+    size: Math.random() < 0.5 ? 'medium' : Math.random() < 0.5 ? 'large' : 'small',
+    loops: Math.random() < 0.7,
+    flourishes: Math.random() < 0.3,
+    legibility: Math.random() < 0.6 ? 'readable' : 'stylized'
+  };
   
   if (isFraud) {
+    // Advanced fraud patterns with realistic mismatches
     const fraudTypes = [
-      'wrong_name',       // Completely different name
-      'misspelled',       // Name with spelling errors
-      'partial_match',    // Only first or last name matches
-      'similar_name',     // Name that sounds similar
-      'shaky_hand',       // Trembling, inconsistent lines
-      'different_style',  // Dramatically different writing style
-      'pressure_off',     // Too light or too heavy pressure
-      'rushed_sloppy'     // Hurried, careless appearance
+      'completely_different_name',
+      'first_name_wrong', 
+      'last_name_wrong',
+      'misspelled_signature',
+      'wrong_handwriting_style',
+      'trembling_forgery',
+      'practiced_forgery',
+      'similar_sounding_name',
+      'reversed_names',
+      'missing_middle_initial'
     ];
     
     const fraudType = fraudTypes[Math.floor(Math.random() * fraudTypes.length)];
     
     switch (fraudType) {
-      case 'wrong_name':
-        const fakeName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-        return `${fakeName}_${style}_fraud_wrong`;
+      case 'completely_different_name':
+        const randomName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+        return createSignaturePattern(randomName, characteristics, 'different_name');
         
-      case 'misspelled':
-        const misspelled = name.split(' ').map(part => {
-          if (Math.random() < 0.7) {
-            // Add/remove/change a letter
-            const chars = part.split('');
-            const index = Math.floor(Math.random() * chars.length);
-            if (Math.random() < 0.5) {
-              chars[index] = String.fromCharCode(97 + Math.floor(Math.random() * 26));
-            } else {
-              chars.splice(index, 1);
-            }
-            return chars.join('');
-          }
-          return part;
-        }).join(' ');
-        return `${misspelled}_${style}_fraud_misspelled`;
+      case 'first_name_wrong':
+        const wrongFirst = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)].split(' ')[0];
+        return createSignaturePattern(`${wrongFirst} ${lastName}`, characteristics, 'wrong_first');
         
-      case 'partial_match':
-        const nameParts = name.split(' ');
-        const partialName = Math.random() < 0.5 ? nameParts[0] : nameParts[nameParts.length - 1];
-        return `${partialName}_${style}_fraud_partial`;
+      case 'last_name_wrong':
+        const wrongLast = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)].split(' ')[1] || 'Smith';
+        return createSignaturePattern(`${firstName} ${wrongLast}`, characteristics, 'wrong_last');
         
-      case 'similar_name':
-        const similarNames = [
-          'John Johnson', 'Mike Mitchell', 'Bob Roberts', 'Jim James',
-          'Mary Maria', 'Sue Susan', 'Tom Thomas', 'Bill William'
-        ];
-        const similar = similarNames[Math.floor(Math.random() * similarNames.length)];
-        return `${similar}_${style}_fraud_similar`;
+      case 'misspelled_signature':
+        const misspelled = name.replace(/([aeiou])/gi, (match) => {
+          const vowels = ['a', 'e', 'i', 'o', 'u'];
+          return Math.random() < 0.3 ? vowels[Math.floor(Math.random() * vowels.length)] : match;
+        });
+        return createSignaturePattern(misspelled, characteristics, 'misspelled');
         
-      case 'shaky_hand':
-        return `${name}_${style}_fraud_shaky`;
+      case 'wrong_handwriting_style':
+        const wrongStyle = {
+          ...characteristics,
+          pressure: characteristics.pressure === 'heavy' ? 'light' : 'heavy',
+          slant: characteristics.slant === 'forward' ? 'backward' : 'forward',
+          loops: !characteristics.loops,
+          size: characteristics.size === 'large' ? 'small' : 'large'
+        };
+        return createSignaturePattern(name, wrongStyle, 'style_mismatch');
         
-      case 'different_style':
-        const conflictingStyle = signatureTypes[Math.floor(Math.random() * signatureTypes.length)];
-        return `${name}_${conflictingStyle}_fraud_style`;
+      case 'trembling_forgery':
+        return createSignaturePattern(name, { ...characteristics, pressure: 'unsteady', speed: 'hesitant' }, 'trembling');
         
-      case 'pressure_off':
-        return `${name}_${style}_fraud_pressure`;
+      case 'practiced_forgery':
+        return createSignaturePattern(name, { ...characteristics, pressure: 'controlled', speed: 'deliberate' }, 'practiced_fake');
         
-      case 'rushed_sloppy':
-        return `${name}_${style}_fraud_rushed`;
+      case 'similar_sounding_name':
+        const similar = generateSimilarName(name);
+        return createSignaturePattern(similar, characteristics, 'similar_sound');
+        
+      case 'reversed_names':
+        return createSignaturePattern(`${lastName} ${firstName}`, characteristics, 'name_reversed');
+        
+      case 'missing_middle_initial':
+        if (nameParts.length > 2) {
+          return createSignaturePattern(`${firstName} ${lastName}`, characteristics, 'missing_middle');
+        }
+        return createSignaturePattern(`${firstName} M. ${lastName}`, characteristics, 'added_middle');
         
       default:
-        return `${name}_${style}_fraud_generic`;
+        return createSignaturePattern(name, characteristics, 'generic_fraud');
     }
-  }
-  
-  // Generate authentic signature with consistent style for legitimate customers
-  const authenticity = Math.random();
-  let modifier = '';
-  
-  if (authenticity < 0.2) {
-    modifier = '_aged';  // Slightly different due to age/time
-  } else if (authenticity < 0.4) {
-    modifier = '_careful'; // More deliberate, formal signing
-  } else if (authenticity < 0.6) {
-    modifier = '_casual'; // Relaxed, everyday signing
-  } else if (authenticity < 0.8) {
-    modifier = '_confident'; // Bold, assured signature
   } else {
-    modifier = '_standard'; // Regular signature
+    // Legitimate signature
+    return createSignaturePattern(name, characteristics, 'legitimate');
+  }
+}
+
+function generateSimilarName(originalName: string): string {
+  const nameParts = originalName.split(' ');
+  const firstName = nameParts[0];
+  
+  // Common name substitutions that sound similar
+  const similarNames: { [key: string]: string[] } = {
+    'John': ['Jon', 'Jonathan', 'Johnny'],
+    'Michael': ['Mitchell', 'Mike', 'Micheal'],
+    'David': ['Dave', 'Daveed', 'Daivd'],
+    'Robert': ['Rob', 'Bob', 'Robbert'],
+    'William': ['Will', 'Bill', 'Willem'],
+    'James': ['Jim', 'Jamie', 'Jemes'],
+    'Mary': ['Marie', 'Maria', 'Mery'],
+    'Jennifer': ['Jenny', 'Jen', 'Jenifer'],
+    'Lisa': ['Liza', 'Leesa', 'Lissa'],
+    'Susan': ['Sue', 'Susie', 'Suzan']
+  };
+  
+  const similar = similarNames[firstName];
+  if (similar && similar.length > 0) {
+    const newFirst = similar[Math.floor(Math.random() * similar.length)];
+    return originalName.replace(firstName, newFirst);
   }
   
-  return `${name}_${style}${modifier}_authentic`;
+  // Fallback: slight misspelling
+  return originalName.replace(/([aeiou])/i, (match) => {
+    const vowels = ['a', 'e', 'i', 'o', 'u'];
+    return vowels[Math.floor(Math.random() * vowels.length)];
+  });
+}
+
+function createSignaturePattern(name: string, characteristics: any, signatureType: string): string {
+  const nameParts = name.split(' ');
+  let pattern = '';
+  
+  // Build realistic signature representation
+  if (characteristics.legibility === 'readable') {
+    pattern = name;
+  } else {
+    // Stylized version with initials and flowing elements
+    const initials = nameParts.map(part => part.charAt(0)).join('');
+    pattern = `${initials}_stylized_${nameParts[nameParts.length - 1]}`;
+  }
+  
+  // Add style characteristics to pattern
+  const styleMarkers = [];
+  
+  if (characteristics.pressure === 'heavy') styleMarkers.push('bold');
+  if (characteristics.pressure === 'light') styleMarkers.push('faint');
+  if (characteristics.pressure === 'unsteady') styleMarkers.push('shaky');
+  
+  if (characteristics.speed === 'fast') styleMarkers.push('rushed');
+  if (characteristics.speed === 'slow') styleMarkers.push('careful');
+  if (characteristics.speed === 'hesitant') styleMarkers.push('uncertain');
+  
+  if (characteristics.slant === 'forward') styleMarkers.push('italic');
+  if (characteristics.slant === 'backward') styleMarkers.push('backslant');
+  
+  if (characteristics.loops) styleMarkers.push('looped');
+  if (characteristics.flourishes) styleMarkers.push('flourished');
+  
+  if (characteristics.size === 'large') styleMarkers.push('large');
+  if (characteristics.size === 'small') styleMarkers.push('small');
+  
+  return `${pattern}|${styleMarkers.join('_')}|${signatureType}`;
 }
 
 export function validateDocuments(documents: Document[]): { isValid: boolean; errors: string[] } {
@@ -474,14 +530,18 @@ export function validateDocuments(documents: Document[]): { isValid: boolean; er
   };
 }
 
-// New function to get signature authenticity details for teller review
 export function analyzeSignature(signature: string, customerName: string): {
   isAuthentic: boolean;
   confidence: number;
   notes: string[];
   fraudIndicators: string[];
 } {
-  const isAuthentic = !signature.includes('_fraud_');
+  const parts = signature.split('|');
+  const signatureName = parts[0] || signature;
+  const styleMarkers = parts[1] ? parts[1].split('_') : [];
+  const signatureType = parts[2] || 'unknown';
+  
+  const isAuthentic = signatureType === 'legitimate';
   let confidence = 0;
   const notes: string[] = [];
   const fraudIndicators: string[] = [];
@@ -489,59 +549,122 @@ export function analyzeSignature(signature: string, customerName: string): {
   if (isAuthentic) {
     confidence = Math.floor(Math.random() * 15) + 85; // 85-100% confidence for authentic
     
-    if (signature.includes('_aged')) {
-      notes.push('Signature shows natural aging variations');
+    // Analyze style characteristics for authentic signatures
+    if (styleMarkers.includes('bold')) {
+      notes.push('Strong, confident pen pressure observed');
     }
-    if (signature.includes('_careful')) {
-      notes.push('Deliberate, formal signing style observed');
+    if (styleMarkers.includes('italic')) {
+      notes.push('Consistent forward slant throughout signature');
     }
-    if (signature.includes('_casual')) {
-      notes.push('Relaxed, everyday signature pattern');
+    if (styleMarkers.includes('looped')) {
+      notes.push('Natural loop formations in letters');
     }
-    if (signature.includes('_confident')) {
-      notes.push('Bold, assured signature characteristics');
+    if (styleMarkers.includes('flourished')) {
+      notes.push('Decorative elements consistent with personality');
     }
-    if (signature.includes('_standard')) {
-      notes.push('Standard signature pattern matches records');
+    if (styleMarkers.includes('careful')) {
+      notes.push('Deliberate, measured signing pace');
     }
-  } else {
-    confidence = Math.floor(Math.random() * 40) + 10; // 10-50% confidence for fraud
     
-    const fraudType = signature.split('_fraud_')[1];
-    switch (fraudType) {
-      case 'wrong':
-        fraudIndicators.push('Name completely different from account holder');
-        fraudIndicators.push('No similarity to recorded signature');
+    notes.push('Signature matches bank records within acceptable variance');
+    notes.push('Natural flow and rhythm consistent with authentic signing');
+    
+  } else {
+    confidence = Math.floor(Math.random() * 40) + 15; // 15-55% confidence for fraud
+    
+    // Detailed fraud analysis based on signature type
+    switch (signatureType) {
+      case 'different_name':
+        fraudIndicators.push('CRITICAL: Name completely different from account holder');
+        fraudIndicators.push('No similarity to recorded signature whatsoever');
+        fraudIndicators.push('Possible identity theft or document forgery');
+        confidence = Math.floor(Math.random() * 20) + 5; // Very low confidence
         break;
+        
+      case 'wrong_first':
+        fraudIndicators.push('First name does not match bank records');
+        fraudIndicators.push('Last name appears correct but suspicious inconsistency');
+        fraudIndicators.push('May indicate attempted partial identity fraud');
+        break;
+        
+      case 'wrong_last':
+        fraudIndicators.push('Last name mismatch with account records');
+        fraudIndicators.push('First name matches but surname is incorrect');
+        fraudIndicators.push('Possible marriage name change not updated or fraud');
+        break;
+        
       case 'misspelled':
-        fraudIndicators.push('Spelling errors in customer name');
-        fraudIndicators.push('Possible unfamiliarity with correct spelling');
+        fraudIndicators.push('Spelling errors in customer name signature');
+        fraudIndicators.push('Indicates unfamiliarity with correct name spelling');
+        fraudIndicators.push('Common sign of attempted forgery');
         break;
-      case 'partial':
-        fraudIndicators.push('Only partial name signed');
-        fraudIndicators.push('Missing required signature elements');
+        
+      case 'style_mismatch':
+        fraudIndicators.push('Handwriting style dramatically different from records');
+        fraudIndicators.push('Pressure, slant, and letter formation inconsistent');
+        fraudIndicators.push('Suggests different person attempting signature');
         break;
-      case 'similar':
-        fraudIndicators.push('Name sounds similar but is different');
-        fraudIndicators.push('Possible identity confusion or deception');
+        
+      case 'trembling':
+        fraudIndicators.push('Unsteady, hesitant line quality observed');
+        fraudIndicators.push('Trembling suggests nervousness or unfamiliarity');
+        fraudIndicators.push('Inconsistent with natural signing behavior');
         break;
-      case 'shaky':
-        fraudIndicators.push('Trembling or unsteady pen strokes');
-        fraudIndicators.push('Possible nervousness or inexperience with name');
+        
+      case 'practiced_fake':
+        fraudIndicators.push('Overly careful, deliberate signing pattern');
+        fraudIndicators.push('Suggests practiced forgery attempt');
+        fraudIndicators.push('Lacks natural flow of authentic signature');
         break;
-      case 'style':
-        fraudIndicators.push('Writing style dramatically different from records');
-        fraudIndicators.push('Inconsistent with customer\'s usual signature');
+        
+      case 'similar_sound':
+        fraudIndicators.push('Name sounds similar but spelling differs');
+        fraudIndicators.push('May be attempt to use phonetically similar identity');
+        fraudIndicators.push('Common fraud technique using name confusion');
         break;
-      case 'pressure':
-        fraudIndicators.push('Pen pressure too light or too heavy');
-        fraudIndicators.push('Unnatural writing pressure patterns');
+        
+      case 'name_reversed':
+        fraudIndicators.push('First and last names appear reversed');
+        fraudIndicators.push('Unusual signing pattern not matching records');
+        fraudIndicators.push('May indicate confusion or deliberate misdirection');
         break;
-      case 'rushed':
-        fraudIndicators.push('Hurried, careless appearance');
-        fraudIndicators.push('Possible attempt to avoid scrutiny');
+        
+      case 'missing_middle':
+        fraudIndicators.push('Middle initial present in records but missing from signature');
+        fraudIndicators.push('Incomplete signature compared to bank records');
         break;
+        
+      case 'added_middle':
+        fraudIndicators.push('Extra middle initial not present in bank records');
+        fraudIndicators.push('Signature contains elements not on file');
+        break;
+        
+      default:
+        fraudIndicators.push('Signature anomalies detected');
+        fraudIndicators.push('Does not match established bank records');
     }
+    
+    // Additional style-based fraud indicators
+    if (styleMarkers.includes('shaky')) {
+      fraudIndicators.push('Trembling hand movements suggest nervousness');
+    }
+    if (styleMarkers.includes('uncertain')) {
+      fraudIndicators.push('Hesitant signing pattern indicates unfamiliarity');
+    }
+    if (styleMarkers.includes('rushed')) {
+      fraudIndicators.push('Hurried execution may indicate attempted deception');
+    }
+  }
+  
+  // Add technical analysis notes
+  if (styleMarkers.includes('large')) {
+    notes.push('Large signature size - may indicate confidence or compensation');
+  }
+  if (styleMarkers.includes('small')) {
+    notes.push('Compact signature style - could suggest caution or privacy');
+  }
+  if (styleMarkers.includes('faint')) {
+    notes.push('Light pen pressure - unusual for typical banking signatures');
   }
   
   return {
