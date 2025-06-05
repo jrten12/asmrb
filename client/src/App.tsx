@@ -621,38 +621,84 @@ function App() {
           setTimeout(() => createNoise(0.8, 0.03), 800);
           break;
         case 'cash_drawer_open':
-          // Satisfying mechanical cash drawer opening
-          createTone(200, 0.1, 0.08);
-          setTimeout(() => createTone(300, 0.15, 0.06), 100);
-          setTimeout(() => createTone(250, 0.2, 0.04), 200);
-          setTimeout(() => createNoise(0.3, 0.02), 300);
+          // Deeply satisfying mechanical cash drawer opening with authentic sounds
+          createTone(180, 0.12, 0.1);
+          setTimeout(() => createTone(220, 0.08, 0.08), 80);
+          setTimeout(() => createTone(280, 0.15, 0.06), 160);
+          setTimeout(() => createTone(240, 0.18, 0.04), 240);
+          setTimeout(() => {
+            // Metal spring release
+            createTone(320, 0.06, 0.03);
+            createNoise(0.25, 0.015);
+          }, 320);
+          setTimeout(() => {
+            // Final settling click
+            createTone(200, 0.08, 0.02);
+          }, 450);
           break;
         case 'cash_drawer_close':
-          // Mechanical drawer closing with satisfying click
-          createTone(300, 0.1, 0.06);
-          setTimeout(() => createTone(200, 0.15, 0.08), 100);
-          setTimeout(() => createTone(180, 0.1, 0.04), 200);
+          // Mechanical drawer closing with multiple satisfying clicks
+          createTone(280, 0.08, 0.06);
+          setTimeout(() => createTone(240, 0.1, 0.08), 60);
+          setTimeout(() => createTone(200, 0.12, 0.06), 120);
+          setTimeout(() => createTone(160, 0.08, 0.04), 180);
+          setTimeout(() => {
+            // Final lock click
+            createTone(140, 0.06, 0.03);
+            createNoise(0.15, 0.01);
+          }, 240);
           break;
         case 'bill_rustle':
-          // ASMR paper money rustling
-          createNoise(0.4, 0.015);
-          setTimeout(() => createNoise(0.3, 0.01), 50);
-          setTimeout(() => createNoise(0.25, 0.008), 100);
+          // Enhanced ASMR paper money rustling with layered textures
+          createNoise(0.35, 0.02);
+          setTimeout(() => createNoise(0.28, 0.015), 40);
+          setTimeout(() => createNoise(0.22, 0.012), 80);
+          setTimeout(() => createNoise(0.18, 0.008), 120);
+          setTimeout(() => {
+            // Paper fiber sound
+            createTone(2400, 0.03, 0.005);
+            createNoise(0.15, 0.006);
+          }, 160);
           break;
         case 'bill_snap':
-          // Crisp bill snapping sound
+          // Crisp bill snapping with authentic paper texture
+          createTone(1200, 0.04, 0.04);
           createTone(800, 0.05, 0.03);
-          createNoise(0.2, 0.01);
+          createNoise(0.25, 0.008);
+          setTimeout(() => {
+            createTone(1000, 0.03, 0.02);
+            createNoise(0.18, 0.006);
+          }, 30);
+          setTimeout(() => {
+            createNoise(0.12, 0.004);
+          }, 60);
           break;
         case 'bill_count':
-          // Satisfying bill counting rhythm
-          createTone(600, 0.04, 0.02);
-          setTimeout(() => createTone(650, 0.03, 0.015), 80);
+          // Satisfying bill counting rhythm with finger taps
+          createTone(650, 0.035, 0.025);
+          createNoise(0.15, 0.008);
+          setTimeout(() => {
+            createTone(700, 0.03, 0.02);
+            createNoise(0.12, 0.006);
+          }, 70);
+          setTimeout(() => {
+            // Finger tap on bill
+            createTone(450, 0.025, 0.015);
+          }, 110);
           break;
         case 'cash_register_ding':
-          // Classic cash register bell
-          createTone(1200, 0.3, 0.15);
-          setTimeout(() => createTone(1600, 0.2, 0.1), 100);
+          // Enhanced classic cash register bell with resonance
+          createTone(1200, 0.25, 0.18);
+          setTimeout(() => createTone(1600, 0.2, 0.12), 80);
+          setTimeout(() => createTone(2000, 0.15, 0.08), 160);
+          setTimeout(() => {
+            // Bell resonance
+            createTone(1400, 0.3, 0.04);
+          }, 240);
+          setTimeout(() => {
+            // Final harmonic
+            createTone(1800, 0.2, 0.02);
+          }, 400);
           break;
         case 'matrix_code':
           // Digital rain sound effect
@@ -5207,7 +5253,7 @@ function App() {
         }
       `}</style>
 
-      {/* Cash Drawer System */}
+      {/* Beautiful Cash Counter System */}
       {showCashDrawer && (
         <div className="cash-drawer" style={{
           position: 'fixed',
@@ -5215,150 +5261,191 @@ function App() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
+          background: 'linear-gradient(135deg, #000a00 0%, #001a00 50%, #000a00 100%)',
           zIndex: 9000,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'monospace'
+          fontFamily: 'monospace',
+          padding: '20px'
         }}>
-          {/* Cash Drawer Header */}
+          
+          {/* Elegant Header */}
           <div style={{
-            background: 'linear-gradient(145deg, #003300, #001100)',
-            border: '3px solid #00ff00',
-            borderRadius: '12px 12px 0 0',
-            padding: '20px',
-            width: '90%',
-            maxWidth: '900px',
+            background: 'linear-gradient(145deg, #004400, #002200)',
+            border: '4px solid #00ff00',
+            borderRadius: '20px 20px 8px 8px',
+            padding: '25px 40px',
+            width: '95%',
+            maxWidth: '1200px',
             textAlign: 'center',
             color: '#00ff00',
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: 'bold',
-            boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+            boxShadow: '0 0 40px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.1)',
+            textShadow: '0 0 15px #00ff00'
           }}>
-            💰 CASH DRAWER - COUNT ${cashDrawerAmount.toLocaleString()} 💰
-            <div style={{ fontSize: '16px', marginTop: '10px', color: '#ffff00' }}>
-              Counted: ${totalCounted.toLocaleString()} | Remaining: ${(cashDrawerAmount - totalCounted).toLocaleString()}
+            🏛️ WESTRIDGE LEDGER BANK - CASH COUNTER 🏛️
+            <div style={{ 
+              fontSize: '20px', 
+              marginTop: '12px', 
+              color: '#ffff00',
+              textShadow: '0 0 10px #ffff00'
+            }}>
+              Target Amount: ${cashDrawerAmount.toLocaleString()}
+            </div>
+            <div style={{ 
+              fontSize: '18px', 
+              marginTop: '8px', 
+              color: totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800',
+              fontWeight: 'bold',
+              textShadow: `0 0 10px ${totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800'}`
+            }}>
+              Counted: ${totalCounted.toLocaleString()} | Remaining: ${Math.max(0, cashDrawerAmount - totalCounted).toLocaleString()}
             </div>
           </div>
 
-          {/* Main Cash Drawer Area */}
+          {/* Spacious Main Counter Area */}
           <div style={{
             display: 'flex',
-            width: '90%',
-            maxWidth: '900px',
-            height: '500px',
-            background: 'linear-gradient(145deg, #2a1a0a, #1a1000)',
-            border: '3px solid #aa8800',
-            borderTop: 'none',
-            borderRadius: '0 0 12px 12px',
-            boxShadow: 'inset 0 0 30px rgba(170, 136, 0, 0.2), 0 0 20px rgba(170, 136, 0, 0.3)'
+            width: '95%',
+            maxWidth: '1200px',
+            height: '600px',
+            background: 'linear-gradient(145deg, #1a0a00, #0a0500)',
+            border: '4px solid #cc8800',
+            borderTop: '2px solid #cc8800',
+            borderRadius: '8px 8px 20px 20px',
+            boxShadow: 'inset 0 0 40px rgba(204, 136, 0, 0.3), 0 0 30px rgba(204, 136, 0, 0.4)',
+            overflow: 'hidden'
           }}>
             
-            {/* Bill Compartments */}
+            {/* Beautiful Bill Drawer */}
             <div style={{
-              flex: 2,
-              padding: '20px',
+              flex: 3,
+              padding: '30px',
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gridTemplateRows: 'repeat(2, 1fr)',
-              gap: '15px',
-              background: 'linear-gradient(145deg, #3a2a1a, #2a1a0a)',
-              borderRadius: '8px',
-              margin: '10px'
+              gap: '25px',
+              background: 'linear-gradient(145deg, #2a1a0a, #1a0a00)',
+              borderRadius: '12px',
+              margin: '15px',
+              border: '2px solid #aa6600',
+              boxShadow: 'inset 0 0 25px rgba(170, 102, 0, 0.2)'
             }}>
               {[1, 5, 10, 20, 50, 100].map(denomination => (
                 <div key={denomination} style={{
                   background: `linear-gradient(145deg, ${getBillColor(denomination)}, ${getDarkBillColor(denomination)})`,
-                  border: `2px solid ${getBillBorderColor(denomination)}`,
-                  borderRadius: '8px',
-                  padding: '10px',
+                  border: `3px solid ${getBillBorderColor(denomination)}`,
+                  borderRadius: '12px',
+                  padding: '20px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   position: 'relative',
-                  minHeight: '100px'
+                  minHeight: '160px',
+                  boxShadow: `0 8px 20px rgba(0,0,0,0.4), inset 0 0 15px ${getBillColor(denomination)}33`
                 }}>
                   <div style={{
                     color: '#000000',
-                    fontSize: '18px',
+                    fontSize: '24px',
                     fontWeight: 'bold',
-                    marginBottom: '10px'
+                    marginBottom: '15px',
+                    textShadow: '0 2px 4px rgba(255,255,255,0.3)',
+                    background: 'rgba(255,255,255,0.1)',
+                    padding: '5px 15px',
+                    borderRadius: '8px',
+                    border: `1px solid ${getBillBorderColor(denomination)}`
                   }}>
                     ${denomination}
                   </div>
                   
-                  {/* Draggable Bills */}
-                  {Array.from({length: Math.min(20, Math.floor(1000 / denomination))}, (_, i) => (
-                    <div
-                      key={`${denomination}-${i}`}
-                      className="bill-draggable"
-                      draggable
-                      onDragStart={(e) => {
-                        const billId = `${denomination}-${Date.now()}-${Math.random()}`;
-                        setDraggingBill({denomination, id: billId});
-                        e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
-                        playSound('bill_rustle');
-                        e.currentTarget.classList.add('bill-dragging');
-                      }}
-                      onDragEnd={(e) => {
-                        e.currentTarget.classList.remove('bill-dragging');
-                        setDraggingBill(null);
-                      }}
-                      style={{
-                        width: '60px',
-                        height: '25px',
-                        background: `linear-gradient(90deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)})`,
-                        border: `1px solid ${getBillBorderColor(denomination)}`,
-                        borderRadius: '3px',
-                        marginBottom: '2px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        color: '#000000',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                        position: 'relative',
-                        zIndex: i
-                      }}
-                    >
-                      ${denomination}
-                    </div>
-                  ))}
+                  {/* Beautiful Draggable Bills */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '3px',
+                    maxHeight: '110px',
+                    overflowY: 'auto'
+                  }}>
+                    {Array.from({length: Math.min(15, Math.floor(1200 / denomination))}, (_, i) => (
+                      <div
+                        key={`${denomination}-${i}`}
+                        className="bill-draggable"
+                        draggable
+                        onDragStart={(e) => {
+                          const billId = `${denomination}-${Date.now()}-${Math.random()}`;
+                          setDraggingBill({denomination, id: billId});
+                          e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
+                          playSound('bill_rustle');
+                          e.currentTarget.classList.add('bill-dragging');
+                        }}
+                        onDragEnd={(e) => {
+                          e.currentTarget.classList.remove('bill-dragging');
+                          setDraggingBill(null);
+                        }}
+                        style={{
+                          width: '80px',
+                          height: '35px',
+                          background: `linear-gradient(90deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)}, ${getBillColor(denomination)})`,
+                          border: `2px solid ${getBillBorderColor(denomination)}`,
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: '#000000',
+                          boxShadow: '0 3px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.2)',
+                          position: 'relative',
+                          zIndex: Math.max(1, 20 - i),
+                          textShadow: '0 1px 2px rgba(255,255,255,0.3)',
+                          transform: `translateY(${i * -2}px)`
+                        }}
+                      >
+                        ${denomination}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Counting Area */}
+            {/* Spacious Customer Counter */}
             <div style={{
-              flex: 1,
-              padding: '20px',
+              flex: 2,
+              padding: '30px',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              gap: '20px'
             }}>
-              {/* Customer Counter */}
+              {/* Large Customer Counter Surface */}
               <div
                 style={{
-                  background: 'linear-gradient(145deg, #1a3a1a, #0a2a0a)',
-                  border: '3px solid #00aa00',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  marginBottom: '15px',
-                  minHeight: '200px',
-                  position: 'relative'
+                  background: 'linear-gradient(145deg, #0a2a0a, #052a05)',
+                  border: '4px solid #00cc00',
+                  borderRadius: '15px',
+                  padding: '25px',
+                  minHeight: '350px',
+                  position: 'relative',
+                  boxShadow: 'inset 0 0 30px rgba(0, 204, 0, 0.2), 0 0 20px rgba(0, 204, 0, 0.3)',
+                  overflow: 'hidden'
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
-                  e.currentTarget.style.background = 'linear-gradient(145deg, #2a4a2a, #1a3a1a)';
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #0f3a0f, #0a3a0a)';
+                  e.currentTarget.style.boxShadow = 'inset 0 0 40px rgba(0, 255, 0, 0.3), 0 0 30px rgba(0, 255, 0, 0.5)';
                 }}
                 onDragLeave={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(145deg, #1a3a1a, #0a2a0a)';
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #0a2a0a, #052a05)';
+                  e.currentTarget.style.boxShadow = 'inset 0 0 30px rgba(0, 204, 0, 0.2), 0 0 20px rgba(0, 204, 0, 0.3)';
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
-                  e.currentTarget.style.background = 'linear-gradient(145deg, #1a3a1a, #0a2a0a)';
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #0a2a0a, #052a05)';
+                  e.currentTarget.style.boxShadow = 'inset 0 0 30px rgba(0, 204, 0, 0.2), 0 0 20px rgba(0, 204, 0, 0.3)';
                   
                   try {
                     const billData = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -5369,13 +5456,13 @@ function App() {
                     setBillsOnCounter(prev => [...prev, {
                       denomination: billData.denomination,
                       id: billData.id,
-                      x: Math.max(0, Math.min(x - 30, rect.width - 60)),
-                      y: Math.max(0, Math.min(y - 12, rect.height - 25))
+                      x: Math.max(10, Math.min(x - 40, rect.width - 90)),
+                      y: Math.max(50, Math.min(y - 17, rect.height - 45))
                     }]);
                     
                     setTotalCounted(prev => prev + billData.denomination);
                     playSound('bill_snap');
-                    setTimeout(() => playSound('bill_count'), 100);
+                    setTimeout(() => playSound('bill_count'), 150);
                   } catch (error) {
                     console.error('Error dropping bill:', error);
                   }
@@ -5383,35 +5470,43 @@ function App() {
               >
                 <div style={{
                   color: '#00ff00',
-                  fontSize: '14px',
+                  fontSize: '18px',
                   fontWeight: 'bold',
-                  marginBottom: '10px',
-                  textAlign: 'center'
+                  marginBottom: '15px',
+                  textAlign: 'center',
+                  textShadow: '0 0 15px #00ff00',
+                  background: 'rgba(0, 255, 0, 0.1)',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  border: '2px solid #00aa00'
                 }}>
                   💵 CUSTOMER COUNTER 💵
                 </div>
                 
-                {/* Bills on counter */}
-                {billsOnCounter.map(bill => (
+                {/* Bills beautifully arranged on counter */}
+                {billsOnCounter.map((bill, index) => (
                   <div
                     key={bill.id}
                     style={{
                       position: 'absolute',
                       left: `${bill.x}px`,
-                      top: `${bill.y + 30}px`,
-                      width: '60px',
-                      height: '25px',
-                      background: `linear-gradient(90deg, ${getBillColor(bill.denomination)}, ${getLightBillColor(bill.denomination)})`,
-                      border: `1px solid ${getBillBorderColor(bill.denomination)}`,
-                      borderRadius: '3px',
+                      top: `${bill.y}px`,
+                      width: '80px',
+                      height: '35px',
+                      background: `linear-gradient(90deg, ${getBillColor(bill.denomination)}, ${getLightBillColor(bill.denomination)}, ${getBillColor(bill.denomination)})`,
+                      border: `2px solid ${getBillBorderColor(bill.denomination)}`,
+                      borderRadius: '6px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '10px',
+                      fontSize: '12px',
                       fontWeight: 'bold',
                       color: '#000000',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.4)',
-                      cursor: 'pointer'
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.3)',
+                      cursor: 'pointer',
+                      transform: `rotate(${(index % 7 - 3) * 5}deg)`,
+                      zIndex: index + 1,
+                      textShadow: '0 1px 2px rgba(255,255,255,0.4)'
                     }}
                     onDoubleClick={() => {
                       setBillsOnCounter(prev => prev.filter(b => b.id !== bill.id));
@@ -5425,31 +5520,32 @@ function App() {
                 
                 {billsOnCounter.length === 0 && (
                   <div style={{
-                    color: '#666666',
-                    fontSize: '12px',
+                    color: '#888888',
+                    fontSize: '16px',
                     textAlign: 'center',
-                    marginTop: '50px'
+                    marginTop: '120px',
+                    fontStyle: 'italic'
                   }}>
-                    Drag bills here to count
+                    Drag bills here to count cash for customer
                   </div>
                 )}
               </div>
 
-              {/* Action Buttons */}
+              {/* Enhanced Action Buttons */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '10px'
+                gap: '15px'
               }}>
                 <button
                   onClick={() => {
                     if (totalCounted === cashDrawerAmount) {
                       playSound('cash_register_ding');
                       setTerminalOutput(prev => [...prev, 
-                        "✓ CASH COUNT CORRECT ✓",
+                        "✓ CASH COUNT PERFECT ✓",
                         `Dispensed: $${totalCounted.toLocaleString()}`,
-                        "Customer satisfied with transaction",
-                        "Processing complete"
+                        "Customer: \"Thank you, that's exactly right!\"",
+                        "Transaction completed successfully"
                       ]);
                       handleCorrectTransaction();
                       setShowCashDrawer(false);
@@ -5458,31 +5554,42 @@ function App() {
                     } else {
                       playSound('reject');
                       setTerminalOutput(prev => [...prev, 
-                        "❌ CASH COUNT ERROR ❌",
+                        "❌ CASH COUNT INCORRECT ❌",
                         `Expected: $${cashDrawerAmount.toLocaleString()}`,
                         `Counted: $${totalCounted.toLocaleString()}`,
                         `Difference: $${Math.abs(cashDrawerAmount - totalCounted).toLocaleString()}`,
                         "",
-                        "Customer: \"That's not the right amount!\"",
-                        "Manager: \"Please recount the cash carefully.\""
+                        totalCounted > cashDrawerAmount ? 
+                          "Customer: \"That's too much money!\"" : 
+                          "Customer: \"That's not enough!\"",
+                        "Manager: \"Count more carefully next time.\""
                       ]);
                       handleError();
                     }
                   }}
                   disabled={totalCounted === 0}
                   style={{
-                    background: totalCounted === cashDrawerAmount ? 'rgba(0, 150, 0, 0.8)' : 'rgba(100, 100, 100, 0.8)',
-                    border: '2px solid ' + (totalCounted === cashDrawerAmount ? '#00ff00' : '#666666'),
-                    color: totalCounted === cashDrawerAmount ? '#00ff00' : '#666666',
-                    padding: '15px',
-                    fontSize: '14px',
+                    background: totalCounted === cashDrawerAmount ? 
+                      'linear-gradient(145deg, #004400, #002200)' : 
+                      'linear-gradient(145deg, #333333, #222222)',
+                    border: '3px solid ' + (totalCounted === cashDrawerAmount ? '#00ff00' : '#666666'),
+                    color: totalCounted === cashDrawerAmount ? '#00ff00' : '#999999',
+                    padding: '18px 25px',
+                    fontSize: '16px',
                     fontWeight: 'bold',
-                    borderRadius: '6px',
+                    borderRadius: '12px',
                     cursor: totalCounted === cashDrawerAmount ? 'pointer' : 'not-allowed',
-                    fontFamily: 'monospace'
+                    fontFamily: 'monospace',
+                    textShadow: totalCounted === cashDrawerAmount ? '0 0 10px #00ff00' : 'none',
+                    boxShadow: totalCounted === cashDrawerAmount ? 
+                      '0 0 20px rgba(0, 255, 0, 0.3)' : 
+                      '0 0 10px rgba(0, 0, 0, 0.5)'
                   }}
                 >
-                  {totalCounted === cashDrawerAmount ? '✓ DISPENSE CASH' : `NEED $${(cashDrawerAmount - totalCounted).toLocaleString()} MORE`}
+                  {totalCounted === cashDrawerAmount ? 
+                    '✓ DISPENSE CASH TO CUSTOMER' : 
+                    `NEED $${Math.abs(cashDrawerAmount - totalCounted).toLocaleString()} ${totalCounted > cashDrawerAmount ? 'LESS' : 'MORE'}`
+                  }
                 </button>
                 
                 <button
@@ -5492,15 +5599,16 @@ function App() {
                     playSound('bill_rustle');
                   }}
                   style={{
-                    background: 'rgba(150, 100, 0, 0.8)',
-                    border: '2px solid #aa8800',
+                    background: 'linear-gradient(145deg, #442200, #221100)',
+                    border: '2px solid #cc8800',
                     color: '#ffaa00',
-                    padding: '10px',
-                    fontSize: '12px',
+                    padding: '12px 20px',
+                    fontSize: '14px',
                     fontWeight: 'bold',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontFamily: 'monospace'
+                    fontFamily: 'monospace',
+                    boxShadow: '0 0 15px rgba(204, 136, 0, 0.3)'
                   }}
                 >
                   🔄 CLEAR COUNTER
@@ -5514,15 +5622,16 @@ function App() {
                     setTerminalOutput(prev => [...prev, "Cash drawer closed", "Transaction cancelled"]);
                   }}
                   style={{
-                    background: 'rgba(150, 0, 0, 0.8)',
+                    background: 'linear-gradient(145deg, #440000, #220000)',
                     border: '2px solid #ff4444',
-                    color: '#ff4444',
-                    padding: '10px',
-                    fontSize: '12px',
+                    color: '#ff6666',
+                    padding: '12px 20px',
+                    fontSize: '14px',
                     fontWeight: 'bold',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontFamily: 'monospace'
+                    fontFamily: 'monospace',
+                    boxShadow: '0 0 15px rgba(255, 68, 68, 0.3)'
                   }}
                 >
                   ✕ CLOSE DRAWER
