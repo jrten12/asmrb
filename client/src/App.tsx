@@ -2,6 +2,55 @@ import React, { useState, useRef, useEffect } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import type { Customer, Document as GameDocument } from './types/game';
 
+// Bill color helper functions for realistic currency appearance
+const getBillColor = (denomination: number): string => {
+  const colors = {
+    1: '#c4d6cf',    // Silver-gray for $1
+    5: '#ddc8b0',    // Light tan for $5
+    10: '#f7e7ce',   // Light yellow for $10
+    20: '#c8e6c9',   // Light green for $20
+    50: '#ffcccb',   // Light pink for $50
+    100: '#e1bee7'   // Light purple for $100
+  };
+  return colors[denomination as keyof typeof colors] || '#ffffff';
+};
+
+const getDarkBillColor = (denomination: number): string => {
+  const colors = {
+    1: '#a0b8a8',    // Darker gray for $1
+    5: '#c4a882',    // Darker tan for $5
+    10: '#e6d4a0',   // Darker yellow for $10
+    20: '#a5d6a7',   // Darker green for $20
+    50: '#ef9a9a',   // Darker pink for $50
+    100: '#ce93d8'   // Darker purple for $100
+  };
+  return colors[denomination as keyof typeof colors] || '#cccccc';
+};
+
+const getLightBillColor = (denomination: number): string => {
+  const colors = {
+    1: '#e8f5e8',    // Lighter gray for $1
+    5: '#f0e6d2',    // Lighter tan for $5
+    10: '#fffaeb',   // Lighter yellow for $10
+    20: '#e8f5e8',   // Lighter green for $20
+    50: '#ffebee',   // Lighter pink for $50
+    100: '#f3e5f5'   // Lighter purple for $100
+  };
+  return colors[denomination as keyof typeof colors] || '#ffffff';
+};
+
+const getBillBorderColor = (denomination: number): string => {
+  const colors = {
+    1: '#7a9b7a',    // Dark gray border for $1
+    5: '#8b7355',    // Dark tan border for $5
+    10: '#d4af37',   // Gold border for $10
+    20: '#388e3c',   // Dark green border for $20
+    50: '#d32f2f',   // Dark red border for $50
+    100: '#7b1fa2'   // Dark purple border for $100
+  };
+  return colors[denomination as keyof typeof colors] || '#000000';
+};
+
 // Extend Window interface for AdMob and iOS WebKit
 declare global {
   interface Window {
@@ -391,6 +440,15 @@ function App() {
   const [showWireInput, setShowWireInput] = useState(false);
   const [wireAmount, setWireAmount] = useState('');
   const [wireDestAccount, setWireDestAccount] = useState('');
+  
+  // Cash Drawer System
+  const [showCashDrawer, setShowCashDrawer] = useState(false);
+  const [cashDrawerAmount, setCashDrawerAmount] = useState(0);
+  const [selectedBills, setSelectedBills] = useState<{[key: number]: number}>({});
+  const [draggingBill, setDraggingBill] = useState<{denomination: number, id: string} | null>(null);
+  const [billsOnCounter, setBillsOnCounter] = useState<{denomination: number, id: string, x: number, y: number}[]>([]);
+  const [totalCounted, setTotalCounted] = useState(0);
+  const [cashDrawerOpen, setCashDrawerOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const [musicMuted, setMusicMuted] = useState(true); // Start muted by default
@@ -561,6 +619,40 @@ function App() {
           createTone(1200, 0.5, 0.06);
           setTimeout(() => createTone(2400, 0.3, 0.04), 500);
           setTimeout(() => createNoise(0.8, 0.03), 800);
+          break;
+        case 'cash_drawer_open':
+          // Satisfying mechanical cash drawer opening
+          createTone(200, 0.1, 0.08);
+          setTimeout(() => createTone(300, 0.15, 0.06), 100);
+          setTimeout(() => createTone(250, 0.2, 0.04), 200);
+          setTimeout(() => createNoise(0.3, 0.02), 300);
+          break;
+        case 'cash_drawer_close':
+          // Mechanical drawer closing with satisfying click
+          createTone(300, 0.1, 0.06);
+          setTimeout(() => createTone(200, 0.15, 0.08), 100);
+          setTimeout(() => createTone(180, 0.1, 0.04), 200);
+          break;
+        case 'bill_rustle':
+          // ASMR paper money rustling
+          createNoise(0.4, 0.015);
+          setTimeout(() => createNoise(0.3, 0.01), 50);
+          setTimeout(() => createNoise(0.25, 0.008), 100);
+          break;
+        case 'bill_snap':
+          // Crisp bill snapping sound
+          createTone(800, 0.05, 0.03);
+          createNoise(0.2, 0.01);
+          break;
+        case 'bill_count':
+          // Satisfying bill counting rhythm
+          createTone(600, 0.04, 0.02);
+          setTimeout(() => createTone(650, 0.03, 0.015), 80);
+          break;
+        case 'cash_register_ding':
+          // Classic cash register bell
+          createTone(1200, 0.3, 0.15);
+          setTimeout(() => createTone(1600, 0.2, 0.1), 100);
           break;
         case 'matrix_code':
           // Digital rain sound effect
@@ -1113,21 +1205,35 @@ function App() {
         return;
       }
       
+      // Check if withdrawal amount is over $1000 cash limit
+      if (withdrawAmount > 1000) {
+        playSound('reject');
+        setTerminalOutput(prev => [...prev, "> " + command, "*** CASH LIMIT EXCEEDED ***", `Requested: $${withdrawAmount.toLocaleString()}`, "Maximum cash withdrawal: $1,000", "Please use check or money order for larger amounts", "TRANSACTION DENIED"]);
+        handleError();
+        return;
+      }
+      
       playSound('legacy_processing');
-      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "PREPARING CASH DISPENSING..."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "OPENING CASH DRAWER..."]);
       
       setTimeout(() => {
-        setVerificationState(prev => ({...prev, transactionProcessed: true}));
         setTerminalOutput(prev => [...prev, 
           "========== WITHDRAWAL APPROVED ==========",
           `AMOUNT: $${amount}`,
           `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
-          "STATUS: READY FOR CASH DISPENSING",
+          "STATUS: COUNT CASH FROM DRAWER",
           "========================================"
         ]);
-        playSound('cash_counting');
-        setTimeout(() => playSound('register_print'), 800);
+        
+        // Open cash drawer for manual counting
+        setCashDrawerAmount(withdrawAmount);
+        setSelectedBills({});
+        setBillsOnCounter([]);
+        setTotalCounted(0);
+        setCashDrawerOpen(true);
+        setShowCashDrawer(true);
+        playSound('cash_drawer_open');
       }, 1500);
       
     } else if (cmd.startsWith('WIRE $')) {
@@ -5068,7 +5174,364 @@ function App() {
           0%, 100% { opacity: 0; transform: rotate(0deg) scale(0.7); }
           50% { opacity: 1; transform: rotate(360deg) scale(1.3); }
         }
+        
+        @keyframes drawerSlide {
+          0% { transform: translateY(100%); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes billFloat {
+          0% { transform: scale(1) rotate(0deg); }
+          50% { transform: scale(1.05) rotate(2deg); }
+          100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .cash-drawer {
+          animation: drawerSlide 0.5s ease-out;
+        }
+        
+        .bill-draggable {
+          transition: all 0.2s ease;
+          cursor: grab;
+        }
+        
+        .bill-draggable:hover {
+          animation: billFloat 0.3s ease-in-out;
+          transform: scale(1.05);
+        }
+        
+        .bill-dragging {
+          cursor: grabbing;
+          z-index: 10000;
+          transform: rotate(5deg) scale(1.1);
+        }
       `}</style>
+
+      {/* Cash Drawer System */}
+      {showCashDrawer && (
+        <div className="cash-drawer" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          zIndex: 9000,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'monospace'
+        }}>
+          {/* Cash Drawer Header */}
+          <div style={{
+            background: 'linear-gradient(145deg, #003300, #001100)',
+            border: '3px solid #00ff00',
+            borderRadius: '12px 12px 0 0',
+            padding: '20px',
+            width: '90%',
+            maxWidth: '900px',
+            textAlign: 'center',
+            color: '#00ff00',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+          }}>
+            💰 CASH DRAWER - COUNT ${cashDrawerAmount.toLocaleString()} 💰
+            <div style={{ fontSize: '16px', marginTop: '10px', color: '#ffff00' }}>
+              Counted: ${totalCounted.toLocaleString()} | Remaining: ${(cashDrawerAmount - totalCounted).toLocaleString()}
+            </div>
+          </div>
+
+          {/* Main Cash Drawer Area */}
+          <div style={{
+            display: 'flex',
+            width: '90%',
+            maxWidth: '900px',
+            height: '500px',
+            background: 'linear-gradient(145deg, #2a1a0a, #1a1000)',
+            border: '3px solid #aa8800',
+            borderTop: 'none',
+            borderRadius: '0 0 12px 12px',
+            boxShadow: 'inset 0 0 30px rgba(170, 136, 0, 0.2), 0 0 20px rgba(170, 136, 0, 0.3)'
+          }}>
+            
+            {/* Bill Compartments */}
+            <div style={{
+              flex: 2,
+              padding: '20px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateRows: 'repeat(2, 1fr)',
+              gap: '15px',
+              background: 'linear-gradient(145deg, #3a2a1a, #2a1a0a)',
+              borderRadius: '8px',
+              margin: '10px'
+            }}>
+              {[1, 5, 10, 20, 50, 100].map(denomination => (
+                <div key={denomination} style={{
+                  background: `linear-gradient(145deg, ${getBillColor(denomination)}, ${getDarkBillColor(denomination)})`,
+                  border: `2px solid ${getBillBorderColor(denomination)}`,
+                  borderRadius: '8px',
+                  padding: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative',
+                  minHeight: '100px'
+                }}>
+                  <div style={{
+                    color: '#000000',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    marginBottom: '10px'
+                  }}>
+                    ${denomination}
+                  </div>
+                  
+                  {/* Draggable Bills */}
+                  {Array.from({length: Math.min(20, Math.floor(1000 / denomination))}, (_, i) => (
+                    <div
+                      key={`${denomination}-${i}`}
+                      className="bill-draggable"
+                      draggable
+                      onDragStart={(e) => {
+                        const billId = `${denomination}-${Date.now()}-${Math.random()}`;
+                        setDraggingBill({denomination, id: billId});
+                        e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
+                        playSound('bill_rustle');
+                        e.currentTarget.classList.add('bill-dragging');
+                      }}
+                      onDragEnd={(e) => {
+                        e.currentTarget.classList.remove('bill-dragging');
+                        setDraggingBill(null);
+                      }}
+                      style={{
+                        width: '60px',
+                        height: '25px',
+                        background: `linear-gradient(90deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)})`,
+                        border: `1px solid ${getBillBorderColor(denomination)}`,
+                        borderRadius: '3px',
+                        marginBottom: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        color: '#000000',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                        position: 'relative',
+                        zIndex: i
+                      }}
+                    >
+                      ${denomination}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Counting Area */}
+            <div style={{
+              flex: 1,
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Customer Counter */}
+              <div
+                style={{
+                  background: 'linear-gradient(145deg, #1a3a1a, #0a2a0a)',
+                  border: '3px solid #00aa00',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  marginBottom: '15px',
+                  minHeight: '200px',
+                  position: 'relative'
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #2a4a2a, #1a3a1a)';
+                }}
+                onDragLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #1a3a1a, #0a2a0a)';
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #1a3a1a, #0a2a0a)';
+                  
+                  try {
+                    const billData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    setBillsOnCounter(prev => [...prev, {
+                      denomination: billData.denomination,
+                      id: billData.id,
+                      x: Math.max(0, Math.min(x - 30, rect.width - 60)),
+                      y: Math.max(0, Math.min(y - 12, rect.height - 25))
+                    }]);
+                    
+                    setTotalCounted(prev => prev + billData.denomination);
+                    playSound('bill_snap');
+                    setTimeout(() => playSound('bill_count'), 100);
+                  } catch (error) {
+                    console.error('Error dropping bill:', error);
+                  }
+                }}
+              >
+                <div style={{
+                  color: '#00ff00',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  marginBottom: '10px',
+                  textAlign: 'center'
+                }}>
+                  💵 CUSTOMER COUNTER 💵
+                </div>
+                
+                {/* Bills on counter */}
+                {billsOnCounter.map(bill => (
+                  <div
+                    key={bill.id}
+                    style={{
+                      position: 'absolute',
+                      left: `${bill.x}px`,
+                      top: `${bill.y + 30}px`,
+                      width: '60px',
+                      height: '25px',
+                      background: `linear-gradient(90deg, ${getBillColor(bill.denomination)}, ${getLightBillColor(bill.denomination)})`,
+                      border: `1px solid ${getBillBorderColor(bill.denomination)}`,
+                      borderRadius: '3px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      color: '#000000',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.4)',
+                      cursor: 'pointer'
+                    }}
+                    onDoubleClick={() => {
+                      setBillsOnCounter(prev => prev.filter(b => b.id !== bill.id));
+                      setTotalCounted(prev => prev - bill.denomination);
+                      playSound('bill_rustle');
+                    }}
+                  >
+                    ${bill.denomination}
+                  </div>
+                ))}
+                
+                {billsOnCounter.length === 0 && (
+                  <div style={{
+                    color: '#666666',
+                    fontSize: '12px',
+                    textAlign: 'center',
+                    marginTop: '50px'
+                  }}>
+                    Drag bills here to count
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}>
+                <button
+                  onClick={() => {
+                    if (totalCounted === cashDrawerAmount) {
+                      playSound('cash_register_ding');
+                      setTerminalOutput(prev => [...prev, 
+                        "✓ CASH COUNT CORRECT ✓",
+                        `Dispensed: $${totalCounted.toLocaleString()}`,
+                        "Customer satisfied with transaction",
+                        "Processing complete"
+                      ]);
+                      handleCorrectTransaction();
+                      setShowCashDrawer(false);
+                      setCashDrawerOpen(false);
+                      playSound('cash_drawer_close');
+                    } else {
+                      playSound('reject');
+                      setTerminalOutput(prev => [...prev, 
+                        "❌ CASH COUNT ERROR ❌",
+                        `Expected: $${cashDrawerAmount.toLocaleString()}`,
+                        `Counted: $${totalCounted.toLocaleString()}`,
+                        `Difference: $${Math.abs(cashDrawerAmount - totalCounted).toLocaleString()}`,
+                        "",
+                        "Customer: \"That's not the right amount!\"",
+                        "Manager: \"Please recount the cash carefully.\""
+                      ]);
+                      handleError();
+                    }
+                  }}
+                  disabled={totalCounted === 0}
+                  style={{
+                    background: totalCounted === cashDrawerAmount ? 'rgba(0, 150, 0, 0.8)' : 'rgba(100, 100, 100, 0.8)',
+                    border: '2px solid ' + (totalCounted === cashDrawerAmount ? '#00ff00' : '#666666'),
+                    color: totalCounted === cashDrawerAmount ? '#00ff00' : '#666666',
+                    padding: '15px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    borderRadius: '6px',
+                    cursor: totalCounted === cashDrawerAmount ? 'pointer' : 'not-allowed',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {totalCounted === cashDrawerAmount ? '✓ DISPENSE CASH' : `NEED $${(cashDrawerAmount - totalCounted).toLocaleString()} MORE`}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setBillsOnCounter([]);
+                    setTotalCounted(0);
+                    playSound('bill_rustle');
+                  }}
+                  style={{
+                    background: 'rgba(150, 100, 0, 0.8)',
+                    border: '2px solid #aa8800',
+                    color: '#ffaa00',
+                    padding: '10px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  🔄 CLEAR COUNTER
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setShowCashDrawer(false);
+                    setCashDrawerOpen(false);
+                    playSound('cash_drawer_close');
+                    setTerminalOutput(prev => [...prev, "Cash drawer closed", "Transaction cancelled"]);
+                  }}
+                  style={{
+                    background: 'rgba(150, 0, 0, 0.8)',
+                    border: '2px solid #ff4444',
+                    color: '#ff4444',
+                    padding: '10px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  ✕ CLOSE DRAWER
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
