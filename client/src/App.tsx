@@ -446,8 +446,8 @@ function App() {
           createNoise(0.2, 0.04);
           break;
         case 'dot_matrix_printer':
-          // Enhanced ASMR dot matrix printer with authentic mechanical sounds - shortened
-          for (let i = 0; i < 10; i++) {
+          // Enhanced ASMR dot matrix printer with authentic mechanical sounds - 2.5 seconds
+          for (let i = 0; i < 25; i++) {
             setTimeout(() => {
               // Main printer head impact
               createTone(1600 + (i % 4) * 150, 0.025, 0.04);
@@ -456,8 +456,14 @@ function App() {
               createNoise(0.018, 0.025);
               // Carriage movement
               if (i % 4 === 0) createTone(800, 0.008, 0.02);
-            }, i * 50);
+            }, i * 100);
           }
+          break;
+        case 'customer_call':
+          // Pleasant bell-like sound for calling next customer
+          createTone(800, 0.15, 0.3);
+          setTimeout(() => createTone(1000, 0.12, 0.25), 100);
+          setTimeout(() => createTone(1200, 0.1, 0.2), 200);
           // Paper tear sound at the end
           setTimeout(() => {
             createNoise(0.15, 0.08);
@@ -2462,11 +2468,14 @@ function App() {
                   style={{
                     background: 'linear-gradient(145deg, rgba(255, 255, 0, 0.2), rgba(255, 255, 0, 0.1))',
                     border: '2px solid #ffff00',
-                    padding: window.innerWidth < 768 ? '12px' : '14px',
-                    borderRadius: '6px',
+                    padding: window.innerWidth < 768 ? '8px' : '10px',
+                    borderRadius: '4px',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                    wordWrap: 'break-word'
                   }}
                   onMouseOver={(e) => {
                     e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 0, 0.3), rgba(255, 255, 0, 0.2))';
@@ -2498,19 +2507,20 @@ function App() {
                   }}>
                     {Object.entries(doc.data).map(([key, value]) => (
                       <div key={key} style={{ 
-                        padding: '6px 10px',
+                        padding: '4px 8px',
                         background: 'rgba(0, 0, 0, 0.3)',
-                        borderRadius: '6px',
+                        borderRadius: '4px',
                         display: 'flex',
-                        flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-                        gap: window.innerWidth < 768 ? '2px' : '10px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                        flexDirection: 'column',
+                        gap: '2px',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        wordBreak: 'break-word',
+                        overflow: 'hidden'
                       }}>
                         <span style={{ 
                           color: '#00dddd', 
-                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
+                          fontSize: window.innerWidth < 768 ? '10px' : '12px',
                           fontWeight: 'bold',
-                          minWidth: window.innerWidth < 768 ? 'auto' : '120px',
                           letterSpacing: '0.5px'
                         }}>
                           {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
@@ -2518,15 +2528,21 @@ function App() {
                         <span style={{ 
                           color: '#ffffff', 
                           fontWeight: 'bold', 
-                          fontSize: window.innerWidth < 768 ? '14px' : '16px',
+                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
                           fontFamily: 'monospace',
                           background: 'rgba(255, 255, 255, 0.15)',
                           padding: '3px 8px',
                           borderRadius: '4px',
                           border: '1px solid rgba(255, 255, 255, 0.3)',
-                          letterSpacing: '0.3px'
+                          letterSpacing: '0.3px',
+                          wordBreak: 'break-word',
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
                         }}>
-                          {value}
+                          {key === 'signature' && typeof value === 'string' && value.includes('|') 
+                            ? value.split('|')[0] + ' (Signature Analysis Available)'
+                            : String(value)}
                         </span>
                       </div>
                     ))}
