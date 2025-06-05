@@ -349,6 +349,7 @@ function App() {
     // Prevent working phase without customer
     if (gamePhase === 'working' && !currentCustomer && gameInitialized) {
       console.log('Generating customer for working phase');
+      playSound('customer_call');
       setCurrentCustomer(generateCustomerLocal());
     }
   }, [gamePhase, gameInitialized]);
@@ -464,12 +465,6 @@ function App() {
           createTone(800, 0.15, 0.3);
           setTimeout(() => createTone(1000, 0.12, 0.25), 100);
           setTimeout(() => createTone(1200, 0.1, 0.2), 200);
-          // Paper tear sound at the end
-          setTimeout(() => {
-            createNoise(0.15, 0.08);
-            createTone(400, 0.06, 0.04);
-            setTimeout(() => createNoise(0.08, 0.05), 60);
-          }, 10 * 50 + 150);
           break;
         case 'modal_close':
           createTone(800, 0.1, 0.05);

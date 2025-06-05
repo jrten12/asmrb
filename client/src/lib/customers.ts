@@ -48,7 +48,10 @@ const STATE_NAME = 'Westfield';
 
 // Track used account numbers to prevent duplicates
 const usedAccountNumbers = new Set<string>();
-let accountNumberCounter = 100000000;
+let accountNumberCounter = 1000; // Start with clean 8-digit numbers (10001000+)
+
+// Clear cache to force new account numbers
+usedAccountNumbers.clear();
 
 const SUSPICIOUS_PATTERNS = [
   { type: 'name_mismatch', description: 'ID name doesn\'t match transaction slip' },
