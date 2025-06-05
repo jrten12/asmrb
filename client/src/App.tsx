@@ -1113,7 +1113,7 @@ function App() {
         setTerminalOutput(prev => [...prev, 
           "========== BALANCE INQUIRY COMPLETE ==========",
           `CUSTOMER: ${currentCustomer.name}`,
-          `ACCOUNT: ${currentCustomer.accountNumber}`,
+          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `CURRENT BALANCE: $${accountBalance.toLocaleString()}`,
           "STATUS: READY FOR SLIP PRINTING",
           "==========================================="
@@ -1605,7 +1605,7 @@ function App() {
     }
     
     if (!verificationState.accountLookedUp) {
-      return `Type LOOKUP ${currentCustomer.accountNumber}`;
+      return `Type LOOKUP ${currentCustomer.transaction.accountNumber}`;
     }
     
     if (!verificationState.signatureCompared) {
@@ -2575,17 +2575,17 @@ function App() {
                       </div>
                       <div style={{ fontSize: '10px', color: '#ffffff', lineHeight: '1.4', fontFamily: 'monospace' }}>
                         <div><strong>NAME:</strong> {(() => {
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD FOUND";
+                          if (currentCustomer.suspiciousLevel > 2) return "NO RECORD FOUND";
                           return currentCustomer.name;
                         })()}</div>
                         <div><strong>ACCT:</strong> {(() => {
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "INVALID";
-                          return currentCustomer.accountNumber;
+                          if (currentCustomer.suspiciousLevel > 2) return "INVALID";
+                          return currentCustomer.transaction.accountNumber;
                         })()}</div>
                         <div><strong>DOB:</strong> {(() => {
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
+                          if (currentCustomer.suspiciousLevel > 2) return "NO RECORD";
                           
-                          const idDoc = currentCustomer.documents.find(d => d.type === 'ID' || d.type === 'id');
+                          const idDoc = currentCustomer.documents.find(d => d.type === 'id');
                           if (!idDoc || !idDoc.data.dateOfBirth) return '03/15/1985';
                           
                           const customerDOB = String(idDoc.data.dateOfBirth);
@@ -2601,8 +2601,8 @@ function App() {
                           return customerDOB;
                         })()}</div>
                         <div><strong>ADDR:</strong> {(() => {
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "NO RECORD";
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 1) {
+                          if (currentCustomer.suspiciousLevel > 2) return "NO RECORD";
+                          if (currentCustomer.suspiciousLevel === 1) {
                             // System shows correct address, document shows wrong one
                             const correctStreetNumber = Math.floor(Math.random() * 9999) + 1;
                             const correctStreet = ['Oak Street', 'Pine Avenue', 'Elm Drive'][Math.floor(Math.random() * 3)];
@@ -2613,11 +2613,11 @@ function App() {
                           return currentCustomer.documents.find(d => d.type === 'ID')?.data.address || 'N/A';
                         })()}</div>
                         <div><strong>BAL:</strong> {(() => {
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "$0.00";
+                          if (currentCustomer.suspiciousLevel > 2) return "$0.00";
                           return `$${accountBalance.toLocaleString()}`;
                         })()}</div>
                         <div><strong>STATUS:</strong> {(() => {
-                          if (currentCustomer.isFraud && currentCustomer.fraudType === 3) return "INVALID ACCOUNT";
+                          if (currentCustomer.suspiciousLevel > 2) return "INVALID ACCOUNT";
                           return "ACTIVE";
                         })()}</div>
                       </div>
