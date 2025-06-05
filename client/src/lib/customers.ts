@@ -270,19 +270,19 @@ function generateAccountNumber(): string {
   const maxAttempts = 50;
   
   do {
-    // Generate clean 8-digit account numbers starting from 10000000
-    const baseNumber = 10000000 + accountNumberCounter + Math.floor(Math.random() * 1000);
+    // Generate normal 8-digit account numbers (20000000-99999999)
+    const baseNumber = 20000000 + accountNumberCounter + Math.floor(Math.random() * 10000);
     accountNumber = baseNumber.toString();
     
-    // Ensure it's exactly 8 digits
-    if (accountNumber.length > 8) {
-      accountNumber = accountNumber.substring(0, 8);
+    // Ensure it's exactly 8 digits and doesn't exceed 99999999
+    if (accountNumber.length > 8 || parseInt(accountNumber) > 99999999) {
+      accountNumber = (20000000 + (accountNumberCounter % 70000000)).toString();
     }
     
     attempts++;
     if (attempts >= maxAttempts) {
       // Fallback: use counter directly to guarantee uniqueness
-      accountNumber = (10000000 + accountNumberCounter).toString();
+      accountNumber = (20000000 + (accountNumberCounter % 70000000)).toString();
       break;
     }
   } while (usedAccountNumbers.has(accountNumber));

@@ -108,6 +108,59 @@ function App() {
     }
   };
 
+  // Performance streak tracking
+  const [performanceStreak, setPerformanceStreak] = useState(0);
+  const [streakAnimation, setStreakAnimation] = useState<{show: boolean, type: string, message: string}>({
+    show: false, type: '', message: ''
+  });
+  const [streakMultiplier, setStreakMultiplier] = useState(1);
+
+  // Handle streak rewards and animations
+  const handleStreakReward = (streak: number) => {
+    let message = '';
+    let type = '';
+    let multiplier = 1;
+    
+    if (streak === 3) {
+      message = 'HOT STREAK! +3x POINTS';
+      type = 'hot';
+      multiplier = 3;
+      playSound('completion_bell');
+    } else if (streak === 5) {
+      message = 'ON FIRE! +5x POINTS';
+      type = 'fire';
+      multiplier = 5;
+      playSound('completion_bell');
+    } else if (streak === 10) {
+      message = 'LEGENDARY! +10x POINTS';
+      type = 'legendary';
+      multiplier = 10;
+      playSound('easter_melody');
+    } else if (streak % 5 === 0 && streak > 10) {
+      message = `UNSTOPPABLE! ${streak} STREAK!`;
+      type = 'unstoppable';
+      multiplier = Math.min(streak, 20);
+      playSound('easter_melody');
+    }
+    
+    if (message) {
+      setStreakAnimation({ show: true, type, message });
+      setStreakMultiplier(multiplier);
+      
+      // Hide animation after 3 seconds
+      setTimeout(() => {
+        setStreakAnimation({ show: false, type: '', message: '' });
+      }, 3000);
+    }
+  };
+
+  // Reset streak on error
+  const resetStreak = () => {
+    setPerformanceStreak(0);
+    setStreakMultiplier(1);
+    setStreakAnimation({ show: false, type: '', message: '' });
+  };
+
   // Enhanced error tracking and scoring system
   const addCorrectTransaction = () => {
     setGameScore(prev => {
@@ -118,12 +171,19 @@ function App() {
       
       return {
         ...prev,
-        score: prev.score + 100,
+        score: prev.score + (100 * streakMultiplier),
         correctTransactions: newTransactionCount,
         consecutiveErrors: 0, // Reset consecutive errors on correct transaction
         customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
         dismissalWarningGiven: false // Reset warning flag
       };
+    });
+
+    // Update performance streak
+    setPerformanceStreak(prev => {
+      const newStreak = prev + 1;
+      handleStreakReward(newStreak);
+      return newStreak;
     });
     
     // Check if ad should be shown every 5 customers
@@ -1506,6 +1566,9 @@ function App() {
   const handleError = () => {
     const newErrors = gameScore.errors + 1;
     setGameScore(prev => ({ ...prev, errors: newErrors }));
+    
+    // Reset performance streak on error
+    resetStreak();
     
     if (newErrors >= 3) {
       setTerminalOutput(prev => [...prev, "*** THREE STRIKES - YOU'RE FIRED! ***", "Shift terminated", "Better luck next time"]);
