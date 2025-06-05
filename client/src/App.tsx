@@ -5305,7 +5305,7 @@ function App() {
         }
       `}</style>
 
-      {/* Professional Cash Register System - Similar to Printer */}
+      {/* Large Professional Bank Teller Cash Drawer */}
       {showCashDrawer && (
         <div style={{
           position: 'fixed',
@@ -5318,51 +5318,50 @@ function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'monospace'
+          fontFamily: 'monospace',
+          padding: '10px'
         }}>
-          {/* Cash Register Machine */}
+          {/* Professional Bank Teller Drawer */}
           <div style={{
-            background: 'linear-gradient(145deg, #2a2a1a, #1a1a0a)',
-            border: '4px solid #cc8800',
-            borderRadius: '20px',
+            background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+            border: '5px solid #555555',
+            borderRadius: '25px',
             padding: '30px',
-            maxWidth: '900px',
-            width: '90%',
-            maxHeight: '600px',
-            height: '90%',
-            boxShadow: '0 0 50px rgba(204, 136, 0, 0.5), inset 0 0 30px rgba(204, 136, 0, 0.1)',
-            position: 'relative',
-            overflow: 'hidden'
+            width: '95%',
+            maxWidth: '1400px',
+            maxHeight: '95vh',
+            overflow: 'auto',
+            boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 204, 0, 0.3)'
           }}>
             
-            {/* Machine Header */}
+            {/* Bank Header */}
             <div style={{
               background: 'linear-gradient(90deg, #004400, #006600)',
-              padding: '15px',
-              marginBottom: '20px',
-              borderRadius: '10px',
+              padding: '20px',
+              marginBottom: '25px',
+              borderRadius: '15px',
               textAlign: 'center',
-              border: '3px solid #00ff00',
-              boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+              border: '4px solid #00ff00',
+              boxShadow: '0 0 30px rgba(0, 255, 0, 0.4)'
             }}>
               <div style={{
                 color: '#00ff00',
-                fontSize: '20px',
+                fontSize: '28px',
                 fontWeight: 'bold',
-                textShadow: '0 0 10px #00ff00'
+                textShadow: '0 0 15px #00ff00'
               }}>
-                WESTRIDGE LEDGER BANK CASH REGISTER
+                🏦 WESTRIDGE LEDGER BANK - CASH DRAWER 🏦
               </div>
               <div style={{
                 color: '#ffff00',
-                fontSize: '16px',
-                marginTop: '5px'
+                fontSize: '18px',
+                marginTop: '8px'
               }}>
-                WITHDRAWAL AMOUNT: ${cashDrawerAmount.toLocaleString()}
+                WITHDRAWAL REQUEST: ${cashDrawerAmount.toLocaleString()}
               </div>
               <div style={{
                 color: totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800',
-                fontSize: '14px',
+                fontSize: '16px',
                 marginTop: '5px',
                 fontWeight: 'bold'
               }}>
