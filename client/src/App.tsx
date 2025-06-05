@@ -1283,7 +1283,19 @@ function App() {
       if (withdrawAmount > 1000) {
         playSound('reject');
         setTerminalOutput(prev => [...prev, "> " + command, "*** CASH LIMIT EXCEEDED ***", `Requested: $${withdrawAmount.toLocaleString()}`, "Maximum cash withdrawal: $1,000", "Please use check or money order for larger amounts", "TRANSACTION DENIED"]);
-        handleError();
+        
+        // Customer leaves after cash limit exceeded
+        setTimeout(() => {
+          setCurrentCustomer(null);
+          setVerificationState({
+            accountLookedUp: false,
+            accountNotFound: false,
+            signatureCompared: false,
+            signatureFraud: false,
+            transactionProcessed: false
+          });
+          setTerminalOutput(prev => [...prev, "", "Customer understands the limit", "Will return with proper paperwork", "Ready for next customer"]);
+        }, 3000);
         return;
       }
       
