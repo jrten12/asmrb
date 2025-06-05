@@ -340,6 +340,20 @@ function App() {
     return generateCustomer(1); // Use level 1 for consistent generation
   };
 
+  // Initialize game properly on first mount
+  useEffect(() => {
+    setGameInitialized(true);
+  }, []);
+
+  // Monitor game state to prevent glitches
+  useEffect(() => {
+    // Prevent working phase without customer
+    if (gamePhase === 'working' && !currentCustomer && gameInitialized) {
+      console.log('Generating customer for working phase');
+      setCurrentCustomer(generateCustomerLocal());
+    }
+  }, [gamePhase, currentCustomer, gameInitialized]);
+
   const playSound = (type: string) => {
     try {
       // Create or reuse audio context
@@ -1277,11 +1291,11 @@ function App() {
       transactionId,
       timestamp,
       customerName: currentCustomer.name,
-      accountNumber: currentCustomer.accountNumber,
-      transactionType: currentCustomer.transactionType,
-      amount: currentCustomer.requestedAmount,
+      accountNumber: currentCustomer.transaction.accountNumber,
+      transactionType: currentCustomer.transaction.type,
+      amount: currentCustomer.transaction.amount,
       balance: accountBalance,
-      destinationAccount: currentCustomer.destinationAccount
+      destinationAccount: currentCustomer.transaction.targetAccount
     };
     
     setReceiptData(receipt);
@@ -1600,7 +1614,7 @@ function App() {
     }
     
     if (!verificationState.transactionProcessed) {
-      return `Type PROCESS ${currentCustomer.transactionType} ${currentCustomer.requestedAmount}`;
+      return `Type PROCESS ${currentCustomer.transaction.type} ${currentCustomer.transaction.amount}`;
     }
     
     return "Type APPROVE or REJECT";
