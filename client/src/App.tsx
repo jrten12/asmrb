@@ -47,6 +47,7 @@ interface LegacyDocument {
 function App() {
   const [gamePhase, setGamePhase] = useState<'welcome' | 'tutorial' | 'punch_in' | 'working' | 'punch_out' | 'leaderboard'>('welcome');
   const [gameInitialized, setGameInitialized] = useState(false);
+  const [preventGlitches, setPreventGlitches] = useState(false);
   const [punchStatus, setPunchStatus] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([
@@ -687,10 +688,10 @@ function App() {
     console.log("Handling command:", cmd, "Current customer:", currentCustomer);
     
     if (cmd === 'NEXT') {
-      const customer = generateCustomer();
+      const customer = generateCustomerLocal();
       setCurrentCustomer(customer);
       resetVerificationState();
-      setTerminalOutput(prev => [...prev, "> " + command, "Customer " + customer.name + " approaching window...", "REQUEST: " + customer.transactionType + " $" + customer.requestedAmount, "Please verify identity before processing."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "Customer " + customer.name + " approaching window...", "REQUEST: " + customer.transaction.type.toUpperCase() + " $" + customer.transaction.amount, "Please verify identity before processing."]);
       console.log("Generated customer:", customer);
       playSound('customer_approach');
     } else if (cmd === 'LOOKUP' || cmd.startsWith('LOOKUP ')) {
