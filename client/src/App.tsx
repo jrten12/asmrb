@@ -165,6 +165,26 @@ function App() {
     show: false, type: '', message: ''
   });
   const [streakMultiplier, setStreakMultiplier] = useState(1);
+  
+  // Cash drawer state for new workflow
+  const [counterBills, setCounterBills] = useState<number[]>([]);
+  const [envelopeBills, setEnvelopeBills] = useState<number[]>([]);
+  const [envelopeSealed, setEnvelopeSealed] = useState(false);
+  const [draggedBill, setDraggedBill] = useState<number | null>(null);
+  
+  // Helper function for adjusting color brightness
+  const adjustBrightness = (color: string, amount: number): string => {
+    const usePound = color[0] === '#';
+    const col = usePound ? color.slice(1) : color;
+    const num = parseInt(col, 16);
+    let r = (num >> 16) + amount;
+    let g = (num >> 8 & 0x00FF) + amount;
+    let b = (num & 0x0000FF) + amount;
+    r = r > 255 ? 255 : r < 0 ? 0 : r;
+    g = g > 255 ? 255 : g < 0 ? 0 : g;
+    b = b > 255 ? 255 : b < 0 ? 0 : b;
+    return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+  };
 
   // Handle streak rewards and animations
   const handleStreakReward = (streak: number) => {
@@ -5363,7 +5383,7 @@ function App() {
         }
       `}</style>
 
-      {/* Large Professional Bank Teller Cash Drawer */}
+      {/* Professional Cash Drawer System */}
       {showCashDrawer && (
         <div style={{
           position: 'fixed',
@@ -5377,172 +5397,365 @@ function App() {
           alignItems: 'center',
           justifyContent: 'center',
           fontFamily: 'monospace',
-          padding: '20px',
+          padding: '15px',
           overflow: 'hidden'
         }}>
-          {/* Professional Bank Teller Drawer */}
-          <div style={{
-            background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-            border: '5px solid #555555',
-            borderRadius: '25px',
+          <div className="cash-drawer" style={{
+            background: 'linear-gradient(145deg, #1a1a1a, #0a0a0a)',
+            border: '4px solid #333333',
+            borderRadius: '20px',
             padding: '20px',
             width: '100%',
-            maxWidth: '1200px',
+            maxWidth: '1000px',
             height: '100%',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 204, 0, 0.3)',
+            maxHeight: '85vh',
+            overflow: 'hidden',
+            boxShadow: '0 0 40px rgba(0, 255, 0, 0.2)',
             display: 'flex',
             flexDirection: 'column'
           }}>
             
-            {/* Compact Header */}
+            {/* Header with Real-time Counter */}
             <div style={{
-              background: 'linear-gradient(90deg, #004400, #006600)',
-              padding: '12px',
+              background: 'linear-gradient(90deg, #001100, #003300)',
+              padding: '15px',
               marginBottom: '15px',
               borderRadius: '10px',
               textAlign: 'center',
               border: '3px solid #00ff00',
-              boxShadow: '0 0 20px rgba(0, 255, 0, 0.4)'
+              boxShadow: '0 0 25px rgba(0, 255, 0, 0.3)'
             }}>
               <div style={{
                 color: '#00ff00',
-                fontSize: '18px',
+                fontSize: '16px',
                 fontWeight: 'bold',
-                textShadow: '0 0 15px #00ff00'
+                textShadow: '0 0 10px #00ff00',
+                marginBottom: '8px'
               }}>
-                💰 CASH DRAWER - WITHDRAWAL: ${cashDrawerAmount.toLocaleString()} 💰
+                🏦 CASH DRAWER - WITHDRAWAL REQUEST 🏦
               </div>
               <div style={{
-                color: totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800',
-                fontSize: '14px',
-                marginTop: '5px',
-                fontWeight: 'bold'
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '10px'
               }}>
-                COUNTED: ${totalCounted.toLocaleString()} | REMAINING: ${Math.max(0, cashDrawerAmount - totalCounted).toLocaleString()}
+                <div style={{
+                  color: '#ffff00',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>
+                  REQUESTED: ${cashDrawerAmount.toLocaleString()}
+                </div>
+                <div style={{
+                  color: totalCounted > 0 ? '#00ff00' : '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>
+                  COUNTER: ${totalCounted.toLocaleString()}
+                </div>
+                <div style={{
+                  color: totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>
+                  REMAINING: ${Math.max(0, cashDrawerAmount - totalCounted).toLocaleString()}
+                </div>
               </div>
             </div>
 
-            {/* Large Teller Drawer with 6 Denomination Slots */}
+            {/* Main Workflow: Drawer -> Counter -> Envelope */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gridTemplateColumns: '2fr 1fr 1fr',
               gap: '15px',
-              marginBottom: '20px',
-              background: 'linear-gradient(145deg, #333333, #222222)',
-              border: '5px solid #666666',
-              borderRadius: '20px',
-              padding: '20px',
-              boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.8)',
-              maxWidth: '100%',
-              overflow: 'hidden'
+              marginBottom: '15px',
+              height: '300px'
             }}>
-              {[100, 50, 20, 10, 5, 1].map(denomination => (
-                <div
-                  key={denomination}
-                  style={{
-                    background: 'linear-gradient(145deg, #404040, #303030)',
-                    border: '3px solid #777777',
-                    borderRadius: '12px',
-                    padding: '12px 8px',
-                    textAlign: 'center',
-                    minHeight: '200px',
-                    maxHeight: '200px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    boxShadow: 'inset 0 0 15px rgba(0, 0, 0, 0.6)',
-                    overflow: 'hidden'
-                  }}
-                >
-                  {/* Denomination Label */}
-                  <div style={{
-                    background: `linear-gradient(135deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)})`,
-                    color: '#000000',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    padding: '8px',
-                    borderRadius: '6px',
-                    marginBottom: '10px',
-                    border: `2px solid ${getBillBorderColor(denomination)}`,
-                    width: '100%',
-                    textAlign: 'center',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.4)'
-                  }}>
-                    ${denomination}
-                  </div>
-                  
-                  {/* Realistic Bill Stack */}
-                  <div style={{
-                    position: 'relative',
-                    height: '140px',
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                  }}>
-                    {Array.from({ length: 10 }, (_, i) => (
-                      <div
-                        key={i}
-                        className="bill-draggable"
-                        draggable
-                        onDragStart={(e) => {
-                          const billData = {
-                            denomination,
-                            id: `${denomination}_${Date.now()}_${Math.random()}`
-                          };
-                          e.dataTransfer.setData('text/plain', JSON.stringify(billData));
-                          e.currentTarget.classList.add('bill-dragging');
-                          playSound('bill_pickup');
-                        }}
-                        onDragEnd={(e) => {
-                          e.currentTarget.classList.remove('bill-dragging');
-                        }}
-                        style={{
-                          position: 'absolute',
-                          width: '100px',
-                          height: '42px',
-                          background: `linear-gradient(135deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)}, ${getBillColor(denomination)})`,
-                          border: `3px solid ${getBillBorderColor(denomination)}`,
-                          borderRadius: '10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '16px',
-                          fontWeight: 'bold',
-                          color: '#000000',
-                          cursor: 'grab',
-                          top: `${i * 4}px`,
-                          left: `${(i % 2) * 3}px`,
-                          transform: `rotate(${(i % 5 - 2) * 3}deg)`,
-                          zIndex: 30 - i,
-                          boxShadow: `0 8px 25px rgba(0,0,0,0.8), inset 0 0 15px ${getBillColor(denomination)}`,
-                          textShadow: `0 2px 4px rgba(255,255,255,0.9), 0 0 10px ${getBillColor(denomination)}`,
-                          transition: 'all 0.3s ease',
-                          backdropFilter: 'blur(1px)'
-                        }}
-                        onMouseOver={(e) => {
-                          e.currentTarget.style.transform = `rotate(${(i % 5 - 2) * 3}deg) translateY(-15px) scale(1.2)`;
-                          e.currentTarget.style.boxShadow = `0 15px 40px rgba(0,0,0,0.9), inset 0 0 25px ${getBillColor(denomination)}`;
-                          e.currentTarget.style.zIndex = '100';
-                          playSound('bill_rustle');
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.transform = `rotate(${(i % 5 - 2) * 3}deg) translateY(0px) scale(1)`;
-                          e.currentTarget.style.boxShadow = `0 8px 25px rgba(0,0,0,0.8), inset 0 0 15px ${getBillColor(denomination)}`;
-                          e.currentTarget.style.zIndex = `${30 - i}`;
-                        }}
-                      >
-                        ${denomination}
-                      </div>
-                    ))}
-                  </div>
+              
+              {/* Left: Cash Drawer with Neon Bills */}
+              <div style={{
+                background: 'linear-gradient(145deg, #1a1a1a, #0f0f0f)',
+                border: '3px solid #333333',
+                borderRadius: '15px',
+                padding: '15px',
+                overflow: 'auto',
+                boxShadow: 'inset 0 0 25px rgba(0, 0, 0, 0.8)'
+              }}>
+                <div style={{
+                  color: '#00ff00',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  marginBottom: '15px',
+                  textAlign: 'center',
+                  textShadow: '0 0 8px #00ff00'
+                }}>
+                  💰 CASH DRAWER 💰
                 </div>
-              ))}
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '10px'
+                }}>
+                  {[100, 50, 20, 10, 5, 1].map(denom => {
+                    const billCount = cashSupply[denom] || 0;
+                    
+                    return (
+                      <div key={denom} style={{
+                        background: 'linear-gradient(145deg, #222222, #111111)',
+                        border: '2px solid #444444',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        textAlign: 'center',
+                        minHeight: '120px'
+                      }}>
+                        <div style={{
+                          color: getBillColor(denom),
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          marginBottom: '5px',
+                          textShadow: `0 0 6px ${getBillColor(denom)}`
+                        }}>
+                          ${denom}
+                        </div>
+                        
+                        <div style={{
+                          color: '#cccccc',
+                          fontSize: '10px',
+                          marginBottom: '8px'
+                        }}>
+                          Stock: {billCount}
+                        </div>
+                        
+                        {/* Draggable Bills */}
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}>
+                          {Array.from({length: Math.min(billCount, 3)}, (_, i) => (
+                            <div 
+                              key={i}
+                              draggable
+                              onDragStart={(e) => {
+                                playSound('paper_rustle');
+                                e.dataTransfer.setData('text/plain', JSON.stringify({
+                                  denomination: denom,
+                                  source: 'drawer',
+                                  id: `${denom}_${Date.now()}_${Math.random()}`
+                                }));
+                              }}
+                              style={{
+                                width: '60px',
+                                height: '26px',
+                                background: `linear-gradient(135deg, ${getBillColor(denom)}, ${adjustBrightness(getBillColor(denom), -20)})`,
+                                border: `1px solid ${adjustBrightness(getBillColor(denom), 30)}`,
+                                borderRadius: '3px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '9px',
+                                fontWeight: 'bold',
+                                color: '#000000',
+                                cursor: billCount > 0 ? 'grab' : 'not-allowed',
+                                opacity: billCount > 0 ? 1 : 0.3,
+                                marginTop: i > 0 ? '-22px' : '0',
+                                zIndex: 10 - i,
+                                boxShadow: `0 1px 4px rgba(0, 0, 0, 0.4), 0 0 6px ${getBillColor(denom)}40`,
+                                textShadow: '1px 1px 1px rgba(255, 255, 255, 0.8)'
+                              }}
+                            >
+                              ${denom}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              {/* Center: Counter Area */}
+              <div 
+                style={{
+                  background: 'linear-gradient(145deg, #2a2a1a, #1a1a0a)',
+                  border: '3px solid #ffff00',
+                  borderRadius: '12px',
+                  padding: '15px',
+                  position: 'relative',
+                  boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)'
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  try {
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    if (data.source === 'drawer' && totalCounted + data.denomination <= cashDrawerAmount) {
+                      playSound('cash_register');
+                      updateCashSupply(data.denomination, -1);
+                      setTotalCounted(prev => prev + data.denomination);
+                      setCounterBills(prev => [...prev, data.denomination]);
+                    }
+                  } catch (error) {
+                    console.error('Drop error:', error);
+                  }
+                }}
+              >
+                <div style={{
+                  color: '#ffff00',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  marginBottom: '10px',
+                  textShadow: '0 0 6px #ffff00'
+                }}>
+                  ⚖️ COUNTER ⚖️
+                </div>
+                
+                <div style={{
+                  color: '#ffffff',
+                  fontSize: '10px',
+                  textAlign: 'center',
+                  marginBottom: '10px'
+                }}>
+                  Drop bills here
+                </div>
+                
+                {/* Bills on Counter */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '3px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: '80px'
+                }}>
+                  {counterBills.map((denom, index) => (
+                    <div
+                      key={index}
+                      draggable
+                      onDragStart={(e) => {
+                        playSound('paper_rustle');
+                        e.dataTransfer.setData('text/plain', JSON.stringify({
+                          source: 'counter',
+                          index: index,
+                          denomination: denom
+                        }));
+                      }}
+                      style={{
+                        width: '50px',
+                        height: '22px',
+                        background: getBillColor(denom),
+                        border: '1px solid rgba(255, 255, 255, 0.5)',
+                        borderRadius: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '8px',
+                        fontWeight: 'bold',
+                        color: '#000000',
+                        cursor: 'grab',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                      }}
+                    >
+                      ${denom}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Right: Customer Envelope */}
+              <div 
+                style={{
+                  background: envelopeSealed ? 
+                    'linear-gradient(145deg, #1a2a1a, #0a1a0a)' : 
+                    'linear-gradient(145deg, #2a1a1a, #1a0a0a)',
+                  border: envelopeSealed ? 
+                    '3px solid #00ff00' : 
+                    '3px solid #ff4444',
+                  borderRadius: '12px',
+                  padding: '15px',
+                  position: 'relative',
+                  boxShadow: envelopeSealed ? 
+                    '0 0 20px rgba(0, 255, 0, 0.3)' : 
+                    '0 0 20px rgba(255, 68, 68, 0.3)'
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (!envelopeSealed) {
+                    try {
+                      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                      if (data.source === 'counter') {
+                        playSound('paper_rustle');
+                        const denom = counterBills[data.index];
+                        setCounterBills(prev => prev.filter((_, i) => i !== data.index));
+                        setEnvelopeBills(prev => [...prev, denom]);
+                      }
+                    } catch (error) {
+                      console.error('Envelope drop error:', error);
+                    }
+                  }
+                }}
+              >
+                <div style={{
+                  color: envelopeSealed ? '#00ff00' : '#ff4444',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  marginBottom: '10px',
+                  textShadow: envelopeSealed ? '0 0 6px #00ff00' : '0 0 6px #ff4444'
+                }}>
+                  {envelopeSealed ? '✅ SEALED' : '📮 ENVELOPE'}
+                </div>
+                
+                {!envelopeSealed && (
+                  <div style={{
+                    color: '#cccccc',
+                    fontSize: '10px',
+                    textAlign: 'center',
+                    marginBottom: '10px'
+                  }}>
+                    Drop from counter
+                  </div>
+                )}
+                
+                {/* Bills in Envelope */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '2px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: '80px',
+                  opacity: envelopeSealed ? 0.7 : 1
+                }}>
+                  {envelopeBills.map((denom, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        width: '40px',
+                        height: '18px',
+                        background: getBillColor(denom),
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '7px',
+                        fontWeight: 'bold',
+                        color: '#000000',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)'
+                      }}
+                    >
+                      ${denom}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Customer Envelope Area */}
