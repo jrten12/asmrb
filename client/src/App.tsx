@@ -6140,62 +6140,6 @@ function App() {
 }
 
 export default App;
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        color: '#000000',
-                        cursor: 'pointer',
-                        transform: `rotate(${(index % 7 - 3) * 8}deg)`,
-                        zIndex: index + 1,
-                        boxShadow: '0 3px 8px rgba(0,0,0,0.4)',
-                        textShadow: '0 1px 1px rgba(255,255,255,0.3)'
-                      }}
-                      onDoubleClick={() => {
-                        setBillsOnCounter(prev => prev.filter(b => b.id !== bill.id));
-                        setTotalCounted(prev => prev - bill.denomination);
-                        playSound('bill_rustle');
-                      }}
-                    >
-                      ${bill.denomination}
-                    </div>
-                  ))}
-                  
-                  {billsOnCounter.length === 0 && (
-                    <div style={{
-                      color: '#666666',
-                      fontSize: '14px',
-                      textAlign: 'center',
-                      marginTop: '100px',
-                      fontStyle: 'italic'
-                    }}>
-                      Drag bills here to count for customer
-                    </div>
-                  )}
-                </div>
-
-                {/* Envelope Sealing Machine */}
-                {totalCounted === cashDrawerAmount && totalCounted > 0 && (
-                  <div style={{
-                    background: 'linear-gradient(145deg, #2a2a0a, #1a1a00)',
-                    border: '3px solid #ccaa00',
-                    borderRadius: '12px',
-                    padding: '15px',
-                    textAlign: 'center',
-                    boxShadow: '0 0 20px rgba(204, 170, 0, 0.3)'
-                  }}>
-                    <div style={{
-                      color: '#ccaa00',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      marginBottom: '10px',
-                      textShadow: '0 0 8px #ccaa00'
-                    }}>
-                      📮 ENVELOPE SEALING MACHINE 📮
-                    </div>
-                    <button
-                      onClick={() => {
-                        playSound('envelope_place');
                         setTimeout(() => {
                           playSound('envelope_seal');
                           setTimeout(() => {
