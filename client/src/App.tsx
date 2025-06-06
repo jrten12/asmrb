@@ -5774,83 +5774,372 @@ function App() {
           </div>
         </div>
       )}
-                
-                {/* Counting Surface */}
-                <div
-                  style={{
-                    background: 'linear-gradient(145deg, #0a2a0a, #052a05)',
-                    border: '4px solid #00cc00',
-                    borderRadius: '15px',
-                    padding: '20px',
-                    minHeight: '300px',
-                    position: 'relative',
-                    boxShadow: 'inset 0 0 20px rgba(0, 204, 0, 0.2)',
-                    overflow: 'hidden'
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.currentTarget.style.background = 'linear-gradient(145deg, #0f3f0f, #0a3a0a)';
-                    e.currentTarget.style.boxShadow = 'inset 0 0 30px rgba(0, 255, 0, 0.4)';
-                  }}
-                  onDragLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(145deg, #0a2a0a, #052a05)';
-                    e.currentTarget.style.boxShadow = 'inset 0 0 20px rgba(0, 204, 0, 0.2)';
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    e.currentTarget.style.background = 'linear-gradient(145deg, #0a2a0a, #052a05)';
-                    e.currentTarget.style.boxShadow = 'inset 0 0 20px rgba(0, 204, 0, 0.2)';
-                    
-                    try {
-                      const billData = JSON.parse(e.dataTransfer.getData('text/plain'));
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const y = e.clientY - rect.top;
-                      
-                      setBillsOnCounter(prev => [...prev, {
-                        denomination: billData.denomination,
-                        id: billData.id,
-                        x: Math.max(10, Math.min(x - 35, rect.width - 80)),
-                        y: Math.max(50, Math.min(y - 14, rect.height - 35))
-                      }]);
-                      
-                      setTotalCounted(prev => prev + billData.denomination);
-                      playSound('bill_snap');
-                      setTimeout(() => playSound('bill_count'), 120);
-                    } catch (error) {
-                      console.error('Error dropping bill:', error);
-                    }
-                  }}
-                >
+
+      {/* Cash Drawer System */}
+      {showCashDrawer && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.95)',
+          zIndex: 7000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
+            border: '4px solid #cc8800',
+            borderRadius: '20px',
+            padding: '30px',
+            width: '90%',
+            maxWidth: '800px',
+            height: '80%',
+            maxHeight: '600px',
+            boxShadow: '0 0 50px rgba(204, 136, 0, 0.5), inset 0 0 30px rgba(204, 136, 0, 0.1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              background: 'linear-gradient(90deg, #004400, #006600)',
+              padding: '15px',
+              marginBottom: '20px',
+              borderRadius: '10px',
+              textAlign: 'center',
+              border: '3px solid #00ff00',
+              boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+            }}>
+              <div style={{
+                color: '#00ff00',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                textShadow: '0 0 10px #00ff00'
+              }}>
+                CASH DRAWER - COUNT ${cashDrawerAmount}
+              </div>
+            </div>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '15px',
+              height: 'calc(100% - 200px)',
+              marginBottom: '20px'
+            }}>
+              {[1, 5, 10, 20, 50, 100].map(denomination => (
+                <div key={denomination} style={{
+                  background: `linear-gradient(145deg, #${denomination === 1 ? '4a5d23' : denomination === 5 ? '5d4a23' : denomination === 10 ? '4a4a5d' : denomination === 20 ? '5d5d23' : denomination === 50 ? '5d235d' : '235d23'}, #${denomination === 1 ? '2a3d13' : denomination === 5 ? '3d2a13' : denomination === 10 ? '2a2a3d' : denomination === 20 ? '3d3d13' : denomination === 50 ? '3d133d' : '133d13'})`,
+                  border: `3px solid #${denomination === 1 ? '88bb44' : denomination === 5 ? 'bb8844' : denomination === 10 ? '8888bb' : denomination === 20 ? 'bbbb44' : denomination === 50 ? 'bb44bb' : '44bb44'}`,
+                  borderRadius: '15px',
+                  padding: '15px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative',
+                  minHeight: '120px'
+                }}>
                   <div style={{
-                    color: '#00ff00',
-                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontSize: '18px',
                     fontWeight: 'bold',
-                    marginBottom: '12px',
-                    textAlign: 'center',
-                    textShadow: '0 0 8px #00ff00',
-                    background: 'rgba(0, 255, 0, 0.1)',
-                    padding: '8px',
-                    borderRadius: '8px',
-                    border: '2px solid #00aa00'
+                    marginBottom: '10px',
+                    textShadow: '0 0 5px rgba(255,255,255,0.5)'
                   }}>
-                    💵 CUSTOMER COUNTING SURFACE 💵
+                    ${denomination}
                   </div>
                   
-                  {/* Bills on counting surface */}
-                  {billsOnCounter.map((bill, index) => (
-                    <div
-                      key={bill.id}
-                      style={{
-                        position: 'absolute',
-                        left: `${bill.x}px`,
-                        top: `${bill.y}px`,
-                        width: '70px',
-                        height: '28px',
-                        background: `linear-gradient(90deg, ${getBillColor(bill.denomination)}, ${getLightBillColor(bill.denomination)}, ${getBillColor(bill.denomination)})`,
-                        border: `2px solid ${getBillBorderColor(bill.denomination)}`,
-                        borderRadius: '6px',
-                        display: 'flex',
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '5px',
+                    flex: 1,
+                    width: '100%'
+                  }}>
+                    {Array.from({length: Math.min(5, Math.floor(200 / denomination))}, (_, i) => (
+                      <div
+                        key={`${denomination}-${i}`}
+                        draggable
+                        onDragStart={(e) => {
+                          const billId = `${denomination}-${Date.now()}-${Math.random()}`;
+                          setDraggingBill({denomination, id: billId});
+                          e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
+                          playSound('bill_rustle');
+                          e.currentTarget.style.opacity = '0.5';
+                        }}
+                        onDragEnd={(e) => {
+                          setDraggingBill(null);
+                          e.currentTarget.style.opacity = '1';
+                        }}
+                        style={{
+                          width: '60px',
+                          height: '25px',
+                          background: `linear-gradient(90deg, #${denomination === 1 ? '88bb44' : denomination === 5 ? 'bb8844' : denomination === 10 ? '8888bb' : denomination === 20 ? 'bbbb44' : denomination === 50 ? 'bb44bb' : '44bb44'}, #${denomination === 1 ? 'aaddaa' : denomination === 5 ? 'ddaaaa' : denomination === 10 ? 'aaaadd' : denomination === 20 ? 'ddddaa' : denomination === 50 ? 'ddaadd' : 'aaddaa'})`,
+                          border: `2px solid #${denomination === 1 ? 'aaddaa' : denomination === 5 ? 'ddaaaa' : denomination === 10 ? 'aaaadd' : denomination === 20 ? 'ddddaa' : denomination === 50 ? 'ddaadd' : 'aaddaa'}`,
+                          borderRadius: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          color: '#000000',
+                          cursor: 'grab',
+                          transform: `translateY(${i * -2}px)`,
+                          zIndex: 10 - i,
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = `translateY(${i * -2 - 3}px) scale(1.05)`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = `translateY(${i * -2}px) scale(1)`;
+                        }}
+                      >
+                        ${denomination}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{
+              background: 'linear-gradient(145deg, #0a2a0a, #052a05)',
+              border: '4px solid #00cc00',
+              borderRadius: '15px',
+              padding: '20px',
+              minHeight: '100px',
+              position: 'relative',
+              boxShadow: 'inset 0 0 20px rgba(0, 204, 0, 0.2)',
+              overflow: 'hidden'
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.background = 'linear-gradient(145deg, #0a3a0a, #053a05)';
+              e.currentTarget.style.boxShadow = 'inset 0 0 30px rgba(0, 255, 0, 0.4)';
+            }}
+            onDragLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(145deg, #0a2a0a, #052a05)';
+              e.currentTarget.style.boxShadow = 'inset 0 0 20px rgba(0, 204, 0, 0.2)';
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.currentTarget.style.background = 'linear-gradient(145deg, #0a2a0a, #052a05)';
+              e.currentTarget.style.boxShadow = 'inset 0 0 20px rgba(0, 204, 0, 0.2)';
+              
+              try {
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                setBillsOnCounter(prev => [...prev, {
+                  id: data.id,
+                  denomination: data.denomination,
+                  x: Math.max(0, Math.min(x - 30, rect.width - 60)),
+                  y: Math.max(0, Math.min(y - 12, rect.height - 25))
+                }]);
+                
+                setTotalCounted(prev => prev + data.denomination);
+                playSound('bill_rustle');
+                playSound('cash_register');
+              } catch (err) {
+                console.error('Error handling bill drop:', err);
+              }
+            }}>
+              <div style={{
+                color: '#00ff00',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: '10px',
+                textShadow: '0 0 5px #00ff00'
+              }}>
+                COUNTING SURFACE - DRAG BILLS HERE
+              </div>
+              
+              {billsOnCounter.map((bill, index) => (
+                <div
+                  key={bill.id}
+                  style={{
+                    position: 'absolute',
+                    left: bill.x,
+                    top: bill.y + 30,
+                    width: '60px',
+                    height: '25px',
+                    background: `linear-gradient(90deg, #${bill.denomination === 1 ? '88bb44' : bill.denomination === 5 ? 'bb8844' : bill.denomination === 10 ? '8888bb' : bill.denomination === 20 ? 'bbbb44' : bill.denomination === 50 ? 'bb44bb' : '44bb44'}, #${bill.denomination === 1 ? 'aaddaa' : bill.denomination === 5 ? 'ddaaaa' : bill.denomination === 10 ? 'aaaadd' : bill.denomination === 20 ? 'ddddaa' : bill.denomination === 50 ? 'ddaadd' : 'aaddaa'})`,
+                    border: `2px solid #${bill.denomination === 1 ? 'aaddaa' : bill.denomination === 5 ? 'ddaaaa' : bill.denomination === 10 ? 'aaaadd' : bill.denomination === 20 ? 'ddddaa' : bill.denomination === 50 ? 'ddaadd' : 'aaddaa'}`,
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    color: '#000000',
+                    cursor: 'pointer',
+                    zIndex: index + 1,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                    transform: `rotate(${(index % 7 - 3) * 5}deg)`
+                  }}
+                  onClick={() => {
+                    setBillsOnCounter(prev => prev.filter(b => b.id !== bill.id));
+                    setTotalCounted(prev => prev - bill.denomination);
+                    playSound('bill_rustle');
+                  }}
+                >
+                  ${bill.denomination}
+                </div>
+              ))}
+              
+              {billsOnCounter.length === 0 && (
+                <div style={{
+                  color: '#666666',
+                  fontSize: '12px',
+                  textAlign: 'center',
+                  fontStyle: 'italic',
+                  marginTop: '20px'
+                }}>
+                  Drop bills here to count them
+                </div>
+              )}
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '20px',
+              padding: '15px',
+              background: 'linear-gradient(145deg, #003300, #001100)',
+              border: '3px solid #00aa00',
+              borderRadius: '10px'
+            }}>
+              <div style={{
+                color: totalCounted === cashDrawerAmount ? '#00ff00' : totalCounted > cashDrawerAmount ? '#ff4444' : '#ffaa00',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                textShadow: `0 0 10px ${totalCounted === cashDrawerAmount ? '#00ff00' : totalCounted > cashDrawerAmount ? '#ff4444' : '#ffaa00'}`
+              }}>
+                COUNTED: ${totalCounted} / REQUIRED: ${cashDrawerAmount}
+              </div>
+              
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {totalCounted === cashDrawerAmount && (
+                  <button
+                    onClick={() => {
+                      playSound('cash_register');
+                      playSound('success');
+                      playSound('correct');
+                      setTerminalOutput(prev => prev + `\n> CASH COUNT VERIFIED: $${totalCounted}\n> TRANSACTION APPROVED\n> DRAWER SECURED`);
+                      
+                      handleCorrectTransaction();
+                      setShowCashDrawer(false);
+                      setCashDrawerOpen(false);
+                      setBillsOnCounter([]);
+                      setTotalCounted(0);
+                      playSound('drawer_close');
+                    }}
+                    style={{
+                      background: 'linear-gradient(145deg, #004400, #002200)',
+                      border: '2px solid #00aa00',
+                      color: '#00ff00',
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontFamily: 'monospace',
+                      boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)'
+                    }}
+                  >
+                    ✓ CONFIRM COUNT
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => {
+                    setBillsOnCounter([]);
+                    setTotalCounted(0);
+                    playSound('bill_rustle');
+                  }}
+                  style={{
+                    background: 'linear-gradient(145deg, #444400, #222200)',
+                    border: '2px solid #aaaa00',
+                    color: '#ffff00',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  CLEAR
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setShowCashDrawer(false);
+                    setCashDrawerOpen(false);
+                    setBillsOnCounter([]);
+                    setTotalCounted(0);
+                    playSound('drawer_close');
+                    setTerminalOutput(prev => prev + `\n> CASH DRAWER CLOSED\n> TRANSACTION CANCELLED`);
+                  }}
+                  style={{
+                    background: 'linear-gradient(145deg, #440000, #220000)',
+                    border: '2px solid #aa0000',
+                    color: '#ff4444',
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                setShowCashDrawer(false);
+                setCashDrawerOpen(false);
+                setBillsOnCounter([]);
+                setTotalCounted(0);
+                playSound('drawer_close');
+              }}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'linear-gradient(145deg, #440000, #220000)',
+                border: '2px solid #cc0000',
+                color: '#ff4444',
+                padding: '8px 12px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: 'monospace'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '10px',
