@@ -87,7 +87,8 @@ export function generateCustomer(level: number): Customer {
 }
 
 function generateTransaction(level: number, suspiciousLevel: number): Transaction {
-  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'transfer', 'wire_transfer', 'cashiers_check', 'money_order', 'inquiry'];
+  // REMOVED TRANSFER - only basic bank teller transactions that have clear customer-facing workflows
+  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'wire_transfer', 'cashiers_check', 'money_order', 'inquiry'];
   const type = types[Math.floor(Math.random() * types.length)];
   
   // More varied transaction amounts

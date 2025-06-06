@@ -5378,30 +5378,34 @@ function App() {
             {/* Large Teller Drawer with 6 Denomination Slots */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(6, 1fr)',
-              gap: '25px',
-              marginBottom: '30px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '15px',
+              marginBottom: '20px',
               background: 'linear-gradient(145deg, #333333, #222222)',
               border: '5px solid #666666',
               borderRadius: '20px',
-              padding: '30px',
-              boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.8)'
+              padding: '20px',
+              boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.8)',
+              maxWidth: '100%',
+              overflow: 'hidden'
             }}>
               {[100, 50, 20, 10, 5, 1].map(denomination => (
                 <div
                   key={denomination}
                   style={{
                     background: 'linear-gradient(145deg, #404040, #303030)',
-                    border: '4px solid #777777',
-                    borderRadius: '15px',
-                    padding: '20px 15px',
+                    border: '3px solid #777777',
+                    borderRadius: '12px',
+                    padding: '12px 8px',
                     textAlign: 'center',
-                    minHeight: '280px',
+                    minHeight: '200px',
+                    maxHeight: '200px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'flex-start',
-                    boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.6)'
+                    boxShadow: 'inset 0 0 15px rgba(0, 0, 0, 0.6)',
+                    overflow: 'hidden'
                   }}
                 >
                   {/* Denomination Label */}
@@ -5424,12 +5428,13 @@ function App() {
                   {/* Realistic Bill Stack */}
                   <div style={{
                     position: 'relative',
-                    height: '200px',
+                    height: '140px',
                     width: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    overflow: 'hidden'
                   }}>
                     {Array.from({ length: 10 }, (_, i) => (
                       <div
@@ -5450,20 +5455,20 @@ function App() {
                         }}
                         style={{
                           position: 'absolute',
-                          width: '110px',
-                          height: '45px',
+                          width: '90px',
+                          height: '35px',
                           background: `linear-gradient(135deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)}, ${getBillColor(denomination)})`,
-                          border: `3px solid ${getBillBorderColor(denomination)}`,
-                          borderRadius: '10px',
+                          border: `2px solid ${getBillBorderColor(denomination)}`,
+                          borderRadius: '8px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '14px',
+                          fontSize: '12px',
                           fontWeight: 'bold',
                           color: '#000000',
                           cursor: 'grab',
-                          top: `${i * 4}px`,
-                          left: `${(i % 4 - 2) * 3}px`,
+                          top: `${i * 3}px`,
+                          left: `${(i % 3 - 1) * 2}px`,
                           transform: `rotate(${(i % 7 - 3) * 2}deg)`,
                           zIndex: 30 - i,
                           boxShadow: '0 5px 15px rgba(0,0,0,0.7)',
@@ -5492,14 +5497,16 @@ function App() {
             {/* Customer Envelope Area */}
             <div style={{
               background: 'linear-gradient(145deg, #0a3a0a, #053005)',
-              border: '5px solid #00cc00',
-              borderRadius: '20px',
-              padding: '30px',
-              minHeight: '300px',
+              border: '4px solid #00cc00',
+              borderRadius: '15px',
+              padding: '20px',
+              minHeight: '200px',
+              maxHeight: '200px',
               position: 'relative',
               boxShadow: 'inset 0 0 30px rgba(0, 204, 0, 0.4)',
               overflow: 'hidden',
-              marginBottom: '25px'
+              marginBottom: '15px',
+              flex: '0 0 auto'
             }}
             onDragOver={(e) => {
               e.preventDefault();
