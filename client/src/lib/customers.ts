@@ -68,8 +68,8 @@ export function generateCustomer(level: number): Customer {
   
   const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
   
-  // 40% fraud rate for more challenging gameplay and pattern recognition
-  const isFraud = Math.random() < 0.4;
+  // 80% fraud rate for testing fraud detection system
+  const isFraud = Math.random() < 0.8;
   const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
   
   const documents = generateDocuments(name, transaction, suspiciousLevel);
