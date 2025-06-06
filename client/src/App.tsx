@@ -166,6 +166,8 @@ function App() {
   });
   const [streakMultiplier, setStreakMultiplier] = useState(1);
   
+
+  
   // Cash drawer state for new workflow
   const [counterBills, setCounterBills] = useState<number[]>([]);
   const [envelopeBills, setEnvelopeBills] = useState<number[]>([]);
@@ -469,9 +471,7 @@ function App() {
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
-  const [showAdBreak, setShowAdBreak] = useState(false);
-  const [adCountdown, setAdCountdown] = useState(5);
-  const [customersServed, setCustomersServed] = useState(0);
+
   const [fraudTracker, setFraudTracker] = useState<boolean[]>([]);
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
@@ -5337,7 +5337,7 @@ function App() {
             fontSize: '12px',
             marginTop: '10px'
           }}>
-            Transaction #{currentBadge.milestone} completed
+            Achievement unlocked!
           </div>
           </div>
         </div>
@@ -5869,7 +5869,7 @@ function App() {
                         setTotalCounted(0);
                         
                         // Complete the withdrawal transaction
-                        handleTransactionComplete(true);
+                        addCorrectTransaction();
                       }, 1000);
                     }
                   }
@@ -6316,7 +6316,11 @@ function App() {
                       playSound('cash_register');
                       playSound('success');
                       playSound('correct');
-                      setTerminalOutput(prev => prev + `\n> CASH COUNT VERIFIED: $${totalCounted}\n> TRANSACTION APPROVED\n> DRAWER SECURED`);
+                      setTerminalOutput(prev => [...prev, 
+                        `> CASH COUNT VERIFIED: $${totalCounted}`,
+                        "> TRANSACTION APPROVED",
+                        "> DRAWER SECURED"
+                      ]);
                       
                       handleCorrectTransaction();
                       setShowCashDrawer(false);
@@ -6370,7 +6374,10 @@ function App() {
                     setBillsOnCounter([]);
                     setTotalCounted(0);
                     playSound('drawer_close');
-                    setTerminalOutput(prev => prev + `\n> CASH DRAWER CLOSED\n> TRANSACTION CANCELLED`);
+                    setTerminalOutput(prev => [...prev, 
+                      "> CASH DRAWER CLOSED",
+                      "> TRANSACTION CANCELLED"
+                    ]);
                   }}
                   style={{
                     background: 'linear-gradient(145deg, #440000, #220000)',
