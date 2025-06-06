@@ -10,10 +10,12 @@ export interface Customer {
 }
 
 export interface Transaction {
-  type: 'deposit' | 'withdrawal' | 'transfer';
+  type: 'deposit' | 'withdrawal' | 'transfer' | 'wire_transfer' | 'cashiers_check' | 'money_order' | 'inquiry';
   amount: number;
   accountNumber: string;
   targetAccount?: string;
+  recipientName?: string;
+  wireRoutingNumber?: string;
 }
 
 export interface Document {

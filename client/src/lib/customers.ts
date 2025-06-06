@@ -87,7 +87,7 @@ export function generateCustomer(level: number): Customer {
 }
 
 function generateTransaction(level: number, suspiciousLevel: number): Transaction {
-  const types: Transaction['type'][] = ['deposit', 'withdrawal'];
+  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'transfer', 'wire_transfer', 'cashiers_check', 'money_order', 'inquiry'];
   const type = types[Math.floor(Math.random() * types.length)];
   
   // More varied transaction amounts
@@ -114,14 +114,30 @@ function generateTransaction(level: number, suspiciousLevel: number): Transactio
     amount = Math.floor(Math.random() * 900) + 100; // $100 to $1000
   }
   
+  // For inquiries, set amount to 0
+  if (type === 'inquiry') {
+    amount = 0;
+  }
+  
   const accountNumber = generateAccountNumber();
-  const targetAccount = type === 'transfer' ? generateAccountNumber() : undefined;
+  const targetAccount = (type === 'transfer' || type === 'wire_transfer') ? generateAccountNumber() : undefined;
+  
+  // Generate additional data for specific transaction types
+  const recipientName = (type === 'wire_transfer' || type === 'cashiers_check' || type === 'money_order') 
+    ? CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)] 
+    : undefined;
+    
+  const wireRoutingNumber = type === 'wire_transfer' 
+    ? `${Math.floor(Math.random() * 900000000) + 100000000}` 
+    : undefined;
   
   return {
     type,
     amount,
     accountNumber,
-    targetAccount
+    targetAccount,
+    recipientName,
+    wireRoutingNumber
   };
 }
 
