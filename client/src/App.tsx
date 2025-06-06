@@ -6140,39 +6140,3 @@ function App() {
 }
 
 export default App;
-                  
-                  <button
-                    onClick={() => {
-                      setShowCashDrawer(false);
-                      setCashDrawerOpen(false);
-                      setBillsOnCounter([]);
-                      setTotalCounted(0);
-                      playSound('cash_drawer_close');
-                      setTerminalOutput(prev => [...prev, "Cash register closed", "Transaction cancelled"]);
-                    }}
-                    style={{
-                      background: 'linear-gradient(145deg, #440000, #220000)',
-                      border: '2px solid #ff4444',
-                      color: '#ff6666',
-                      padding: '10px 15px',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontFamily: 'monospace'
-                    }}
-                  >
-                    ✕ CLOSE REGISTER
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
-  );
-}
-
-export default App;
