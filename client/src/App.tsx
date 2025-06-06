@@ -126,6 +126,8 @@ function App() {
     color: string;
     tier: string;
   } | null>(null);
+  const [showPrinter, setShowPrinter] = useState(false);
+  const [receiptContent, setReceiptContent] = useState<string>('');
 
   // Achievement badge definitions
   const badges = [
@@ -5749,7 +5751,7 @@ function App() {
               whiteSpace: 'pre-line',
               textShadow: '0 0 2px #00ff00'
             }}>
-              {receiptContent}
+              {receiptContent || "No receipt content"}
             </div>
             
             <button
