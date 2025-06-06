@@ -5340,34 +5340,27 @@ function App() {
             flexDirection: 'column'
           }}>
             
-            {/* Bank Header */}
+            {/* Compact Header */}
             <div style={{
               background: 'linear-gradient(90deg, #004400, #006600)',
-              padding: '20px',
-              marginBottom: '25px',
-              borderRadius: '15px',
+              padding: '12px',
+              marginBottom: '15px',
+              borderRadius: '10px',
               textAlign: 'center',
-              border: '4px solid #00ff00',
-              boxShadow: '0 0 30px rgba(0, 255, 0, 0.4)'
+              border: '3px solid #00ff00',
+              boxShadow: '0 0 20px rgba(0, 255, 0, 0.4)'
             }}>
               <div style={{
                 color: '#00ff00',
-                fontSize: '28px',
+                fontSize: '18px',
                 fontWeight: 'bold',
                 textShadow: '0 0 15px #00ff00'
               }}>
-                🏦 WESTRIDGE LEDGER BANK - CASH DRAWER 🏦
-              </div>
-              <div style={{
-                color: '#ffff00',
-                fontSize: '18px',
-                marginTop: '8px'
-              }}>
-                WITHDRAWAL REQUEST: ${cashDrawerAmount.toLocaleString()}
+                💰 CASH DRAWER - WITHDRAWAL: ${cashDrawerAmount.toLocaleString()} 💰
               </div>
               <div style={{
                 color: totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800',
-                fontSize: '16px',
+                fontSize: '14px',
                 marginTop: '5px',
                 fontWeight: 'bold'
               }}>
@@ -5412,17 +5405,17 @@ function App() {
                   <div style={{
                     background: `linear-gradient(135deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)})`,
                     color: '#000000',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontWeight: 'bold',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    marginBottom: '20px',
-                    border: `3px solid ${getBillBorderColor(denomination)}`,
+                    padding: '8px',
+                    borderRadius: '6px',
+                    marginBottom: '10px',
+                    border: `2px solid ${getBillBorderColor(denomination)}`,
                     width: '100%',
                     textAlign: 'center',
-                    boxShadow: '0 3px 8px rgba(0,0,0,0.4)'
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.4)'
                   }}>
-                    ${denomination} BILLS
+                    ${denomination}
                   </div>
                   
                   {/* Realistic Bill Stack */}
@@ -5455,34 +5448,36 @@ function App() {
                         }}
                         style={{
                           position: 'absolute',
-                          width: '90px',
-                          height: '35px',
+                          width: '100px',
+                          height: '42px',
                           background: `linear-gradient(135deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)}, ${getBillColor(denomination)})`,
-                          border: `2px solid ${getBillBorderColor(denomination)}`,
-                          borderRadius: '8px',
+                          border: `3px solid ${getBillBorderColor(denomination)}`,
+                          borderRadius: '10px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '12px',
+                          fontSize: '16px',
                           fontWeight: 'bold',
                           color: '#000000',
                           cursor: 'grab',
-                          top: `${i * 3}px`,
-                          left: `${(i % 3 - 1) * 2}px`,
-                          transform: `rotate(${(i % 7 - 3) * 2}deg)`,
+                          top: `${i * 4}px`,
+                          left: `${(i % 2) * 3}px`,
+                          transform: `rotate(${(i % 5 - 2) * 3}deg)`,
                           zIndex: 30 - i,
-                          boxShadow: '0 5px 15px rgba(0,0,0,0.7)',
-                          textShadow: '0 2px 3px rgba(255,255,255,0.5)',
-                          transition: 'all 0.3s ease'
+                          boxShadow: `0 8px 25px rgba(0,0,0,0.8), inset 0 0 15px ${getBillColor(denomination)}`,
+                          textShadow: `0 2px 4px rgba(255,255,255,0.9), 0 0 10px ${getBillColor(denomination)}`,
+                          transition: 'all 0.3s ease',
+                          backdropFilter: 'blur(1px)'
                         }}
                         onMouseOver={(e) => {
-                          e.currentTarget.style.transform = `rotate(${(i % 7 - 3) * 2}deg) translateY(-12px) scale(1.15)`;
-                          e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.9)';
+                          e.currentTarget.style.transform = `rotate(${(i % 5 - 2) * 3}deg) translateY(-15px) scale(1.2)`;
+                          e.currentTarget.style.boxShadow = `0 15px 40px rgba(0,0,0,0.9), inset 0 0 25px ${getBillColor(denomination)}`;
                           e.currentTarget.style.zIndex = '100';
+                          playSound('bill_rustle');
                         }}
                         onMouseOut={(e) => {
-                          e.currentTarget.style.transform = `rotate(${(i % 7 - 3) * 2}deg) translateY(0px) scale(1)`;
-                          e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.7)';
+                          e.currentTarget.style.transform = `rotate(${(i % 5 - 2) * 3}deg) translateY(0px) scale(1)`;
+                          e.currentTarget.style.boxShadow = `0 8px 25px rgba(0,0,0,0.8), inset 0 0 15px ${getBillColor(denomination)}`;
                           e.currentTarget.style.zIndex = `${30 - i}`;
                         }}
                       >
