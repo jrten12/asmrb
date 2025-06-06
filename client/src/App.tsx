@@ -172,6 +172,24 @@ function App() {
   const [envelopeSealed, setEnvelopeSealed] = useState(false);
   const [draggedBill, setDraggedBill] = useState<number | null>(null);
   
+  // Cash supply state
+  const [cashSupply, setCashSupply] = useState<{[key: number]: number}>({
+    100: 50,
+    50: 50, 
+    20: 50,
+    10: 50,
+    5: 50,
+    1: 50
+  });
+  
+  // Helper function for updating cash supply
+  const updateCashSupply = (denomination: number, change: number) => {
+    setCashSupply(prev => ({
+      ...prev,
+      [denomination]: Math.max(0, (prev[denomination] || 0) + change)
+    }));
+  };
+
   // Helper function for adjusting color brightness
   const adjustBrightness = (color: string, amount: number): string => {
     const usePound = color[0] === '#';
@@ -939,6 +957,20 @@ function App() {
           // Paper tearing sound
           createNoise(0.3, 0.15);
           setTimeout(() => createTone(200, 0.1, 0.05), 150);
+          break;
+
+        case 'drawer_open':
+          // Heavy metal drawer opening sound
+          createTone(60, 0.2, 0.1);
+          setTimeout(() => createNoise(0.15, 0.3), 100);
+          setTimeout(() => createTone(80, 0.15, 0.05), 300);
+          break;
+
+        case 'drawer_close':
+          // Heavy metal drawer closing sound
+          createTone(80, 0.2, 0.1);
+          setTimeout(() => createTone(60, 0.25, 0.15), 200);
+          setTimeout(() => createNoise(0.1, 0.1), 350);
           break;
 
         default:
@@ -5758,42 +5790,188 @@ function App() {
               </div>
             </div>
 
-            {/* Customer Envelope Area */}
+            {/* Control Panel with SEAL ENVELOPE Button */}
             <div style={{
-              background: 'linear-gradient(145deg, #0a3a0a, #053005)',
-              border: '4px solid #00cc00',
-              borderRadius: '15px',
-              padding: '20px',
-              minHeight: '200px',
-              maxHeight: '200px',
-              position: 'relative',
-              boxShadow: 'inset 0 0 30px rgba(0, 204, 0, 0.4)',
-              overflow: 'hidden',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '15px',
               marginBottom: '15px',
-              flex: '0 0 auto'
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.currentTarget.style.background = 'linear-gradient(145deg, #0f5f0f, #0a5a0a)';
-              e.currentTarget.style.boxShadow = 'inset 0 0 50px rgba(0, 255, 0, 0.6)';
-            }}
-            onDragLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(145deg, #0a3a0a, #053005)';
-              e.currentTarget.style.boxShadow = 'inset 0 0 30px rgba(0, 204, 0, 0.4)';
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.currentTarget.style.background = 'linear-gradient(145deg, #0a3a0a, #053005)';
-              e.currentTarget.style.boxShadow = 'inset 0 0 30px rgba(0, 204, 0, 0.4)';
+              padding: '15px',
+              background: 'linear-gradient(145deg, #1a1a1a, #0a0a0a)',
+              border: '3px solid #444444',
+              borderRadius: '12px',
+              boxShadow: '0 0 20px rgba(68, 68, 68, 0.3)'
+            }}>
               
-              try {
-                const billData = JSON.parse(e.dataTransfer.getData('text/plain'));
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                setBillsOnCounter(prev => [...prev, {
-                  denomination: billData.denomination,
+              {/* Summary Display */}
+              <div style={{
+                color: '#00ff00',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                textShadow: '0 0 8px #00ff00'
+              }}>
+                Envelope Total: ${envelopeBills.reduce((sum, denom) => sum + denom, 0).toLocaleString()}
+              </div>
+              
+              {/* SEAL ENVELOPE Button */}
+              <button
+                onClick={() => {
+                  if (envelopeBills.length > 0 && !envelopeSealed) {
+                    // ASMR envelope sealing sounds
+                    playSound('paper_rustle');
+                    setTimeout(() => {
+                      // Create envelope sealing sound effect
+                      try {
+                        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                        
+                        // Sticky peel sound
+                        const oscillator1 = audioContext.createOscillator();
+                        const gainNode1 = audioContext.createGain();
+                        oscillator1.connect(gainNode1);
+                        gainNode1.connect(audioContext.destination);
+                        oscillator1.frequency.setValueAtTime(200, audioContext.currentTime);
+                        oscillator1.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.3);
+                        gainNode1.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        oscillator1.start();
+                        oscillator1.stop(audioContext.currentTime + 0.3);
+                        
+                        // Firm press sound
+                        setTimeout(() => {
+                          const oscillator2 = audioContext.createOscillator();
+                          const gainNode2 = audioContext.createGain();
+                          oscillator2.connect(gainNode2);
+                          gainNode2.connect(audioContext.destination);
+                          oscillator2.frequency.setValueAtTime(80, audioContext.currentTime);
+                          gainNode2.gain.setValueAtTime(0.15, audioContext.currentTime);
+                          gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                          oscillator2.start();
+                          oscillator2.stop(audioContext.currentTime + 0.2);
+                        }, 300);
+                        
+                      } catch (error) {
+                        console.log("Envelope sealing audio not available:", error);
+                      }
+                    }, 200);
+                    
+                    setEnvelopeSealed(true);
+                    
+                    // Check if amount matches requested amount
+                    const envelopeTotal = envelopeBills.reduce((sum, denom) => sum + denom, 0);
+                    if (envelopeTotal === cashDrawerAmount) {
+                      playSound('completion_bell');
+                      setTimeout(() => {
+                        setShowCashDrawer(false);
+                        setEnvelopeSealed(false);
+                        setEnvelopeBills([]);
+                        setCounterBills([]);
+                        setTotalCounted(0);
+                        
+                        // Complete the withdrawal transaction
+                        handleTransactionComplete(true);
+                      }, 1000);
+                    }
+                  }
+                }}
+                disabled={envelopeBills.length === 0 || envelopeSealed}
+                style={{
+                  background: (envelopeBills.length > 0 && !envelopeSealed) 
+                    ? 'linear-gradient(145deg, #006600, #004400)' 
+                    : '#333333',
+                  color: (envelopeBills.length > 0 && !envelopeSealed) 
+                    ? '#00ff00' 
+                    : '#666666',
+                  border: '3px solid ' + ((envelopeBills.length > 0 && !envelopeSealed) 
+                    ? '#00ff00' 
+                    : '#555555'),
+                  borderRadius: '12px',
+                  padding: '15px 25px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: (envelopeBills.length > 0 && !envelopeSealed) 
+                    ? 'pointer' 
+                    : 'not-allowed',
+                  fontFamily: 'monospace',
+                  textShadow: (envelopeBills.length > 0 && !envelopeSealed) 
+                    ? '0 0 10px #00ff00' 
+                    : 'none',
+                  boxShadow: (envelopeBills.length > 0 && !envelopeSealed) 
+                    ? '0 0 20px rgba(0, 255, 0, 0.4)' 
+                    : 'none'
+                }}
+              >
+                {envelopeSealed ? '✅ ENVELOPE SEALED' : '📮 SEAL ENVELOPE'}
+              </button>
+              
+              {/* Reset Button */}
+              <button
+                onClick={() => {
+                  playSound('paper_rustle');
+                  setCounterBills([]);
+                  setEnvelopeBills([]);
+                  setEnvelopeSealed(false);
+                  setTotalCounted(0);
+                  
+                  // Reset cash supply
+                  setCashSupply({
+                    100: 50, 50: 50, 20: 50, 10: 50, 5: 50, 1: 50
+                  });
+                }}
+                style={{
+                  background: 'linear-gradient(145deg, #552200, #331100)',
+                  border: '3px solid #cc8800',
+                  color: '#ffaa00',
+                  padding: '15px 20px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace'
+                }}
+              >
+                🔄 RESET
+              </button>
+            </div>
+
+            {/* Close Cash Drawer Button */}
+            <div style={{
+              textAlign: 'center',
+              marginTop: '15px'
+            }}>
+              <button
+                onClick={() => {
+                  playSound('drawer_close');
+                  setTimeout(() => {
+                    setShowCashDrawer(false);
+                    setEnvelopeSealed(false);
+                    setEnvelopeBills([]);
+                    setCounterBills([]);
+                    setTotalCounted(0);
+                  }, 300);
+                }}
+                style={{
+                  background: 'linear-gradient(145deg, #aa0000, #660000)',
+                  border: '3px solid #ff0000',
+                  color: '#ff4444',
+                  padding: '15px 30px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace',
+                  textShadow: '0 0 10px #ff4444',
+                  boxShadow: '0 0 20px rgba(255, 68, 68, 0.3)'
+                }}
+              >
+                ❌ CLOSE DRAWER
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
                   id: billData.id,
                   x: Math.max(20, Math.min(x - 55, rect.width - 130)),
                   y: Math.max(80, Math.min(y - 22, rect.height - 65))
