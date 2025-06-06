@@ -1415,14 +1415,57 @@ function App() {
         return;
       }
       
+      // FRAUD DETECTION: Check if customer has fraudulent documents
+      const fraudulentDocs = currentCustomer.documents.filter(doc => !doc.isValid);
+      
+      if (fraudulentDocs.length > 0) {
+        // Player approved a fraudulent transaction - MAJOR ERROR
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "🚨🚨🚨 FRAUD APPROVED - MAJOR ERROR 🚨🚨🚨",
+          "YOU JUST APPROVED A FRAUDULENT TRANSACTION!",
+          "",
+          "DETECTED FRAUD:",
+          ...fraudulentDocs.map(doc => `❌ ${doc.hasError || 'Document invalid'}`),
+          "",
+          "⚠️ SUPERVISOR ALERT ⚠️",
+          "This is a serious security breach!",
+          "Your performance score has been severely penalized.",
+          "",
+          "REMEMBER: Always verify ALL documents carefully!",
+          "==================================================",
+          ""
+        ]);
+        
+        // Severe penalty for approving fraud
+        setGameScore(prev => ({
+          ...prev,
+          score: Math.max(0, prev.score - 500), // Major penalty
+          errors: prev.errors + 1,
+          consecutiveErrors: prev.consecutiveErrors + 1
+        }));
+        
+        playSound('reject');
+        playSound('warning');
+        
+        setTimeout(() => {
+          setCurrentCustomer(null);
+          resetVerificationState();
+          setTerminalOutput(prev => [...prev, "Customer left. Security reviewing your performance.", "Next customer please - BE MORE CAREFUL!"]);
+        }, 3000);
+        return;
+      }
+      
+      // Customer is legitimate - approve normally
       setTerminalOutput(prev => [...prev, "> " + command, "TRANSACTION APPROVED", "All verifications complete", "Processing payment..."]);
       playSound('approve');
       setTimeout(() => playSound('stamp'), 300);
       setTimeout(() => playSound('receipt_print'), 600);
       setTimeout(() => {
+        handleCorrectTransaction();
         setCurrentCustomer(null);
         resetVerificationState();
-        setTerminalOutput(prev => [...prev, "Customer served. Next customer please."]);
+        setTerminalOutput(prev => [...prev, "Customer served successfully. Next customer please."]);
         playSound('paper_rustle');
       }, 2000);
     } else if (cmd === 'REJECT') {
@@ -1553,8 +1596,8 @@ function App() {
   };
 
   const checkAccountBalance = (accountNumber: string) => {
-    // Generate realistic account balance
-    const balance = Math.floor(Math.random() * 50000) + 1000;
+    // Generate realistic account balance (lower amounts)
+    const balance = Math.floor(Math.random() * 3000) + 500; // $500 to $3500
     setAccountBalance(balance);
     return balance;
   };
@@ -1565,6 +1608,16 @@ function App() {
     const transactionId = Date.now().toString().slice(-6);
     const timestamp = new Date().toLocaleString();
     
+    // Calculate proper balances
+    const startingBalance = accountBalance;
+    let endingBalance = accountBalance;
+    
+    if (currentCustomer.transaction.type === 'withdrawal') {
+      endingBalance = accountBalance - currentCustomer.transaction.amount;
+    } else if (currentCustomer.transaction.type === 'deposit') {
+      endingBalance = accountBalance + currentCustomer.transaction.amount;
+    }
+    
     const receipt = {
       transactionId,
       timestamp,
@@ -1572,7 +1625,9 @@ function App() {
       accountNumber: currentCustomer.transaction.accountNumber,
       transactionType: currentCustomer.transaction.type,
       amount: currentCustomer.transaction.amount,
-      balance: accountBalance,
+      startingBalance: startingBalance,
+      endingBalance: endingBalance,
+      balance: endingBalance, // Keep for backward compatibility
       destinationAccount: currentCustomer.transaction.targetAccount
     };
     

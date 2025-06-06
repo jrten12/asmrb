@@ -87,16 +87,16 @@ export function generateCustomer(level: number): Customer {
 }
 
 function generateTransaction(level: number, suspiciousLevel: number): Transaction {
-  // REMOVED TRANSFER - only basic bank teller transactions that have clear customer-facing workflows
-  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'wire_transfer', 'cashiers_check', 'money_order', 'inquiry'];
+  // Only basic transactions with working game mechanics
+  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'inquiry'];
   const type = types[Math.floor(Math.random() * types.length)];
   
-  // More varied transaction amounts
+  // Realistic transaction amounts
   const amountRanges = [
-    { min: 50, max: 500 },      // Small transactions
-    { min: 500, max: 2000 },    // Medium transactions
-    { min: 2000, max: 10000 },  // Large transactions
-    { min: 10000, max: 50000 }  // Very large transactions
+    { min: 25, max: 200 },      // Small transactions
+    { min: 200, max: 800 },     // Medium transactions
+    { min: 800, max: 2500 },    // Large transactions
+    { min: 2500, max: 5000 }    // Very large transactions
   ];
   
   const range = amountRanges[Math.floor(Math.random() * amountRanges.length)];
@@ -258,13 +258,21 @@ export function generateDocuments(customerName: string, transaction: Transaction
     hasAccountError = true;
   }
   
+  // Generate realistic account balance (lower amounts)
+  let accountBalance = Math.floor(Math.random() * 3000) + 500; // $500 to $3500
+  
+  // Ensure sufficient balance for withdrawals
+  if (transaction.type === 'withdrawal') {
+    accountBalance = Math.max(accountBalance, transaction.amount + Math.floor(Math.random() * 500) + 100);
+  }
+  
   documents.push({
     id: 'bank_book',
     type: 'bank_book',
     data: {
       name: customerName,
       accountNumber: bookAccount,
-      balance: Math.floor(Math.random() * 5000) + 1000,
+      balance: accountBalance,
       amount: transaction.amount
     },
     isValid: !hasAccountError,
