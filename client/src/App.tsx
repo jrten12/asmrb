@@ -5321,19 +5321,23 @@ function App() {
           alignItems: 'center',
           justifyContent: 'center',
           fontFamily: 'monospace',
-          padding: '10px'
+          padding: '20px',
+          overflow: 'hidden'
         }}>
           {/* Professional Bank Teller Drawer */}
           <div style={{
             background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
             border: '5px solid #555555',
             borderRadius: '25px',
-            padding: '30px',
-            width: '95%',
-            maxWidth: '1400px',
-            maxHeight: '95vh',
+            padding: '20px',
+            width: '100%',
+            maxWidth: '1200px',
+            height: '100%',
+            maxHeight: '90vh',
             overflow: 'auto',
-            boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 204, 0, 0.3)'
+            boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 204, 0, 0.3)',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
             
             {/* Bank Header */}
