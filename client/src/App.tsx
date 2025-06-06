@@ -5691,96 +5691,89 @@ function App() {
 
       {/* Desktop Printer System */}
       {showPrinter && (
-                    <div key={denomination} style={{
-                      background: `linear-gradient(145deg, ${getBillColor(denomination)}, ${getDarkBillColor(denomination)})`,
-                      border: `3px solid ${getBillBorderColor(denomination)}`,
-                      borderRadius: '12px',
-                      padding: '15px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      position: 'relative',
-                      boxShadow: `0 5px 15px rgba(0,0,0,0.3), inset 0 0 10px ${getBillColor(denomination)}33`
-                    }}>
-                      <div style={{
-                        color: '#000000',
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
-                        textShadow: '0 1px 2px rgba(255,255,255,0.3)',
-                        background: 'rgba(255,255,255,0.2)',
-                        padding: '5px 10px',
-                        borderRadius: '8px'
-                      }}>
-                        ${denomination}
-                      </div>
-                      
-                      {/* Interactive Bill Stack */}
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: '2px',
-                        flex: 1,
-                        width: '100%'
-                      }}>
-                        {Array.from({length: Math.min(8, Math.floor(800 / denomination))}, (_, i) => (
-                          <div
-                            key={`${denomination}-${i}`}
-                            draggable
-                            onDragStart={(e) => {
-                              const billId = `${denomination}-${Date.now()}-${Math.random()}`;
-                              setDraggingBill({denomination, id: billId});
-                              e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
-                              playSound('bill_rustle');
-                              e.currentTarget.style.opacity = '0.5';
-                            }}
-                            onDragEnd={(e) => {
-                              setDraggingBill(null);
-                              e.currentTarget.style.opacity = '1';
-                            }}
-                            style={{
-                              width: '70px',
-                              height: '28px',
-                              background: `linear-gradient(90deg, ${getBillColor(denomination)}, ${getLightBillColor(denomination)}, ${getBillColor(denomination)})`,
-                              border: `2px solid ${getBillBorderColor(denomination)}`,
-                              borderRadius: '6px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '10px',
-                              fontWeight: 'bold',
-                              color: '#000000',
-                              cursor: 'grab',
-                              transform: `translateY(${i * -2}px) rotate(${(i % 3 - 1) * 2}deg)`,
-                              zIndex: 10 - i,
-                              boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
-                              transition: 'all 0.2s ease',
-                              textShadow: '0 1px 1px rgba(255,255,255,0.3)'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = `translateY(${i * -2 - 3}px) rotate(${(i % 3 - 1) * 2}deg) scale(1.05)`;
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = `translateY(${i * -2}px) rotate(${(i % 3 - 1) * 2}deg) scale(1)`;
-                            }}
-                          >
-                            ${denomination}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Customer Service Area */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.95)',
+          zIndex: 8000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #2a2a1a, #1a1a0a)',
+            border: '4px solid #cc8800',
+            borderRadius: '20px',
+            padding: '30px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '500px',
+            height: '80%',
+            boxShadow: '0 0 50px rgba(204, 136, 0, 0.5), inset 0 0 30px rgba(204, 136, 0, 0.1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              background: 'linear-gradient(90deg, #004400, #006600)',
+              padding: '15px',
+              marginBottom: '20px',
+              borderRadius: '10px',
+              textAlign: 'center',
+              border: '3px solid #00ff00',
+              boxShadow: '0 0 20px rgba(0, 255, 0, 0.3)'
+            }}>
               <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px'
+                color: '#00ff00',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                textShadow: '0 0 10px #00ff00'
               }}>
+                WESTRIDGE LEDGER BANK DOT MATRIX PRINTER
+              </div>
+            </div>
+            
+            <div style={{
+              background: 'linear-gradient(145deg, #0a2a0a, #052a05)',
+              border: '4px solid #00cc00',
+              borderRadius: '15px',
+              padding: '20px',
+              height: 'calc(100% - 120px)',
+              fontFamily: 'monospace',
+              fontSize: '12px',
+              color: '#00ff00',
+              overflow: 'auto',
+              whiteSpace: 'pre-line',
+              textShadow: '0 0 2px #00ff00'
+            }}>
+              {receiptContent}
+            </div>
+            
+            <button
+              onClick={() => setShowPrinter(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'linear-gradient(145deg, #440000, #220000)',
+                border: '2px solid #cc0000',
+                color: '#ff4444',
+                padding: '8px 12px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontFamily: 'monospace'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
                 
                 {/* Counting Surface */}
                 <div
