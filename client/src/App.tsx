@@ -993,20 +993,18 @@ function App() {
               ]);
               playSound('reject');
             } else if (fraudulentDocs.length > 0) {
-              // Show account found but with warnings about document mismatches
+              // Show account found normally - player must spot the fraud themselves
               const balance = Math.floor(Math.random() * 3000) + 500;
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
-                "✓ ACCOUNT FOUND - BUT CHECK DOCUMENTS CAREFULLY",
+                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
                 "STATUS: ACTIVE CUSTOMER",
                 "BALANCE: $" + balance.toLocaleString(),
-                "⚠️ WARNING: Document inconsistencies detected",
-                "⚠️ VERIFY ALL DOCUMENTS BEFORE APPROVING",
                 "BANK RECORDS NOW DISPLAYED BELOW"
               ]);
-              playSound('warning');
+              playSound('approve');
             } else {
               // Clean legitimate customer
               const balance = Math.floor(Math.random() * 3000) + 500;
