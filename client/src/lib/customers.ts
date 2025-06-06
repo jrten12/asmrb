@@ -518,43 +518,7 @@ export function validateDocuments(documents: Document[]): { isValid: boolean; er
     errors.push('Amount mismatch between slip and bank book');
   }
 
-  // Critical ID validation - check for suspicious ID number patterns
-  if (idDoc) {
-    const idNumber = idDoc.data.idNumber as string;
-    const licenseNumber = idDoc.data.licenseNumber as string;
-    
-    // Check if ID number and license number correlation looks suspicious
-    if (idNumber && licenseNumber) {
-      // Extract the random parts (removing DL- prefix)
-      const licenseCode = licenseNumber.replace('DL-', '');
-      
-      // Basic correlation check - they should have some relationship
-      // In real scenarios, there would be a database lookup
-      // For the game, we'll check if they're completely unrelated patterns
-      if (idNumber.length > 5 && licenseCode.length > 5) {
-        const idChars = idNumber.substring(0, 3);
-        const licenseChars = licenseCode.substring(0, 3);
-        
-        // If the first 3 chars are completely different, flag as suspicious
-        let matchCount = 0;
-        for (let i = 0; i < 3; i++) {
-          if (idChars[i] === licenseChars[i]) matchCount++;
-        }
-        
-        // No matching characters in first 3 positions is highly suspicious
-        if (matchCount === 0) {
-          errors.push('ID number and driver license number correlation suspicious - possible fake documents');
-        }
-        
-        // Additional check: license numbers typically have some pattern consistency
-        // Check for obvious fakes like sequential or repeated patterns
-        if (licenseCode.includes('123') || licenseCode.includes('ABC') || 
-            licenseCode === licenseCode[0].repeat(licenseCode.length)) {
-          errors.push('Driver license number appears to be fabricated');
-        }
-      }
-    }
-  }
+  // Note: ID validation is intentionally removed - it's the player's job to spot inconsistencies
   
   // Enhanced signature validation
   if (signatureDoc && idDoc) {
