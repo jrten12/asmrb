@@ -786,30 +786,30 @@ function App() {
           createTone(300, 0.1, 0.08);
           break;
         case 'dot_matrix_print':
-          // Play authentic dot matrix printer for 10 seconds
+          // Play authentic dot matrix printer for 2 seconds
           try {
             const printerAudio = new Audio('/dot-matrix-printer.mp3');
-            printerAudio.volume = 0.6;
+            printerAudio.volume = 0.4;
             printerAudio.currentTime = 0;
             printerAudio.play().catch(e => {
               console.log('Dot matrix audio play failed:', e);
               // Fallback to synthesized printer sound
-              for (let i = 0; i < 15; i++) {
+              for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
                   createTone(1600 + (i % 4) * 150, 0.025, 0.04);
                   createNoise(0.018, 0.025);
                 }, i * 50);
               }
             });
-            // Stop after 10 seconds
+            // Stop after 2 seconds
             setTimeout(() => {
               printerAudio.pause();
               printerAudio.currentTime = 0;
-            }, 10000);
+            }, 2000);
           } catch (e) {
             console.log('Dot matrix audio creation failed:', e);
             // Fallback synthesized sound
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 6; i++) {
               setTimeout(() => {
                 createTone(1600 + (i % 4) * 150, 0.025, 0.04);
                 createNoise(0.018, 0.025);
