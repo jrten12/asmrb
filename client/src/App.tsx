@@ -977,28 +977,39 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // Check if account number matches any of the customer's documents
+            // Check for fraud: documents with mismatched account numbers
+            const fraudulentDocs = currentCustomer.documents.filter(doc => !doc.isValid);
             const customerAccountNumber = currentCustomer.transaction.accountNumber;
-            const idCardAccount = currentCustomer.documents.find(d => d.type === 'id')?.data.accountNumber;
-            const bankBookAccount = currentCustomer.documents.find(d => d.type === 'bank_book')?.data.accountNumber;
             
-            // Account is valid if it matches the transaction account or any document account
-            const isValidAccount = accountNum === customerAccountNumber || 
-                                 accountNum === idCardAccount || 
-                                 accountNum === bankBookAccount;
-            
-            if (currentCustomer.suspiciousLevel > 0 && !isValidAccount) {
+            // Account lookup should match the transaction account number
+            if (accountNum !== customerAccountNumber) {
               setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
               setTerminalOutput(prev => [...prev, 
                 "> LOOKUP " + accountNum,
                 "❌❌❌ ACCOUNT NOT FOUND ❌❌❌",
                 "STATUS: INVALID - NO RECORD IN SYSTEM",
-                "WARNING: POTENTIAL FRAUD DETECTED",
+                "WARNING: REQUESTED ACCOUNT DOES NOT MATCH TRANSACTION",
                 "ACTION: REJECT TRANSACTION IMMEDIATELY"
               ]);
               playSound('reject');
-            } else if (isValidAccount) {
-              const balance = Math.floor(Math.random() * 50000) + 5000;
+            } else if (fraudulentDocs.length > 0) {
+              // Show account found but with warnings about document mismatches
+              const balance = Math.floor(Math.random() * 3000) + 500;
+              setAccountBalance(balance);
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✓ ACCOUNT FOUND - BUT CHECK DOCUMENTS CAREFULLY",
+                "STATUS: ACTIVE CUSTOMER",
+                "BALANCE: $" + balance.toLocaleString(),
+                "⚠️ WARNING: Document inconsistencies detected",
+                "⚠️ VERIFY ALL DOCUMENTS BEFORE APPROVING",
+                "BANK RECORDS NOW DISPLAYED BELOW"
+              ]);
+              playSound('warning');
+            } else {
+              // Clean legitimate customer
+              const balance = Math.floor(Math.random() * 3000) + 500;
               setAccountBalance(balance);
               setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
               setTerminalOutput(prev => [...prev, 
@@ -1009,14 +1020,6 @@ function App() {
                 "BANK RECORDS NOW DISPLAYED BELOW"
               ]);
               playSound('approve');
-            } else {
-              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "✗ ACCOUNT MISMATCH",
-                "CUSTOMER ACCOUNT DOES NOT MATCH"
-              ]);
-              playSound('reject');
             }
           }, 800);
         }, 1200);
