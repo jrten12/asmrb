@@ -68,8 +68,8 @@ export function generateCustomer(level: number): Customer {
   
   const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
   
-  // 80% fraud rate for testing fraud detection system
-  const isFraud = Math.random() < 0.8;
+  // 50% fraud rate for challenging but fair gameplay
+  const isFraud = Math.random() < 0.5;
   const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
   
   const documents = generateDocuments(name, transaction, suspiciousLevel);
@@ -160,7 +160,7 @@ export function generateDocuments(customerName: string, transaction: Transaction
   // For fraudulent customers, select which documents will have errors (1-2 types of fraud max)
   let fraudDocumentTypes: string[] = [];
   if (isFraudulentCustomer) {
-    const fraudTypes = ['id', 'slip', 'bank_book', 'signature'];
+    const fraudTypes = ['id', 'slip', 'bank_book', 'signature', 'id_correlation'];
     const numFraudTypes = Math.floor(Math.random() * 2) + 1; // 1-2 fraud types maximum
     
     // Shuffle and pick fraud types
@@ -198,6 +198,30 @@ export function generateDocuments(customerName: string, transaction: Transaction
     }
   }
   
+  // Handle ID/License correlation fraud
+  const hasCorrelationFraud = fraudDocumentTypes.includes('id_correlation');
+  let idNumber = Math.random().toString(36).substr(2, 9).toUpperCase();
+  let licenseNumber = 'DL-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  
+  if (hasCorrelationFraud) {
+    // Create completely unrelated ID and license numbers (obvious mismatch)
+    idNumber = Math.random().toString(36).substr(2, 9).toUpperCase();
+    licenseNumber = 'DL-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    
+    // Ensure they have no correlation (first 3 chars completely different)
+    while (idNumber.substring(0, 3) === licenseNumber.substring(3, 6)) {
+      licenseNumber = 'DL-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+    
+    hasIdError = true;
+    errorType = hasIdError && errorType ? errorType + '; ID/License correlation suspicious' : 'ID/License correlation suspicious';
+  } else if (!hasIdError) {
+    // For legitimate customers, create some correlation between ID and license
+    const basePattern = Math.random().toString(36).substr(2, 3).toUpperCase();
+    idNumber = basePattern + Math.random().toString(36).substr(2, 6).toUpperCase();
+    licenseNumber = 'DL-' + basePattern + Math.random().toString(36).substr(2, 5).toUpperCase();
+  }
+
   documents.push({
     id: 'id_card',
     type: 'id',
@@ -206,8 +230,8 @@ export function generateDocuments(customerName: string, transaction: Transaction
       accountNumber: idAccountNumber,
       address: generateAddress(),
       dateOfBirth: idBirthday,
-      idNumber: Math.random().toString(36).substr(2, 9).toUpperCase(),
-      licenseNumber: 'DL-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+      idNumber: idNumber,
+      licenseNumber: licenseNumber
     },
     isValid: !hasIdError,
     hasError: hasIdError ? errorType : undefined
