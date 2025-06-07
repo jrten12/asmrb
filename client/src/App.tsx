@@ -1390,76 +1390,7 @@ function App() {
         return;
       }
       
-      // FRAUD DETECTION: Check if customer has fraudulent documents
-      const fraudulentDocs = currentCustomer.documents.filter(doc => !doc.isValid);
-      
-      if (fraudulentDocs.length > 0) {
-        // Player approved a fraudulent transaction - MAJOR ERROR
-        setTerminalOutput(prev => [...prev, 
-          "> " + command,
-          "🚨🚨🚨 FRAUD APPROVED - MAJOR ERROR 🚨🚨🚨",
-          "YOU JUST APPROVED A FRAUDULENT TRANSACTION!",
-          "",
-          "DETECTED FRAUD:",
-          ...fraudulentDocs.map(doc => `❌ ${doc.hasError || 'Document invalid'}`),
-          "",
-          "⚠️ SUPERVISOR ALERT ⚠️",
-          "This is a serious security breach!",
-          "Your performance score has been severely penalized.",
-          "",
-          "REMEMBER: Always verify ALL documents carefully!",
-          "==================================================",
-          ""
-        ]);
-        
-        // Severe penalty for approving fraud
-        setGameScore(prev => ({
-          ...prev,
-          score: Math.max(0, prev.score - 500), // Major penalty
-          errors: prev.errors + 1,
-          fraudulentApprovals: (prev.fraudulentApprovals || 0) + 1
-        }));
-        
-        // Check if this is the second fraudulent approval - GAME OVER
-        if ((gameScore.fraudulentApprovals || 0) >= 2) {
-          playSound('reject');
-          playSound('warning');
-          setTimeout(() => {
-            setTerminalOutput(prev => [...prev, 
-              "",
-              "🚨🚨🚨 TERMINATION NOTICE 🚨🚨🚨",
-              "",
-              "EMPLOYEE TERMINATED FOR SECURITY VIOLATIONS",
-              "",
-              "You have approved 2 fraudulent transactions.",
-              "This violates bank security protocols.",
-              "",
-              "Your employment is hereby TERMINATED.",
-              "Security will escort you from the premises.",
-              "",
-              "- Bank Management",
-              "==================================================",
-              ""
-            ]);
-            setTimeout(() => {
-              window.location.reload();
-            }, 5000);
-          }, 2000);
-        } else {
-          playSound('reject');
-          playSound('warning');
-          setTimeout(() => {
-            setCurrentCustomer(null);
-            resetVerificationState();
-            setTerminalOutput(prev => [...prev, 
-              "⚠️ WARNING: ONE MORE FRAUD APPROVAL = TERMINATION ⚠️",
-              "Customer left. Security reviewing your performance.", 
-              "Next customer please - BE MORE CAREFUL!"
-            ]);
-          }, 3000);
-        }
-        return;
-      }
+      // Check for sufficient funds before proceeding
       
       const withdrawAmount = parseFloat(amount);
       if (withdrawAmount > accountBalance) {
