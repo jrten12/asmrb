@@ -1314,7 +1314,7 @@ function App() {
         }));
         
         // Check if this is the second fraudulent approval - GAME OVER
-        if ((gameScore.fraudulentApprovals || 0) >= 1) {
+        if ((gameScore.fraudulentApprovals || 0) >= 2) {
           playSound('reject');
           playSound('warning');
           setTimeout(() => {
@@ -1421,7 +1421,7 @@ function App() {
         }));
         
         // Check if this is the second fraudulent approval - GAME OVER
-        if ((gameScore.fraudulentApprovals || 0) >= 1) {
+        if ((gameScore.fraudulentApprovals || 0) >= 2) {
           playSound('reject');
           playSound('warning');
           setTimeout(() => {
