@@ -251,13 +251,14 @@ function App() {
       setTerminalOutput(prev => [...prev, "> " + command, "ANALYZING SIGNATURE PATTERNS...", "COMPARING WITH BANK RECORDS..."]);
       
       setTimeout(() => {
-        setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: analysis.isFraudulent}));
+        const isFraudulent = !analysis.isAuthentic;
+        setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: isFraudulent}));
         
-        if (analysis.isFraudulent) {
+        if (isFraudulent) {
           setTerminalOutput(prev => [...prev,
             "⚠️ SIGNATURE ANALYSIS COMPLETE ⚠️",
             "DISCREPANCY DETECTED:",
-            analysis.reason,
+            ...analysis.fraudIndicators,
             "RECOMMENDATION: INVESTIGATE FURTHER"
           ]);
           playSound('reject');
