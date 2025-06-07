@@ -640,8 +640,8 @@ function App() {
           createNoise(0.2, 0.04);
           break;
         case 'dot_matrix_printer':
-          // Enhanced ASMR dot matrix printer with authentic mechanical sounds - 2.5 seconds
-          for (let i = 0; i < 25; i++) {
+          // Short dot matrix printer sound - 1 second
+          for (let i = 0; i < 8; i++) {
             setTimeout(() => {
               // Main printer head impact
               createTone(1600 + (i % 4) * 150, 0.025, 0.04);
@@ -650,7 +650,7 @@ function App() {
               createNoise(0.018, 0.025);
               // Carriage movement
               if (i % 4 === 0) createTone(800, 0.008, 0.02);
-            }, i * 100);
+            }, i * 80);
           }
           break;
         case 'customer_call':
@@ -1980,6 +1980,7 @@ function App() {
       correctTransactions: 0, 
       errors: 0, 
       timeOnShift: 0, 
+      fraudulentApprovals: 0,
       consecutiveErrors: 0, 
       errorDetails: [],
       customersCalledWithoutService: 0,
