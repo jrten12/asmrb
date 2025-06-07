@@ -3650,9 +3650,9 @@ function App() {
                 if (currentCustomer && !verificationState.transactionProcessed && !isTerminated) {
                   const currentDismissals = gameScore.customersCalledWithoutService + 1;
                   
-                  // Fire at 5 dismissals - immediate termination
-                  if (currentDismissals >= 5) {
-                    console.log('FIRING EMPLOYEE - 5 dismissals reached');
+                  // Fire at 4 dismissals - immediate termination
+                  if (currentDismissals >= 4) {
+                    console.log('FIRING EMPLOYEE - 4 dismissals reached');
                     playSound('reject');
                     
                     // Create termination overlay and force restart
@@ -3699,9 +3699,9 @@ function App() {
                     return;
                   }
                   
-                  // Warning at exactly 3 dismissals
-                  if (currentDismissals === 3 && !gameScore.dismissalWarningGiven) {
-                    console.log('WARNING EMPLOYEE - 3 dismissals reached');
+                  // Warning at exactly 2 dismissals
+                  if (currentDismissals === 2 && !gameScore.dismissalWarningGiven) {
+                    console.log('WARNING EMPLOYEE - 2 dismissals reached');
                     setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${currentDismissals} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
                     setShowManagerWarning(true);
                     playSound('reject');
