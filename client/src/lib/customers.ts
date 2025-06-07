@@ -341,8 +341,8 @@ export function generateDocuments(customerName: string, transaction: Transaction
     hasError: hasBankBookError ? bankBookErrorType : undefined
   });
   
-  // Signature
-  const signatureHasFraud = fraudDocumentTypes.includes('signature');
+  // Signature - apply signature fraud
+  const signatureHasFraud = fraudDocumentTypes.includes('signature_fraud');
   documents.push({
     id: 'signature',
     type: 'signature',
