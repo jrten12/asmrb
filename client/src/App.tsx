@@ -1042,33 +1042,18 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            const customerAccountNumber = currentCustomer.transaction.accountNumber;
-            
-            // Account lookup should match the transaction account number
-            if (accountNum !== customerAccountNumber) {
-              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "❌❌❌ ACCOUNT NOT FOUND ❌❌❌",
-                "STATUS: INVALID - NO RECORD IN SYSTEM",
-                "WARNING: REQUESTED ACCOUNT DOES NOT MATCH TRANSACTION",
-                "ACTION: REJECT TRANSACTION IMMEDIATELY"
-              ]);
-              playSound('reject');
-            } else {
-              // All valid account lookups show identical results - no fraud detection
-              const balance = Math.floor(Math.random() * 3000) + 500;
-              setAccountBalance(balance);
-              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
-                "STATUS: ACTIVE CUSTOMER",
-                "BALANCE: $" + balance.toLocaleString(),
-                "BANK RECORDS NOW DISPLAYED BELOW"
-              ]);
-              playSound('approve');
-            }
+            // Always return account information - no automatic validation
+            const balance = Math.floor(Math.random() * 3000) + 500;
+            setAccountBalance(balance);
+            setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+            setTerminalOutput(prev => [...prev, 
+              "> LOOKUP " + accountNum,
+              "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+              "STATUS: ACTIVE CUSTOMER",
+              "BALANCE: $" + balance.toLocaleString(),
+              "BANK RECORDS NOW DISPLAYED BELOW"
+            ]);
+            playSound('approve');
           }, 800);
         }, 1200);
       }
