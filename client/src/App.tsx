@@ -5657,13 +5657,23 @@ function App() {
                   background: 'linear-gradient(145deg, #2a2a1a, #1a1a0a)',
                   border: '3px solid #ffff00',
                   borderRadius: '12px',
-                  padding: '15px',
+                  padding: '20px',
                   position: 'relative',
                   boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)'
                 }}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #3a3a2a, #2a2a1a)';
+                  e.currentTarget.style.borderColor = '#ffff66';
+                }}
+                onDragLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #2a2a1a, #1a1a0a)';
+                  e.currentTarget.style.borderColor = '#ffff00';
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
+                  e.currentTarget.style.background = 'linear-gradient(145deg, #2a2a1a, #1a1a0a)';
+                  e.currentTarget.style.borderColor = '#ffff00';
                   try {
                     const data = JSON.parse(e.dataTransfer.getData('text/plain'));
                     if (data.source === 'drawer' && totalCounted + data.denomination <= cashDrawerAmount) {
@@ -5764,10 +5774,24 @@ function App() {
                     '0 0 20px rgba(0, 255, 0, 0.3)' : 
                     '0 0 20px rgba(255, 68, 68, 0.3)'
                 }}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  if (!envelopeSealed) {
+                    e.currentTarget.style.background = 'linear-gradient(145deg, #3a2a2a, #2a1a1a)';
+                    e.currentTarget.style.borderColor = '#ff6666';
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (!envelopeSealed) {
+                    e.currentTarget.style.background = 'linear-gradient(145deg, #2a1a1a, #1a0a0a)';
+                    e.currentTarget.style.borderColor = '#ff4444';
+                  }
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
                   if (!envelopeSealed) {
+                    e.currentTarget.style.background = 'linear-gradient(145deg, #2a1a1a, #1a0a0a)';
+                    e.currentTarget.style.borderColor = '#ff4444';
                     try {
                       const data = JSON.parse(e.dataTransfer.getData('text/plain'));
                       if (data.source === 'counter') {
@@ -6199,7 +6223,7 @@ function App() {
                         draggable
                         onDragStart={(e) => {
                           const billId = `${denomination}-${Date.now()}-${Math.random()}`;
-                          setDraggingBill({denomination, id: billId});
+                          setDraggingBill(denomination);
                           e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
                           playSound('bill_rustle');
                           e.currentTarget.style.opacity = '0.5';
