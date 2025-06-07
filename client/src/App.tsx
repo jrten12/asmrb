@@ -5431,17 +5431,21 @@ function App() {
         .bill-draggable {
           transition: all 0.2s ease;
           cursor: grab;
+          user-select: none;
         }
         
         .bill-draggable:hover {
           animation: billFloat 0.3s ease-in-out;
-          transform: scale(1.05);
+          transform: scale(1.08) !important;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6) !important;
         }
         
         .bill-dragging {
-          cursor: grabbing;
-          z-index: 10000;
-          transform: rotate(5deg) scale(1.1);
+          cursor: grabbing !important;
+          z-index: 10000 !important;
+          transform: rotate(8deg) scale(1.15) !important;
+          opacity: 0.8 !important;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8) !important;
         }
       `}</style>
 
@@ -5530,10 +5534,10 @@ function App() {
             {/* Main Workflow: Drawer -> Counter -> Envelope */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '2fr 1fr 1fr',
-              gap: '15px',
-              marginBottom: '15px',
-              height: '300px'
+              gridTemplateColumns: '3fr 2fr 2fr',
+              gap: '20px',
+              marginBottom: '20px',
+              height: '400px'
             }}>
               
               {/* Left: Cash Drawer with Neon Bills */}
@@ -5598,28 +5602,35 @@ function App() {
                           alignItems: 'center',
                           gap: '2px'
                         }}>
-                          {Array.from({length: Math.min(billCount, 3)}, (_, i) => (
+                          {Array.from({length: Math.min(billCount, 5)}, (_, i) => (
                             <div 
                               key={i}
+                              className="bill-draggable"
                               draggable
                               onDragStart={(e) => {
                                 playSound('paper_rustle');
+                                setDraggingBill(denom);
                                 e.dataTransfer.setData('text/plain', JSON.stringify({
                                   denomination: denom,
                                   source: 'drawer',
                                   id: `${denom}_${Date.now()}_${Math.random()}`
                                 }));
+                                e.currentTarget.classList.add('bill-dragging');
+                              }}
+                              onDragEnd={(e) => {
+                                setDraggingBill(null);
+                                e.currentTarget.classList.remove('bill-dragging');
                               }}
                               style={{
-                                width: '60px',
-                                height: '26px',
+                                width: '120px',
+                                height: '50px',
                                 background: `linear-gradient(135deg, ${getBillColor(denom)}, ${adjustBrightness(getBillColor(denom), -20)})`,
-                                border: `1px solid ${adjustBrightness(getBillColor(denom), 30)}`,
-                                borderRadius: '3px',
+                                border: `2px solid ${adjustBrightness(getBillColor(denom), 30)}`,
+                                borderRadius: '6px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '9px',
+                                fontSize: '16px',
                                 fontWeight: 'bold',
                                 color: '#000000',
                                 cursor: billCount > 0 ? 'grab' : 'not-allowed',
@@ -5698,6 +5709,7 @@ function App() {
                   {counterBills.map((denom, index) => (
                     <div
                       key={index}
+                      className="bill-draggable"
                       draggable
                       onDragStart={(e) => {
                         playSound('paper_rustle');
@@ -5706,21 +5718,28 @@ function App() {
                           index: index,
                           denomination: denom
                         }));
+                        e.currentTarget.classList.add('bill-dragging');
+                      }}
+                      onDragEnd={(e) => {
+                        e.currentTarget.classList.remove('bill-dragging');
                       }}
                       style={{
-                        width: '50px',
-                        height: '22px',
-                        background: getBillColor(denom),
-                        border: '1px solid rgba(255, 255, 255, 0.5)',
-                        borderRadius: '2px',
+                        width: '100px',
+                        height: '40px',
+                        background: `linear-gradient(135deg, ${getBillColor(denom)}, ${adjustBrightness(getBillColor(denom), -15)})`,
+                        border: `2px solid ${adjustBrightness(getBillColor(denom), 20)}`,
+                        borderRadius: '4px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '8px',
+                        fontSize: '14px',
                         fontWeight: 'bold',
                         color: '#000000',
                         cursor: 'grab',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                        boxShadow: `0 2px 4px rgba(0, 0, 0, 0.4), 0 0 4px ${getBillColor(denom)}60`,
+                        textShadow: '1px 1px 1px rgba(255, 255, 255, 0.7)',
+                        transform: `rotate(${(index % 5 - 2) * 3}deg)`,
+                        margin: '2px'
                       }}
                     >
                       ${denom}
@@ -5799,18 +5818,21 @@ function App() {
                     <div
                       key={index}
                       style={{
-                        width: '40px',
-                        height: '18px',
-                        background: getBillColor(denom),
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        borderRadius: '2px',
+                        width: '80px',
+                        height: '32px',
+                        background: `linear-gradient(135deg, ${getBillColor(denom)}, ${adjustBrightness(getBillColor(denom), -10)})`,
+                        border: `2px solid ${adjustBrightness(getBillColor(denom), 15)}`,
+                        borderRadius: '3px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '7px',
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         color: '#000000',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)'
+                        boxShadow: `0 2px 3px rgba(0, 0, 0, 0.3), 0 0 3px ${getBillColor(denom)}50`,
+                        textShadow: '1px 1px 1px rgba(255, 255, 255, 0.6)',
+                        transform: `rotate(${(index % 3 - 1) * 2}deg)`,
+                        margin: '1px'
                       }}
                     >
                       ${denom}
