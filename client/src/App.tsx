@@ -4946,6 +4946,8 @@ function App() {
                   setTimeout(() => {
                     // Process the lookup with the entered number
                     const fullCommand = 'LOOKUP ' + currentNumberInput;
+                    console.log('Processing lookup command:', fullCommand);
+                    console.log('Current customer:', currentCustomer);
                     handleCommand(fullCommand);
                     setShowNumberPad(false);
                     setCurrentNumberInput('');
