@@ -157,45 +157,47 @@ export function generateDocuments(customerName: string, transaction: Transaction
   // Only fraudulent customers (suspiciousLevel > 0) get fraudulent documents
   const isFraudulentCustomer = suspiciousLevel > 0;
   
-  // For fraudulent customers, select which documents will have errors (1-2 types of fraud max)
+  // For fraudulent customers, select which documents will have errors (1-3 types of fraud)
   let fraudDocumentTypes: string[] = [];
   if (isFraudulentCustomer) {
-    const fraudTypes = ['id', 'slip', 'bank_book', 'signature', 'id_correlation'];
-    const numFraudTypes = Math.floor(Math.random() * 2) + 1; // 1-2 fraud types maximum
+    const fraudTypes = ['name_mismatch', 'dob_mismatch', 'address_mismatch', 'account_mismatch', 'amount_mismatch', 'signature_fraud'];
+    const numFraudTypes = Math.floor(Math.random() * 3) + 1; // 1-3 fraud types
     
-    // Shuffle and pick fraud types
+    // Shuffle and pick fraud types - ensure variety
     const shuffled = [...fraudTypes].sort(() => Math.random() - 0.5);
     fraudDocumentTypes = shuffled.slice(0, numFraudTypes);
   }
   
-  // ID Document
-  const idHasFraud = fraudDocumentTypes.includes('id');
+  // ID Document - apply specific fraud types
   let idName = customerName;
   let idAccountNumber = transaction.accountNumber;
   let idBirthday = realBirthday;
+  let idAddress = generateAddress();
   let hasIdError = false;
   let errorType = '';
   
-  if (idHasFraud) {
-    // For fraud cases, mismatch name, account number, or birthday
-    const fraudType = Math.floor(Math.random() * 3);
-    if (fraudType === 0) {
-      idName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-      hasIdError = true;
-      errorType = 'Name mismatch with transaction slip';
-    } else if (fraudType === 1) {
-      idAccountNumber = generateAccountNumber();
-      hasIdError = true;
-      errorType = 'Account number mismatch';
-    } else {
-      // Generate a different birthday (within 5 years)
-      const altYear = birthYear + Math.floor(Math.random() * 10) - 5;
-      const altMonth = Math.floor(Math.random() * 12) + 1;
-      const altDay = Math.floor(Math.random() * 28) + 1;
-      idBirthday = `${altMonth.toString().padStart(2, '0')}/${altDay.toString().padStart(2, '0')}/${altYear}`;
-      hasIdError = true;
-      errorType = 'Date of birth mismatch with bank records';
-    }
+  // Apply name mismatch
+  if (fraudDocumentTypes.includes('name_mismatch')) {
+    idName = generateSimilarName(customerName);
+    hasIdError = true;
+    errorType = 'Name mismatch with bank records';
+  }
+  
+  // Apply date of birth mismatch
+  if (fraudDocumentTypes.includes('dob_mismatch')) {
+    const altYear = birthYear + Math.floor(Math.random() * 10) - 5;
+    const altMonth = Math.floor(Math.random() * 12) + 1;
+    const altDay = Math.floor(Math.random() * 28) + 1;
+    idBirthday = `${altMonth.toString().padStart(2, '0')}/${altDay.toString().padStart(2, '0')}/${altYear}`;
+    hasIdError = true;
+    errorType = hasIdError ? errorType + ' / Date of birth mismatch' : 'Date of birth mismatch with bank records';
+  }
+  
+  // Apply account number mismatch
+  if (fraudDocumentTypes.includes('account_mismatch')) {
+    idAccountNumber = generateAccountNumber();
+    hasIdError = true;
+    errorType = hasIdError ? errorType + ' / Account number mismatch' : 'Account number mismatch with bank records';
   }
   
   // Handle ID/License correlation fraud
@@ -237,12 +239,22 @@ export function generateDocuments(customerName: string, transaction: Transaction
     hasError: hasIdError ? errorType : undefined
   });
   
-  // Transaction Slip
-  const slipHasFraud = fraudDocumentTypes.includes('slip');
+  // Transaction Slip - apply amount mismatch fraud
+  let slipName = customerName;
   let slipAmount = transaction.amount;
-  let hasAmountError = false;
+  let slipAccount = transaction.accountNumber;
+  let hasSlipError = false;
+  let slipErrorType = '';
   
-  if (slipHasFraud) {
+  // Apply name mismatch to slip
+  if (fraudDocumentTypes.includes('name_mismatch')) {
+    slipName = generateSimilarName(customerName);
+    hasSlipError = true;
+    slipErrorType = 'Name mismatch on transaction slip';
+  }
+  
+  // Apply amount mismatch
+  if (fraudDocumentTypes.includes('amount_mismatch')) {
     // Create subtle amount discrepancies for pattern recognition
     const discrepancyTypes = [
       () => transaction.amount + Math.floor(Math.random() * 50) + 10, // Small addition
@@ -255,31 +267,57 @@ export function generateDocuments(customerName: string, transaction: Transaction
     ];
     const discrepancyMethod = discrepancyTypes[Math.floor(Math.random() * discrepancyTypes.length)];
     slipAmount = discrepancyMethod();
-    hasAmountError = true;
+    hasSlipError = true;
+    slipErrorType = hasSlipError && slipErrorType ? slipErrorType + ' / Amount mismatch' : 'Amount doesn\'t match bank book';
+  }
+  
+  // Apply account mismatch to slip
+  if (fraudDocumentTypes.includes('account_mismatch')) {
+    slipAccount = generateAccountNumber();
+    hasSlipError = true;
+    slipErrorType = hasSlipError && slipErrorType ? slipErrorType + ' / Account number mismatch' : 'Account number mismatch';
   }
   
   documents.push({
     id: 'transaction_slip',
     type: 'slip',
     data: {
-      name: customerName,
+      name: slipName,
       amount: slipAmount,
-      accountNumber: transaction.accountNumber,
+      accountNumber: slipAccount,
       targetAccount: transaction.targetAccount,
       type: transaction.type
     },
-    isValid: !hasAmountError,
-    hasError: hasAmountError ? 'Amount doesn\'t match bank book' : undefined
+    isValid: !hasSlipError,
+    hasError: hasSlipError ? slipErrorType : undefined
   });
   
-  // Bank Book
-  const bookHasFraud = fraudDocumentTypes.includes('bank_book');
+  // Bank Book - apply fraud types
+  let bookName = customerName;
   let bookAccount = transaction.accountNumber;
-  let hasAccountError = false;
+  let hasBankBookError = false;
+  let bankBookErrorType = '';
   
-  if (bookHasFraud) {
+  // Apply name mismatch to bank book
+  if (fraudDocumentTypes.includes('name_mismatch')) {
+    bookName = generateSimilarName(customerName);
+    hasBankBookError = true;
+    bankBookErrorType = 'Name mismatch in bank book';
+  }
+  
+  // Apply account mismatch to bank book
+  if (fraudDocumentTypes.includes('account_mismatch')) {
     bookAccount = generateAccountNumber();
-    hasAccountError = true;
+    hasBankBookError = true;
+    bankBookErrorType = hasBankBookError && bankBookErrorType ? bankBookErrorType + ' / Account number mismatch' : 'Account number mismatch in bank book';
+  }
+  
+  // Apply address mismatch
+  if (fraudDocumentTypes.includes('address_mismatch')) {
+    // Generate different address for bank book vs ID
+    idAddress = generateAddress(); // Different from bank book address
+    hasBankBookError = true;
+    bankBookErrorType = hasBankBookError && bankBookErrorType ? bankBookErrorType + ' / Address mismatch' : 'Address doesn\'t match ID card';
   }
   
   // Generate realistic account balance (lower amounts)
@@ -294,13 +332,13 @@ export function generateDocuments(customerName: string, transaction: Transaction
     id: 'bank_book',
     type: 'bank_book',
     data: {
-      name: customerName,
+      name: bookName,
       accountNumber: bookAccount,
       balance: accountBalance,
       amount: transaction.amount
     },
-    isValid: !hasAccountError,
-    hasError: hasAccountError ? 'Account number mismatch' : undefined
+    isValid: !hasBankBookError,
+    hasError: hasBankBookError ? bankBookErrorType : undefined
   });
   
   // Signature
