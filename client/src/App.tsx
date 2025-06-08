@@ -1295,6 +1295,8 @@ function App() {
       
     } else if (cmd.startsWith('WITHDRAW $')) {
       const amount = cmd.substring(10).trim();
+      console.log("WITHDRAW command - amount:", amount);
+      
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
@@ -1307,8 +1309,8 @@ function App() {
       }
       
       // Check for sufficient funds before proceeding
-      
       const withdrawAmount = parseFloat(amount);
+      console.log("Parsed withdrawal amount:", withdrawAmount, "Account balance:", accountBalance);
       if (withdrawAmount > accountBalance) {
         playSound('reject');
         setTerminalOutput(prev => [...prev, "> " + command, "*** INSUFFICIENT FUNDS ***", `Requested: $${withdrawAmount.toLocaleString()}`, `Available: $${accountBalance.toLocaleString()}`, "TRANSACTION DENIED", "", "Customer: \"Oh, I'm sorry! I didn't realize.", "I must have miscalculated my balance.", "Thank you for checking. I'll come back later.\""]);
