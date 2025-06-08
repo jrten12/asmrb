@@ -66,10 +66,10 @@ export function generateCustomer(level: number): Customer {
   const id = Math.random().toString(36).substr(2, 9);
   const name = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
   
-  const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
+  const transaction = generateTransaction(level, 0);
   
-  // 50% fraud rate for challenging but fair gameplay
-  const isFraud = Math.random() < 0.5;
+  // 40% fraud rate - ensure transaction account number is always valid for lookup
+  const isFraud = Math.random() < 0.4;
   const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
   
   const documents = generateDocuments(name, transaction, suspiciousLevel);
@@ -158,9 +158,10 @@ export function generateDocuments(customerName: string, transaction: Transaction
   const isFraudulentCustomer = suspiciousLevel > 0;
   
   // For fraudulent customers, select which documents will have errors (1-3 types of fraud)
+  // IMPORTANT: Never include 'account_mismatch' in fraudulent scenarios to ensure transaction account number is always valid
   let fraudDocumentTypes: string[] = [];
   if (isFraudulentCustomer) {
-    const fraudTypes = ['name_mismatch', 'dob_mismatch', 'address_mismatch', 'account_mismatch', 'amount_mismatch', 'signature_fraud'];
+    const fraudTypes = ['name_mismatch', 'dob_mismatch', 'address_mismatch', 'amount_mismatch', 'signature_fraud'];
     const numFraudTypes = Math.floor(Math.random() * 3) + 1; // 1-3 fraud types
     
     // Shuffle and pick fraud types - ensure variety
@@ -193,12 +194,7 @@ export function generateDocuments(customerName: string, transaction: Transaction
     errorType = hasIdError ? errorType + ' / Date of birth mismatch' : 'Date of birth mismatch with bank records';
   }
   
-  // Apply account number mismatch
-  if (fraudDocumentTypes.includes('account_mismatch')) {
-    idAccountNumber = generateAccountNumber();
-    hasIdError = true;
-    errorType = hasIdError ? errorType + ' / Account number mismatch' : 'Account number mismatch with bank records';
-  }
+  // Account number always matches transaction - no account mismatch fraud
   
   // Handle ID/License correlation fraud
   const hasCorrelationFraud = fraudDocumentTypes.includes('id_correlation');
@@ -271,12 +267,7 @@ export function generateDocuments(customerName: string, transaction: Transaction
     slipErrorType = hasSlipError && slipErrorType ? slipErrorType + ' / Amount mismatch' : 'Amount doesn\'t match bank book';
   }
   
-  // Apply account mismatch to slip
-  if (fraudDocumentTypes.includes('account_mismatch')) {
-    slipAccount = generateAccountNumber();
-    hasSlipError = true;
-    slipErrorType = hasSlipError && slipErrorType ? slipErrorType + ' / Account number mismatch' : 'Account number mismatch';
-  }
+  // Account number always matches transaction - no account mismatch fraud
   
   documents.push({
     id: 'transaction_slip',
@@ -305,12 +296,7 @@ export function generateDocuments(customerName: string, transaction: Transaction
     bankBookErrorType = 'Name mismatch in bank book';
   }
   
-  // Apply account mismatch to bank book
-  if (fraudDocumentTypes.includes('account_mismatch')) {
-    bookAccount = generateAccountNumber();
-    hasBankBookError = true;
-    bankBookErrorType = hasBankBookError && bankBookErrorType ? bankBookErrorType + ' / Account number mismatch' : 'Account number mismatch in bank book';
-  }
+  // Account number always matches transaction - no account mismatch fraud
   
   // Apply address mismatch
   if (fraudDocumentTypes.includes('address_mismatch')) {
