@@ -3942,34 +3942,18 @@ function App() {
             }}>
               <button
                 onClick={() => {
-                  const actuallyFraudulent = signatureModal.analysis && !signatureModal.analysis.isAuthentic;
-                  
-                  if (actuallyFraudulent) {
-                    // Player marked fraudulent signature as VALID - this is an error!
-                    handleTransactionError("Approved fraudulent signature - failed to detect forgery");
-                    setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: true}));
-                    setTerminalOutput(prev => [...prev, 
-                      "========== SIGNATURE APPROVED ==========",
-                      "✓ TELLER DETERMINATION: VALID",
-                      "⚠️ SYSTEM WARNING: POTENTIAL OVERSIGHT",
-                      "STATUS: IDENTITY ACCEPTED BY TELLER",
-                      "PROCEED WITH TRANSACTION",
-                      "======================================"
-                    ]);
-                  } else {
-                    // Correct determination - legitimate signature marked as valid
-                    setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: false}));
-                    setTerminalOutput(prev => [...prev, 
-                      "========== SIGNATURE VERIFIED ==========",
-                      "✓ SIGNATURES MATCH",
-                      "✓ VISUAL COMPARISON: AUTHENTIC",
-                      "✓ HANDWRITING ANALYSIS: CONSISTENT",
-                      "STATUS: IDENTITY CONFIRMED",
-                      "PROCEED WITH TRANSACTION",
-                      "======================================"
-                    ]);
-                    playSound('approve');
-                  }
+                  // Player marked signature as VALID - no automatic fraud checking
+                  setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: false}));
+                  setTerminalOutput(prev => [...prev, 
+                    "========== SIGNATURE VERIFIED ==========",
+                    "✓ TELLER DETERMINATION: VALID",
+                    "✓ VISUAL COMPARISON: AUTHENTIC",
+                    "✓ HANDWRITING ANALYSIS: CONSISTENT",
+                    "STATUS: IDENTITY CONFIRMED",
+                    "PROCEED WITH TRANSACTION",
+                    "======================================"
+                  ]);
+                  playSound('approve');
                   
                   setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
                 }}
@@ -3990,37 +3974,19 @@ function App() {
               
               <button
                 onClick={() => {
-                  const actuallyFraudulent = signatureModal.analysis && !signatureModal.analysis.isAuthentic;
-                  
-                  if (actuallyFraudulent) {
-                    // Correct determination - fraudulent signature marked as invalid
-                    setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: true}));
-                    setTerminalOutput(prev => [...prev, 
-                      "========== SIGNATURE REJECTED ==========",
-                      "✗ SIGNATURES DO NOT MATCH",
-                      "✗ VISUAL COMPARISON: INCONSISTENT", 
-                      "✗ HANDWRITING ANALYSIS: SUSPICIOUS",
-                      "STATUS: IDENTITY NOT CONFIRMED",
-                      "*** FRAUD DETECTED BY TELLER ***",
-                      "EXCELLENT FRAUD DETECTION SKILLS",
-                      "======================================="
-                    ]);
-                    playSound('approve'); // Correct decision gets approval sound
-                  } else {
-                    // Player marked legitimate signature as INVALID - this is an error!
-                    handleTransactionError("Rejected valid signature - incorrect fraud determination");
-                    setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: true}));
-                    setTerminalOutput(prev => [...prev, 
-                      "========== SIGNATURE REJECTED ==========",
-                      "✗ TELLER DETERMINATION: INVALID",
-                      "⚠️ SYSTEM WARNING: LEGITIMATE SIGNATURE REJECTED",
-                      "STATUS: CUSTOMER IDENTITY INCORRECTLY DENIED",
-                      "*** PROCESSING ERROR - CUSTOMER COMPLAINT LIKELY ***",
-                      "TELLER TRAINING MAY BE REQUIRED",
-                      "======================================="
-                    ]);
-                    playSound('reject');
-                  }
+                  // Player marked signature as FRAUD - no automatic fraud checking
+                  setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: true}));
+                  setTerminalOutput(prev => [...prev, 
+                    "========== SIGNATURE REJECTED ==========",
+                    "✗ TELLER DETERMINATION: FRAUD DETECTED",
+                    "✗ VISUAL COMPARISON: INCONSISTENT", 
+                    "✗ HANDWRITING ANALYSIS: SUSPICIOUS",
+                    "STATUS: IDENTITY NOT CONFIRMED",
+                    "*** FRAUD DETECTED BY TELLER ***",
+                    "TRANSACTION WILL BE REJECTED",
+                    "======================================="
+                  ]);
+                  playSound('reject');
                   
                   setSignatureModal({isOpen: false, bankSignature: '', customerSignature: ''});
                 }}
