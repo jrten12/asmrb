@@ -1042,18 +1042,33 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // Always return account information - no automatic validation
-            const balance = Math.floor(Math.random() * 3000) + 500;
-            setAccountBalance(balance);
-            setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-            setTerminalOutput(prev => [...prev, 
-              "> LOOKUP " + accountNum,
-              "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
-              "STATUS: ACTIVE CUSTOMER",
-              "BALANCE: $" + balance.toLocaleString(),
-              "BANK RECORDS NOW DISPLAYED BELOW"
-            ]);
-            playSound('approve');
+            const customerAccountNumber = currentCustomer.transaction.accountNumber;
+            
+            if (accountNum === customerAccountNumber) {
+              // Correct account number entered - show account information
+              const balance = Math.floor(Math.random() * 3000) + 500;
+              setAccountBalance(balance);
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+                "STATUS: ACTIVE CUSTOMER",
+                "BALANCE: $" + balance.toLocaleString(),
+                "BANK RECORDS NOW DISPLAYED BELOW"
+              ]);
+              playSound('approve');
+            } else {
+              // Wrong account number entered - show not found
+              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "❌❌❌ ACCOUNT NOT FOUND ❌❌❌",
+                "STATUS: NO RECORD IN SYSTEM",
+                "ENTERED: " + accountNum,
+                "ERROR: ACCOUNT DOES NOT EXIST"
+              ]);
+              playSound('reject');
+            }
           }, 800);
         }, 1200);
       }
