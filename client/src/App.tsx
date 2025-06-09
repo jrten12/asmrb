@@ -173,29 +173,7 @@ function App() {
   
 
   
-  // Cash drawer state for new workflow
-  const [counterBills, setCounterBills] = useState<number[]>([]);
-  const [envelopeBills, setEnvelopeBills] = useState<number[]>([]);
-  const [envelopeSealed, setEnvelopeSealed] = useState(false);
-  const [draggedBill, setDraggedBill] = useState<number | null>(null);
-  
-  // Cash supply state
-  const [cashSupply, setCashSupply] = useState<{[key: number]: number}>({
-    100: 50,
-    50: 50, 
-    20: 50,
-    10: 50,
-    5: 50,
-    1: 50
-  });
-  
-  // Helper function for updating cash supply
-  const updateCashSupply = (denomination: number, change: number) => {
-    setCashSupply(prev => ({
-      ...prev,
-      [denomination]: Math.max(0, (prev[denomination] || 0) + change)
-    }));
-  };
+  // Cash drawer system removed - using receipt-only transactions
 
   // Helper function for adjusting color brightness
   const adjustBrightness = (color: string, amount: number): string => {
@@ -490,13 +468,7 @@ function App() {
   const [wireAmount, setWireAmount] = useState('');
   const [wireDestAccount, setWireDestAccount] = useState('');
 
-  // Cash drawer state variables
-  const [showCashDrawer, setShowCashDrawer] = useState(false);
-  const [cashDrawerOpen, setCashDrawerOpen] = useState(false);
-  const [cashDrawerAmount, setCashDrawerAmount] = useState(0);
-  const [billsOnCounter, setBillsOnCounter] = useState<any[]>([]);
-  const [totalCounted, setTotalCounted] = useState(0);
-  const [draggingBill, setDraggingBill] = useState<number | null>(null);
+  // Cash drawer removed - using simplified receipt-only withdrawals
   const [showPrinter, setShowPrinter] = useState(false);
   const [receiptContent, setReceiptContent] = useState<string>('');
 
@@ -1366,26 +1338,21 @@ function App() {
       }
       
       playSound('legacy_processing');
-      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "OPENING CASH DRAWER..."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "PREPARING RECEIPT..."]);
       
       setTimeout(() => {
+        setVerificationState(prev => ({...prev, transactionProcessed: true}));
         setTerminalOutput(prev => [...prev, 
           "========== WITHDRAWAL APPROVED ==========",
           `AMOUNT: $${amount}`,
           `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
-          "STATUS: COUNT CASH FROM DRAWER",
+          "STATUS: PROCESSING COMPLETE",
           "========================================"
         ]);
         
-        // Open cash drawer for manual counting
-        setCashDrawerAmount(withdrawAmount);
-        setSelectedBills({});
-        setBillsOnCounter([]);
-        setTotalCounted(0);
-        setCashDrawerOpen(true);
-        setShowCashDrawer(true);
-        playSound('cash_drawer_open');
+        // Process transaction and show receipt
+        processTransaction();
       }, 1500);
       
     } else if (cmd.startsWith('WIRE $')) {
@@ -6135,26 +6102,7 @@ function App() {
         </div>
       )}
 
-      {/* Cash Drawer System */}
-      {showCashDrawer && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.95)',
-          zIndex: 7000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'monospace'
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
-            border: '4px solid #cc8800',
-            borderRadius: '20px',
-            padding: '30px',
+      {/* Cash drawer removed - simplified withdrawal process */}
             width: '90%',
             maxWidth: '800px',
             height: '80%',
