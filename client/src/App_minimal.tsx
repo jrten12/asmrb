@@ -215,7 +215,7 @@ function App() {
       const newCount = prev.customersCalledWithoutService + 1;
       console.log("Dismissal count:", newCount, "Warning given:", prev.dismissalWarningGiven);
       
-      if (newCount === 2 && !prev.dismissalWarningGiven) {
+      if (newCount === 2) {
         // First warning at 2 dismissals
         setTerminalOutput(prevOutput => [...prevOutput,
           "",
@@ -228,8 +228,8 @@ function App() {
         ]);
         playSound('reject');
         return { ...prev, customersCalledWithoutService: newCount, dismissalWarningGiven: true };
-      } else if (newCount >= 4 && prev.dismissalWarningGiven) {
-        // Termination at 4 dismissals (only if warning was already given)
+      } else if (newCount === 4) {
+        // Termination at exactly 4 dismissals
         setTerminalOutput(prevOutput => [...prevOutput,
           "",
           "🚨 SUPERVISOR INTERVENTION 🚨",
@@ -239,7 +239,7 @@ function App() {
           "Your shift has been terminated",
           ""
         ]);
-        setGamePhase('leaderboard');
+        setTimeout(() => setGamePhase('leaderboard'), 2000);
         return { ...prev, customersCalledWithoutService: newCount };
       }
       
@@ -277,7 +277,7 @@ function App() {
         console.log("Fraud approval count:", newFraudCount);
         
         if (newFraudCount === 1) {
-          // First fraud approval - warning
+          // First fraud approval - warning only
           setTerminalOutput(prevOutput => [...prevOutput,
             "",
             "⚠️ SECURITY ALERT ⚠️",
@@ -289,18 +289,18 @@ function App() {
           ]);
           playSound('reject');
           return { ...prev, fraudulentApprovals: newFraudCount, score: prev.score - 200 };
-        } else if (newFraudCount >= 2) {
-          // Second fraud approval - termination
+        } else if (newFraudCount === 2) {
+          // Second fraud approval - termination only
           setTerminalOutput(prevOutput => [...prevOutput,
             "",
             "🚨 SECURITY BREACH 🚨",
             "TERMINATION: Multiple fraudulent approvals detected",
             "You have approved 2 fraudulent transactions",
             "This poses a serious security risk to the bank",
-            "Your access has been revoked immediately",
+            "Your shift has been terminated",
             ""
           ]);
-          setGamePhase('leaderboard');
+          setTimeout(() => setGamePhase('leaderboard'), 2000);
           return { ...prev, fraudulentApprovals: newFraudCount };
         }
         
@@ -674,6 +674,78 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {gamePhase === 'leaderboard' && (
+        <div style={{
+          textAlign: 'center',
+          padding: '40px',
+          maxWidth: '600px'
+        }}>
+          <h1 style={{
+            fontSize: '36px',
+            marginBottom: '20px',
+            color: '#ff0000',
+            textShadow: '0 0 20px #ff0000'
+          }}>
+            SHIFT TERMINATED
+          </h1>
+          <div style={{
+            fontSize: '18px',
+            marginBottom: '30px',
+            padding: '20px',
+            background: 'rgba(100, 0, 0, 0.3)',
+            borderRadius: '8px',
+            border: '2px solid #ff0000'
+          }}>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Final Performance:</strong>
+            </div>
+            <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+              Score: {gameScore.score}<br/>
+              Correct Transactions: {gameScore.correctTransactions}<br/>
+              Errors: {gameScore.errors}<br/>
+              Fraudulent Approvals: {gameScore.fraudulentApprovals}<br/>
+              Customer Dismissals: {gameScore.customersCalledWithoutService}
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setGamePhase('welcome');
+              setGameScore({
+                score: 0,
+                correctTransactions: 0,
+                errors: 0,
+                timeOnShift: 0,
+                fraudulentApprovals: 0,
+                consecutiveErrors: 0,
+                errorDetails: [],
+                customersCalledWithoutService: 0,
+                dismissalWarningGiven: false
+              });
+              setCurrentCustomer(null);
+              setVerificationState({ accountLookedUp: false, signatureCompared: false });
+              setTerminalOutput([
+                "WESTRIDGE LEDGER BANK SYSTEM v2.1",
+                "TELLER AUTHENTICATION: APPROVED",
+                "",
+                "Ready for customer service"
+              ]);
+            }}
+            style={{
+              background: 'linear-gradient(145deg, #666666, #444444)',
+              border: '3px solid #888888',
+              color: '#ffffff',
+              padding: '15px 30px',
+              fontSize: '18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontFamily: 'monospace'
+            }}
+          >
+            NEW SHIFT
+          </button>
         </div>
       )}
     </div>
