@@ -213,10 +213,10 @@ function App() {
     
     setGameScore(prev => {
       const newCount = prev.customersCalledWithoutService + 1;
-      console.log("Dismissal count:", newCount, "Warning given:", prev.dismissalWarningGiven);
+      console.log("Dismissal count:", newCount, "Warning already given:", prev.dismissalWarningGiven);
       
+      // Warning at exactly 2 dismissals
       if (newCount === 2) {
-        // First warning at 2 dismissals
         setTerminalOutput(prevOutput => [...prevOutput,
           "",
           "⚠️ SUPERVISOR ALERT ⚠️",
@@ -227,9 +227,17 @@ function App() {
           ""
         ]);
         playSound('reject');
+        // Update state and continue playing
+        setCurrentCustomer(null);
+        setVerificationState({ accountLookedUp: false, signatureCompared: false });
+        setTimeout(() => {
+          setCurrentCustomer(generateCustomerLocal());
+        }, 1000);
         return { ...prev, customersCalledWithoutService: newCount, dismissalWarningGiven: true };
-      } else if (newCount === 4) {
-        // Termination at exactly 4 dismissals
+      }
+      
+      // Termination at exactly 4 dismissals (only after warning was given)
+      if (newCount === 4 && prev.dismissalWarningGiven) {
         setTerminalOutput(prevOutput => [...prevOutput,
           "",
           "🚨 SUPERVISOR INTERVENTION 🚨",
@@ -239,15 +247,20 @@ function App() {
           "Your shift has been terminated",
           ""
         ]);
-        setTimeout(() => setGamePhase('leaderboard'), 2000);
+        // Delay termination to show message
+        setTimeout(() => setGamePhase('leaderboard'), 3000);
         return { ...prev, customersCalledWithoutService: newCount };
       }
       
+      // Regular dismissal - just count and continue
+      setCurrentCustomer(null);
+      setVerificationState({ accountLookedUp: false, signatureCompared: false });
+      setTimeout(() => {
+        setCurrentCustomer(generateCustomerLocal());
+      }, 1000);
+      
       return { ...prev, customersCalledWithoutService: newCount };
     });
-    
-    setCurrentCustomer(null);
-    setVerificationState({ accountLookedUp: false, signatureCompared: false });
   };
 
   const startGame = () => {
