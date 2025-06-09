@@ -213,6 +213,7 @@ function App() {
     
     setGameScore(prev => {
       const newCount = prev.customersCalledWithoutService + 1;
+      console.log("Dismissal count:", newCount, "Warning given:", prev.dismissalWarningGiven);
       
       if (newCount === 2 && !prev.dismissalWarningGiven) {
         // First warning at 2 dismissals
@@ -221,13 +222,14 @@ function App() {
           "⚠️ SUPERVISOR ALERT ⚠️",
           "WARNING: Customer service protocol violation",
           "You have dismissed 2 customers without service",
-          "Warning: One more dismissal will result in termination",
+          "Warning: Two more dismissals will result in termination",
           "Please serve all customers properly",
           ""
         ]);
+        playSound('reject');
         return { ...prev, customersCalledWithoutService: newCount, dismissalWarningGiven: true };
-      } else if (newCount >= 4) {
-        // Termination at 4 dismissals
+      } else if (newCount >= 4 && prev.dismissalWarningGiven) {
+        // Termination at 4 dismissals (only if warning was already given)
         setTerminalOutput(prevOutput => [...prevOutput,
           "",
           "🚨 SUPERVISOR INTERVENTION 🚨",
@@ -272,6 +274,7 @@ function App() {
       // Player approved a fraudulent transaction - handle fraud consequence
       setGameScore(prev => {
         const newFraudCount = prev.fraudulentApprovals + 1;
+        console.log("Fraud approval count:", newFraudCount);
         
         if (newFraudCount === 1) {
           // First fraud approval - warning
@@ -284,6 +287,7 @@ function App() {
             "Please be more careful with document verification",
             ""
           ]);
+          playSound('reject');
           return { ...prev, fraudulentApprovals: newFraudCount, score: prev.score - 200 };
         } else if (newFraudCount >= 2) {
           // Second fraud approval - termination
