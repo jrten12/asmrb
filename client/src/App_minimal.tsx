@@ -77,6 +77,11 @@ interface GameScore {
   correctTransactions: number;
   errors: number;
   timeOnShift: number;
+  fraudulentApprovals: number;
+  consecutiveErrors: number;
+  errorDetails: string[];
+  customersCalledWithoutService: number;
+  dismissalWarningGiven: boolean;
 }
 
 interface LeaderboardEntry {
@@ -101,11 +106,54 @@ function App() {
     correctTransactions: 0,
     errors: 0,
     timeOnShift: 0,
+    fraudulentApprovals: 0,
     consecutiveErrors: 0,
     errorDetails: [] as string[],
     customersCalledWithoutService: 0,
     dismissalWarningGiven: false
   });
+  
+  // Background music and sound management
+  const [musicMuted, setMusicMuted] = useState(false);
+  const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Account lookup state (no automatic fraud detection)
+  const [accountBalance, setAccountBalance] = useState(0);
+  const [verificationState, setVerificationState] = useState({
+    accountLookedUp: false,
+    signatureCompared: false
+  });
+
+  // Initialize background music
+  useEffect(() => {
+    if (!musicMuted) {
+      if (!backgroundMusicRef.current) {
+        backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
+        backgroundMusicRef.current.loop = true;
+        backgroundMusicRef.current.volume = 0.15; // Low volume background music
+      }
+      
+      backgroundMusicRef.current.addEventListener('canplaythrough', () => {
+        if (!musicMuted && backgroundMusicRef.current) {
+          backgroundMusicRef.current.play().catch(e => {
+            console.log("Auto-play prevented:", e);
+          });
+        }
+      });
+      
+      if (musicMuted && backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
+    }
+    
+    return () => {
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
+    };
+  }, [musicMuted]);
 
   // Helper functions
   const playSound = (soundType: string) => {
