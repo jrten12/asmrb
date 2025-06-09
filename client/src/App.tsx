@@ -837,7 +837,7 @@ function App() {
           createTone(300, 0.1, 0.08);
           break;
         case 'dot_matrix_print':
-          // Play authentic dot matrix printer for 2 seconds
+          // Play authentic dot matrix printer for exactly 2 seconds
           try {
             const printerAudio = new Audio('/dot-matrix-printer.mp3');
             printerAudio.volume = 0.4;
@@ -852,7 +852,7 @@ function App() {
                 }, i * 50);
               }
             });
-            // Stop after 2 seconds
+            // Force stop after exactly 2 seconds
             setTimeout(() => {
               printerAudio.pause();
               printerAudio.currentTime = 0;
