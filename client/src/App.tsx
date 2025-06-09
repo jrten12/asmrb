@@ -1682,7 +1682,7 @@ function App() {
         "RECEIPT PRINTED AND TORN OFF",
         "READY FOR NEXT CUSTOMER"
       ]);
-    }, 5000);
+    }, 2000);
   };
 
   const punchIn = () => {
@@ -4355,7 +4355,7 @@ function App() {
           zIndex: 2000,
           width: '280px',
           boxShadow: '0 0 20px rgba(0, 0, 0, 0.5)',
-          animation: 'printReceipt 3s ease-out'
+          animation: 'printReceipt 2s ease-out'
         }}>
           <div style={{
             borderBottom: '2px dashed #333333',
