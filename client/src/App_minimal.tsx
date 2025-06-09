@@ -213,7 +213,16 @@ function App() {
     
     const currentCount = gameScore.customersCalledWithoutService;
     const newCount = currentCount + 1;
-    console.log("DISMISSAL: Current count:", currentCount, "New count:", newCount, "Warning given:", gameScore.dismissalWarningGiven);
+    console.log("DISMISSAL DEBUG: Current count:", currentCount, "New count will be:", newCount, "Warning already given:", gameScore.dismissalWarningGiven);
+    
+    // Add detailed logging for each scenario
+    if (newCount === 2 && !gameScore.dismissalWarningGiven) {
+      console.log("TRIGGERING: Management warning (2nd dismissal)");
+    } else if (newCount === 4 && gameScore.dismissalWarningGiven) {
+      console.log("TRIGGERING: Final termination (4th dismissal)");
+    } else {
+      console.log("TRIGGERING: Regular dismissal");
+    }
     
     // Always clear customer and generate new one first
     setCurrentCustomer(null);
@@ -669,6 +678,7 @@ function App() {
                   <p style={{ fontSize: '11px', margin: '2px 0' }}>
                     <strong>Dismissals:</strong> {gameScore.customersCalledWithoutService}/4
                     {gameScore.customersCalledWithoutService >= 2 && <span style={{ color: '#ff0000' }}> ⚠️</span>}
+                    {gameScore.dismissalWarningGiven && <span style={{ color: '#ffaa00' }}> (WARNING GIVEN)</span>}
                   </p>
                   {gameScore.dismissalWarningGiven && (
                     <p style={{ fontSize: '10px', color: '#ff4444', fontStyle: 'italic' }}>
