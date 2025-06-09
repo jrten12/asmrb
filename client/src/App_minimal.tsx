@@ -636,14 +636,15 @@ function App() {
                     <button
                       onClick={handleCustomerDismissal}
                       style={{
-                        background: 'linear-gradient(145deg, #666666, #444444)',
-                        border: '2px solid #888888',
-                        color: '#ffffff',
+                        background: 'linear-gradient(145deg, #ffaa00, #ff8800)',
+                        border: '2px solid #ffbb00',
+                        color: '#000000',
                         padding: '10px 16px',
                         fontSize: '12px',
                         borderRadius: '5px',
                         cursor: 'pointer',
-                        fontFamily: 'monospace'
+                        fontFamily: 'monospace',
+                        fontWeight: 'bold'
                       }}
                     >
                       DISMISS
