@@ -1405,6 +1405,9 @@ function App() {
         return;
       }
       
+      // ASMR wire input sound - satisfying typing feedback
+      playSound('wire_input');
+      
       if (!destAccount || destAccount !== currentCustomer.transaction.targetAccount) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Destination account mismatch", `Expected: ${currentCustomer.transaction.targetAccount}`, `Entered: ${destAccount || 'NONE'}`, "WIRE TRANSFER DENIED"]);
         playSound('reject');
@@ -1507,7 +1510,7 @@ function App() {
                 "Security will escort you from the premises",
                 "- Bank Management"
               ]);
-              setGamePhase('ended');
+              setGamePhase('punch_out');
               setIsTerminated(true);
             }, 2000);
           }
