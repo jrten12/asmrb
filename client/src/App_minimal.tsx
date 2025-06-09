@@ -219,14 +219,15 @@ function App() {
     setCurrentCustomer(null);
     setVerificationState({ accountLookedUp: false, signatureCompared: false });
     
-    // Handle warning at exactly 2nd dismissal
+    // Handle warning at exactly 2nd dismissal - WARNING ONLY, GAME CONTINUES
     if (newCount === 2 && !gameScore.dismissalWarningGiven) {
       setTerminalOutput(prev => [...prev,
         "",
         "⚠️ SUPERVISOR ALERT ⚠️",
         "WARNING: Customer service protocol violation",
-        "You have dismissed 2 customers without service",
-        "Warning: Two more dismissals will result in termination",
+        "You have dismissed 2 customers without service", 
+        "This is your FIRST WARNING",
+        "Two more dismissals will result in termination",
         "Please serve all customers properly",
         ""
       ]);
@@ -236,26 +237,27 @@ function App() {
         customersCalledWithoutService: newCount, 
         dismissalWarningGiven: true 
       }));
-      // Continue game with new customer
+      // Continue game with new customer - this is just a warning
       setTimeout(() => {
         setCurrentCustomer(generateCustomerLocal());
       }, 2000);
       return;
     }
     
-    // Handle termination at exactly 4th dismissal
+    // Handle FINAL TERMINATION at exactly 4th dismissal - FIRED
     if (newCount === 4 && gameScore.dismissalWarningGiven) {
       setTerminalOutput(prev => [...prev,
         "",
-        "🚨 SUPERVISOR INTERVENTION 🚨",
-        "TERMINATION: Excessive customer dismissals",
+        "🚨 YOU ARE FIRED 🚨",
+        "FINAL TERMINATION: Excessive customer dismissals",
         "You have dismissed 4 customers without service",
-        "This violates our customer service standards",
-        "Your shift has been terminated",
+        "You ignored the management warning",
+        "You are terminated immediately",
+        "Please collect your belongings and leave",
         ""
       ]);
       setGameScore(prev => ({ ...prev, customersCalledWithoutService: newCount }));
-      // End game after showing message
+      // End game - YOU'RE FIRED
       setTimeout(() => setGamePhase('leaderboard'), 3000);
       return;
     }
