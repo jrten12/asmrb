@@ -1861,8 +1861,8 @@ function App() {
         score: prev.score + 100,
         correctTransactions: newTransactionCount,
         consecutiveErrors: 0, // Reset consecutive errors on correct transaction
-        customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
-        dismissalWarningGiven: false // Reset warning flag
+        customersCalledWithoutService: 0 // Reset dismissal counter on successful transaction
+        // Keep dismissalWarningGiven - don't reset warning flag
       };
     });
     
@@ -3475,7 +3475,7 @@ function App() {
                 if (currentCustomer && !verificationState.transactionProcessed && !isTerminated) {
                   const currentDismissals = gameScore.customersCalledWithoutService + 1;
                   
-                  // Fire at 4 dismissals - immediate termination
+                  // Fire at 4 dismissals - immediate termination  
                   if (currentDismissals >= 4) {
                     console.log('FIRING EMPLOYEE - 4 dismissals reached');
                     playSound('reject');
@@ -3524,8 +3524,14 @@ function App() {
                     return;
                   }
                   
-                  // Warning at exactly 2 dismissals
-                  if (currentDismissals === 2 && !gameScore.dismissalWarningGiven) {
+                  // Update dismissal counter first
+                  setGameScore(prev => ({
+                    ...prev,
+                    customersCalledWithoutService: currentDismissals
+                  }));
+                  
+                  // Warning at exactly 2 dismissals (first warning)
+                  if (currentDismissals === 2) {
                     console.log('WARNING EMPLOYEE - 2 dismissals reached');
                     setManagerMessage(`⚠️ MANAGEMENT WARNING ⚠️\n\nEmployee ID: ${Math.floor(Math.random() * 10000)}\nViolation: Customer Service Neglect\n\nYou have dismissed ${currentDismissals} customers without completing their transactions.\n\nThis behavior is unacceptable and violates bank policy.\n\nPlease improve your customer service immediately.\n\nFurther violations will result in termination.\n\n- Bank Management`);
                     setShowManagerWarning(true);
@@ -3535,13 +3541,7 @@ function App() {
                     
                     setGameScore(prev => ({
                       ...prev,
-                      customersCalledWithoutService: currentDismissals,
                       dismissalWarningGiven: true
-                    }));
-                  } else {
-                    setGameScore(prev => ({
-                      ...prev,
-                      customersCalledWithoutService: currentDismissals
                     }));
                   }
                 }
