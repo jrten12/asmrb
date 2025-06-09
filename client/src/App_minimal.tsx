@@ -184,22 +184,134 @@ function App() {
     return customer;
   };
 
+  // Account lookup function - NEVER automatically flags fraud, always returns account info
+  const handleAccountLookup = (accountNumber: string) => {
+    setTerminalOutput(prev => [...prev, 
+      `> LOOKUP ${accountNumber}`,
+      "CONNECTING TO DATABASE...",
+      "SEARCHING..."
+    ]);
+    
+    setTimeout(() => {
+      // Always return account information - no automatic validation
+      const balance = Math.floor(Math.random() * 3000) + 500;
+      setAccountBalance(balance);
+      setVerificationState(prev => ({...prev, accountLookedUp: true}));
+      setTerminalOutput(prev => [...prev, 
+        "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+        "STATUS: ACTIVE CUSTOMER",
+        `BALANCE: $${balance.toLocaleString()}`,
+        "BANK RECORDS NOW DISPLAYED BELOW"
+      ]);
+      playSound('cash');
+    }, 1500);
+  };
+
+  // Handle customer dismissal without service
+  const handleCustomerDismissal = () => {
+    if (!currentCustomer) return;
+    
+    setGameScore(prev => {
+      const newCount = prev.customersCalledWithoutService + 1;
+      
+      if (newCount === 2 && !prev.dismissalWarningGiven) {
+        // First warning at 2 dismissals
+        setTerminalOutput(prevOutput => [...prevOutput,
+          "",
+          "⚠️ SUPERVISOR ALERT ⚠️",
+          "WARNING: Customer service protocol violation",
+          "You have dismissed 2 customers without service",
+          "Warning: One more dismissal will result in termination",
+          "Please serve all customers properly",
+          ""
+        ]);
+        return { ...prev, customersCalledWithoutService: newCount, dismissalWarningGiven: true };
+      } else if (newCount >= 4) {
+        // Termination at 4 dismissals
+        setTerminalOutput(prevOutput => [...prevOutput,
+          "",
+          "🚨 SUPERVISOR INTERVENTION 🚨",
+          "TERMINATION: Excessive customer dismissals",
+          "You have dismissed 4 customers without service",
+          "This violates our customer service standards",
+          "Your shift has been terminated",
+          ""
+        ]);
+        setGamePhase('leaderboard');
+        return { ...prev, customersCalledWithoutService: newCount };
+      }
+      
+      return { ...prev, customersCalledWithoutService: newCount };
+    });
+    
+    setCurrentCustomer(null);
+    setVerificationState({ accountLookedUp: false, signatureCompared: false });
+  };
+
   const startGame = () => {
     setGamePhase('working');
     setCurrentCustomer(generateCustomerLocal());
     setGameInitialized(true);
     playSound('cash');
+    
+    // Start background music when game begins
+    if (!musicMuted && backgroundMusicRef.current) {
+      backgroundMusicRef.current.play().catch(e => {
+        console.log("Music auto-play prevented:", e);
+      });
+    }
   };
 
   const completeTransaction = (isCorrect: boolean) => {
-    if (isCorrect) {
+    if (!currentCustomer) return;
+    
+    // Check if customer has document mismatches (fraud indicators)
+    const hasFraudulentDocuments = currentCustomer.documents.some(doc => !doc.isValid);
+    
+    if (isCorrect && hasFraudulentDocuments) {
+      // Player approved a fraudulent transaction - handle fraud consequence
+      setGameScore(prev => {
+        const newFraudCount = prev.fraudulentApprovals + 1;
+        
+        if (newFraudCount === 1) {
+          // First fraud approval - warning
+          setTerminalOutput(prevOutput => [...prevOutput,
+            "",
+            "⚠️ SECURITY ALERT ⚠️",
+            "WARNING: You have approved a fraudulent transaction",
+            "This has been flagged by our security system",
+            "Warning: One more fraudulent approval will result in termination",
+            "Please be more careful with document verification",
+            ""
+          ]);
+          return { ...prev, fraudulentApprovals: newFraudCount, score: prev.score - 200 };
+        } else if (newFraudCount >= 2) {
+          // Second fraud approval - termination
+          setTerminalOutput(prevOutput => [...prevOutput,
+            "",
+            "🚨 SECURITY BREACH 🚨",
+            "TERMINATION: Multiple fraudulent approvals detected",
+            "You have approved 2 fraudulent transactions",
+            "This poses a serious security risk to the bank",
+            "Your access has been revoked immediately",
+            ""
+          ]);
+          setGamePhase('leaderboard');
+          return { ...prev, fraudulentApprovals: newFraudCount };
+        }
+        
+        return { ...prev, fraudulentApprovals: newFraudCount };
+      });
+    } else if (isCorrect) {
+      // Correct approval of legitimate transaction
       setGameScore(prev => ({
         ...prev,
         score: prev.score + 100,
         correctTransactions: prev.correctTransactions + 1
       }));
-      playSound('success');
+      playSound('cash');
     } else {
+      // Incorrect decision
       setGameScore(prev => ({
         ...prev,
         errors: prev.errors + 1
@@ -207,8 +319,11 @@ function App() {
       playSound('reject');
     }
     
-    // Generate next customer
-    setCurrentCustomer(generateCustomerLocal());
+    // Generate next customer after processing
+    setTimeout(() => {
+      setCurrentCustomer(generateCustomerLocal());
+      setVerificationState({ accountLookedUp: false, signatureCompared: false });
+    }, 1000);
   };
 
   return (
@@ -261,6 +376,94 @@ function App() {
           maxWidth: '1200px',
           padding: '20px'
         }}>
+          {/* Music Controls */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '10px'
+          }}>
+            <button
+              onClick={() => {
+                setMusicMuted(!musicMuted);
+                if (!musicMuted && backgroundMusicRef.current) {
+                  backgroundMusicRef.current.pause();
+                } else if (musicMuted && backgroundMusicRef.current) {
+                  backgroundMusicRef.current.play().catch(e => console.log("Music play failed:", e));
+                }
+              }}
+              style={{
+                background: 'rgba(0, 100, 0, 0.6)',
+                border: '2px solid #00ff00',
+                color: '#00ff00',
+                padding: '8px 16px',
+                fontSize: '12px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontFamily: 'monospace'
+              }}
+            >
+              {musicMuted ? '♪ MUSIC OFF' : '♪ MUSIC ON'}
+            </button>
+          </div>
+
+          {/* Account Lookup Controls */}
+          {currentCustomer && (
+            <div style={{
+              marginBottom: '16px',
+              padding: '12px',
+              background: 'rgba(40, 0, 40, 0.4)',
+              border: '2px solid #aa00aa',
+              borderRadius: '6px'
+            }}>
+              <div style={{ fontSize: '14px', marginBottom: '12px', color: '#ff00ff', fontWeight: 'bold', textAlign: 'center' }}>
+                🔍 VERIFICATION CONTROLS
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  onClick={() => handleAccountLookup(currentCustomer.transaction.accountNumber)}
+                  disabled={verificationState.accountLookedUp}
+                  style={{
+                    background: verificationState.accountLookedUp ? 'rgba(0, 100, 0, 0.8)' : 'rgba(100, 100, 0, 0.6)',
+                    border: '2px solid ' + (verificationState.accountLookedUp ? '#00ff00' : '#ffff00'),
+                    color: verificationState.accountLookedUp ? '#00ff00' : '#ffff00',
+                    padding: '10px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: verificationState.accountLookedUp ? 'not-allowed' : 'pointer',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setVerificationState(prev => ({...prev, signatureCompared: true}));
+                    setTerminalOutput(prev => [...prev, "Signature comparison completed manually"]);
+                  }}
+                  disabled={!verificationState.accountLookedUp || verificationState.signatureCompared}
+                  style={{
+                    background: verificationState.signatureCompared ? 'rgba(0, 100, 0, 0.8)' : 
+                               !verificationState.accountLookedUp ? 'rgba(100, 100, 100, 0.3)' : 'rgba(100, 100, 0, 0.6)',
+                    border: '2px solid ' + (verificationState.signatureCompared ? '#00ff00' : 
+                                           !verificationState.accountLookedUp ? '#666666' : '#ffff00'),
+                    color: verificationState.signatureCompared ? '#00ff00' : 
+                           !verificationState.accountLookedUp ? '#666666' : '#ffff00',
+                    padding: '10px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: (!verificationState.accountLookedUp || verificationState.signatureCompared) ? 'not-allowed' : 'pointer',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {verificationState.signatureCompared ? '✓ SIGNATURE OK' : 'COMPARE SIGNATURE'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Terminal Display */}
           <div style={{
             background: '#000000',
@@ -298,39 +501,87 @@ function App() {
                   <p><strong>Transaction:</strong> {currentCustomer.transaction.type}</p>
                   <p><strong>Amount:</strong> ${currentCustomer.transaction.amount}</p>
                   
-                  {/* Documents */}
+                  {/* Documents - Detailed View for Manual Fraud Detection */}
                   <div style={{ marginTop: '20px' }}>
-                    <h4>Documents:</h4>
+                    <h4>Customer Documents:</h4>
                     {currentCustomer.documents.map((doc, index) => (
                       <div key={index} style={{
                         background: 'rgba(255, 255, 255, 0.9)',
                         color: '#000000',
-                        padding: '10px',
-                        margin: '5px 0',
+                        padding: '12px',
+                        margin: '8px 0',
                         borderRadius: '5px',
-                        fontSize: '12px'
+                        fontSize: '11px',
+                        border: doc.isValid ? '2px solid green' : '2px solid red'
                       }}>
-                        <strong>{doc.type.toUpperCase()}:</strong> {doc.data.name || doc.data.accountNumber}
+                        <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>
+                          {doc.type.toUpperCase()} {!doc.isValid && '⚠️'}
+                        </div>
+                        {doc.type === 'id' && (
+                          <div>
+                            <div><strong>Name:</strong> {doc.data.name}</div>
+                            <div><strong>DOB:</strong> {doc.data.dateOfBirth}</div>
+                            <div><strong>Address:</strong> {doc.data.address}</div>
+                            <div><strong>ID Number:</strong> {doc.data.idNumber}</div>
+                            <div><strong>License:</strong> {doc.data.licenseNumber}</div>
+                          </div>
+                        )}
+                        {doc.type === 'slip' && (
+                          <div>
+                            <div><strong>Name:</strong> {doc.data.name}</div>
+                            <div><strong>Type:</strong> {doc.data.type}</div>
+                            <div><strong>Amount:</strong> ${doc.data.amount}</div>
+                            <div><strong>Account:</strong> {doc.data.accountNumber}</div>
+                          </div>
+                        )}
+                        {doc.type === 'bank_book' && (
+                          <div>
+                            <div><strong>Name:</strong> {doc.data.name}</div>
+                            <div><strong>Account:</strong> {doc.data.accountNumber}</div>
+                            <div><strong>Balance:</strong> ${doc.data.balance?.toLocaleString()}</div>
+                            <div><strong>Transaction:</strong> ${doc.data.amount}</div>
+                          </div>
+                        )}
+                        {doc.type === 'signature' && (
+                          <div>
+                            <div><strong>Signature:</strong> {doc.data.name}</div>
+                            <div style={{ fontStyle: 'italic', fontSize: '10px' }}>
+                              Style: {doc.data.signature?.split('|')[1] || 'standard'}
+                            </div>
+                          </div>
+                        )}
+                        {doc.hasError && (
+                          <div style={{ color: 'red', fontSize: '10px', marginTop: '4px' }}>
+                            Issue: {doc.hasError}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
 
                   {/* Action Buttons */}
                   <div style={{
-                    display: 'flex',
-                    gap: '10px',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gap: '8px',
                     marginTop: '20px'
                   }}>
                     <button
                       onClick={() => completeTransaction(true)}
+                      disabled={!verificationState.accountLookedUp || !verificationState.signatureCompared}
                       style={{
-                        background: 'linear-gradient(145deg, #00aa00, #008800)',
-                        border: '2px solid #00ff00',
-                        color: '#ffffff',
-                        padding: '10px 20px',
-                        fontSize: '14px',
+                        background: (!verificationState.accountLookedUp || !verificationState.signatureCompared) ? 
+                                   'rgba(100, 100, 100, 0.3)' : 'linear-gradient(145deg, #00aa00, #008800)',
+                        border: '2px solid ' + ((!verificationState.accountLookedUp || !verificationState.signatureCompared) ? 
+                                               '#666666' : '#00ff00'),
+                        color: (!verificationState.accountLookedUp || !verificationState.signatureCompared) ? 
+                               '#666666' : '#ffffff',
+                        padding: '10px 16px',
+                        fontSize: '12px',
                         borderRadius: '5px',
-                        cursor: 'pointer'
+                        cursor: (!verificationState.accountLookedUp || !verificationState.signatureCompared) ? 
+                                'not-allowed' : 'pointer',
+                        fontFamily: 'monospace'
                       }}
                     >
                       APPROVE
@@ -341,13 +592,29 @@ function App() {
                         background: 'linear-gradient(145deg, #aa0000, #880000)',
                         border: '2px solid #ff0000',
                         color: '#ffffff',
-                        padding: '10px 20px',
-                        fontSize: '14px',
+                        padding: '10px 16px',
+                        fontSize: '12px',
                         borderRadius: '5px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontFamily: 'monospace'
                       }}
                     >
                       REJECT
+                    </button>
+                    <button
+                      onClick={handleCustomerDismissal}
+                      style={{
+                        background: 'linear-gradient(145deg, #666666, #444444)',
+                        border: '2px solid #888888',
+                        color: '#ffffff',
+                        padding: '10px 16px',
+                        fontSize: '12px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontFamily: 'monospace'
+                      }}
+                    >
+                      DISMISS
                     </button>
                   </div>
                 </div>
@@ -362,11 +629,44 @@ function App() {
               padding: '20px'
             }}>
               <h3>Performance</h3>
-              <div style={{ fontSize: '16px' }}>
+              <div style={{ fontSize: '14px' }}>
                 <p><strong>Score:</strong> {gameScore.score}</p>
                 <p><strong>Correct:</strong> {gameScore.correctTransactions}</p>
                 <p><strong>Errors:</strong> {gameScore.errors}</p>
                 <p><strong>Time:</strong> {Math.floor(gameScore.timeOnShift / 60)}:{(gameScore.timeOnShift % 60).toString().padStart(2, '0')}</p>
+                
+                <div style={{ marginTop: '16px', padding: '8px', background: 'rgba(100, 0, 0, 0.2)', borderRadius: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#ff6666', fontWeight: 'bold', marginBottom: '4px' }}>
+                    WARNING SYSTEM
+                  </div>
+                  <p style={{ fontSize: '11px', margin: '2px 0' }}>
+                    <strong>Fraud Approvals:</strong> {gameScore.fraudulentApprovals}/2
+                    {gameScore.fraudulentApprovals >= 1 && <span style={{ color: '#ff0000' }}> ⚠️</span>}
+                  </p>
+                  <p style={{ fontSize: '11px', margin: '2px 0' }}>
+                    <strong>Dismissals:</strong> {gameScore.customersCalledWithoutService}/4
+                    {gameScore.customersCalledWithoutService >= 2 && <span style={{ color: '#ff0000' }}> ⚠️</span>}
+                  </p>
+                  {gameScore.dismissalWarningGiven && (
+                    <p style={{ fontSize: '10px', color: '#ff4444', fontStyle: 'italic' }}>
+                      Dismissal warning issued
+                    </p>
+                  )}
+                </div>
+
+                {verificationState.accountLookedUp && (
+                  <div style={{ marginTop: '16px', padding: '8px', background: 'rgba(0, 0, 100, 0.2)', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '12px', color: '#6666ff', fontWeight: 'bold', marginBottom: '4px' }}>
+                      ACCOUNT INFO
+                    </div>
+                    <p style={{ fontSize: '11px', margin: '2px 0' }}>
+                      <strong>Balance:</strong> ${accountBalance.toLocaleString()}
+                    </p>
+                    <p style={{ fontSize: '11px', margin: '2px 0' }}>
+                      <strong>Status:</strong> Active
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
