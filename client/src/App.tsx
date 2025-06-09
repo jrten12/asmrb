@@ -1479,19 +1479,69 @@ function App() {
         return;
       }
       
-      // Process the wire transfer transaction
+      setVerificationState(prev => ({...prev, transactionProcessed: true}));
       
-      // Customer is legitimate - approve normally
-      setTerminalOutput(prev => [...prev, "> " + command, "TRANSACTION APPROVED", "All verifications complete", "Processing payment..."]);
+      // Check if this is a fraudulent transaction being approved
+      const isFraudApproval = currentCustomer.documents.some(doc => !doc.isValid);
+      
+      if (isFraudApproval) {
+        setGameScore(prev => {
+          const newFraudApprovals = prev.fraudulentApprovals + 1;
+          
+          if (newFraudApprovals === 1) {
+            setTerminalOutput(prevOutput => [...prevOutput,
+              "> " + command,
+              "⚠️ SUPERVISOR NOTICE ⚠️",
+              "WARNING: Document discrepancy detected after approval",
+              "Employee review required - this is your first warning",
+              "Future violations may result in termination"
+            ]);
+            playSound('reject');
+          } else if (newFraudApprovals >= 2) {
+            setTimeout(() => {
+              setTerminalOutput(prevOutput => [...prevOutput,
+                "🚨 IMMEDIATE TERMINATION 🚨",
+                "Employee ID: " + Math.floor(Math.random() * 10000),
+                "VIOLATION: Multiple fraudulent transaction approvals",
+                "Your employment is hereby TERMINATED",
+                "Security will escort you from the premises",
+                "- Bank Management"
+              ]);
+              setGamePhase('ended');
+              setIsTerminated(true);
+            }, 2000);
+          }
+          
+          return {
+            ...prev,
+            fraudulentApprovals: newFraudApprovals,
+            errors: prev.errors + 1,
+            errorDetails: [...prev.errorDetails, `Approved fraudulent transaction for ${currentCustomer.name}`]
+          };
+        });
+      } else {
+        setGameScore(prev => ({
+          ...prev,
+          score: prev.score + 100,
+          correctTransactions: prev.correctTransactions + 1
+        }));
+        
+        setTerminalOutput(prev => [...prev,
+          "> " + command,
+          "✓ TRANSACTION APPROVED ✓",
+          "Processing complete - customer satisfied",
+          "Next customer may approach window"
+        ]);
+      }
+      
       playSound('approve');
-      setTimeout(() => playSound('stamp'), 300);
-      setTimeout(() => playSound('receipt_print'), 600);
+      
       setTimeout(() => {
-        handleCorrectTransaction();
+        if (!isFraudApproval) {
+          handleCorrectTransaction();
+        }
         setCurrentCustomer(null);
         resetVerificationState();
-        setTerminalOutput(prev => [...prev, "Customer served successfully. Next customer please."]);
-        playSound('paper_rustle');
       }, 2000);
     } else if (cmd === 'REJECT') {
       if (!currentCustomer) {
