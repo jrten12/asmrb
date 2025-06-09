@@ -211,56 +211,60 @@ function App() {
   const handleCustomerDismissal = () => {
     if (!currentCustomer) return;
     
-    setGameScore(prev => {
-      const newCount = prev.customersCalledWithoutService + 1;
-      console.log("Dismissal count:", newCount, "Warning already given:", prev.dismissalWarningGiven);
-      
-      // Warning at exactly 2 dismissals
-      if (newCount === 2) {
-        setTerminalOutput(prevOutput => [...prevOutput,
-          "",
-          "⚠️ SUPERVISOR ALERT ⚠️",
-          "WARNING: Customer service protocol violation",
-          "You have dismissed 2 customers without service",
-          "Warning: Two more dismissals will result in termination",
-          "Please serve all customers properly",
-          ""
-        ]);
-        playSound('reject');
-        // Update state and continue playing
-        setCurrentCustomer(null);
-        setVerificationState({ accountLookedUp: false, signatureCompared: false });
-        setTimeout(() => {
-          setCurrentCustomer(generateCustomerLocal());
-        }, 1000);
-        return { ...prev, customersCalledWithoutService: newCount, dismissalWarningGiven: true };
-      }
-      
-      // Termination at exactly 4 dismissals (only after warning was given)
-      if (newCount === 4 && prev.dismissalWarningGiven) {
-        setTerminalOutput(prevOutput => [...prevOutput,
-          "",
-          "🚨 SUPERVISOR INTERVENTION 🚨",
-          "TERMINATION: Excessive customer dismissals",
-          "You have dismissed 4 customers without service",
-          "This violates our customer service standards",
-          "Your shift has been terminated",
-          ""
-        ]);
-        // Delay termination to show message
-        setTimeout(() => setGamePhase('leaderboard'), 3000);
-        return { ...prev, customersCalledWithoutService: newCount };
-      }
-      
-      // Regular dismissal - just count and continue
-      setCurrentCustomer(null);
-      setVerificationState({ accountLookedUp: false, signatureCompared: false });
+    const currentCount = gameScore.customersCalledWithoutService;
+    const newCount = currentCount + 1;
+    console.log("DISMISSAL: Current count:", currentCount, "New count:", newCount, "Warning given:", gameScore.dismissalWarningGiven);
+    
+    // Always clear customer and generate new one first
+    setCurrentCustomer(null);
+    setVerificationState({ accountLookedUp: false, signatureCompared: false });
+    
+    // Handle warning at exactly 2nd dismissal
+    if (newCount === 2 && !gameScore.dismissalWarningGiven) {
+      setTerminalOutput(prev => [...prev,
+        "",
+        "⚠️ SUPERVISOR ALERT ⚠️",
+        "WARNING: Customer service protocol violation",
+        "You have dismissed 2 customers without service",
+        "Warning: Two more dismissals will result in termination",
+        "Please serve all customers properly",
+        ""
+      ]);
+      playSound('reject');
+      setGameScore(prev => ({ 
+        ...prev, 
+        customersCalledWithoutService: newCount, 
+        dismissalWarningGiven: true 
+      }));
+      // Continue game with new customer
       setTimeout(() => {
         setCurrentCustomer(generateCustomerLocal());
-      }, 1000);
-      
-      return { ...prev, customersCalledWithoutService: newCount };
-    });
+      }, 2000);
+      return;
+    }
+    
+    // Handle termination at exactly 4th dismissal
+    if (newCount === 4 && gameScore.dismissalWarningGiven) {
+      setTerminalOutput(prev => [...prev,
+        "",
+        "🚨 SUPERVISOR INTERVENTION 🚨",
+        "TERMINATION: Excessive customer dismissals",
+        "You have dismissed 4 customers without service",
+        "This violates our customer service standards",
+        "Your shift has been terminated",
+        ""
+      ]);
+      setGameScore(prev => ({ ...prev, customersCalledWithoutService: newCount }));
+      // End game after showing message
+      setTimeout(() => setGamePhase('leaderboard'), 3000);
+      return;
+    }
+    
+    // Regular dismissal - just update count and continue
+    setGameScore(prev => ({ ...prev, customersCalledWithoutService: newCount }));
+    setTimeout(() => {
+      setCurrentCustomer(generateCustomerLocal());
+    }, 1000);
   };
 
   const startGame = () => {
