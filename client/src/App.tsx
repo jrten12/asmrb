@@ -2699,7 +2699,7 @@ function App() {
       
 
       
-      {/* Music Control Button */}
+      {/* Music Control Button - Moved to bottom left */}
       <button
         onClick={() => {
           const newMutedState = !musicMuted;
@@ -2717,8 +2717,8 @@ function App() {
           }
         }}
         style={{
-          position: 'absolute',
-          top: '8px',
+          position: 'fixed',
+          bottom: '8px',
           left: '8px',
           background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
           border: `2px solid ${musicMuted ? '#ff0000' : '#00ff00'}`,
@@ -2746,10 +2746,10 @@ function App() {
         {musicMuted ? '🔇 MUSIC OFF' : '🎵 MUSIC ON'}
       </button>
 
-      {/* Westridge Ledger Bank Logo - Subtle placement */}
+      {/* Westridge Ledger Bank Logo - Moved to bottom right */}
       <div style={{
-        position: 'absolute',
-        top: '8px',
+        position: 'fixed',
+        bottom: '8px',
         right: '8px',
         zIndex: 100,
         opacity: 0.7
@@ -2758,7 +2758,7 @@ function App() {
           src="./westridge-logo.png" 
           alt="Westridge Ledger Bank"
           style={{
-            width: '45px',
+            width: '35px',
             height: 'auto',
             filter: 'brightness(1.2) sepia(1) hue-rotate(90deg) saturate(2)'
           }}
@@ -2768,7 +2768,7 @@ function App() {
             e.currentTarget.style.display = 'none';
             const parent = e.currentTarget.parentElement;
             if (parent) {
-              parent.innerHTML = '<div style="color: #00ff00; font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">WESTRIDGE<br/>LEDGER<br/>BANK</div>';
+              parent.innerHTML = '<div style="color: #00ff00; font-size: 9px; font-weight: bold; text-align: center; line-height: 1.2;">WESTRIDGE<br/>LEDGER<br/>BANK</div>';
             }
           }}
         />
