@@ -4810,7 +4810,7 @@ function App() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'linear-gradient(45deg, #000000, #001100)',
+            background: 'radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 50%, #000000 100%)',
             zIndex: 3000,
             overflow: 'hidden'
           }}
@@ -4837,321 +4837,242 @@ function App() {
             }
           }}
         >
-          {/* CRT Scanlines */}
+          {/* Dynamic Emergency Lighting */}
           <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
-            pointerEvents: 'none'
+            background: `
+              radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.25) 0%, transparent 25%),
+              radial-gradient(circle at 80% 30%, rgba(0, 0, 255, 0.25) 0%, transparent 25%),
+              radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 20%)
+            `,
+            animation: 'emergencyFlash 0.5s infinite alternate'
           }} />
-          
-          {/* Bank Scene */}
+
+          {/* Professional Alert Banner */}
           <div style={{
             position: 'absolute',
-            bottom: '0px',
-            left: '0px',
-            right: '0px',
-            height: '100px',
-            background: 'linear-gradient(180deg, #003300 0%, #001100 100%)',
-            border: '2px solid #00ff00',
-            borderBottom: 'none'
-          }} />
-          
-          {/* Teller Counter */}
-          <div style={{
-            position: 'absolute',
-            bottom: '100px',
-            left: '10%',
-            width: '200px',
-            height: '80px',
-            background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
-            border: '2px solid #00ff00'
-          }} />
-          
-          {/* FRAUD DETECTED Alert */}
-          <div style={{
-            position: 'absolute',
-            top: '50px',
+            top: '30px',
             left: '50%',
             transform: 'translateX(-50%)',
-            color: '#ff0000',
-            fontSize: '32px',
+            background: 'linear-gradient(90deg, #cc0000 0%, #ff3333 50%, #cc0000 100%)',
+            color: '#ffffff',
+            padding: '20px 50px',
+            fontSize: '28px',
             fontWeight: 'bold',
             textAlign: 'center',
-            animation: 'fraudAlert 2s infinite',
-            textShadow: '0 0 20px #ff0000',
-            fontFamily: 'monospace'
+            borderRadius: '10px',
+            boxShadow: '0 6px 25px rgba(255, 0, 0, 0.6)',
+            fontFamily: 'Arial, sans-serif',
+            letterSpacing: '3px',
+            animation: 'alertFadeIn 1.5s ease-out forwards'
           }}>
-            🚨 FRAUD DETECTED 🚨
+            FINANCIAL CRIMES INVESTIGATION
           </div>
-          
-          {/* Multiple Police Units Response Team */}
-          
-          {/* Lead Police Unit */}
-          <div style={{
-            position: 'absolute',
-            bottom: '180px',
-            right: '-150px',
-            fontSize: '60px',
-            animation: 'leadUnit 2s ease-out forwards',
-            filter: 'drop-shadow(0 0 10px #0066ff)'
-          }}>
-            🚔
-          </div>
-          
-          {/* Backup Unit 1 */}
-          <div style={{
-            position: 'absolute',
-            bottom: '180px',
-            left: '-150px',
-            fontSize: '60px',
-            animation: 'backupUnit1 2.5s ease-out 0.5s forwards',
-            filter: 'drop-shadow(0 0 10px #ff0066)'
-          }}>
-            🚔
-          </div>
-          
-          {/* Backup Unit 2 */}
-          <div style={{
-            position: 'absolute',
-            bottom: '120px',
-            right: '-200px',
-            fontSize: '50px',
-            animation: 'backupUnit2 3s ease-out 1s forwards'
-          }}>
-            🚔
-          </div>
-          
-          {/* SWAT Response Vehicle */}
-          <div style={{
-            position: 'absolute',
-            bottom: '80px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '70px',
-            animation: 'swatResponse 4s ease-out 2s forwards',
-            opacity: 0
-          }}>
-            🚐
-          </div>
-          
-          {/* Police Helicopter Air Support */}
+
+          {/* FBI Investigation Panel */}
           <div style={{
             position: 'absolute',
             top: '120px',
-            right: '-150px',
-            fontSize: '80px',
-            animation: 'airSupport 5s ease-in-out 2.5s forwards',
-            opacity: 0,
-            filter: 'drop-shadow(0 0 15px #ffff00)'
-          }}>
-            🚁
-          </div>
-          
-          {/* K-9 Tactical Unit */}
-          <div style={{
-            position: 'absolute',
-            bottom: '250px',
-            left: '100px',
-            fontSize: '40px',
-            animation: 'k9Unit 3s ease-out 3s forwards',
-            opacity: 0
-          }}>
-            🐕‍🦺
-          </div>
-          
-          {/* Lead Officer */}
-          <div style={{
-            position: 'absolute',
-            bottom: '250px',
-            right: '200px',
-            fontSize: '70px',
-            animation: 'leadOfficer 3s ease-out 1.5s forwards',
-            opacity: 0
-          }}>
-            👮‍♂️
-          </div>
-          
-          {/* Backup Officer */}
-          <div style={{
-            position: 'absolute',
-            bottom: '250px',
-            left: '200px',
-            fontSize: '60px',
-            animation: 'backupOfficer 3s ease-out 2s forwards',
-            opacity: 0
-          }}>
-            👮‍♀️
-          </div>
-          
-          {/* Fraud Detective */}
-          <div style={{
-            position: 'absolute',
-            bottom: '250px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '50px',
-            animation: 'detective 4s ease-out 3.5s forwards',
-            opacity: 0
-          }}>
-            🕵️‍♂️
-          </div>
-          
-          {/* Fraudulent Customer - Enhanced Panic Sequence */}
-          <div style={{
-            position: 'absolute',
-            bottom: '200px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '80px',
-            animation: 'suspectPanic 6s ease-in-out 1s forwards'
-          }}>
-            🧑‍💼
-          </div>
-          
-          {/* Radio Dispatch Commands */}
-          <div style={{
-            position: 'absolute',
-            top: '200px',
-            left: '20px',
-            color: '#ff4444',
+            left: '40px',
+            background: 'rgba(0, 0, 0, 0.92)',
+            border: '3px solid #444444',
+            borderRadius: '12px',
+            padding: '25px',
+            color: '#ffffff',
             fontSize: '16px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            animation: 'radioDispatch1 3s linear 4s forwards',
-            opacity: 0
-          }}>
-            📻 "ALL UNITS CODE 10-16 FRAUD IN PROGRESS"<br/>
-            📻 "SUSPECT AT WESTRIDGE BANK TELLER 3"<br/>
-            📻 "REQUESTING IMMEDIATE BACKUP"
-          </div>
-          
-          {/* On-Scene Commands */}
-          <div style={{
-            position: 'absolute',
-            top: '280px',
-            right: '20px',
-            color: '#ff6666',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            animation: 'onSceneCommands 3s linear 5.5s forwards',
-            opacity: 0
-          }}>
-            "HANDS WHERE WE CAN SEE THEM!"<br/>
-            "STEP AWAY FROM THE COUNTER!"<br/>
-            "FRAUD INVESTIGATION UNIT!"<br/>
-            "YOU ARE UNDER ARREST!"
-          </div>
-          
-          {/* Handcuffs Application Sequence */}
-          <div style={{
-            position: 'absolute',
-            bottom: '240px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '30px',
-            animation: 'handcuffsApply 3s linear 6.5s forwards',
-            opacity: 0
-          }}>
-            🔗
-          </div>
-          
-          {/* Miranda Rights Reading */}
-          <div style={{
-            position: 'absolute',
-            bottom: '320px',
-            left: '30%',
-            color: '#aaaaff',
-            fontSize: '14px',
-            fontFamily: 'monospace',
-            animation: 'mirandaRights 4s linear 7.5s forwards',
+            fontFamily: 'Courier New, monospace',
+            animation: 'panelSlideIn 2.5s ease-out 1s forwards',
             opacity: 0,
-            lineHeight: '1.4'
+            minWidth: '350px'
           }}>
-            "You have the right to remain silent..."<br/>
-            "Anything you say can and will be used..."<br/>
-            "You have the right to an attorney..."<br/>
-            "If you cannot afford an attorney..."
-          </div>
-          
-          {/* Evidence Collection */}
-          <div style={{
-            position: 'absolute',
-            top: '350px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: '#ffaa00',
-            fontSize: '14px',
-            fontFamily: 'monospace',
-            animation: 'evidenceCollection 3s linear 8.5s forwards',
-            opacity: 0,
-            textAlign: 'center'
-          }}>
-            📋 EVIDENCE SECURED<br/>
-            📋 FRAUDULENT DOCUMENTS CONFISCATED<br/>
-            📋 CASE #FR-2024-{Math.floor(Math.random() * 999)}
-          </div>
-          
-          {/* Arrest Dialog */}
-          <div style={{
-            position: 'absolute',
-            bottom: '300px',
-            left: '50px',
-            color: '#ff4444',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            animation: 'arrestDialog 5s linear forwards',
-            opacity: 0
-          }}>
-            <div style={{ animation: 'textFadeIn 5s linear forwards' }}>
-              "You're under arrest for attempted fraud"
+            <div style={{ color: '#ffcc00', marginBottom: '12px', fontWeight: 'bold', fontSize: '18px' }}>
+              FBI FINANCIAL CRIMES DIVISION
             </div>
+            <div style={{ marginBottom: '8px' }}>CASE ID: FC-2024-{Math.floor(Math.random() * 9999).toString().padStart(4, '0')}</div>
+            <div style={{ marginBottom: '8px' }}>SUSPECT: DOCUMENT FRAUD</div>
+            <div style={{ marginBottom: '8px' }}>LOCATION: WESTRIDGE NATIONAL BANK</div>
+            <div style={{ marginBottom: '8px' }}>AGENT: SPECIAL AGENT HARRISON</div>
+            <div style={{ color: '#ff6666', fontWeight: 'bold' }}>STATUS: APPREHENSION IN PROGRESS</div>
           </div>
-          
-          {/* Success Message */}
+
+          {/* Federal Response Vehicles */}
           <div style={{
             position: 'absolute',
             bottom: '120px',
+            right: '-250px',
+            animation: 'federalUnit1 3.5s ease-out forwards'
+          }}>
+            <div style={{
+              background: 'linear-gradient(45deg, #2a2a3a 0%, #404055 50%, #2a2a3a 100%)',
+              padding: '20px 30px',
+              borderRadius: '12px',
+              color: '#ffffff',
+              fontSize: '14px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              border: '3px solid #555577',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.8)',
+              minWidth: '120px'
+            }}>
+              FEDERAL<br/>BUREAU OF<br/>INVESTIGATION
+            </div>
+          </div>
+
+          <div style={{
+            position: 'absolute',
+            bottom: '120px',
+            left: '-250px',
+            animation: 'federalUnit2 4s ease-out 0.8s forwards'
+          }}>
+            <div style={{
+              background: 'linear-gradient(45deg, #1a1a2a 0%, #333344 50%, #1a1a2a 100%)',
+              padding: '20px 30px',
+              borderRadius: '12px',
+              color: '#ffffff',
+              fontSize: '14px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              border: '3px solid #444466',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.8)',
+              minWidth: '120px'
+            }}>
+              FINANCIAL<br/>CRIMES<br/>TASK FORCE
+            </div>
+          </div>
+
+          {/* Special Agent Badge */}
+          <div style={{
+            position: 'absolute',
+            bottom: '220px',
             left: '50%',
             transform: 'translateX(-50%)',
+            animation: 'badgePresent 4.5s ease-out 2.5s forwards',
+            opacity: 0
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #1a1a4a 0%, #2a2a6a 100%)',
+              padding: '25px',
+              borderRadius: '15px',
+              color: '#ffffff',
+              fontSize: '18px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              border: '3px solid #4a4a8a',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.9)',
+              minWidth: '220px'
+            }}>
+              SPECIAL AGENT<br/>
+              <div style={{ fontSize: '14px', color: '#ccccff', marginTop: '8px' }}>
+                FINANCIAL INVESTIGATIONS
+              </div>
+            </div>
+          </div>
+
+          {/* Secure Communications Terminal */}
+          <div style={{
+            position: 'absolute',
+            bottom: '40px',
+            left: '40px',
+            background: 'rgba(0, 20, 0, 0.85)',
+            border: '2px solid #004400',
+            borderRadius: '8px',
+            padding: '20px',
             color: '#00ff00',
+            fontSize: '14px',
+            fontFamily: 'Courier New, monospace',
+            animation: 'commsActive 10s linear 4s forwards',
+            opacity: 0,
+            maxWidth: '450px'
+          }}>
+            <div style={{ color: '#ffff00', marginBottom: '10px', fontWeight: 'bold' }}>SECURE FBI COMMUNICATIONS</div>
+            <div style={{ marginBottom: '4px' }}>🔒 SUSPECT APPREHENDED SUCCESSFULLY</div>
+            <div style={{ marginBottom: '4px' }}>🔒 FRAUDULENT DOCUMENTS SECURED</div>
+            <div style={{ marginBottom: '4px' }}>🔒 EVIDENCE CHAIN ESTABLISHED</div>
+            <div style={{ marginBottom: '4px' }}>🔒 BANK OPERATIONS RESTORED</div>
+            <div style={{ marginBottom: '4px' }}>🔒 CASE FORWARDED TO PROSECUTION</div>
+            <div style={{ color: '#ffffff', fontWeight: 'bold' }}>🔒 INVESTIGATION COMPLETE</div>
+          </div>
+
+          {/* Mission Success Confirmation */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'linear-gradient(135deg, #004400 0%, #006600 100%)',
+            color: '#ffffff',
+            padding: '35px',
+            borderRadius: '20px',
+            textAlign: 'center',
             fontSize: '24px',
             fontWeight: 'bold',
-            textAlign: 'center',
-            fontFamily: 'monospace',
-            animation: 'successMessage 6s linear forwards',
-            opacity: 0,
-            textShadow: '0 0 15px #00ff00'
+            border: '4px solid #00aa00',
+            boxShadow: '0 10px 30px rgba(0, 150, 0, 0.5)',
+            animation: 'missionComplete 4s ease-out 9s forwards',
+            opacity: 0
           }}>
-            FRAUD SUSPECT ARRESTED<br/>
-            EXCELLENT DETECTIVE WORK
+            FRAUD INVESTIGATION SUCCESSFUL<br/>
+            <div style={{ fontSize: '18px', marginTop: '12px', color: '#aaffaa' }}>
+              EXCEPTIONAL FRAUD DETECTION<br/>
+              BANK SECURITY MAINTAINED<br/>
+              FEDERAL CASE CLOSED
+            </div>
           </div>
         </div>
       )}
 
       {/* CSS Animations */}
       <style>{`
-        @keyframes fraudAlert {
-          0%, 50%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-          25%, 75% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
+        /* Professional FBI Investigation Animations */
+        @keyframes emergencyFlash {
+          0% { opacity: 0.6; }
+          100% { opacity: 1; }
         }
         
-        @keyframes officerApproach {
-          0% { right: 100vw; }
-          60% { right: 200px; }
-          100% { right: 200px; }
+        @keyframes alertFadeIn {
+          0% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); }
+          50% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1.05); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
         }
         
-        @keyframes customerArrest {
-          0% { transform: translateX(-50%) rotate(0deg); }
-          60% { transform: translateX(-50%) rotate(0deg); }
-          80% { transform: translateX(-50%) rotate(-10deg); }
-          100% { transform: translateX(-50%) rotate(0deg); }
+        @keyframes panelSlideIn {
+          0% { opacity: 0; transform: translateX(-100px); }
+          60% { opacity: 1; transform: translateX(10px); }
+          100% { opacity: 1; transform: translateX(0px); }
+        }
+        
+        @keyframes federalUnit1 {
+          0% { right: -250px; opacity: 0; }
+          30% { right: 100px; opacity: 1; }
+          100% { right: 80px; opacity: 1; }
+        }
+        
+        @keyframes federalUnit2 {
+          0% { left: -250px; opacity: 0; }
+          30% { left: 100px; opacity: 1; }
+          100% { left: 80px; opacity: 1; }
+        }
+        
+        @keyframes badgePresent {
+          0% { opacity: 0; transform: translateX(-50%) translateY(50px) scale(0.8); }
+          40% { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.1); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+        }
+        
+        @keyframes commsActive {
+          0% { opacity: 0; transform: translateY(30px); }
+          20% { opacity: 1; transform: translateY(0px); }
+          100% { opacity: 1; transform: translateY(0px); }
+        }
+        
+        @keyframes missionComplete {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+          30% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+          100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
         
         @keyframes handcuffsAppear {
@@ -5236,108 +5157,6 @@ function App() {
         @keyframes policeCarArrive {
           0% { transform: translateX(0px); }
           100% { transform: translateX(150px); }
-        }
-        
-        /* Enhanced Multi-Unit Police Response Animations */
-        @keyframes leadUnit {
-          0% { right: -150px; }
-          100% { right: 100px; }
-        }
-        
-        @keyframes backupUnit1 {
-          0% { left: -150px; }
-          100% { left: 100px; }
-        }
-        
-        @keyframes backupUnit2 {
-          0% { right: -200px; }
-          100% { right: 150px; }
-        }
-        
-        @keyframes swatResponse {
-          0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
-          50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
-          100% { opacity: 1; transform: translateX(-50%) scale(1); }
-        }
-        
-        @keyframes airSupport {
-          0% { opacity: 0; right: -150px; transform: rotate(-15deg); }
-          30% { opacity: 1; right: 200px; transform: rotate(-5deg); }
-          70% { opacity: 1; right: 150px; transform: rotate(5deg); }
-          100% { opacity: 1; right: 180px; transform: rotate(-2deg); }
-        }
-        
-        @keyframes k9Unit {
-          0% { opacity: 0; transform: translateX(-50px) scale(0.8); }
-          50% { opacity: 1; transform: translateX(0px) scale(1.1); }
-          100% { opacity: 1; transform: translateX(0px) scale(1); }
-        }
-        
-        @keyframes leadOfficer {
-          0% { opacity: 0; transform: translateX(100px) scale(0.8); }
-          50% { opacity: 1; transform: translateX(0px) scale(1.1); }
-          100% { opacity: 1; transform: translateX(0px) scale(1); }
-        }
-        
-        @keyframes backupOfficer {
-          0% { opacity: 0; transform: translateX(-100px) scale(0.8); }
-          50% { opacity: 1; transform: translateX(0px) scale(1.1); }
-          100% { opacity: 1; transform: translateX(0px) scale(1); }
-        }
-        
-        @keyframes detective {
-          0% { opacity: 0; transform: translateX(-50%) translateY(50px) scale(0.8); }
-          50% { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.1); }
-          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
-        }
-        
-        @keyframes suspectPanic {
-          0% { transform: translateX(-50%) rotate(0deg) scale(1); }
-          15% { transform: translateX(-50%) rotate(-5deg) scale(1.05); }
-          30% { transform: translateX(-50%) rotate(5deg) scale(0.95); }
-          45% { transform: translateX(-50%) rotate(-8deg) scale(1.08); }
-          60% { transform: translateX(-50%) rotate(3deg) scale(0.92); }
-          75% { transform: translateX(-50%) rotate(-10deg) scale(1.1); }
-          90% { transform: translateX(-50%) rotate(0deg) scale(0.9); }
-          100% { transform: translateX(-50%) rotate(-20deg) scale(0.8); }
-        }
-        
-        @keyframes radioDispatch1 {
-          0% { opacity: 0; transform: translateY(20px); }
-          20% { opacity: 1; transform: translateY(0px); }
-          80% { opacity: 1; transform: translateY(0px); }
-          100% { opacity: 0; transform: translateY(-20px); }
-        }
-        
-        @keyframes onSceneCommands {
-          0% { opacity: 0; transform: translateY(20px) scale(0.9); }
-          20% { opacity: 1; transform: translateY(0px) scale(1.05); }
-          40% { opacity: 1; transform: translateY(0px) scale(1); }
-          60% { opacity: 1; transform: translateY(0px) scale(1.02); }
-          80% { opacity: 1; transform: translateY(0px) scale(1); }
-          100% { opacity: 1; transform: translateY(0px) scale(1); }
-        }
-        
-        @keyframes handcuffsApply {
-          0% { opacity: 0; transform: translateX(-50%) scale(0) rotate(0deg); }
-          30% { opacity: 0; transform: translateX(-50%) scale(0) rotate(0deg); }
-          50% { opacity: 1; transform: translateX(-50%) scale(1.5) rotate(180deg); }
-          70% { opacity: 1; transform: translateX(-50%) scale(1.2) rotate(270deg); }
-          100% { opacity: 1; transform: translateX(-50%) scale(1) rotate(360deg); }
-        }
-        
-        @keyframes mirandaRights {
-          0% { opacity: 0; transform: translateY(15px); }
-          25% { opacity: 1; transform: translateY(0px); }
-          75% { opacity: 1; transform: translateY(0px); }
-          100% { opacity: 1; transform: translateY(0px); }
-        }
-        
-        @keyframes evidenceCollection {
-          0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.8); }
-          30% { opacity: 1; transform: translateX(-50%) translateY(-5px) scale(1.1); }
-          70% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
-          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
         }
         
         @keyframes textStep1 {
