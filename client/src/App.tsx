@@ -2728,33 +2728,7 @@ function App() {
       
 
       
-      {/* Westridge Ledger Bank Logo - Subtle placement */}
-      <div style={{
-        position: 'absolute',
-        top: '8px',
-        right: '8px',
-        zIndex: 100,
-        opacity: 0.7
-      }}>
-        <img 
-          src="./westridge-logo.png" 
-          alt="Westridge Ledger Bank"
-          style={{
-            width: '45px',
-            height: 'auto',
-            filter: 'brightness(1.2) sepia(1) hue-rotate(90deg) saturate(2)'
-          }}
-          onError={(e) => {
-            console.log('Logo failed to load:', e);
-            // Fallback to text-based logo
-            e.currentTarget.style.display = 'none';
-            const parent = e.currentTarget.parentElement;
-            if (parent) {
-              parent.innerHTML = '<div style="color: #00ff00; font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">WESTRIDGE<br/>LEDGER<br/>BANK</div>';
-            }
-          }}
-        />
-      </div>
+
 
       {/* CRT Scanline Effect */}
       <div style={{
@@ -6634,7 +6608,7 @@ function App() {
           onClick={toggleMusic}
           style={{
             position: 'fixed',
-            bottom: '80px',
+            bottom: '10px',
             left: '20px',
             background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
             border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
@@ -6666,7 +6640,7 @@ function App() {
           alt="Westridge Ledger Bank"
           style={{
             position: 'fixed',
-            bottom: '80px',
+            bottom: '10px',
             right: '20px',
             width: '80px',
             height: 'auto',
