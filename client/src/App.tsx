@@ -1697,7 +1697,7 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.0; // Completely silent by default
+        backgroundMusicRef.current.volume = 0.08; // Set to reasonable 8% volume
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
@@ -1714,13 +1714,13 @@ function App() {
       
       // Only play music if not muted
       if (!musicMuted) {
-        backgroundMusicRef.current.volume = 0.01; // Set to 1% when unmuted
+        backgroundMusicRef.current.volume = 0.08; // Set to 8% when unmuted
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
           // Try again after user interaction
           const tryAgain = () => {
             if (backgroundMusicRef.current && !musicMuted) {
-              backgroundMusicRef.current.volume = 0.01;
+              backgroundMusicRef.current.volume = 0.08;
               backgroundMusicRef.current.play().catch(() => {});
             }
           };
@@ -2699,6 +2699,49 @@ function App() {
       
 
       
+      {/* Music Control Button */}
+      <button
+        onClick={() => {
+          setMusicMuted(!musicMuted);
+          if (backgroundMusicRef.current) {
+            if (musicMuted) {
+              backgroundMusicRef.current.volume = 0.08;
+              backgroundMusicRef.current.play().catch(() => {});
+            } else {
+              backgroundMusicRef.current.pause();
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
+          border: `2px solid ${musicMuted ? '#ff0000' : '#00ff00'}`,
+          borderRadius: '6px',
+          color: '#ffffff',
+          padding: '8px 12px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          zIndex: 100,
+          fontFamily: 'monospace',
+          textShadow: '0 0 5px #000000',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        {musicMuted ? '🔇 MUSIC OFF' : '🎵 MUSIC ON'}
+      </button>
+
       {/* Westridge Ledger Bank Logo - Subtle placement */}
       <div style={{
         position: 'absolute',
