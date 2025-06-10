@@ -1306,7 +1306,7 @@ function App() {
       }
       
       playSound('legacy_processing');
-      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "OPENING CASH DRAWER..."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "PREPARING CASH..."]);
       
       setTimeout(() => {
         setTerminalOutput(prev => [...prev, 
@@ -1314,18 +1314,20 @@ function App() {
           `AMOUNT: $${amount}`,
           `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
-          "STATUS: COUNT CASH FROM DRAWER",
+          "STATUS: CASH DISPENSED",
+          "TRANSACTION COMPLETE",
           "========================================"
         ]);
         
-        // Open cash drawer for manual counting
-        setCashDrawerAmount(withdrawAmount);
-        setSelectedBills({});
-        setBillsOnCounter([]);
-        setTotalCounted(0);
-        setCashDrawerOpen(true);
-        setShowCashDrawer(true);
+        // Complete withdrawal transaction immediately
         playSound('cash_drawer_open');
+        setTimeout(() => {
+          handleCorrectTransaction();
+          setCurrentCustomer(null);
+          resetVerificationState();
+          setTerminalOutput(prev => [...prev, "Customer served successfully. Next customer please."]);
+          playSound('paper_rustle');
+        }, 2000);
       }, 1500);
       
     } else if (cmd.startsWith('WIRE $')) {
@@ -5508,9 +5510,9 @@ function App() {
         }
       `}</style>
 
-      {/* Cash Drawer System Removed */}
-      {false && (
-        <div style={{
+      {/* Cash drawer functionality removed for app store deployment */}
+
+      {/* Desktop Printer System */}
           position: 'fixed',
           top: 0,
           left: 0,
