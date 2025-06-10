@@ -134,6 +134,8 @@ function App() {
   } | null>(null);
 
 
+
+
   // Achievement badge definitions
   const badges = [
     { milestone: 1, name: "Rookie Banker", description: "Successfully processed your first customer transaction", icon: "🥉", color: "#CD7F32", tier: "Bronze" },
@@ -505,7 +507,6 @@ function App() {
   const [billsInEnvelope, setBillsInEnvelope] = useState<{denomination: number, id: string}[]>([]);
   const [showEnvelopeSealing, setShowEnvelopeSealing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const [musicMuted, setMusicMuted] = useState(true); // Start muted by default
 
   const generateCustomerLocal = (): Customer => {
