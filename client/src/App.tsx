@@ -496,13 +496,7 @@ function App() {
   const [wireAmount, setWireAmount] = useState('');
   const [wireDestAccount, setWireDestAccount] = useState('');
 
-  // Cash drawer state variables
-  const [showCashDrawer, setShowCashDrawer] = useState(false);
-  const [cashDrawerOpen, setCashDrawerOpen] = useState(false);
-  const [cashDrawerAmount, setCashDrawerAmount] = useState(0);
-  const [billsOnCounter, setBillsOnCounter] = useState<any[]>([]);
-  const [totalCounted, setTotalCounted] = useState(0);
-  const [draggingBill, setDraggingBill] = useState<number | null>(null);
+
   const [showPrinter, setShowPrinter] = useState(false);
   const [receiptContent, setReceiptContent] = useState<string>('');
 
@@ -1773,10 +1767,8 @@ function App() {
     // Clear any active states
     setCurrentCustomer(null);
     setSelectedDocument(null);
-    setShowCashDrawer(false);
-    setCashDrawerOpen(false);
-    setBillsOnCounter([]);
-    setTotalCounted(0);
+
+
     setTerminalOutput([]);
     
     // Always show punch-out screen, then go back to punch in
@@ -5612,8 +5604,8 @@ function App() {
         }
       `}</style>
 
-      {/* Professional Cash Drawer System */}
-      {showCashDrawer && (
+      {/* Cash drawer removed */}
+      {false && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -5675,21 +5667,16 @@ function App() {
                   fontSize: '14px',
                   fontWeight: 'bold'
                 }}>
-                  REQUESTED: ${cashDrawerAmount.toLocaleString()}
                 </div>
                 <div style={{
-                  color: totalCounted > 0 ? '#00ff00' : '#ffffff',
                   fontSize: '14px',
                   fontWeight: 'bold'
                 }}>
-                  COUNTER: ${totalCounted.toLocaleString()}
                 </div>
                 <div style={{
-                  color: totalCounted === cashDrawerAmount ? '#00ff00' : '#ff8800',
                   fontSize: '14px',
                   fontWeight: 'bold'
                 }}>
-                  REMAINING: ${Math.max(0, cashDrawerAmount - totalCounted).toLocaleString()}
                 </div>
               </div>
             </div>
@@ -5772,7 +5759,6 @@ function App() {
                               draggable
                               onDragStart={(e) => {
                                 playSound('paper_rustle');
-                                setDraggingBill(denom);
                                 e.dataTransfer.setData('text/plain', JSON.stringify({
                                   denomination: denom,
                                   source: 'drawer',
@@ -5781,7 +5767,6 @@ function App() {
                                 e.currentTarget.classList.add('bill-dragging');
                               }}
                               onDragEnd={(e) => {
-                                setDraggingBill(null);
                                 e.currentTarget.classList.remove('bill-dragging');
                               }}
                               style={{
@@ -5839,10 +5824,8 @@ function App() {
                   e.currentTarget.style.borderColor = '#ffff00';
                   try {
                     const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-                    if (data.source === 'drawer' && totalCounted + data.denomination <= cashDrawerAmount) {
                       playSound('cash_register');
                       updateCashSupply(data.denomination, -1);
-                      setTotalCounted(prev => prev + data.denomination);
                       setCounterBills(prev => [...prev, data.denomination]);
                     }
                   } catch (error) {
@@ -6098,14 +6081,11 @@ function App() {
                     
                     // Check if amount matches requested amount
                     const envelopeTotal = envelopeBills.reduce((sum, denom) => sum + denom, 0);
-                    if (envelopeTotal === cashDrawerAmount) {
                       playSound('completion_bell');
                       setTimeout(() => {
-                        setShowCashDrawer(false);
                         setEnvelopeSealed(false);
                         setEnvelopeBills([]);
                         setCounterBills([]);
-                        setTotalCounted(0);
                         
                         // Complete the withdrawal transaction
                         addCorrectTransaction();
@@ -6150,7 +6130,6 @@ function App() {
                   setCounterBills([]);
                   setEnvelopeBills([]);
                   setEnvelopeSealed(false);
-                  setTotalCounted(0);
                   
                   // Reset cash supply
                   setCashSupply({
@@ -6182,11 +6161,9 @@ function App() {
                 onClick={() => {
                   playSound('drawer_close');
                   setTimeout(() => {
-                    setShowCashDrawer(false);
                     setEnvelopeSealed(false);
                     setEnvelopeBills([]);
                     setCounterBills([]);
-                    setTotalCounted(0);
                   }, 300);
                 }}
                 style={{
@@ -6297,7 +6274,6 @@ function App() {
       )}
 
       {/* Cash Drawer System */}
-      {showCashDrawer && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -6339,7 +6315,6 @@ function App() {
                 fontWeight: 'bold',
                 textShadow: '0 0 10px #00ff00'
               }}>
-                CASH DRAWER - COUNT ${cashDrawerAmount}
               </div>
             </div>
             
@@ -6386,13 +6361,11 @@ function App() {
                         draggable
                         onDragStart={(e) => {
                           const billId = `${denomination}-${Date.now()}-${Math.random()}`;
-                          setDraggingBill(denomination);
                           e.dataTransfer.setData('text/plain', JSON.stringify({denomination, id: billId}));
                           playSound('bill_rustle');
                           e.currentTarget.style.opacity = '0.5';
                         }}
                         onDragEnd={(e) => {
-                          setDraggingBill(null);
                           e.currentTarget.style.opacity = '1';
                         }}
                         style={{
@@ -6458,14 +6431,12 @@ function App() {
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 
-                setBillsOnCounter(prev => [...prev, {
                   id: data.id,
                   denomination: data.denomination,
                   x: Math.max(0, Math.min(x - 30, rect.width - 60)),
                   y: Math.max(0, Math.min(y - 12, rect.height - 25))
                 }]);
                 
-                setTotalCounted(prev => prev + data.denomination);
                 playSound('bill_rustle');
                 playSound('cash_register');
               } catch (err) {
@@ -6483,7 +6454,6 @@ function App() {
                 COUNTING SURFACE - DRAG BILLS HERE
               </div>
               
-              {billsOnCounter.map((bill, index) => (
                 <div
                   key={bill.id}
                   style={{
@@ -6507,8 +6477,6 @@ function App() {
                     transform: `rotate(${(index % 7 - 3) * 5}deg)`
                   }}
                   onClick={() => {
-                    setBillsOnCounter(prev => prev.filter(b => b.id !== bill.id));
-                    setTotalCounted(prev => prev - bill.denomination);
                     playSound('bill_rustle');
                   }}
                 >
@@ -6516,7 +6484,6 @@ function App() {
                 </div>
               ))}
               
-              {billsOnCounter.length === 0 && (
                 <div style={{
                   color: '#666666',
                   fontSize: '12px',
@@ -6540,32 +6507,23 @@ function App() {
               borderRadius: '10px'
             }}>
               <div style={{
-                color: totalCounted === cashDrawerAmount ? '#00ff00' : totalCounted > cashDrawerAmount ? '#ff4444' : '#ffaa00',
                 fontSize: '18px',
                 fontWeight: 'bold',
-                textShadow: `0 0 10px ${totalCounted === cashDrawerAmount ? '#00ff00' : totalCounted > cashDrawerAmount ? '#ff4444' : '#ffaa00'}`
               }}>
-                COUNTED: ${totalCounted} / REQUIRED: ${cashDrawerAmount}
               </div>
               
               <div style={{ display: 'flex', gap: '10px' }}>
-                {totalCounted === cashDrawerAmount && (
                   <button
                     onClick={() => {
                       playSound('cash_register');
                       playSound('success');
                       playSound('correct');
                       setTerminalOutput(prev => [...prev, 
-                        `> CASH COUNT VERIFIED: $${totalCounted}`,
                         "> TRANSACTION APPROVED",
                         "> DRAWER SECURED"
                       ]);
                       
                       handleCorrectTransaction();
-                      setShowCashDrawer(false);
-                      setCashDrawerOpen(false);
-                      setBillsOnCounter([]);
-                      setTotalCounted(0);
                       playSound('drawer_close');
                     }}
                     style={{
@@ -6587,8 +6545,6 @@ function App() {
                 
                 <button
                   onClick={() => {
-                    setBillsOnCounter([]);
-                    setTotalCounted(0);
                     playSound('bill_rustle');
                   }}
                   style={{
@@ -6608,10 +6564,6 @@ function App() {
                 
                 <button
                   onClick={() => {
-                    setShowCashDrawer(false);
-                    setCashDrawerOpen(false);
-                    setBillsOnCounter([]);
-                    setTotalCounted(0);
                     playSound('drawer_close');
                     setTerminalOutput(prev => [...prev, 
                       "> CASH DRAWER CLOSED",
@@ -6637,10 +6589,6 @@ function App() {
             
             <button
               onClick={() => {
-                setShowCashDrawer(false);
-                setCashDrawerOpen(false);
-                setBillsOnCounter([]);
-                setTotalCounted(0);
                 playSound('drawer_close');
               }}
               style={{
