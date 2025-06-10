@@ -6608,8 +6608,8 @@ function App() {
           onClick={toggleMusic}
           style={{
             position: 'fixed',
-            bottom: '10px',
-            left: '20px',
+            bottom: '5px',
+            left: '80px',
             background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
             border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
             borderRadius: '50%',
@@ -6640,8 +6640,8 @@ function App() {
           alt="Westridge Ledger Bank"
           style={{
             position: 'fixed',
-            bottom: '10px',
-            right: '20px',
+            bottom: '5px',
+            right: '80px',
             width: '80px',
             height: 'auto',
             filter: 'drop-shadow(0 0 10px #00ff00)',
