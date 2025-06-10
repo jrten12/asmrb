@@ -179,43 +179,7 @@ function App() {
   
 
   
-  // Cash drawer state for new workflow
-  const [counterBills, setCounterBills] = useState<number[]>([]);
-  const [envelopeBills, setEnvelopeBills] = useState<number[]>([]);
-  const [envelopeSealed, setEnvelopeSealed] = useState(false);
-  const [draggedBill, setDraggedBill] = useState<number | null>(null);
-  
-  // Cash supply state
-  const [cashSupply, setCashSupply] = useState<{[key: number]: number}>({
-    100: 50,
-    50: 50, 
-    20: 50,
-    10: 50,
-    5: 50,
-    1: 50
-  });
-  
-  // Helper function for updating cash supply
-  const updateCashSupply = (denomination: number, change: number) => {
-    setCashSupply(prev => ({
-      ...prev,
-      [denomination]: Math.max(0, (prev[denomination] || 0) + change)
-    }));
-  };
 
-  // Helper function for adjusting color brightness
-  const adjustBrightness = (color: string, amount: number): string => {
-    const usePound = color[0] === '#';
-    const col = usePound ? color.slice(1) : color;
-    const num = parseInt(col, 16);
-    let r = (num >> 16) + amount;
-    let g = (num >> 8 & 0x00FF) + amount;
-    let b = (num & 0x0000FF) + amount;
-    r = r > 255 ? 255 : r < 0 ? 0 : r;
-    g = g > 255 ? 255 : g < 0 ? 0 : g;
-    b = b > 255 ? 255 : b < 0 ? 0 : b;
-    return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
-  };
 
   // Handle streak rewards and animations
   const handleStreakReward = (streak: number) => {
@@ -497,20 +461,8 @@ function App() {
   const [wireAmount, setWireAmount] = useState('');
   const [wireDestAccount, setWireDestAccount] = useState('');
 
-  // Cash drawer state variables
-  const [showCashDrawer, setShowCashDrawer] = useState(false);
-  const [cashDrawerOpen, setCashDrawerOpen] = useState(false);
-  const [cashDrawerAmount, setCashDrawerAmount] = useState(0);
-  const [billsOnCounter, setBillsOnCounter] = useState<any[]>([]);
-  const [totalCounted, setTotalCounted] = useState(0);
-  const [draggingBill, setDraggingBill] = useState<number | null>(null);
   const [showPrinter, setShowPrinter] = useState(false);
   const [receiptContent, setReceiptContent] = useState<string>('');
-
-  // Cash Register System
-  const [selectedBills, setSelectedBills] = useState<{[key: number]: number}>({});
-  const [billsInEnvelope, setBillsInEnvelope] = useState<{denomination: number, id: string}[]>([]);
-  const [showEnvelopeSealing, setShowEnvelopeSealing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomerLocal = (): Customer => {
@@ -5556,8 +5508,8 @@ function App() {
         }
       `}</style>
 
-      {/* Professional Cash Drawer System */}
-      {showCashDrawer && (
+      {/* Cash Drawer System Removed */}
+      {false && (
         <div style={{
           position: 'fixed',
           top: 0,
