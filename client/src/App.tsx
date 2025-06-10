@@ -6602,15 +6602,25 @@ function App() {
         </div>
       )}
       
-      {/* Music button and logo positioned below shift controls */}
+      {/* Music button and logo positioned FAR below shift controls */}
       {gamePhase === 'working' && (
-        <>
+        <div style={{
+          position: 'fixed',
+          bottom: '0px',
+          left: '0px',
+          right: '0px',
+          height: '60px',
+          background: 'rgba(0, 0, 0, 0.3)',
+          borderTop: '1px solid #003300',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0 20px',
+          zIndex: 500
+        }}>
           <button
             onClick={toggleMusic}
             style={{
-              position: 'fixed',
-              bottom: '5px',
-              left: '20px',
               background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
               border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
               borderRadius: '50%',
@@ -6625,8 +6635,7 @@ function App() {
               height: '32px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 999
+              justifyContent: 'center'
             }}
             title={musicMuted ? "Unmute music" : "Mute music"}
           >
@@ -6637,16 +6646,12 @@ function App() {
             src="/westridge-logo.png" 
             alt="Westridge Ledger Bank"
             style={{
-              position: 'fixed',
-              bottom: '5px',
-              right: '20px',
-              width: '60px',
+              width: '50px',
               height: 'auto',
-              filter: 'drop-shadow(0 0 5px #00ff00)',
-              zIndex: 999
+              filter: 'drop-shadow(0 0 5px #00ff00)'
             }}
           />
-        </>
+        </div>
       )}
 
     </div>
