@@ -6602,53 +6602,7 @@ function App() {
         </div>
       )}
       
-      {/* Music button - always visible during gameplay */}
-      {gamePhase === 'working' && (
-        <button
-          onClick={toggleMusic}
-          style={{
-            position: 'fixed',
-            bottom: '5px',
-            left: '80px',
-            background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
-            border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
-            borderRadius: '50%',
-            color: '#ffffff',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            padding: '8px',
-            cursor: 'pointer',
-            boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
-            transition: 'all 0.2s',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-          title={musicMuted ? "Unmute music" : "Mute music"}
-        >
-          {musicMuted ? '🔇' : '🎵'}
-        </button>
-      )}
-      
-      {/* Logo - always visible during gameplay */}
-      {gamePhase === 'working' && (
-        <img 
-          src="/westridge-logo.png" 
-          alt="Westridge Ledger Bank"
-          style={{
-            position: 'fixed',
-            bottom: '5px',
-            right: '80px',
-            width: '80px',
-            height: 'auto',
-            filter: 'drop-shadow(0 0 10px #00ff00)',
-            zIndex: 1000
-          }}
-        />
-      )}
+
     </div>
   );
 }
