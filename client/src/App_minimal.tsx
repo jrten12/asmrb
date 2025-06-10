@@ -351,9 +351,9 @@ function App() {
       playSound('reject');
     }
     
-    // Generate next customer after processing
+    // Clear customer - requires manual calling of next customer
     setTimeout(() => {
-      setCurrentCustomer(generateCustomerLocal());
+      setCurrentCustomer(null);
       setVerificationState({ accountLookedUp: false, signatureCompared: false });
     }, 1000);
   };
@@ -514,6 +514,42 @@ function App() {
           </div>
 
 
+
+          {/* Customer Calling Area */}
+          {!currentCustomer && (
+            <div style={{
+              background: 'rgba(0, 100, 0, 0.1)',
+              border: '2px solid #00aa00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '20px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '16px', marginBottom: '12px', color: '#00ff00' }}>
+                No customer at window
+              </div>
+              <button
+                onClick={() => {
+                  setCurrentCustomer(generateCustomerLocal());
+                  setTerminalOutput(prev => [...prev, "> NEXT", "Customer approaching window..."]);
+                  playSound('cash');
+                }}
+                style={{
+                  background: 'linear-gradient(145deg, #00aa00, #008800)',
+                  border: '3px solid #00ff00',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold'
+                }}
+              >
+                CALL NEXT CUSTOMER
+              </button>
+            </div>
+          )}
 
           {/* Game Area */}
           <div style={{
