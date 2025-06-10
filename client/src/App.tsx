@@ -480,6 +480,7 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
+  const [arrestAnimationTimer, setArrestAnimationTimer] = useState<NodeJS.Timeout | null>(null);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
   const [showAdBreak, setShowAdBreak] = useState(false);
