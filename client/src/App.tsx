@@ -1697,7 +1697,7 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.08; // Set to reasonable 8% volume
+        backgroundMusicRef.current.volume = 0.12; // Set to 12% volume for better audibility
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
@@ -1714,13 +1714,13 @@ function App() {
       
       // Only play music if not muted
       if (!musicMuted) {
-        backgroundMusicRef.current.volume = 0.08; // Set to 8% when unmuted
+        backgroundMusicRef.current.volume = 0.12; // Set to 12% when unmuted
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
           // Try again after user interaction
           const tryAgain = () => {
             if (backgroundMusicRef.current && !musicMuted) {
-              backgroundMusicRef.current.volume = 0.08;
+              backgroundMusicRef.current.volume = 0.12;
               backgroundMusicRef.current.play().catch(() => {});
             }
           };
@@ -2702,13 +2702,17 @@ function App() {
       {/* Music Control Button */}
       <button
         onClick={() => {
-          setMusicMuted(!musicMuted);
+          const newMutedState = !musicMuted;
+          setMusicMuted(newMutedState);
+          
           if (backgroundMusicRef.current) {
-            if (musicMuted) {
-              backgroundMusicRef.current.volume = 0.08;
-              backgroundMusicRef.current.play().catch(() => {});
-            } else {
+            if (newMutedState) {
+              // Muting the music
               backgroundMusicRef.current.pause();
+            } else {
+              // Unmuting the music - set proper volume and play
+              backgroundMusicRef.current.volume = 0.12; // Slightly higher volume for better audibility
+              backgroundMusicRef.current.play().catch(() => {});
             }
           }
         }}
@@ -4859,9 +4863,13 @@ function App() {
             overflow: 'hidden'
           }}
           ref={(el) => {
-            if (el) {
-              // Auto-close animation after 6 seconds
-              setTimeout(() => {
+            if (el && !arrestAnimationTimer) {
+              // Clear any existing timer and set new one
+              if (arrestAnimationTimer) {
+                clearTimeout(arrestAnimationTimer);
+              }
+              
+              const timer = setTimeout(() => {
                 setShowArrestAnimation(false);
                 setCurrentCustomer(generateCustomerLocal());
                 setVerificationState({
@@ -4877,7 +4885,10 @@ function App() {
                   "> Next customer approaching window",
                   "Ready to process transaction"
                 ]);
+                setArrestAnimationTimer(null);
               }, 6000);
+              
+              setArrestAnimationTimer(timer);
             }
           }}
         >
@@ -4914,10 +4925,10 @@ function App() {
             letterSpacing: '3px',
             animation: 'alertFadeIn 1.5s ease-out forwards'
           }}>
-            FINANCIAL CRIMES INVESTIGATION
+            WESTFIELD POLICE DEPARTMENT
           </div>
 
-          {/* FBI Investigation Panel */}
+          {/* Police Investigation Panel */}
           <div style={{
             position: 'absolute',
             top: '120px',
@@ -4933,17 +4944,17 @@ function App() {
             opacity: 0,
             minWidth: '350px'
           }}>
-            <div style={{ color: '#ffcc00', marginBottom: '12px', fontWeight: 'bold', fontSize: '18px' }}>
-              FBI FINANCIAL CRIMES DIVISION
+            <div style={{ color: '#4488ff', marginBottom: '12px', fontWeight: 'bold', fontSize: '18px' }}>
+              WESTFIELD POLICE DEPARTMENT
             </div>
-            <div style={{ marginBottom: '8px' }}>CASE ID: FC-2024-{Math.floor(Math.random() * 9999).toString().padStart(4, '0')}</div>
-            <div style={{ marginBottom: '8px' }}>SUSPECT: DOCUMENT FRAUD</div>
+            <div style={{ marginBottom: '8px' }}>INCIDENT: WPD-2024-{Math.floor(Math.random() * 9999).toString().padStart(4, '0')}</div>
+            <div style={{ marginBottom: '8px' }}>CHARGE: ATTEMPTED BANK FRAUD</div>
             <div style={{ marginBottom: '8px' }}>LOCATION: WESTRIDGE NATIONAL BANK</div>
-            <div style={{ marginBottom: '8px' }}>AGENT: SPECIAL AGENT HARRISON</div>
-            <div style={{ color: '#ff6666', fontWeight: 'bold' }}>STATUS: APPREHENSION IN PROGRESS</div>
+            <div style={{ marginBottom: '8px' }}>OFFICER: DETECTIVE M. RODRIGUEZ</div>
+            <div style={{ color: '#ff6666', fontWeight: 'bold' }}>STATUS: SUSPECT IN CUSTODY</div>
           </div>
 
-          {/* Federal Response Vehicles */}
+          {/* Police Response Vehicles */}
           <div style={{
             position: 'absolute',
             bottom: '120px',
@@ -4951,18 +4962,18 @@ function App() {
             animation: 'federalUnit1 3.5s ease-out forwards'
           }}>
             <div style={{
-              background: 'linear-gradient(45deg, #2a2a3a 0%, #404055 50%, #2a2a3a 100%)',
+              background: 'linear-gradient(45deg, #1a2a4a 0%, #2a4a7a 50%, #1a2a4a 100%)',
               padding: '20px 30px',
               borderRadius: '12px',
               color: '#ffffff',
               fontSize: '14px',
               textAlign: 'center',
               fontWeight: 'bold',
-              border: '3px solid #555577',
+              border: '3px solid #4477aa',
               boxShadow: '0 4px 15px rgba(0, 0, 0, 0.8)',
               minWidth: '120px'
             }}>
-              FEDERAL<br/>BUREAU OF<br/>INVESTIGATION
+              WESTFIELD<br/>POLICE<br/>DEPARTMENT
             </div>
           </div>
 
@@ -4973,22 +4984,22 @@ function App() {
             animation: 'federalUnit2 4s ease-out 0.8s forwards'
           }}>
             <div style={{
-              background: 'linear-gradient(45deg, #1a1a2a 0%, #333344 50%, #1a1a2a 100%)',
+              background: 'linear-gradient(45deg, #2a1a1a 0%, #4a3333 50%, #2a1a1a 100%)',
               padding: '20px 30px',
               borderRadius: '12px',
               color: '#ffffff',
               fontSize: '14px',
               textAlign: 'center',
               fontWeight: 'bold',
-              border: '3px solid #444466',
+              border: '3px solid #664444',
               boxShadow: '0 4px 15px rgba(0, 0, 0, 0.8)',
               minWidth: '120px'
             }}>
-              FINANCIAL<br/>CRIMES<br/>TASK FORCE
+              DETECTIVE<br/>UNIT<br/>RESPONDING
             </div>
           </div>
 
-          {/* Special Agent Badge */}
+          {/* Police Badge */}
           <div style={{
             position: 'absolute',
             bottom: '220px',
@@ -4998,25 +5009,25 @@ function App() {
             opacity: 0
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #1a1a4a 0%, #2a2a6a 100%)',
+              background: 'linear-gradient(135deg, #1a3a1a 0%, #2a6a2a 100%)',
               padding: '25px',
               borderRadius: '15px',
               color: '#ffffff',
               fontSize: '18px',
               textAlign: 'center',
               fontWeight: 'bold',
-              border: '3px solid #4a4a8a',
+              border: '3px solid #4a8a4a',
               boxShadow: '0 6px 20px rgba(0, 0, 0, 0.9)',
               minWidth: '220px'
             }}>
-              SPECIAL AGENT<br/>
-              <div style={{ fontSize: '14px', color: '#ccccff', marginTop: '8px' }}>
-                FINANCIAL INVESTIGATIONS
+              DETECTIVE BADGE<br/>
+              <div style={{ fontSize: '14px', color: '#ccffcc', marginTop: '8px' }}>
+                FINANCIAL CRIMES UNIT
               </div>
             </div>
           </div>
 
-          {/* Secure Communications Terminal */}
+          {/* Police Communications Terminal */}
           <div style={{
             position: 'absolute',
             bottom: '40px',
@@ -5032,13 +5043,13 @@ function App() {
             opacity: 0,
             maxWidth: '450px'
           }}>
-            <div style={{ color: '#ffff00', marginBottom: '10px', fontWeight: 'bold' }}>SECURE FBI COMMUNICATIONS</div>
-            <div style={{ marginBottom: '4px' }}>🔒 SUSPECT APPREHENDED SUCCESSFULLY</div>
-            <div style={{ marginBottom: '4px' }}>🔒 FRAUDULENT DOCUMENTS SECURED</div>
-            <div style={{ marginBottom: '4px' }}>🔒 EVIDENCE CHAIN ESTABLISHED</div>
-            <div style={{ marginBottom: '4px' }}>🔒 BANK OPERATIONS RESTORED</div>
-            <div style={{ marginBottom: '4px' }}>🔒 CASE FORWARDED TO PROSECUTION</div>
-            <div style={{ color: '#ffffff', fontWeight: 'bold' }}>🔒 INVESTIGATION COMPLETE</div>
+            <div style={{ color: '#ffff00', marginBottom: '10px', fontWeight: 'bold' }}>WESTFIELD PD DISPATCH</div>
+            <div style={{ marginBottom: '4px' }}>📻 SUSPECT APPREHENDED AT BANK</div>
+            <div style={{ marginBottom: '4px' }}>📻 FRAUDULENT DOCUMENTS SEIZED</div>
+            <div style={{ marginBottom: '4px' }}>📻 EVIDENCE SECURED FOR COURT</div>
+            <div style={{ marginBottom: '4px' }}>📻 BANK OPERATIONS RESUMED</div>
+            <div style={{ marginBottom: '4px' }}>📻 TRANSPORT TO COUNTY JAIL</div>
+            <div style={{ color: '#ffffff', fontWeight: 'bold' }}>📻 CASE CLOSED - EXCELLENT WORK</div>
           </div>
 
           {/* Mission Success Confirmation */}
