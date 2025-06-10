@@ -1353,7 +1353,7 @@ function App() {
       }
       
       playSound('legacy_processing');
-      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "OPENING CASH DRAWER..."]);
+      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "DISPENSING CASH..."]);
       
       setTimeout(() => {
         setTerminalOutput(prev => [...prev, 
@@ -1361,18 +1361,23 @@ function App() {
           `AMOUNT: $${amount}`,
           `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
-          "STATUS: COUNT CASH FROM DRAWER",
+          "STATUS: TRANSACTION COMPLETE",
           "========================================"
         ]);
         
-        // Open cash drawer for manual counting
-        setCashDrawerAmount(withdrawAmount);
-        setSelectedBills({});
-        setBillsOnCounter([]);
-        setTotalCounted(0);
-        setCashDrawerOpen(true);
-        setShowCashDrawer(true);
-        playSound('cash_drawer_open');
+        // Complete withdrawal transaction immediately
+        handleCorrectTransaction();
+        playSound('cash');
+        
+        // Generate next customer after brief pause
+        setTimeout(() => {
+          const customer = generateCustomerLocal();
+          setCurrentCustomer(customer);
+          resetVerificationState();
+          setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
+          console.log("Generated customer:", customer);
+          playSound('customer_approach');
+        }, 2000);
       }, 1500);
       
     } else if (cmd.startsWith('WIRE $')) {
