@@ -133,6 +133,10 @@ function App() {
     tier: string;
   } | null>(null);
 
+  // Background music and sound management
+  const [musicMuted, setMusicMuted] = useState(false);
+  const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+
 
 
 
@@ -507,7 +511,6 @@ function App() {
   const [billsInEnvelope, setBillsInEnvelope] = useState<{denomination: number, id: string}[]>([]);
   const [showEnvelopeSealing, setShowEnvelopeSealing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [musicMuted, setMusicMuted] = useState(true); // Start muted by default
 
   const generateCustomerLocal = (): Customer => {
     // Implement scattered 40% fraud distribution (4 out of every 10 customers)
