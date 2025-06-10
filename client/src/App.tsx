@@ -1371,7 +1371,13 @@ function App() {
         setTimeout(() => {
           handleCorrectTransaction();
           setCurrentCustomer(null);
-          resetVerificationState();
+          setVerificationState({
+            accountLookedUp: false,
+            accountNotFound: false,
+            signatureCompared: false,
+            signatureFraud: false,
+            transactionProcessed: false
+          });
           setTerminalOutput(prev => [...prev, "Customer served successfully. Next customer please."]);
           playSound('paper_rustle');
         }, 2000);
@@ -4898,21 +4904,41 @@ function App() {
           {/* FRAUD DETECTED Alert */}
           <div style={{
             position: 'absolute',
-            top: '50px',
+            top: '20px',
             left: '50%',
             transform: 'translateX(-50%)',
             color: '#ff0000',
-            fontSize: '32px',
+            fontSize: '28px',
             fontWeight: 'bold',
             textAlign: 'center',
             animation: 'fraudAlert 2s infinite',
             textShadow: '0 0 20px #ff0000',
             fontFamily: 'monospace'
           }}>
-            🚨 FRAUD DETECTED 🚨
+            🚨 WESTFIELD POLICE DEPARTMENT 🚨<br/>
+            FRAUD DETECTED - SUSPECT IN CUSTODY
           </div>
           
-          {/* Police Officer */}
+          {/* Radio Chatter Background */}
+          <div style={{
+            position: 'absolute',
+            top: '80px',
+            right: '20px',
+            color: '#00ff00',
+            fontSize: '12px',
+            fontFamily: 'monospace',
+            background: 'rgba(0, 0, 0, 0.7)',
+            padding: '10px',
+            borderRadius: '5px',
+            animation: 'radioFade 6s linear forwards',
+            opacity: 0
+          }}>
+            "Unit 23 to dispatch... fraud suspect in custody<br/>
+            at Westridge Ledger Bank on Main Street.<br/>
+            Request transport for booking. Over."
+          </div>
+          
+          {/* Westfield Police Officer */}
           <div style={{
             position: 'absolute',
             bottom: '180px',
@@ -4921,6 +4947,18 @@ function App() {
             animation: 'officerApproach 3s ease-in-out forwards'
           }}>
             👮‍♂️
+          </div>
+          
+          {/* Police Badge */}
+          <div style={{
+            position: 'absolute',
+            bottom: '250px',
+            right: '180px',
+            fontSize: '24px',
+            animation: 'badgeFlash 4s ease-in-out forwards',
+            opacity: 0
+          }}>
+            🔰
           </div>
           
           {/* Fraudulent Customer */}
@@ -4948,7 +4986,7 @@ function App() {
             🔗
           </div>
           
-          {/* Police Car */}
+          {/* Westfield Police Car */}
           <div style={{
             position: 'absolute',
             bottom: '180px',
@@ -4959,16 +4997,34 @@ function App() {
             🚔
           </div>
           
+          {/* Police Car Badge/Number */}
+          <div style={{
+            position: 'absolute',
+            bottom: '200px',
+            right: '-180px',
+            fontSize: '12px',
+            color: '#ffffff',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            animation: 'carBadgeShow 3s ease-in-out forwards',
+            opacity: 0
+          }}>
+            WESTFIELD PD<br/>UNIT 23
+          </div>
+          
           {/* Arrest Dialog */}
           <div style={{
             position: 'absolute',
             bottom: '300px',
             left: '50px',
             color: '#ff4444',
-            fontSize: '18px',
+            fontSize: '16px',
             fontWeight: 'bold',
             fontFamily: 'monospace',
-            animation: 'arrestDialog 5s linear forwards',
+            background: 'rgba(0, 0, 0, 0.8)',
+            padding: '10px',
+            borderRadius: '5px',
+            animation: 'arrestDialog 6s linear forwards',
             opacity: 0
           }}>
             <div style={{ animation: 'textFadeIn 5s linear forwards' }}>
@@ -5041,6 +5097,36 @@ function App() {
           50% { opacity: 0; }
           60% { opacity: 1; }
           100% { opacity: 1; }
+        }
+        
+        @keyframes radioFade {
+          0% { opacity: 0; }
+          20% { opacity: 0; }
+          30% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { opacity: 0.7; }
+        }
+        
+        @keyframes badgeFlash {
+          0% { opacity: 0; }
+          40% { opacity: 0; }
+          50% { opacity: 1; transform: scale(1.2); }
+          60% { opacity: 0.8; transform: scale(1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes carBadgeShow {
+          0% { opacity: 0; right: -180px; }
+          30% { opacity: 0; right: -180px; }
+          50% { opacity: 1; right: -160px; }
+          100% { opacity: 1; right: -160px; }
+        }
+        
+        @keyframes successMessage {
+          0% { opacity: 0; }
+          70% { opacity: 0; }
+          80% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         
         @keyframes successMessage {
@@ -6493,6 +6579,54 @@ function App() {
             </button>
           </div>
         </div>
+      )}
+      
+      {/* Music button - always visible during gameplay */}
+      {gamePhase === 'working' && (
+        <button
+          onClick={toggleMusic}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
+            border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+            borderRadius: '50%',
+            color: '#ffffff',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            padding: '8px',
+            cursor: 'pointer',
+            boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
+            transition: 'all 0.2s',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+          title={musicMuted ? "Unmute music" : "Mute music"}
+        >
+          {musicMuted ? '🔇' : '🎵'}
+        </button>
+      )}
+      
+      {/* Logo - always visible during gameplay */}
+      {gamePhase === 'working' && (
+        <img 
+          src="/westridge-logo.png" 
+          alt="Westridge Ledger Bank"
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '80px',
+            height: 'auto',
+            filter: 'drop-shadow(0 0 10px #00ff00)',
+            zIndex: 1000
+          }}
+        />
       )}
     </div>
   );
