@@ -4924,31 +4924,163 @@ function App() {
             🔗
           </div>
           
-          {/* Police Car */}
+          {/* Enhanced Police Response Animation */}
           <div style={{
-            position: 'absolute',
-            bottom: '180px',
-            right: '-200px',
-            fontSize: '60px',
-            animation: 'policeCarArrive 2s ease-in-out forwards'
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'rgba(0, 0, 0, 0.95)',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
-            🚔
-          </div>
-          
-          {/* Arrest Dialog */}
-          <div style={{
-            position: 'absolute',
-            bottom: '300px',
-            left: '50px',
-            color: '#ff4444',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            animation: 'arrestDialog 5s linear forwards',
-            opacity: 0
-          }}>
-            <div style={{ animation: 'textFadeIn 5s linear forwards' }}>
-              "You're under arrest for attempted fraud"
+            {/* Police Siren Flash Effect */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(45deg, rgba(255,0,0,0.4), rgba(0,0,255,0.4))',
+              animation: 'sirenFlash 0.6s infinite alternate'
+            }} />
+            
+            {/* Multiple Police Units */}
+            <div style={{
+              position: 'absolute',
+              bottom: '15%',
+              left: '-400px',
+              fontSize: '100px',
+              animation: 'policeUnit1 3s ease-out forwards'
+            }}>
+              🚔
+            </div>
+            
+            <div style={{
+              position: 'absolute',
+              bottom: '15%',
+              right: '-400px',
+              fontSize: '100px',
+              animation: 'policeUnit2 3.5s ease-out forwards'
+            }}>
+              🚓
+            </div>
+            
+            <div style={{
+              position: 'absolute',
+              bottom: '20%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: '80px',
+              animation: 'detectiveUnit 4s ease-out forwards',
+              opacity: 0
+            }}>
+              🕵️‍♂️
+            </div>
+            
+            {/* Security Officers */}
+            <div style={{
+              position: 'absolute',
+              bottom: '25%',
+              left: '25%',
+              fontSize: '70px',
+              animation: 'officer1Arrive 4.5s ease-out forwards',
+              opacity: 0
+            }}>
+              👮‍♂️
+            </div>
+            
+            <div style={{
+              position: 'absolute',
+              bottom: '25%',
+              right: '25%',
+              fontSize: '70px',
+              animation: 'officer2Arrive 5s ease-out forwards',
+              opacity: 0
+            }}>
+              👮‍♀️
+            </div>
+            
+            {/* Dramatic Alert Sequence */}
+            <div style={{
+              textAlign: 'center',
+              zIndex: 10,
+              animation: 'alertSequence 8s ease-in-out forwards'
+            }}>
+              <div style={{
+                color: '#ff0000',
+                fontSize: '48px',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                textShadow: '0 0 20px rgba(255,0,0,1)',
+                animation: 'urgentAlert1 8s ease-in-out forwards',
+                opacity: 0
+              }}>
+                🚨 FRAUD DETECTED 🚨
+              </div>
+              
+              <div style={{
+                color: '#ffff00',
+                fontSize: '28px',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                textShadow: '0 0 10px rgba(255,255,0,0.8)',
+                marginTop: '30px',
+                animation: 'urgentAlert2 8s ease-in-out forwards',
+                opacity: 0
+              }}>
+                BANK SECURITY ACTIVATED
+              </div>
+              
+              <div style={{
+                color: '#00ff00',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                textShadow: '0 0 10px rgba(0,255,0,0.8)',
+                marginTop: '20px',
+                animation: 'urgentAlert3 8s ease-in-out forwards',
+                opacity: 0
+              }}>
+                SUSPECT APPREHENDED
+              </div>
+              
+              <div style={{
+                color: '#00ffff',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                textShadow: '0 0 10px rgba(0,255,255,0.8)',
+                marginTop: '40px',
+                animation: 'urgentAlert4 8s ease-in-out forwards',
+                opacity: 0
+              }}>
+                EXCELLENT WORK, TELLER
+              </div>
+            </div>
+            
+            {/* Police Radio Communication */}
+            <div style={{
+              position: 'absolute',
+              bottom: '8%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: '#00ff00',
+              fontSize: '16px',
+              fontFamily: 'monospace',
+              textAlign: 'center',
+              background: 'rgba(0,0,0,0.8)',
+              padding: '10px 20px',
+              borderRadius: '10px',
+              border: '2px solid #00ff00',
+              animation: 'radioDispatch 8s ease-in-out forwards',
+              opacity: 0
+            }}>
+              📻 "DISPATCH: Fraud suspect in custody. Teller vigilance prevented financial crime."
             </div>
           </div>
           
@@ -5000,23 +5132,79 @@ function App() {
           100% { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         
-        @keyframes policeCarArrive {
-          0% { right: -200px; }
-          100% { right: 50px; }
+        @keyframes sirenFlash {
+          0% { background: linear-gradient(45deg, rgba(255,0,0,0.4), rgba(0,0,255,0.4)); }
+          100% { background: linear-gradient(45deg, rgba(0,0,255,0.4), rgba(255,0,0,0.4)); }
         }
         
-        @keyframes arrestDialog {
-          0% { opacity: 0; }
-          30% { opacity: 0; }
-          40% { opacity: 1; }
-          100% { opacity: 1; }
+        @keyframes policeUnit1 {
+          0% { left: -400px; transform: scale(1); }
+          60% { left: 20%; transform: scale(1.1); }
+          100% { left: 20%; transform: scale(1); }
         }
         
-        @keyframes textFadeIn {
-          0% { opacity: 0; }
+        @keyframes policeUnit2 {
+          0% { right: -400px; transform: scale(1); }
+          60% { right: 20%; transform: scale(1.1); }
+          100% { right: 20%; transform: scale(1); }
+        }
+        
+        @keyframes detectiveUnit {
+          0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
           50% { opacity: 0; }
-          60% { opacity: 1; }
-          100% { opacity: 1; }
+          70% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+        
+        @keyframes officer1Arrive {
+          0% { opacity: 0; transform: translateX(-100px) scale(0.5); }
+          60% { opacity: 0; }
+          80% { opacity: 1; transform: translateX(0) scale(1.1); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        
+        @keyframes officer2Arrive {
+          0% { opacity: 0; transform: translateX(100px) scale(0.5); }
+          65% { opacity: 0; }
+          85% { opacity: 1; transform: translateX(0) scale(1.1); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        
+        @keyframes urgentAlert1 {
+          0% { opacity: 0; transform: scale(0.5); }
+          20% { opacity: 1; transform: scale(1.2); }
+          30% { opacity: 1; transform: scale(1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes urgentAlert2 {
+          0% { opacity: 0; transform: translateY(20px); }
+          30% { opacity: 0; }
+          50% { opacity: 1; transform: translateY(-5px); }
+          60% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes urgentAlert3 {
+          0% { opacity: 0; transform: translateY(20px); }
+          50% { opacity: 0; }
+          70% { opacity: 1; transform: translateY(-5px); }
+          80% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes urgentAlert4 {
+          0% { opacity: 0; transform: scale(0.8); }
+          70% { opacity: 0; }
+          90% { opacity: 1; transform: scale(1.1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes radioDispatch {
+          0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          80% { opacity: 0; }
+          90% { opacity: 1; transform: translateX(-50%) translateY(-5px); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         
         @keyframes successMessage {
