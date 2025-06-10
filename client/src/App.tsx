@@ -4888,51 +4888,212 @@ function App() {
             🚨 FRAUD DETECTED 🚨
           </div>
           
-          {/* Police Officer */}
+          {/* Multiple Police Units Response Team */}
+          
+          {/* Lead Police Unit */}
           <div style={{
             position: 'absolute',
             bottom: '180px',
-            right: '200px',
+            right: '-150px',
+            fontSize: '60px',
+            animation: 'leadUnit 2s ease-out forwards',
+            filter: 'drop-shadow(0 0 10px #0066ff)'
+          }}>
+            🚔
+          </div>
+          
+          {/* Backup Unit 1 */}
+          <div style={{
+            position: 'absolute',
+            bottom: '180px',
+            left: '-150px',
+            fontSize: '60px',
+            animation: 'backupUnit1 2.5s ease-out 0.5s forwards',
+            filter: 'drop-shadow(0 0 10px #ff0066)'
+          }}>
+            🚔
+          </div>
+          
+          {/* Backup Unit 2 */}
+          <div style={{
+            position: 'absolute',
+            bottom: '120px',
+            right: '-200px',
+            fontSize: '50px',
+            animation: 'backupUnit2 3s ease-out 1s forwards'
+          }}>
+            🚔
+          </div>
+          
+          {/* SWAT Response Vehicle */}
+          <div style={{
+            position: 'absolute',
+            bottom: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '70px',
+            animation: 'swatResponse 4s ease-out 2s forwards',
+            opacity: 0
+          }}>
+            🚐
+          </div>
+          
+          {/* Police Helicopter Air Support */}
+          <div style={{
+            position: 'absolute',
+            top: '120px',
+            right: '-150px',
             fontSize: '80px',
-            animation: 'officerApproach 3s ease-in-out forwards'
+            animation: 'airSupport 5s ease-in-out 2.5s forwards',
+            opacity: 0,
+            filter: 'drop-shadow(0 0 15px #ffff00)'
+          }}>
+            🚁
+          </div>
+          
+          {/* K-9 Tactical Unit */}
+          <div style={{
+            position: 'absolute',
+            bottom: '250px',
+            left: '100px',
+            fontSize: '40px',
+            animation: 'k9Unit 3s ease-out 3s forwards',
+            opacity: 0
+          }}>
+            🐕‍🦺
+          </div>
+          
+          {/* Lead Officer */}
+          <div style={{
+            position: 'absolute',
+            bottom: '250px',
+            right: '200px',
+            fontSize: '70px',
+            animation: 'leadOfficer 3s ease-out 1.5s forwards',
+            opacity: 0
           }}>
             👮‍♂️
           </div>
           
-          {/* Fraudulent Customer */}
+          {/* Backup Officer */}
           <div style={{
             position: 'absolute',
-            bottom: '180px',
+            bottom: '250px',
+            left: '200px',
+            fontSize: '60px',
+            animation: 'backupOfficer 3s ease-out 2s forwards',
+            opacity: 0
+          }}>
+            👮‍♀️
+          </div>
+          
+          {/* Fraud Detective */}
+          <div style={{
+            position: 'absolute',
+            bottom: '250px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '50px',
+            animation: 'detective 4s ease-out 3.5s forwards',
+            opacity: 0
+          }}>
+            🕵️‍♂️
+          </div>
+          
+          {/* Fraudulent Customer - Enhanced Panic Sequence */}
+          <div style={{
+            position: 'absolute',
+            bottom: '200px',
             left: '50%',
             transform: 'translateX(-50%)',
             fontSize: '80px',
-            animation: 'customerArrest 4s ease-in-out forwards'
+            animation: 'suspectPanic 6s ease-in-out 1s forwards'
           }}>
             🧑‍💼
           </div>
           
-          {/* Handcuffs Effect */}
+          {/* Radio Dispatch Commands */}
           <div style={{
             position: 'absolute',
-            bottom: '220px',
+            top: '200px',
+            left: '20px',
+            color: '#ff4444',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            animation: 'radioDispatch1 3s linear 4s forwards',
+            opacity: 0
+          }}>
+            📻 "ALL UNITS CODE 10-16 FRAUD IN PROGRESS"<br/>
+            📻 "SUSPECT AT WESTRIDGE BANK TELLER 3"<br/>
+            📻 "REQUESTING IMMEDIATE BACKUP"
+          </div>
+          
+          {/* On-Scene Commands */}
+          <div style={{
+            position: 'absolute',
+            top: '280px',
+            right: '20px',
+            color: '#ff6666',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            animation: 'onSceneCommands 3s linear 5.5s forwards',
+            opacity: 0
+          }}>
+            "HANDS WHERE WE CAN SEE THEM!"<br/>
+            "STEP AWAY FROM THE COUNTER!"<br/>
+            "FRAUD INVESTIGATION UNIT!"<br/>
+            "YOU ARE UNDER ARREST!"
+          </div>
+          
+          {/* Handcuffs Application Sequence */}
+          <div style={{
+            position: 'absolute',
+            bottom: '240px',
             left: '50%',
             transform: 'translateX(-50%)',
-            fontSize: '40px',
-            animation: 'handcuffsAppear 4s ease-in-out forwards',
+            fontSize: '30px',
+            animation: 'handcuffsApply 3s linear 6.5s forwards',
             opacity: 0
           }}>
             🔗
           </div>
           
-          {/* Police Car */}
+          {/* Miranda Rights Reading */}
           <div style={{
             position: 'absolute',
-            bottom: '180px',
-            right: '-200px',
-            fontSize: '60px',
-            animation: 'policeCarArrive 2s ease-in-out forwards'
+            bottom: '320px',
+            left: '30%',
+            color: '#aaaaff',
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            animation: 'mirandaRights 4s linear 7.5s forwards',
+            opacity: 0,
+            lineHeight: '1.4'
           }}>
-            🚔
+            "You have the right to remain silent..."<br/>
+            "Anything you say can and will be used..."<br/>
+            "You have the right to an attorney..."<br/>
+            "If you cannot afford an attorney..."
+          </div>
+          
+          {/* Evidence Collection */}
+          <div style={{
+            position: 'absolute',
+            top: '350px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#ffaa00',
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            animation: 'evidenceCollection 3s linear 8.5s forwards',
+            opacity: 0,
+            textAlign: 'center'
+          }}>
+            📋 EVIDENCE SECURED<br/>
+            📋 FRAUDULENT DOCUMENTS CONFISCATED<br/>
+            📋 CASE #FR-2024-{Math.floor(Math.random() * 999)}
           </div>
           
           {/* Arrest Dialog */}
@@ -5075,6 +5236,108 @@ function App() {
         @keyframes policeCarArrive {
           0% { transform: translateX(0px); }
           100% { transform: translateX(150px); }
+        }
+        
+        /* Enhanced Multi-Unit Police Response Animations */
+        @keyframes leadUnit {
+          0% { right: -150px; }
+          100% { right: 100px; }
+        }
+        
+        @keyframes backupUnit1 {
+          0% { left: -150px; }
+          100% { left: 100px; }
+        }
+        
+        @keyframes backupUnit2 {
+          0% { right: -200px; }
+          100% { right: 150px; }
+        }
+        
+        @keyframes swatResponse {
+          0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+          50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+        
+        @keyframes airSupport {
+          0% { opacity: 0; right: -150px; transform: rotate(-15deg); }
+          30% { opacity: 1; right: 200px; transform: rotate(-5deg); }
+          70% { opacity: 1; right: 150px; transform: rotate(5deg); }
+          100% { opacity: 1; right: 180px; transform: rotate(-2deg); }
+        }
+        
+        @keyframes k9Unit {
+          0% { opacity: 0; transform: translateX(-50px) scale(0.8); }
+          50% { opacity: 1; transform: translateX(0px) scale(1.1); }
+          100% { opacity: 1; transform: translateX(0px) scale(1); }
+        }
+        
+        @keyframes leadOfficer {
+          0% { opacity: 0; transform: translateX(100px) scale(0.8); }
+          50% { opacity: 1; transform: translateX(0px) scale(1.1); }
+          100% { opacity: 1; transform: translateX(0px) scale(1); }
+        }
+        
+        @keyframes backupOfficer {
+          0% { opacity: 0; transform: translateX(-100px) scale(0.8); }
+          50% { opacity: 1; transform: translateX(0px) scale(1.1); }
+          100% { opacity: 1; transform: translateX(0px) scale(1); }
+        }
+        
+        @keyframes detective {
+          0% { opacity: 0; transform: translateX(-50%) translateY(50px) scale(0.8); }
+          50% { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.1); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+        }
+        
+        @keyframes suspectPanic {
+          0% { transform: translateX(-50%) rotate(0deg) scale(1); }
+          15% { transform: translateX(-50%) rotate(-5deg) scale(1.05); }
+          30% { transform: translateX(-50%) rotate(5deg) scale(0.95); }
+          45% { transform: translateX(-50%) rotate(-8deg) scale(1.08); }
+          60% { transform: translateX(-50%) rotate(3deg) scale(0.92); }
+          75% { transform: translateX(-50%) rotate(-10deg) scale(1.1); }
+          90% { transform: translateX(-50%) rotate(0deg) scale(0.9); }
+          100% { transform: translateX(-50%) rotate(-20deg) scale(0.8); }
+        }
+        
+        @keyframes radioDispatch1 {
+          0% { opacity: 0; transform: translateY(20px); }
+          20% { opacity: 1; transform: translateY(0px); }
+          80% { opacity: 1; transform: translateY(0px); }
+          100% { opacity: 0; transform: translateY(-20px); }
+        }
+        
+        @keyframes onSceneCommands {
+          0% { opacity: 0; transform: translateY(20px) scale(0.9); }
+          20% { opacity: 1; transform: translateY(0px) scale(1.05); }
+          40% { opacity: 1; transform: translateY(0px) scale(1); }
+          60% { opacity: 1; transform: translateY(0px) scale(1.02); }
+          80% { opacity: 1; transform: translateY(0px) scale(1); }
+          100% { opacity: 1; transform: translateY(0px) scale(1); }
+        }
+        
+        @keyframes handcuffsApply {
+          0% { opacity: 0; transform: translateX(-50%) scale(0) rotate(0deg); }
+          30% { opacity: 0; transform: translateX(-50%) scale(0) rotate(0deg); }
+          50% { opacity: 1; transform: translateX(-50%) scale(1.5) rotate(180deg); }
+          70% { opacity: 1; transform: translateX(-50%) scale(1.2) rotate(270deg); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1) rotate(360deg); }
+        }
+        
+        @keyframes mirandaRights {
+          0% { opacity: 0; transform: translateY(15px); }
+          25% { opacity: 1; transform: translateY(0px); }
+          75% { opacity: 1; transform: translateY(0px); }
+          100% { opacity: 1; transform: translateY(0px); }
+        }
+        
+        @keyframes evidenceCollection {
+          0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.8); }
+          30% { opacity: 1; transform: translateX(-50%) translateY(-5px) scale(1.1); }
+          70% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
         }
         
         @keyframes textStep1 {
