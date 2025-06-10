@@ -4878,28 +4878,40 @@ function App() {
             pointerEvents: 'none'
           }} />
           
-          {/* Bank Scene */}
+          {/* Bank Floor */}
           <div style={{
             position: 'absolute',
             bottom: '0px',
             left: '0px',
             right: '0px',
-            height: '100px',
-            background: 'linear-gradient(180deg, #003300 0%, #001100 100%)',
-            border: '2px solid #00ff00',
-            borderBottom: 'none'
+            height: '60px',
+            background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+            borderTop: '2px solid #666666'
           }} />
           
-          {/* Teller Counter */}
+          {/* Bank Exit Door */}
           <div style={{
             position: 'absolute',
-            bottom: '100px',
-            left: '10%',
-            width: '200px',
-            height: '80px',
-            background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
-            border: '2px solid #00ff00'
-          }} />
+            bottom: '60px',
+            right: '50px',
+            width: '80px',
+            height: '120px',
+            background: 'linear-gradient(180deg, #444444 0%, #222222 100%)',
+            border: '2px solid #666666',
+            borderRadius: '8px 8px 0 0'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '10px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: '#cccccc',
+              fontSize: '10px',
+              fontFamily: 'monospace'
+            }}>
+              EXIT
+            </div>
+          </div>
           
           {/* FRAUD DETECTED Alert */}
           <div style={{
@@ -4938,52 +4950,72 @@ function App() {
             Request transport for booking. Over."
           </div>
           
-          {/* Westfield Police Officer */}
+          {/* Officer 1 - Leading */}
           <div style={{
             position: 'absolute',
-            bottom: '180px',
-            right: '200px',
-            fontSize: '80px',
-            animation: 'officerApproach 3s ease-in-out forwards'
+            bottom: '70px',
+            left: '30%',
+            fontSize: '60px',
+            animation: 'officer1Escort 8s ease-in-out forwards',
+            zIndex: 3
           }}>
             👮‍♂️
           </div>
           
-          {/* Police Badge */}
+          {/* Handcuffed Suspect */}
           <div style={{
             position: 'absolute',
-            bottom: '250px',
-            right: '180px',
-            fontSize: '24px',
-            animation: 'badgeFlash 4s ease-in-out forwards',
-            opacity: 0
-          }}>
-            🔰
-          </div>
-          
-          {/* Fraudulent Customer */}
-          <div style={{
-            position: 'absolute',
-            bottom: '180px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '80px',
-            animation: 'customerArrest 4s ease-in-out forwards'
+            bottom: '70px',
+            left: '40%',
+            fontSize: '60px',
+            animation: 'suspectPerpWalk 8s ease-in-out forwards',
+            zIndex: 2
           }}>
             🧑‍💼
           </div>
           
-          {/* Handcuffs Effect */}
+          {/* Officer 2 - Following */}
           <div style={{
             position: 'absolute',
-            bottom: '220px',
+            bottom: '70px',
             left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '40px',
-            animation: 'handcuffsAppear 4s ease-in-out forwards',
-            opacity: 0
+            fontSize: '60px',
+            animation: 'officer2Escort 8s ease-in-out forwards',
+            zIndex: 3
+          }}>
+            👮‍♀️
+          </div>
+          
+          {/* Handcuffs on Suspect */}
+          <div style={{
+            position: 'absolute',
+            bottom: '90px',
+            left: '40%',
+            fontSize: '20px',
+            animation: 'handcuffsVisible 8s ease-in-out forwards',
+            opacity: 0,
+            zIndex: 4
           }}>
             🔗
+          </div>
+          
+          {/* Perp Walk Text */}
+          <div style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#ff4444',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            background: 'rgba(0, 0, 0, 0.8)',
+            padding: '8px 12px',
+            borderRadius: '4px',
+            animation: 'perpWalkText 8s linear forwards',
+            opacity: 0
+          }}>
+            SUSPECT IN CUSTODY - ESCORTED FROM PREMISES
           </div>
           
           {/* Westfield Police Car */}
@@ -5060,24 +5092,39 @@ function App() {
           25%, 75% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
         }
         
-        @keyframes officerApproach {
-          0% { right: 100vw; }
-          60% { right: 200px; }
-          100% { right: 200px; }
+        @keyframes officer1Escort {
+          0% { left: -10%; }
+          20% { left: 30%; }
+          80% { left: 30%; }
+          100% { left: 80%; }
         }
         
-        @keyframes customerArrest {
-          0% { transform: translateX(-50%) rotate(0deg); }
-          60% { transform: translateX(-50%) rotate(0deg); }
-          80% { transform: translateX(-50%) rotate(-10deg); }
-          100% { transform: translateX(-50%) rotate(0deg); }
+        @keyframes suspectPerpWalk {
+          0% { left: 50%; transform: translateX(-50%); }
+          20% { left: 40%; transform: translateX(-50%); }
+          80% { left: 40%; transform: translateX(-50%) rotate(-5deg); }
+          100% { left: 90%; transform: translateX(-50%) rotate(-5deg); }
         }
         
-        @keyframes handcuffsAppear {
+        @keyframes officer2Escort {
+          0% { left: 100%; }
+          20% { left: 50%; }
+          80% { left: 50%; }
+          100% { left: 100%; }
+        }
+        
+        @keyframes handcuffsVisible {
+          0% { opacity: 0; left: 50%; }
+          20% { opacity: 1; left: 40%; }
+          80% { opacity: 1; left: 40%; }
+          100% { opacity: 1; left: 90%; }
+        }
+        
+        @keyframes perpWalkText {
           0% { opacity: 0; }
-          60% { opacity: 0; }
-          70% { opacity: 1; transform: translateX(-50%) scale(1.5); }
-          100% { opacity: 1; transform: translateX(-50%) scale(1); }
+          30% { opacity: 1; }
+          70% { opacity: 1; }
+          100% { opacity: 0; }
         }
         
         @keyframes policeCarArrive {
