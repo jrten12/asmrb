@@ -179,7 +179,7 @@ function App() {
   
 
   
-
+  // Cash drawer functionality removed for app store deployment
 
   // Handle streak rewards and animations
   const handleStreakReward = (streak: number) => {
@@ -444,7 +444,6 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
-  const [arrestAnimationTimer, setArrestAnimationTimer] = useState<NodeJS.Timeout | null>(null);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
   const [showAdBreak, setShowAdBreak] = useState(false);
@@ -461,8 +460,20 @@ function App() {
   const [wireAmount, setWireAmount] = useState('');
   const [wireDestAccount, setWireDestAccount] = useState('');
 
+  // Cash drawer state variables
+  const [showCashDrawer, setShowCashDrawer] = useState(false);
+  const [cashDrawerOpen, setCashDrawerOpen] = useState(false);
+  const [cashDrawerAmount, setCashDrawerAmount] = useState(0);
+  const [billsOnCounter, setBillsOnCounter] = useState<any[]>([]);
+  const [totalCounted, setTotalCounted] = useState(0);
+  const [draggingBill, setDraggingBill] = useState<number | null>(null);
   const [showPrinter, setShowPrinter] = useState(false);
   const [receiptContent, setReceiptContent] = useState<string>('');
+
+  // Cash Register System
+  const [selectedBills, setSelectedBills] = useState<{[key: number]: number}>({});
+  const [billsInEnvelope, setBillsInEnvelope] = useState<{denomination: number, id: string}[]>([]);
+  const [showEnvelopeSealing, setShowEnvelopeSealing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const generateCustomerLocal = (): Customer => {
@@ -1651,7 +1662,7 @@ function App() {
         // Use the correct path for the background music file
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
         backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.12; // Set to 12% volume for better audibility
+        backgroundMusicRef.current.volume = 0.0; // Completely silent by default
         backgroundMusicRef.current.preload = 'auto';
         
         // Add error handler for music loading
@@ -1668,13 +1679,13 @@ function App() {
       
       // Only play music if not muted
       if (!musicMuted) {
-        backgroundMusicRef.current.volume = 0.12; // Set to 12% when unmuted
+        backgroundMusicRef.current.volume = 0.01; // Set to 1% when unmuted
         backgroundMusicRef.current.play().catch(e => {
           console.log('Background music failed to start:', e);
           // Try again after user interaction
           const tryAgain = () => {
             if (backgroundMusicRef.current && !musicMuted) {
-              backgroundMusicRef.current.volume = 0.12;
+              backgroundMusicRef.current.volume = 0.01;
               backgroundMusicRef.current.play().catch(() => {});
             }
           };
@@ -2653,57 +2664,10 @@ function App() {
       
 
       
-      {/* Music Control Button - Moved to bottom left */}
-      <button
-        onClick={() => {
-          const newMutedState = !musicMuted;
-          setMusicMuted(newMutedState);
-          
-          if (backgroundMusicRef.current) {
-            if (newMutedState) {
-              // Muting the music
-              backgroundMusicRef.current.pause();
-            } else {
-              // Unmuting the music - set proper volume and play
-              backgroundMusicRef.current.volume = 0.12; // Slightly higher volume for better audibility
-              backgroundMusicRef.current.play().catch(() => {});
-            }
-          }
-        }}
-        style={{
-          position: 'fixed',
-          bottom: '8px',
-          left: '8px',
-          background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
-          border: `2px solid ${musicMuted ? '#ff0000' : '#00ff00'}`,
-          borderRadius: '6px',
-          color: '#ffffff',
-          padding: '8px 12px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          zIndex: 100,
-          fontFamily: 'monospace',
-          textShadow: '0 0 5px #000000',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
-          e.currentTarget.style.transform = 'scale(1.05)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-      >
-        {musicMuted ? '🔇 MUSIC OFF' : '🎵 MUSIC ON'}
-      </button>
-
-      {/* Westridge Ledger Bank Logo - Moved to bottom right */}
+      {/* Westridge Ledger Bank Logo - Subtle placement */}
       <div style={{
-        position: 'fixed',
-        bottom: '8px',
+        position: 'absolute',
+        top: '8px',
         right: '8px',
         zIndex: 100,
         opacity: 0.7
@@ -2712,7 +2676,7 @@ function App() {
           src="./westridge-logo.png" 
           alt="Westridge Ledger Bank"
           style={{
-            width: '35px',
+            width: '45px',
             height: 'auto',
             filter: 'brightness(1.2) sepia(1) hue-rotate(90deg) saturate(2)'
           }}
@@ -2722,7 +2686,7 @@ function App() {
             e.currentTarget.style.display = 'none';
             const parent = e.currentTarget.parentElement;
             if (parent) {
-              parent.innerHTML = '<div style="color: #00ff00; font-size: 9px; font-weight: bold; text-align: center; line-height: 1.2;">WESTRIDGE<br/>LEDGER<br/>BANK</div>';
+              parent.innerHTML = '<div style="color: #00ff00; font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">WESTRIDGE<br/>LEDGER<br/>BANK</div>';
             }
           }}
         />
@@ -4812,18 +4776,14 @@ function App() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 50%, #000000 100%)',
+            background: 'linear-gradient(45deg, #000000, #001100)',
             zIndex: 3000,
             overflow: 'hidden'
           }}
           ref={(el) => {
-            if (el && !arrestAnimationTimer) {
-              // Clear any existing timer and set new one
-              if (arrestAnimationTimer) {
-                clearTimeout(arrestAnimationTimer);
-              }
-              
-              const timer = setTimeout(() => {
+            if (el) {
+              // Auto-close animation after 6 seconds
+              setTimeout(() => {
                 setShowArrestAnimation(false);
                 setCurrentCustomer(generateCustomerLocal());
                 setVerificationState({
@@ -4839,249 +4799,164 @@ function App() {
                   "> Next customer approaching window",
                   "Ready to process transaction"
                 ]);
-                setArrestAnimationTimer(null);
               }, 6000);
-              
-              setArrestAnimationTimer(timer);
             }
           }}
         >
-          {/* Dynamic Emergency Lighting */}
+          {/* CRT Scanlines */}
           <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            background: `
-              radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.25) 0%, transparent 25%),
-              radial-gradient(circle at 80% 30%, rgba(0, 0, 255, 0.25) 0%, transparent 25%),
-              radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 20%)
-            `,
-            animation: 'emergencyFlash 0.5s infinite alternate'
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
+            pointerEvents: 'none'
           }} />
-
-          {/* Professional Alert Banner */}
+          
+          {/* Bank Scene */}
           <div style={{
             position: 'absolute',
-            top: '30px',
+            bottom: '0px',
+            left: '0px',
+            right: '0px',
+            height: '100px',
+            background: 'linear-gradient(180deg, #003300 0%, #001100 100%)',
+            border: '2px solid #00ff00',
+            borderBottom: 'none'
+          }} />
+          
+          {/* Teller Counter */}
+          <div style={{
+            position: 'absolute',
+            bottom: '100px',
+            left: '10%',
+            width: '200px',
+            height: '80px',
+            background: 'linear-gradient(180deg, #004400 0%, #002200 100%)',
+            border: '2px solid #00ff00'
+          }} />
+          
+          {/* FRAUD DETECTED Alert */}
+          <div style={{
+            position: 'absolute',
+            top: '50px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: 'linear-gradient(90deg, #cc0000 0%, #ff3333 50%, #cc0000 100%)',
-            color: '#ffffff',
-            padding: '20px 50px',
-            fontSize: '28px',
+            color: '#ff0000',
+            fontSize: '32px',
             fontWeight: 'bold',
             textAlign: 'center',
-            borderRadius: '10px',
-            boxShadow: '0 6px 25px rgba(255, 0, 0, 0.6)',
-            fontFamily: 'Arial, sans-serif',
-            letterSpacing: '3px',
-            animation: 'alertFadeIn 1.5s ease-out forwards'
+            animation: 'fraudAlert 2s infinite',
+            textShadow: '0 0 20px #ff0000',
+            fontFamily: 'monospace'
           }}>
-            WESTFIELD POLICE DEPARTMENT
+            🚨 FRAUD DETECTED 🚨
           </div>
-
-          {/* Police Investigation Panel */}
+          
+          {/* Police Officer */}
           <div style={{
             position: 'absolute',
-            top: '120px',
-            left: '40px',
-            background: 'rgba(0, 0, 0, 0.92)',
-            border: '3px solid #444444',
-            borderRadius: '12px',
-            padding: '25px',
-            color: '#ffffff',
-            fontSize: '16px',
-            fontFamily: 'Courier New, monospace',
-            animation: 'panelSlideIn 2.5s ease-out 1s forwards',
-            opacity: 0,
-            minWidth: '350px'
+            bottom: '180px',
+            right: '200px',
+            fontSize: '80px',
+            animation: 'officerApproach 3s ease-in-out forwards'
           }}>
-            <div style={{ color: '#4488ff', marginBottom: '12px', fontWeight: 'bold', fontSize: '18px' }}>
-              WESTFIELD POLICE DEPARTMENT
-            </div>
-            <div style={{ marginBottom: '8px' }}>INCIDENT: WPD-2024-{Math.floor(Math.random() * 9999).toString().padStart(4, '0')}</div>
-            <div style={{ marginBottom: '8px' }}>CHARGE: ATTEMPTED BANK FRAUD</div>
-            <div style={{ marginBottom: '8px' }}>LOCATION: WESTRIDGE NATIONAL BANK</div>
-            <div style={{ marginBottom: '8px' }}>OFFICER: DETECTIVE M. RODRIGUEZ</div>
-            <div style={{ color: '#ff6666', fontWeight: 'bold' }}>STATUS: SUSPECT IN CUSTODY</div>
+            👮‍♂️
           </div>
-
-          {/* Police Response Vehicles */}
+          
+          {/* Fraudulent Customer */}
           <div style={{
             position: 'absolute',
-            bottom: '120px',
-            right: '-250px',
-            animation: 'federalUnit1 3.5s ease-out forwards'
+            bottom: '180px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '80px',
+            animation: 'customerArrest 4s ease-in-out forwards'
           }}>
-            <div style={{
-              background: 'linear-gradient(45deg, #1a2a4a 0%, #2a4a7a 50%, #1a2a4a 100%)',
-              padding: '20px 30px',
-              borderRadius: '12px',
-              color: '#ffffff',
-              fontSize: '14px',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              border: '3px solid #4477aa',
-              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.8)',
-              minWidth: '120px'
-            }}>
-              WESTFIELD<br/>POLICE<br/>DEPARTMENT
-            </div>
+            🧑‍💼
           </div>
-
-          <div style={{
-            position: 'absolute',
-            bottom: '120px',
-            left: '-250px',
-            animation: 'federalUnit2 4s ease-out 0.8s forwards'
-          }}>
-            <div style={{
-              background: 'linear-gradient(45deg, #2a1a1a 0%, #4a3333 50%, #2a1a1a 100%)',
-              padding: '20px 30px',
-              borderRadius: '12px',
-              color: '#ffffff',
-              fontSize: '14px',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              border: '3px solid #664444',
-              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.8)',
-              minWidth: '120px'
-            }}>
-              DETECTIVE<br/>UNIT<br/>RESPONDING
-            </div>
-          </div>
-
-          {/* Police Badge */}
+          
+          {/* Handcuffs Effect */}
           <div style={{
             position: 'absolute',
             bottom: '220px',
             left: '50%',
             transform: 'translateX(-50%)',
-            animation: 'badgePresent 4.5s ease-out 2.5s forwards',
+            fontSize: '40px',
+            animation: 'handcuffsAppear 4s ease-in-out forwards',
             opacity: 0
           }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #1a3a1a 0%, #2a6a2a 100%)',
-              padding: '25px',
-              borderRadius: '15px',
-              color: '#ffffff',
-              fontSize: '18px',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              border: '3px solid #4a8a4a',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.9)',
-              minWidth: '220px'
-            }}>
-              DETECTIVE BADGE<br/>
-              <div style={{ fontSize: '14px', color: '#ccffcc', marginTop: '8px' }}>
-                FINANCIAL CRIMES UNIT
-              </div>
+            🔗
+          </div>
+          
+          {/* Police Car */}
+          <div style={{
+            position: 'absolute',
+            bottom: '180px',
+            right: '-200px',
+            fontSize: '60px',
+            animation: 'policeCarArrive 2s ease-in-out forwards'
+          }}>
+            🚔
+          </div>
+          
+          {/* Arrest Dialog */}
+          <div style={{
+            position: 'absolute',
+            bottom: '300px',
+            left: '50px',
+            color: '#ff4444',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            fontFamily: 'monospace',
+            animation: 'arrestDialog 5s linear forwards',
+            opacity: 0
+          }}>
+            <div style={{ animation: 'textFadeIn 5s linear forwards' }}>
+              "You're under arrest for attempted fraud"
             </div>
           </div>
-
-          {/* Police Communications Terminal */}
+          
+          {/* Success Message */}
           <div style={{
             position: 'absolute',
-            bottom: '40px',
-            left: '40px',
-            background: 'rgba(0, 20, 0, 0.85)',
-            border: '2px solid #004400',
-            borderRadius: '8px',
-            padding: '20px',
-            color: '#00ff00',
-            fontSize: '14px',
-            fontFamily: 'Courier New, monospace',
-            animation: 'commsActive 10s linear 4s forwards',
-            opacity: 0,
-            maxWidth: '450px'
-          }}>
-            <div style={{ color: '#ffff00', marginBottom: '10px', fontWeight: 'bold' }}>WESTFIELD PD DISPATCH</div>
-            <div style={{ marginBottom: '4px' }}>📻 SUSPECT APPREHENDED AT BANK</div>
-            <div style={{ marginBottom: '4px' }}>📻 FRAUDULENT DOCUMENTS SEIZED</div>
-            <div style={{ marginBottom: '4px' }}>📻 EVIDENCE SECURED FOR COURT</div>
-            <div style={{ marginBottom: '4px' }}>📻 BANK OPERATIONS RESUMED</div>
-            <div style={{ marginBottom: '4px' }}>📻 TRANSPORT TO COUNTY JAIL</div>
-            <div style={{ color: '#ffffff', fontWeight: 'bold' }}>📻 CASE CLOSED - EXCELLENT WORK</div>
-          </div>
-
-          {/* Mission Success Confirmation */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
+            bottom: '120px',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'linear-gradient(135deg, #004400 0%, #006600 100%)',
-            color: '#ffffff',
-            padding: '35px',
-            borderRadius: '20px',
-            textAlign: 'center',
+            transform: 'translateX(-50%)',
+            color: '#00ff00',
             fontSize: '24px',
             fontWeight: 'bold',
-            border: '4px solid #00aa00',
-            boxShadow: '0 10px 30px rgba(0, 150, 0, 0.5)',
-            animation: 'missionComplete 4s ease-out 9s forwards',
-            opacity: 0
+            textAlign: 'center',
+            fontFamily: 'monospace',
+            animation: 'successMessage 6s linear forwards',
+            opacity: 0,
+            textShadow: '0 0 15px #00ff00'
           }}>
-            FRAUD INVESTIGATION SUCCESSFUL<br/>
-            <div style={{ fontSize: '18px', marginTop: '12px', color: '#aaffaa' }}>
-              EXCEPTIONAL FRAUD DETECTION<br/>
-              BANK SECURITY MAINTAINED<br/>
-              FEDERAL CASE CLOSED
-            </div>
+            FRAUD SUSPECT ARRESTED<br/>
+            EXCELLENT DETECTIVE WORK
           </div>
         </div>
       )}
 
       {/* CSS Animations */}
       <style>{`
-        /* Professional FBI Investigation Animations */
-        @keyframes emergencyFlash {
-          0% { opacity: 0.6; }
-          100% { opacity: 1; }
+        @keyframes fraudAlert {
+          0%, 50%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+          25%, 75% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
         }
         
-        @keyframes alertFadeIn {
-          0% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); }
-          50% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1.05); }
-          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+        @keyframes officerApproach {
+          0% { right: 100vw; }
+          60% { right: 200px; }
+          100% { right: 200px; }
         }
         
-        @keyframes panelSlideIn {
-          0% { opacity: 0; transform: translateX(-100px); }
-          60% { opacity: 1; transform: translateX(10px); }
-          100% { opacity: 1; transform: translateX(0px); }
-        }
-        
-        @keyframes federalUnit1 {
-          0% { right: -250px; opacity: 0; }
-          30% { right: 100px; opacity: 1; }
-          100% { right: 80px; opacity: 1; }
-        }
-        
-        @keyframes federalUnit2 {
-          0% { left: -250px; opacity: 0; }
-          30% { left: 100px; opacity: 1; }
-          100% { left: 80px; opacity: 1; }
-        }
-        
-        @keyframes badgePresent {
-          0% { opacity: 0; transform: translateX(-50%) translateY(50px) scale(0.8); }
-          40% { opacity: 1; transform: translateX(-50%) translateY(-10px) scale(1.1); }
-          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
-        }
-        
-        @keyframes commsActive {
-          0% { opacity: 0; transform: translateY(30px); }
-          20% { opacity: 1; transform: translateY(0px); }
-          100% { opacity: 1; transform: translateY(0px); }
-        }
-        
-        @keyframes missionComplete {
-          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-          30% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-          100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        @keyframes customerArrest {
+          0% { transform: translateX(-50%) rotate(0deg); }
+          60% { transform: translateX(-50%) rotate(0deg); }
+          80% { transform: translateX(-50%) rotate(-10deg); }
+          100% { transform: translateX(-50%) rotate(0deg); }
         }
         
         @keyframes handcuffsAppear {
@@ -5510,9 +5385,9 @@ function App() {
         }
       `}</style>
 
-      {/* Cash drawer functionality removed for app store deployment */}
-
-      {/* Desktop Printer System */}
+      {/* Professional Cash Drawer System */}
+      {showCashDrawer && (
+        <div style={{
           position: 'fixed',
           top: 0,
           left: 0,
