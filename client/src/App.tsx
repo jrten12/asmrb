@@ -2718,7 +2718,7 @@ function App() {
       display: 'flex',
       flexDirection: 'column',
       padding: '4px',
-      paddingBottom: '20px',
+      paddingBottom: '80px',
       overflow: 'auto',
       position: 'fixed',
       top: 0,
