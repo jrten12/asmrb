@@ -6602,21 +6602,18 @@ function App() {
         </div>
       )}
       
-      {/* Music button and logo positioned FAR below shift controls */}
+      {/* Music button and logo positioned after END SHIFT button */}
       {gamePhase === 'working' && (
         <div style={{
-          position: 'fixed',
-          bottom: '0px',
+          position: 'absolute',
+          bottom: '10px',
           left: '0px',
           right: '0px',
-          height: '60px',
-          background: 'rgba(0, 0, 0, 0.3)',
-          borderTop: '1px solid #003300',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '0 20px',
-          zIndex: 500
+          zIndex: 100
         }}>
           <button
             onClick={toggleMusic}
@@ -6625,14 +6622,14 @@ function App() {
               border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
               borderRadius: '50%',
               color: '#ffffff',
-              fontSize: '14px',
+              fontSize: '12px',
               fontWeight: 'bold',
-              padding: '6px',
+              padding: '4px',
               cursor: 'pointer',
               boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
               transition: 'all 0.2s',
-              width: '32px',
-              height: '32px',
+              width: '28px',
+              height: '28px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -6646,7 +6643,7 @@ function App() {
             src="/westridge-logo.png" 
             alt="Westridge Ledger Bank"
             style={{
-              width: '50px',
+              width: '40px',
               height: 'auto',
               filter: 'drop-shadow(0 0 5px #00ff00)'
             }}
