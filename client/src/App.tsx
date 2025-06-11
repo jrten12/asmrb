@@ -2744,43 +2744,45 @@ function App() {
                   </div>
                   <div style={{ 
                     display: 'grid', 
-                    gap: '6px',
-                    fontSize: window.innerWidth < 768 ? '14px' : '16px'
+                    gap: '8px',
+                    fontSize: window.innerWidth < 768 ? '16px' : '18px'
                   }}>
                     {Object.entries(doc.data).map(([key, value]) => (
                       <div key={key} style={{ 
-                        padding: '4px 8px',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        borderRadius: '4px',
+                        padding: '6px 10px',
+                        background: 'rgba(0, 0, 0, 0.4)',
+                        borderRadius: '6px',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '2px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        gap: '4px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
                         wordBreak: 'break-word',
                         overflow: 'hidden'
                       }}>
                         <span style={{ 
-                          color: '#00dddd', 
-                          fontSize: window.innerWidth < 768 ? '10px' : '12px',
+                          color: '#00ffff', 
+                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
                           fontWeight: 'bold',
-                          letterSpacing: '0.5px'
+                          letterSpacing: '0.5px',
+                          textShadow: '0 0 4px #00ffff'
                         }}>
                           {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
                         </span>
                         <span style={{ 
                           color: '#ffffff', 
                           fontWeight: 'bold', 
-                          fontSize: window.innerWidth < 768 ? '12px' : '14px',
+                          fontSize: window.innerWidth < 768 ? '14px' : '16px',
                           fontFamily: 'monospace',
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          letterSpacing: '0.3px',
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(255, 255, 255, 0.4)',
+                          letterSpacing: '0.4px',
                           wordBreak: 'break-word',
                           maxWidth: '100%',
                           overflow: 'hidden',
-                          textOverflow: 'ellipsis'
+                          textOverflow: 'ellipsis',
+                          textShadow: '0 0 2px rgba(255, 255, 255, 0.5)'
                         }}>
                           {key === 'signature' && typeof value === 'string' && value.includes('|') 
                             ? value.split('|')[0] + ' (Signature Analysis Available)'
