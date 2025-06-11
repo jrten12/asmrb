@@ -1226,36 +1226,21 @@ function App() {
         return;
       }
       
-      playSound('legacy_processing');
-      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING WITHDRAWAL...", "CHECKING AVAILABLE FUNDS...", "PREPARING CASH..."]);
+      // Mark transaction as ready for processing (don't auto-complete)
+      setVerificationState(prev => ({...prev, transactionProcessed: true}));
       
-      setTimeout(() => {
-        setTerminalOutput(prev => [...prev, 
-          "========== WITHDRAWAL APPROVED ==========",
-          `AMOUNT: $${amount}`,
-          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-          `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
-          "STATUS: CASH DISPENSED",
-          "TRANSACTION COMPLETE",
-          "========================================"
-        ]);
-        
-        // Complete withdrawal transaction immediately
-        playSound('cash_drawer_open');
-        setTimeout(() => {
-          handleCorrectTransaction();
-          setCurrentCustomer(null);
-          setVerificationState({
-            accountLookedUp: false,
-            accountNotFound: false,
-            signatureCompared: false,
-            signatureFraud: false,
-            transactionProcessed: false
-          });
-          setTerminalOutput(prev => [...prev, "Customer served successfully. Next customer please."]);
-          playSound('paper_rustle');
-        }, 2000);
-      }, 1500);
+      playSound('legacy_processing');
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "========== WITHDRAWAL PREPARED ==========",
+        `AMOUNT: $${amount}`,
+        `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+        `AVAILABLE BALANCE: $${accountBalance.toLocaleString()}`,
+        "STATUS: READY FOR PROCESSING",
+        "",
+        "⚡ CLICK PROCESS TRANSACTION TO COMPLETE ⚡",
+        "========================================"
+      ]);
       
     } else if (cmd.startsWith('WIRE $')) {
       const wireData = cmd.substring(6).trim();
@@ -3578,7 +3563,13 @@ function App() {
                   : 'not-allowed',
                 borderRadius: '6px',
                 fontFamily: 'monospace',
-                gridColumn: 'span 2'
+                gridColumn: 'span 2',
+                animation: currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed 
+                  ? 'sparkle 1.5s ease-in-out infinite' 
+                  : 'none',
+                boxShadow: currentCustomer && verificationState.accountLookedUp && verificationState.signatureCompared && verificationState.transactionProcessed 
+                  ? '0 0 20px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.2)' 
+                  : 'none'
               }}
             >
               🖨️ PROCESS TRANSACTION
@@ -5190,6 +5181,24 @@ function App() {
         @keyframes sparkle3 {
           0%, 100% { opacity: 0; transform: rotate(0deg) scale(0.7); }
           50% { opacity: 1; transform: rotate(360deg) scale(1.3); }
+        }
+        
+        @keyframes sparkle {
+          0% { 
+            background: rgba(0, 150, 0, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.2);
+            transform: scale(1);
+          }
+          50% { 
+            background: rgba(0, 200, 0, 1);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 1), inset 0 0 30px rgba(0, 255, 0, 0.4);
+            transform: scale(1.02);
+          }
+          100% { 
+            background: rgba(0, 150, 0, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.2);
+            transform: scale(1);
+          }
         }
         
         @keyframes drawerSlide {
