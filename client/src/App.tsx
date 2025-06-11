@@ -1872,8 +1872,38 @@ function App() {
         fontFamily: 'monospace',
         color: '#00ff00',
         padding: '20px',
-        textAlign: 'center'
+        textAlign: 'center',
+        position: 'relative'
       }}>
+        {/* Music Button - Always Visible */}
+        <button
+          onClick={toggleMusic}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: musicMuted ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)',
+            border: '2px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+            borderRadius: '50%',
+            color: '#ffffff',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            padding: '12px',
+            cursor: 'pointer',
+            boxShadow: '0 0 15px ' + (musicMuted ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)'),
+            transition: 'all 0.3s ease',
+            width: '60px',
+            height: '60px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000
+          }}
+          title={musicMuted ? "Unmute background music" : "Mute background music"}
+        >
+          {musicMuted ? '🔇' : '🎵'}
+        </button>
+        
         {/* CRT Scanlines */}
         <div style={{
           position: 'absolute',
@@ -2257,6 +2287,35 @@ function App() {
           }
         }}
       >
+        {/* Music Button - Always Visible */}
+        <button
+          onClick={toggleMusic}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: musicMuted ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)',
+            border: '2px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+            borderRadius: '50%',
+            color: '#ffffff',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            padding: '12px',
+            cursor: 'pointer',
+            boxShadow: '0 0 15px ' + (musicMuted ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)'),
+            transition: 'all 0.3s ease',
+            width: '60px',
+            height: '60px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000
+          }}
+          title={musicMuted ? "Unmute background music" : "Mute background music"}
+        >
+          {musicMuted ? '🔇' : '🎵'}
+        </button>
+
         {/* Time Clock Machine */}
         <div style={{
           background: 'linear-gradient(145deg, #333333, #1a1a1a)',
@@ -5034,65 +5093,7 @@ function App() {
           to { opacity: 1; }
         }
         
-        @keyframes customerArrest {
-          0% { transform: translateX(0px) rotate(0deg); }
-          25% { transform: translateX(-10px) rotate(-5deg); }
-          50% { transform: translateX(-20px) rotate(-10deg); }
-          75% { transform: translateX(-30px) rotate(-15deg); }
-          100% { transform: translateX(-40px) rotate(-20deg); }
-        }
-        
-        @keyframes officer1Approach {
-          0% { transform: translateX(0px); }
-          100% { transform: translateX(-150px); }
-        }
-        
-        @keyframes officer2Approach {
-          0% { transform: translateX(0px); }
-          100% { transform: translateX(400px); }
-        }
-        
-        @keyframes handcuffsApply {
-          0% { opacity: 0; transform: scale(0); }
-          50% { opacity: 0; transform: scale(0); }
-          60% { opacity: 1; transform: scale(1.5) rotate(180deg); }
-          100% { opacity: 1; transform: scale(1) rotate(360deg); }
-        }
-        
-        @keyframes policeCarArrive {
-          0% { transform: translateX(0px); }
-          100% { transform: translateX(150px); }
-        }
-        
-        @keyframes textStep1 {
-          0% { opacity: 0; }
-          10% { opacity: 1; }
-          30% { opacity: 1; }
-          35% { opacity: 0; }
-          100% { opacity: 0; }
-        }
-        
-        @keyframes textStep2 {
-          0% { opacity: 0; }
-          35% { opacity: 0; }
-          40% { opacity: 1; }
-          65% { opacity: 1; }
-          70% { opacity: 0; }
-          100% { opacity: 0; }
-        }
-        
-        @keyframes textStep3 {
-          0% { opacity: 0; }
-          70% { opacity: 0; }
-          75% { opacity: 1; }
-          100% { opacity: 1; }
-        }
-        
-        @keyframes finalMessage {
-          0% { opacity: 0; }
-          80% { opacity: 0; }
-          100% { opacity: 1; }
-        }
+
       `}</style>
 
 
