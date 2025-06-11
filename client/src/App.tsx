@@ -139,7 +139,14 @@ function App() {
 
   // Background music and sound management
   const [musicMuted, setMusicMuted] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Background music playlist
+  const musicPlaylist = [
+    '/The Currency Hypnosis.mp3',
+    '/cash-flow-groove.mp3'
+  ];
 
 
 
@@ -1650,9 +1657,9 @@ function App() {
     
     try {
       if (!backgroundMusicRef.current) {
-        // Use the correct path for the background music file
-        backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
-        backgroundMusicRef.current.loop = true;
+        // Initialize with first track in playlist
+        backgroundMusicRef.current = new Audio(musicPlaylist[currentTrackIndex]);
+        backgroundMusicRef.current.loop = false; // Don't loop individual tracks
         backgroundMusicRef.current.volume = 0.0; // Completely silent by default
         backgroundMusicRef.current.preload = 'auto';
         
