@@ -2599,6 +2599,44 @@ function App() {
       
 
 
+      {/* Music Control Button - Always Visible */}
+      <button
+        onClick={toggleMusic}
+        style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          background: musicMuted ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)',
+          border: '2px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+          borderRadius: '50%',
+          color: '#ffffff',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          padding: '10px',
+          cursor: 'pointer',
+          boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)',
+          transition: 'all 0.3s ease',
+          width: '48px',
+          height: '48px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          fontFamily: 'monospace'
+        }}
+        title={musicMuted ? "Unmute background music" : "Mute background music"}
+        onMouseOver={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = musicMuted ? '0 0 15px rgba(255, 0, 0, 0.7)' : '0 0 15px rgba(0, 255, 0, 0.7)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = musicMuted ? '0 0 10px rgba(255, 0, 0, 0.5)' : '0 0 10px rgba(0, 255, 0, 0.5)';
+        }}
+      >
+        {musicMuted ? '🔇' : '🎵'}
+      </button>
+
       {/* CRT Scanline Effect */}
       <div style={{
         position: 'fixed',
@@ -4740,306 +4778,225 @@ function App() {
             }
           }}
         >
-          {/* CRT Scanlines */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
-            pointerEvents: 'none'
-          }} />
-          
-          {/* Bank Floor */}
-          <div style={{
-            position: 'absolute',
-            bottom: '0px',
-            left: '0px',
-            right: '0px',
-            height: '60px',
-            background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
-            borderTop: '2px solid #666666'
-          }} />
-          
-          {/* Bank Exit Door */}
+          {/* Enhanced Police Response Scene */}
           <div style={{
             position: 'absolute',
             bottom: '60px',
-            right: '50px',
-            width: '80px',
-            height: '120px',
-            background: 'linear-gradient(180deg, #444444 0%, #222222 100%)',
-            border: '2px solid #666666',
-            borderRadius: '8px 8px 0 0'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: '10px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: '#cccccc',
-              fontSize: '10px',
-              fontFamily: 'monospace'
-            }}>
-              EXIT
-            </div>
-          </div>
+            left: '0',
+            right: '0',
+            height: '40px',
+            background: 'linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%)',
+            borderTop: '2px solid #444'
+          }} />
           
-          {/* FRAUD DETECTED Alert */}
+          {/* WESTFIELD PD ALERT */}
           <div style={{
             position: 'absolute',
-            top: '20px',
+            top: '30px',
             left: '50%',
             transform: 'translateX(-50%)',
-            color: '#ff0000',
-            fontSize: '28px',
+            color: '#ff3333',
+            fontSize: '32px',
             fontWeight: 'bold',
             textAlign: 'center',
-            animation: 'fraudAlert 2s infinite',
-            textShadow: '0 0 20px #ff0000',
-            fontFamily: 'monospace'
+            animation: 'alertFlash 1.5s infinite alternate',
+            textShadow: '0 0 20px #ff3333',
+            fontFamily: 'monospace',
+            background: 'rgba(0,0,0,0.8)',
+            padding: '15px',
+            borderRadius: '8px',
+            border: '3px solid #ff3333'
           }}>
             🚨 WESTFIELD POLICE DEPARTMENT 🚨<br/>
-            FRAUD DETECTED - SUSPECT IN CUSTODY
+            FRAUD SUSPECT APPREHENDED
           </div>
           
-          {/* Radio Chatter Background */}
+          {/* Radio Dispatch */}
           <div style={{
             position: 'absolute',
-            top: '80px',
+            top: '140px',
             right: '20px',
-            color: '#00ff00',
-            fontSize: '12px',
+            color: '#00ff88',
+            fontSize: '14px',
             fontFamily: 'monospace',
-            background: 'rgba(0, 0, 0, 0.7)',
-            padding: '10px',
-            borderRadius: '5px',
-            animation: 'radioFade 6s linear forwards',
-            opacity: 0
+            background: 'rgba(0,0,0,0.9)',
+            padding: '12px',
+            borderRadius: '6px',
+            border: '2px solid #00ff88',
+            animation: 'radioChatter 8s ease-in-out forwards',
+            opacity: 0,
+            maxWidth: '300px'
           }}>
-            "Unit 23 to dispatch... fraud suspect in custody<br/>
-            at Westridge Ledger Bank on Main Street.<br/>
-            Request transport for booking. Over."
+            "Dispatch to Unit 23... suspect secured<br/>
+            Location: Westridge Ledger Bank<br/>
+            Crime: Attempted bank fraud<br/>
+            Status: Perp walk in progress. Over."
           </div>
           
-          {/* Officer 1 - Leading */}
+          {/* Lead Officer */}
           <div style={{
             position: 'absolute',
-            bottom: '70px',
-            left: '30%',
-            fontSize: '60px',
-            animation: 'officer1Escort 8s ease-in-out forwards',
-            zIndex: 3
+            bottom: '100px',
+            left: '20%',
+            fontSize: '70px',
+            animation: 'leadOfficer 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+            filter: 'drop-shadow(3px 3px 6px rgba(0,0,0,0.5))'
           }}>
             👮‍♂️
           </div>
           
-          {/* Handcuffed Suspect */}
+          {/* Handcuffed Fraudster */}
           <div style={{
             position: 'absolute',
-            bottom: '70px',
-            left: '40%',
-            fontSize: '60px',
-            animation: 'suspectPerpWalk 8s ease-in-out forwards',
-            zIndex: 2
+            bottom: '100px',
+            left: '45%',
+            fontSize: '70px',
+            animation: 'fraudsterWalk 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+            filter: 'drop-shadow(3px 3px 6px rgba(0,0,0,0.5))'
           }}>
             🧑‍💼
           </div>
           
-          {/* Officer 2 - Following */}
+          {/* Following Officer */}
           <div style={{
             position: 'absolute',
-            bottom: '70px',
-            left: '50%',
-            fontSize: '60px',
-            animation: 'officer2Escort 8s ease-in-out forwards',
-            zIndex: 3
+            bottom: '100px',
+            left: '70%',
+            fontSize: '70px',
+            animation: 'followOfficer 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+            filter: 'drop-shadow(3px 3px 6px rgba(0,0,0,0.5))'
           }}>
             👮‍♀️
           </div>
           
-          {/* Handcuffs on Suspect */}
+          {/* Handcuffs Visual */}
           <div style={{
             position: 'absolute',
-            bottom: '90px',
-            left: '40%',
-            fontSize: '20px',
-            animation: 'handcuffsVisible 8s ease-in-out forwards',
-            opacity: 0,
-            zIndex: 4
+            bottom: '130px',
+            left: '45%',
+            fontSize: '25px',
+            animation: 'handcuffsShow 8s ease-in-out forwards',
+            opacity: 0
           }}>
             🔗
           </div>
           
-          {/* Perp Walk Text */}
+          {/* Police Vehicle */}
           <div style={{
             position: 'absolute',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: '#ff4444',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            background: 'rgba(0, 0, 0, 0.8)',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            animation: 'perpWalkText 8s linear forwards',
-            opacity: 0
-          }}>
-            SUSPECT IN CUSTODY - ESCORTED FROM PREMISES
-          </div>
-          
-          {/* Westfield Police Car */}
-          <div style={{
-            position: 'absolute',
-            bottom: '180px',
-            right: '-200px',
-            fontSize: '60px',
-            animation: 'policeCarArrive 2s ease-in-out forwards'
+            bottom: '210px',
+            right: '-150px',
+            fontSize: '80px',
+            animation: 'policeVehicle 3s ease-out forwards',
+            filter: 'drop-shadow(3px 3px 6px rgba(0,0,0,0.5))'
           }}>
             🚔
           </div>
           
-          {/* Police Car Badge/Number */}
+          {/* Unit Badge */}
           <div style={{
             position: 'absolute',
-            bottom: '200px',
-            right: '-180px',
-            fontSize: '12px',
+            bottom: '260px',
+            right: '-120px',
+            fontSize: '14px',
             color: '#ffffff',
             fontWeight: 'bold',
             fontFamily: 'monospace',
-            animation: 'carBadgeShow 3s ease-in-out forwards',
+            background: 'rgba(0,0,0,0.8)',
+            padding: '5px 8px',
+            borderRadius: '4px',
+            animation: 'badgeShow 4s ease-out forwards',
             opacity: 0
           }}>
             WESTFIELD PD<br/>UNIT 23
           </div>
           
-          {/* Arrest Dialog */}
+          {/* Arrest Announcement */}
           <div style={{
             position: 'absolute',
-            bottom: '300px',
-            left: '50px',
-            color: '#ff4444',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            background: 'rgba(0, 0, 0, 0.8)',
-            padding: '10px',
-            borderRadius: '5px',
-            animation: 'arrestDialog 6s linear forwards',
-            opacity: 0
-          }}>
-            <div style={{ animation: 'textFadeIn 5s linear forwards' }}>
-              "You're under arrest for attempted fraud"
-            </div>
-          </div>
-          
-          {/* Success Message */}
-          <div style={{
-            position: 'absolute',
-            bottom: '120px',
+            bottom: '30px',
             left: '50%',
             transform: 'translateX(-50%)',
             color: '#00ff00',
-            fontSize: '24px',
+            fontSize: '26px',
             fontWeight: 'bold',
             textAlign: 'center',
             fontFamily: 'monospace',
-            animation: 'successMessage 6s linear forwards',
+            animation: 'successAnnounce 8s ease-in-out forwards',
             opacity: 0,
-            textShadow: '0 0 15px #00ff00'
+            textShadow: '0 0 15px #00ff00',
+            background: 'rgba(0,0,0,0.8)',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: '2px solid #00ff00'
           }}>
-            FRAUD SUSPECT ARRESTED<br/>
-            EXCELLENT DETECTIVE WORK
+            FRAUD SUSPECT IN CUSTODY<br/>
+            EXCELLENT DETECTIVE WORK, TELLER
           </div>
         </div>
       )}
 
       {/* CSS Animations */}
       <style>{`
-        @keyframes fraudAlert {
-          0%, 50%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-          25%, 75% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
+        @keyframes alertFlash {
+          0% { opacity: 1; transform: translateX(-50%) scale(1); }
+          50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         
-        @keyframes officer1Escort {
-          0% { left: -10%; }
-          20% { left: 30%; }
-          80% { left: 30%; }
-          100% { left: 80%; }
+        @keyframes radioChatter {
+          0% { opacity: 0; transform: translateX(20px); }
+          25% { opacity: 1; transform: translateX(0px); }
+          75% { opacity: 1; transform: translateX(0px); }
+          100% { opacity: 0.7; transform: translateX(0px); }
         }
         
-        @keyframes suspectPerpWalk {
-          0% { left: 50%; transform: translateX(-50%); }
-          20% { left: 40%; transform: translateX(-50%); }
-          80% { left: 40%; transform: translateX(-50%) rotate(-5deg); }
-          100% { left: 90%; transform: translateX(-50%) rotate(-5deg); }
+        @keyframes leadOfficer {
+          0% { left: -15%; transform: translateX(0); }
+          25% { left: 20%; transform: translateX(0); }
+          75% { left: 20%; transform: translateX(0); }
+          100% { left: 120%; transform: translateX(0); }
         }
         
-        @keyframes officer2Escort {
-          0% { left: 100%; }
-          20% { left: 50%; }
-          80% { left: 50%; }
-          100% { left: 100%; }
+        @keyframes fraudsterWalk {
+          0% { left: 45%; transform: translateX(-50%) rotate(0deg); }
+          25% { left: 45%; transform: translateX(-50%) rotate(-3deg); }
+          75% { left: 45%; transform: translateX(-50%) rotate(-3deg); }
+          100% { left: 120%; transform: translateX(-50%) rotate(-3deg); }
         }
         
-        @keyframes handcuffsVisible {
-          0% { opacity: 0; left: 50%; }
-          20% { opacity: 1; left: 40%; }
-          80% { opacity: 1; left: 40%; }
-          100% { opacity: 1; left: 90%; }
+        @keyframes followOfficer {
+          0% { left: 120%; transform: translateX(0); }
+          25% { left: 70%; transform: translateX(0); }
+          75% { left: 70%; transform: translateX(0); }
+          100% { left: 120%; transform: translateX(0); }
         }
         
-        @keyframes perpWalkText {
-          0% { opacity: 0; }
-          30% { opacity: 1; }
-          70% { opacity: 1; }
-          100% { opacity: 0; }
+        @keyframes handcuffsShow {
+          0% { opacity: 0; left: 45%; }
+          25% { opacity: 1; left: 45%; }
+          75% { opacity: 1; left: 45%; }
+          100% { opacity: 1; left: 120%; }
         }
         
-        @keyframes policeCarArrive {
-          0% { right: -200px; }
-          100% { right: 50px; }
+        @keyframes policeVehicle {
+          0% { right: -150px; }
+          100% { right: 30px; }
         }
         
-        @keyframes arrestDialog {
-          0% { opacity: 0; }
-          30% { opacity: 0; }
-          40% { opacity: 1; }
-          100% { opacity: 1; }
+        @keyframes badgeShow {
+          0% { opacity: 0; right: -120px; }
+          30% { opacity: 0; right: -120px; }
+          50% { opacity: 1; right: -100px; }
+          100% { opacity: 1; right: -100px; }
         }
         
-        @keyframes textFadeIn {
-          0% { opacity: 0; }
-          50% { opacity: 0; }
-          60% { opacity: 1; }
-          100% { opacity: 1; }
-        }
-        
-        @keyframes radioFade {
-          0% { opacity: 0; }
-          20% { opacity: 0; }
-          30% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { opacity: 0.7; }
-        }
-        
-        @keyframes badgeFlash {
-          0% { opacity: 0; }
-          40% { opacity: 0; }
-          50% { opacity: 1; transform: scale(1.2); }
-          60% { opacity: 0.8; transform: scale(1); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        
-        @keyframes carBadgeShow {
-          0% { opacity: 0; right: -180px; }
-          30% { opacity: 0; right: -180px; }
-          50% { opacity: 1; right: -160px; }
-          100% { opacity: 1; right: -160px; }
+        @keyframes successAnnounce {
+          0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          60% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          75% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1.1); }
+          85% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0px) scale(1); }
         }
         
         @keyframes successMessage {
