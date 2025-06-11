@@ -298,126 +298,9 @@ function App() {
     });
   };
 
-  // Google AdMob Integration for iOS Monetization
-  const [admobInitialized, setAdmobInitialized] = useState(false);
-  const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
-  const [isRewardedAdLoaded, setIsRewardedAdLoaded] = useState(false);
 
-  // Initialize Google AdMob
-  useEffect(() => {
-    const initializeAdMob = () => {
-      // Check if running in iOS app environment
-      if (window.webkit && window.webkit.messageHandlers) {
-        // Initialize AdMob for iOS
-        window.webkit.messageHandlers.admob?.postMessage({
-          action: 'initialize',
-          appId: 'ca-app-pub-3940256099942544~1458002511', // Test App ID for development
-          testDeviceIds: ['2077ef9a63d2b398840261c8221a0c9b'] // Test device ID
-        });
-        
-        // Set up ad event listeners
-        window.admobEvents = {
-          onInterstitialLoaded: () => setIsInterstitialLoaded(true),
-          onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false),
-          onRewardedAdLoaded: () => setIsRewardedAdLoaded(true),
-          onRewardedAdFailedToLoad: () => setIsRewardedAdLoaded(false),
-          onRewardedAdRewarded: () => {
-            // Give player bonus for watching ad
-            setGameScore(prev => ({
-              ...prev,
-              score: prev.score + 50
-            }));
-          }
-        };
-        
-        setAdmobInitialized(true);
-      } else {
-        // Fallback for web testing
-        console.log('AdMob: Running in web environment, using test mode');
-        setAdmobInitialized(true);
-        setIsInterstitialLoaded(true);
-        setIsRewardedAdLoaded(true);
-      }
-    };
 
-    initializeAdMob();
-  }, []);
 
-  // Load interstitial ad
-  const loadInterstitialAd = () => {
-    if (window.webkit && window.webkit.messageHandlers.admob) {
-      window.webkit.messageHandlers.admob.postMessage({
-        action: 'loadInterstitial',
-        adUnitId: 'ca-app-pub-3940256099942544/4411468910' // Test Interstitial Ad Unit ID
-      });
-    }
-  };
-
-  // Show interstitial ad every 5 customers
-  const showInterstitialAd = () => {
-    if (isInterstitialLoaded) {
-      if (window.webkit && window.webkit.messageHandlers.admob) {
-        window.webkit.messageHandlers.admob.postMessage({
-          action: 'showInterstitial'
-        });
-      } else {
-        // Fallback for web testing
-        showAdBreakScreen();
-      }
-      setIsInterstitialLoaded(false);
-      // Load next ad
-      setTimeout(loadInterstitialAd, 1000);
-    }
-  };
-
-  // Load rewarded ad
-  const loadRewardedAd = () => {
-    if (window.webkit && window.webkit.messageHandlers.admob) {
-      window.webkit.messageHandlers.admob.postMessage({
-        action: 'loadRewarded',
-        adUnitId: 'ca-app-pub-3940256099942544/1712485313' // Test Rewarded Ad Unit ID
-      });
-    }
-  };
-
-  // Show rewarded ad for bonus points
-  const showRewardedAd = () => {
-    if (isRewardedAdLoaded) {
-      if (window.webkit && window.webkit.messageHandlers.admob) {
-        window.webkit.messageHandlers.admob.postMessage({
-          action: 'showRewarded'
-        });
-      }
-      setIsRewardedAdLoaded(false);
-      // Load next ad
-      setTimeout(loadRewardedAd, 1000);
-    }
-  };
-
-  // Fallback ad break screen for web testing
-  const showAdBreakScreen = () => {
-    setShowAdBreak(true);
-    setAdCountdown(5);
-    
-    const countdown = setInterval(() => {
-      setAdCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdown);
-          setShowAdBreak(false);
-          return 5;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // Load ads when AdMob is initialized
-  useEffect(() => {
-    if (admobInitialized) {
-      loadInterstitialAd();
-      loadRewardedAd();
-    }
-  }, [admobInitialized]);
 
 
 
@@ -482,8 +365,6 @@ function App() {
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
-  const [showAdBreak, setShowAdBreak] = useState(false);
-  const [adCountdown, setAdCountdown] = useState(5);
   const [customersServed, setCustomersServed] = useState(0);
   const [fraudTracker, setFraudTracker] = useState<boolean[]>([]);
   const [showNumberPad, setShowNumberPad] = useState(false);
