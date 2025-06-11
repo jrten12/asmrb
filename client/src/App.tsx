@@ -2720,35 +2720,7 @@ function App() {
       
 
 
-      {/* FIXED MUSIC BUTTON - ALWAYS VISIBLE */}
-      <button
-        onClick={toggleMusic}
-        style={{
-          position: 'fixed',
-          top: '15px',
-          right: '15px',
-          background: musicMuted ? '#ff0000' : '#00ff00',
-          border: '3px solid #ffffff',
-          borderRadius: '50%',
-          color: '#000000',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          padding: '15px',
-          cursor: 'pointer',
-          boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
-          transition: 'all 0.3s ease',
-          width: '60px',
-          height: '60px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          fontFamily: 'monospace'
-        }}
-        title={musicMuted ? "Click to turn music ON" : "Click to turn music OFF"}
-      >
-        {musicMuted ? '🔇' : '🎵'}
-      </button>
+
 
       {/* CRT Scanline Effect */}
       <div style={{
