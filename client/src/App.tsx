@@ -2574,14 +2574,14 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* MUSIC BUTTON - LEFT SIDE */}
+      {/* MUSIC BUTTON - BOTTOM LEFT CORNER */}
       <div
         key="music-button-unique-2025"
         onClick={toggleMusic}
         style={{
           position: 'fixed',
-          top: '15px',
-          left: '15px',
+          bottom: '20px',
+          left: '20px',
           width: '40px',
           height: '40px',
           backgroundColor: musicMuted ? '#FF0000' : '#00FF00',
