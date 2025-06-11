@@ -2691,6 +2691,31 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
+      {/* BRIGHT VISIBLE MUSIC BUTTON */}
+      <div
+        onClick={toggleMusic}
+        style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          width: '80px',
+          height: '80px',
+          backgroundColor: musicMuted ? '#FF0000' : '#00FF00',
+          border: '4px solid #FFFFFF',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '32px',
+          color: '#000000',
+          cursor: 'pointer',
+          zIndex: 99999,
+          boxShadow: '0 0 30px #FFFFFF'
+        }}
+      >
+        {musicMuted ? '🔇' : '🎵'}
+      </div>
+      
 
       
 
