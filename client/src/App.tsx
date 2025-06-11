@@ -1881,35 +1881,6 @@ function App() {
         textAlign: 'center',
         position: 'relative'
       }}>
-        {/* Music Button - Always Visible */}
-        <button
-          onClick={toggleMusic}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: musicMuted ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)',
-            border: '2px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
-            borderRadius: '50%',
-            color: '#ffffff',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            padding: '12px',
-            cursor: 'pointer',
-            boxShadow: '0 0 15px ' + (musicMuted ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)'),
-            transition: 'all 0.3s ease',
-            width: '60px',
-            height: '60px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000
-          }}
-          title={musicMuted ? "Unmute background music" : "Mute background music"}
-        >
-          {musicMuted ? '🔇' : '🎵'}
-        </button>
-        
         {/* CRT Scanlines */}
         <div style={{
           position: 'absolute',
@@ -2100,36 +2071,6 @@ function App() {
         overflowY: 'auto',
         position: 'relative'
       }}>
-        {/* Music Button - Always Visible */}
-        <button
-          onClick={toggleMusic}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: musicMuted ? '#ff0000' : '#00ff00',
-            border: '3px solid #ffffff',
-            borderRadius: '50%',
-            color: '#000000',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            padding: '15px',
-            cursor: 'pointer',
-            boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s ease',
-            width: '60px',
-            height: '60px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            fontFamily: 'monospace'
-          }}
-          title={musicMuted ? "Click to turn music ON" : "Click to turn music OFF"}
-        >
-          {musicMuted ? '🔇' : '🎵'}
-        </button>
-        
         {/* CRT Scanlines */}
         <div style={{
           position: 'absolute',
@@ -2324,35 +2265,6 @@ function App() {
           }
         }}
       >
-        {/* Music Button - Always Visible */}
-        <button
-          onClick={toggleMusic}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: musicMuted ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)',
-            border: '2px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
-            borderRadius: '50%',
-            color: '#ffffff',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            padding: '12px',
-            cursor: 'pointer',
-            boxShadow: '0 0 15px ' + (musicMuted ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)'),
-            transition: 'all 0.3s ease',
-            width: '60px',
-            height: '60px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000
-          }}
-          title={musicMuted ? "Unmute background music" : "Mute background music"}
-        >
-          {musicMuted ? '🔇' : '🎵'}
-        </button>
-
         {/* Time Clock Machine */}
         <div style={{
           background: 'linear-gradient(145deg, #333333, #1a1a1a)',
