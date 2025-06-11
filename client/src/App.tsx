@@ -5166,48 +5166,7 @@ function App() {
         </div>
       )}
 
-      {/* Google AdMob Ad Break Overlay */}
-      {showAdBreak && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.95)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 4000,
-          fontFamily: 'monospace'
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, #002200, #001100)',
-            border: '3px solid #00ff00',
-            borderRadius: '12px',
-            padding: '40px',
-            textAlign: 'center',
-            color: '#00ff00',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)'
-          }}>
-            <div style={{ fontSize: '32px', marginBottom: '20px' }}>
-              📺 AD BREAK 📺
-            </div>
-            <div style={{ fontSize: '18px', marginBottom: '20px' }}>
-              Thanks for playing Bank Teller 1988!
-            </div>
-            <div style={{ fontSize: '48px', color: '#ffff00', textShadow: '0 0 10px #ffff00' }}>
-              {adCountdown}
-            </div>
-            <div style={{ fontSize: '14px', marginTop: '20px', color: '#888888' }}>
-              Resuming in {adCountdown} seconds...
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Achievement Badge Popup */}
       {showBadgePopup && currentBadge && (
