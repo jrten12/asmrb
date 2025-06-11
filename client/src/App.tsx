@@ -1663,6 +1663,35 @@ function App() {
         backgroundMusicRef.current.volume = 0.0; // Completely silent by default
         backgroundMusicRef.current.preload = 'auto';
         
+        // Add event listener for when track ends - advance to next track
+        backgroundMusicRef.current.addEventListener('ended', () => {
+          if (!musicMuted && backgroundMusicRef.current) {
+            const nextIndex = (currentTrackIndex + 1) % musicPlaylist.length;
+            console.log(`Switching to track ${nextIndex}: ${musicPlaylist[nextIndex]}`);
+            
+            // Stop current track completely
+            backgroundMusicRef.current.pause();
+            backgroundMusicRef.current.currentTime = 0;
+            
+            // Update track index
+            setCurrentTrackIndex(nextIndex);
+            
+            // Load next track
+            backgroundMusicRef.current.src = musicPlaylist[nextIndex];
+            backgroundMusicRef.current.load();
+            
+            // Play next track after a brief delay to ensure loading
+            setTimeout(() => {
+              if (backgroundMusicRef.current && !musicMuted) {
+                backgroundMusicRef.current.volume = 0.01;
+                backgroundMusicRef.current.play().catch(e => {
+                  console.log('Failed to play next track:', e);
+                });
+              }
+            }, 100);
+          }
+        });
+        
         // Add error handler for music loading
         backgroundMusicRef.current.addEventListener('error', () => {
           console.log('Background music file not found or failed to load');
@@ -1670,9 +1699,13 @@ function App() {
       }
       
       // Stop any existing music first to prevent overlapping
-      if (backgroundMusicRef.current.currentTime > 0) {
-        backgroundMusicRef.current.pause();
-        backgroundMusicRef.current.currentTime = 0;
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
+      
+      // Ensure we're using the correct track
+      if (backgroundMusicRef.current.src !== window.location.origin + musicPlaylist[currentTrackIndex]) {
+        backgroundMusicRef.current.src = musicPlaylist[currentTrackIndex];
+        backgroundMusicRef.current.load();
       }
       
       // Only play music if not muted
