@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tellers-window-v1.0.0';
+const CACHE_NAME = 'tellers-window-v1.0.1-music-button-fix';
 const urlsToCache = [
   '/',
   '/src/main.tsx',

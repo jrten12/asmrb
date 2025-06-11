@@ -2574,8 +2574,9 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* MUSIC BUTTON */}
+      {/* SINGLE MUSIC BUTTON - FORCE REFRESH */}
       <div
+        key="music-button-unique-2025"
         onClick={toggleMusic}
         style={{
           position: 'fixed',
