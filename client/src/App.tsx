@@ -1146,30 +1146,21 @@ function App() {
         return;
       }
       
-      // Process the approved transaction
+      // Mark transaction as ready for processing (don't auto-complete)
+      setVerificationState(prev => ({...prev, transactionProcessed: true}));
       
       playSound('legacy_processing');
-      setTerminalOutput(prev => [...prev, "> " + command, "PROCESSING DEPOSIT...", "VALIDATING FUNDS...", "UPDATING ACCOUNT BALANCE..."]);
-      
-      setTimeout(() => {
-        setVerificationState(prev => ({...prev, transactionProcessed: true}));
-        handleCorrectTransaction();
-        setTerminalOutput(prev => [...prev, 
-          "========== DEPOSIT COMPLETED ==========",
-          `AMOUNT: $${amount}`,
-          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-          `NEW BALANCE: $${(accountBalance + parseFloat(amount)).toLocaleString()}`,
-          "TRANSACTION APPROVED",
-          "======================================"
-        ]);
-        playSound('register_print');
-        setTimeout(() => {
-          setCurrentCustomer(null);
-          resetVerificationState();
-          setTerminalOutput(prev => [...prev, "Customer served successfully. Next customer please."]);
-          playSound('paper_rustle');
-        }, 2000);
-      }, 1500);
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "========== DEPOSIT PREPARED ==========",
+        `AMOUNT: $${amount}`,
+        `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+        `NEW BALANCE: $${(accountBalance + parseFloat(amount)).toLocaleString()}`,
+        "STATUS: READY FOR PROCESSING",
+        "",
+        "⚡ CLICK PROCESS TRANSACTION TO COMPLETE ⚡",
+        "======================================"
+      ]);
       
     } else if (cmd.startsWith('WITHDRAW $')) {
       const amount = cmd.substring(10).trim();
