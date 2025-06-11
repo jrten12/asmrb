@@ -927,18 +927,34 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // Always return account information - no automatic validation
-            const balance = Math.floor(Math.random() * 3000) + 500;
-            setAccountBalance(balance);
-            setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-            setTerminalOutput(prev => [...prev, 
-              "> LOOKUP " + accountNum,
-              "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
-              "STATUS: ACTIVE CUSTOMER",
-              "BALANCE: $" + balance.toLocaleString(),
-              "BANK RECORDS NOW DISPLAYED BELOW"
-            ]);
-            playSound('approve');
+            // Check if entered account number matches customer's actual account
+            const customerAccountNumber = currentCustomer.transaction.accountNumber;
+            
+            if (accountNum === customerAccountNumber) {
+              // Account number matches - show real account information
+              const balance = Math.floor(Math.random() * 3000) + 500;
+              setAccountBalance(balance);
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+                "STATUS: ACTIVE CUSTOMER",
+                "BALANCE: $" + balance.toLocaleString(),
+                "BANK RECORDS NOW DISPLAYED BELOW"
+              ]);
+              playSound('approve');
+            } else {
+              // Account number doesn't match - show account not found
+              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✗✗✗ ACCOUNT NOT FOUND ✗✗✗",
+                "ERROR: No records match this account number",
+                "STATUS: INVALID ACCOUNT",
+                "PLEASE VERIFY ACCOUNT NUMBER WITH CUSTOMER"
+              ]);
+              playSound('reject');
+            }
           }, 800);
         }, 1200);
       }
