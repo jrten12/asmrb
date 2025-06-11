@@ -4704,7 +4704,7 @@ function App() {
         </div>
       )}
 
-      {/* Beautiful CSS Arrest Animation */}
+      {/* Westfield Police Department Arrest Animation */}
       {showArrestAnimation && (
         <div 
           style={{
@@ -4713,13 +4713,13 @@ function App() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'linear-gradient(45deg, #000000, #001100)',
+            background: 'linear-gradient(45deg, #000011, #001100)',
             zIndex: 3000,
             overflow: 'hidden'
           }}
           ref={(el) => {
             if (el) {
-              // Auto-close animation after 6 seconds
+              // Auto-close animation after 8 seconds
               setTimeout(() => {
                 setShowArrestAnimation(false);
                 setCurrentCustomer(generateCustomerLocal());
@@ -4732,11 +4732,11 @@ function App() {
                 });
                 setTerminalOutput(prev => [...prev, 
                   "",
-                  "> Fraud suspect removed from premises",
+                  "> WESTFIELD PD: Suspect in custody",
                   "> Next customer approaching window",
                   "Ready to process transaction"
                 ]);
-              }, 6000);
+              }, 8000);
             }
           }}
         >
