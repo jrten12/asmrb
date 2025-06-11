@@ -2574,27 +2574,27 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* SINGLE MUSIC BUTTON - FORCE REFRESH */}
+      {/* MUSIC BUTTON - LEFT SIDE */}
       <div
         key="music-button-unique-2025"
         onClick={toggleMusic}
         style={{
           position: 'fixed',
           top: '15px',
-          right: '15px',
-          width: '50px',
-          height: '50px',
+          left: '15px',
+          width: '40px',
+          height: '40px',
           backgroundColor: musicMuted ? '#FF0000' : '#00FF00',
           border: '2px solid #FFFFFF',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '20px',
+          fontSize: '16px',
           color: '#000000',
           cursor: 'pointer',
           zIndex: 99999,
-          boxShadow: '0 0 15px rgba(255, 255, 255, 0.8)',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
           fontWeight: 'bold'
         }}
         title={musicMuted ? "Click to turn music ON" : "Click to turn music OFF"}
