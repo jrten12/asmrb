@@ -59,7 +59,7 @@
         <p>For privacy questions, contact: privacy@infarill.com</p>
         
         <div style="margin: 30px 0; text-align: center;">
-            <button onclick="window.close()" style="
+            <button onclick="goBackToGame()" style="
                 background: linear-gradient(145deg, #004400, #002200);
                 border: 2px solid #00ff00;
                 color: #00ff00;
@@ -73,6 +73,22 @@
                 boxShadow: 0 0 20px rgba(0, 255, 0, 0.3);
             ">← Back to Game</button>
         </div>
+        
+        <script>
+            function goBackToGame() {
+                // Try multiple methods to return to the game
+                if (window.opener) {
+                    // If opened from another window, close this one
+                    window.close();
+                } else if (document.referrer) {
+                    // Go back to the referring page
+                    window.location.href = document.referrer;
+                } else {
+                    // Navigate to the root of the game
+                    window.location.href = '/';
+                }
+            }
+        </script>
         
         <p><strong>Infarill LLC</strong><br>
         © 2025 All rights reserved</p>
