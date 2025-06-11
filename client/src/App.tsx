@@ -2015,6 +2015,48 @@ function App() {
             marginBottom: '20px'
           }}>
             Fictional simulation. All names and events are coincidental.
+            <br />
+            © 2025 Infarill LLC. All rights reserved.
+          </div>
+          
+          {/* Privacy Policy and Terms Links */}
+          <div style={{
+            fontSize: '8px',
+            color: '#888888',
+            textAlign: 'center',
+            marginBottom: '15px',
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '15px'
+          }}>
+            <button
+              onClick={() => window.open('/privacy-policy.html', '_blank')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#00ff00',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '8px',
+                fontFamily: 'monospace'
+              }}
+            >
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => window.open('/terms-of-service.html', '_blank')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#00ff00',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '8px',
+                fontFamily: 'monospace'
+              }}
+            >
+              Terms of Service
+            </button>
           </div>
           
           <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center' }}>
@@ -2518,6 +2560,50 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* Legal Links */}
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: '8px',
+          color: '#666666',
+          textAlign: 'center',
+          display: 'flex',
+          gap: '15px',
+          alignItems: 'center'
+        }}>
+          <span>© 2025 Infarill LLC</span>
+          <button
+            onClick={() => window.open('/privacy-policy.html', '_blank')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#00aa00',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              fontSize: '8px',
+              fontFamily: 'monospace'
+            }}
+          >
+            Privacy Policy
+          </button>
+          <button
+            onClick={() => window.open('/terms-of-service.html', '_blank')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#00aa00',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              fontSize: '8px',
+              fontFamily: 'monospace'
+            }}
+          >
+            Terms of Service
+          </button>
+        </div>
 
         {/* Punch Animation Keyframes */}
         <style>{`
