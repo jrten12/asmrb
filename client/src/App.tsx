@@ -2120,20 +2120,7 @@ function App() {
           </div>
         </div>
         
-        {/* Logo - bottom right */}
-        <img 
-          src="/westridge-logo.png" 
-          alt="Westridge Ledger Bank"
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            width: '80px',
-            height: 'auto',
-            filter: 'drop-shadow(0 0 10px #00ff00)',
-            zIndex: 1000
-          }}
-        />
+
       </div>
     );
   }
@@ -2378,18 +2365,28 @@ function App() {
             }}>
               {new Date().toLocaleTimeString()}
             </div>
-            <img 
-              src="/bank-teller-1988-logo.png" 
-              alt="Bank Teller 1988"
-              style={{
-                width: window.innerWidth < 768 ? '100px' : '120px',
-                maxWidth: '70vw',
-                height: 'auto',
-                marginTop: '5px',
-                filter: 'drop-shadow(0 0 10px #00ff00)',
-                imageRendering: 'pixelated'
-              }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '5px' }}>
+              <img 
+                src="/bank-teller-1988-logo.png" 
+                alt="Bank Teller 1988"
+                style={{
+                  width: window.innerWidth < 768 ? '100px' : '120px',
+                  maxWidth: '60vw',
+                  height: 'auto',
+                  filter: 'drop-shadow(0 0 10px #00ff00)',
+                  imageRendering: 'pixelated'
+                }}
+              />
+              <img 
+                src="/westridge-logo.png" 
+                alt="Westridge Ledger Bank"
+                style={{
+                  width: window.innerWidth < 768 ? '40px' : '50px',
+                  height: 'auto',
+                  filter: 'drop-shadow(0 0 10px #00ff00)'
+                }}
+              />
+            </div>
             {/* Punch Status Display */}
             {punchStatus && (
               <div style={{
