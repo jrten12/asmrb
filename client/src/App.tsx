@@ -3611,7 +3611,9 @@ function App() {
             {/* End of Shift Button - Below score */}
             <button
               onClick={() => {
-                punchOut();
+                if (window.confirm('Are you sure you want to end your shift? This will close the game.')) {
+                  punchOut();
+                }
               }}
               style={{
                 marginTop: '8px',
