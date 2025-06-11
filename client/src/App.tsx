@@ -2687,8 +2687,11 @@ function App() {
           minHeight: window.innerWidth < 768 ? '280px' : '320px',
           maxHeight: window.innerWidth < 768 ? '380px' : '420px',
           overflowY: 'auto',
+          overflowX: 'hidden',
           boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
-          WebkitOverflowScrolling: 'touch' // iOS smooth scrolling
+          WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
+          boxSizing: 'border-box',
+          width: '100%'
         }}>
           <div style={{ 
             color: '#ffff00', 
@@ -2715,9 +2718,11 @@ function App() {
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                    width: '100%',
                     maxWidth: '100%',
                     overflow: 'hidden',
-                    wordWrap: 'break-word'
+                    wordWrap: 'break-word',
+                    boxSizing: 'border-box'
                   }}
                   onMouseOver={(e) => {
                     e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 0, 0.3), rgba(255, 255, 0, 0.2))';
@@ -2757,7 +2762,10 @@ function App() {
                         gap: '4px',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         wordBreak: 'break-word',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        width: '100%',
+                        maxWidth: '100%',
+                        boxSizing: 'border-box'
                       }}>
                         <span style={{ 
                           color: '#00ffff', 
@@ -2774,15 +2782,18 @@ function App() {
                           fontSize: window.innerWidth < 768 ? '14px' : '16px',
                           fontFamily: 'monospace',
                           background: 'rgba(255, 255, 255, 0.2)',
-                          padding: '4px 10px',
+                          padding: '4px 8px',
                           borderRadius: '6px',
                           border: '1px solid rgba(255, 255, 255, 0.4)',
                           letterSpacing: '0.4px',
                           wordBreak: 'break-word',
+                          width: '100%',
                           maxWidth: '100%',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          textShadow: '0 0 2px rgba(255, 255, 255, 0.5)'
+                          textShadow: '0 0 2px rgba(255, 255, 255, 0.5)',
+                          boxSizing: 'border-box',
+                          display: 'block'
                         }}>
                           {key === 'signature' && typeof value === 'string' && value.includes('|') 
                             ? value.split('|')[0] + ' (Signature Analysis Available)'
