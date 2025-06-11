@@ -2761,17 +2761,47 @@ function App() {
           border: '3px solid #ffff00',
           padding: '16px',
           background: 'rgba(255, 255, 0, 0.1)',
-          borderRadius: '4px'
+          borderRadius: '4px',
+          position: 'relative'
         }}>
-          <h1 style={{ margin: '0 0 8px 0', fontSize: '22px', color: '#ffff00' }}>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: window.innerWidth < 768 ? '26px' : '22px', color: '#ffff00' }}>
             CUSTOMER: {currentCustomer.name}
           </h1>
-          <div style={{ color: '#00ff00', marginBottom: '4px', fontSize: '24px', fontWeight: 'bold', letterSpacing: '2px' }}>
+          <div style={{ color: '#00ff00', marginBottom: '4px', fontSize: window.innerWidth < 768 ? '28px' : '24px', fontWeight: 'bold', letterSpacing: '2px' }}>
             ACCOUNT: {currentCustomer.transaction.accountNumber}
           </div>
-          <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '18px' }}>
+          <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: window.innerWidth < 768 ? '22px' : '18px' }}>
             REQUEST: {currentCustomer.transaction.type.toUpperCase()} ${currentCustomer.transaction.amount}
           </div>
+          
+          {/* Music button in bottom-left of customer box */}
+          <button
+            onClick={toggleMusic}
+            style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '8px',
+              background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
+              border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+              borderRadius: '50%',
+              color: '#ffffff',
+              fontSize: window.innerWidth < 768 ? '16px' : '14px',
+              fontWeight: 'bold',
+              padding: window.innerWidth < 768 ? '8px' : '6px',
+              cursor: 'pointer',
+              boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
+              transition: 'all 0.2s',
+              width: window.innerWidth < 768 ? '36px' : '32px',
+              height: window.innerWidth < 768 ? '36px' : '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}
+            title={musicMuted ? "Unmute music" : "Mute music"}
+          >
+            {musicMuted ? '🔇' : '🎵'}
+          </button>
         </div>
       ) : (
         <div style={{
@@ -2782,8 +2812,8 @@ function App() {
           background: 'rgba(0, 50, 0, 0.3)',
           borderRadius: '4px'
         }}>
-          <h1 style={{ margin: 0, fontSize: '20px', color: '#888888' }}>NO CUSTOMER PRESENT</h1>
-          <div style={{ fontSize: '14px', color: '#00aaff' }}>Tap CALL CUSTOMER to begin</div>
+          <h1 style={{ margin: 0, fontSize: window.innerWidth < 768 ? '24px' : '20px', color: '#888888' }}>NO CUSTOMER PRESENT</h1>
+          <div style={{ fontSize: window.innerWidth < 768 ? '18px' : '14px', color: '#00aaff' }}>Tap CALL CUSTOMER to begin</div>
         </div>
       )}
 
@@ -6602,54 +6632,7 @@ function App() {
         </div>
       )}
       
-      {/* Music button and logo positioned after END SHIFT button */}
-      {gamePhase === 'working' && (
-        <div style={{
-          position: 'absolute',
-          bottom: '10px',
-          left: '0px',
-          right: '0px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0 20px',
-          zIndex: 100
-        }}>
-          <button
-            onClick={toggleMusic}
-            style={{
-              background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
-              border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
-              borderRadius: '50%',
-              color: '#ffffff',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              padding: '4px',
-              cursor: 'pointer',
-              boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
-              transition: 'all 0.2s',
-              width: '28px',
-              height: '28px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title={musicMuted ? "Unmute music" : "Mute music"}
-          >
-            {musicMuted ? '🔇' : '🎵'}
-          </button>
-          
-          <img 
-            src="/westridge-logo.png" 
-            alt="Westridge Ledger Bank"
-            style={{
-              width: '40px',
-              height: 'auto',
-              filter: 'drop-shadow(0 0 5px #00ff00)'
-            }}
-          />
-        </div>
-      )}
+
 
     </div>
   );
