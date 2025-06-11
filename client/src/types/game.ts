@@ -7,6 +7,7 @@ export interface Customer {
   suspiciousLevel: number;
   patience: number;
   maxPatience: number;
+  isFraudulent: boolean;
 }
 
 export interface Transaction {

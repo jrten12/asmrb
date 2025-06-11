@@ -412,7 +412,13 @@ function App() {
       customer.documents = generateDocuments(customer.name, customer.transaction, 0);
     }
     
-    return customer;
+    // Add isFraudulent property based on document validity
+    const isFraudulent = customer.documents.some(doc => !doc.isValid);
+    
+    return {
+      ...customer,
+      isFraudulent
+    };
   };
 
   // Initialize game properly on first mount
@@ -2091,8 +2097,39 @@ function App() {
         fontFamily: 'monospace',
         color: '#00ff00',
         padding: '20px',
-        overflowY: 'auto'
+        overflowY: 'auto',
+        position: 'relative'
       }}>
+        {/* Music Button - Always Visible */}
+        <button
+          onClick={toggleMusic}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: musicMuted ? '#ff0000' : '#00ff00',
+            border: '3px solid #ffffff',
+            borderRadius: '50%',
+            color: '#000000',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            padding: '15px',
+            cursor: 'pointer',
+            boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
+            transition: 'all 0.3s ease',
+            width: '60px',
+            height: '60px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            fontFamily: 'monospace'
+          }}
+          title={musicMuted ? "Click to turn music ON" : "Click to turn music OFF"}
+        >
+          {musicMuted ? '🔇' : '🎵'}
+        </button>
+        
         {/* CRT Scanlines */}
         <div style={{
           position: 'absolute',
@@ -3560,41 +3597,50 @@ function App() {
             {currentCustomer && (
               <button
                 onClick={() => {
-                  playSound('police_radio');
-                  setTerminalOutput(prev => [...prev, 
-                    "> FRAUD ALERT ACTIVATED",
-                    "*** CALLING BANK SECURITY ***",
-                    "Radio dispatch: Units responding...",
-                    "Customer being detained for investigation"
-                  ]);
+                  // Check if customer is actually fraudulent (based on document mismatches)
+                  const hasDocumentMismatches = currentCustomer?.documents?.some(doc => !doc.isValid);
                   
-                  // Start arrest animation sequence
-                  setTimeout(() => {
-                    setShowArrestAnimation(true);
+                  if (hasDocumentMismatches) {
+                    // Correct fraud detection
+                    playSound('approve');
+                    setGameScore(prev => ({ 
+                      ...prev, 
+                      score: prev.score + 100, 
+                      correctTransactions: prev.correctTransactions + 1 
+                    }));
+                    setTerminalOutput(prev => [...prev, 
+                      "========== FRAUD REPORT ACCEPTED ==========",
+                      "✓ WESTFIELD POLICE DEPARTMENT NOTIFIED",
+                      "✓ SUSPECT WILL BE APPREHENDED",
+                      "✓ +100 POINTS FOR FRAUD DETECTION",
+                      "*** EXCELLENT DETECTIVE WORK ***"
+                    ]);
                     
-                    // Close animation and proceed to next customer
+                    // Trigger Westfield Police Department arrest animation
+                    setShowArrestAnimation(true);
+                  } else {
+                    // False accusation - penalize player
+                    handleTransactionError("Falsely accused legitimate customer of fraud");
+                    setTerminalOutput(prev => [...prev, 
+                      "ERROR: FALSE FRAUD ACCUSATION",
+                      "Customer was legitimate - bank apologizes",
+                      "Supervisor notified of error",
+                      "-100 points penalty applied"
+                    ]);
+                    playSound('reject');
+                    
+                    // Generate new customer after error
                     setTimeout(() => {
-                      setShowArrestAnimation(false);
-                      handleCorrectTransaction();
-                      
-                      // Generate next customer after brief pause
-                      setTimeout(() => {
-                        setCurrentCustomer(generateCustomerLocal());
-                        setVerificationState({
-                          accountLookedUp: false,
-                          accountNotFound: false,
-                          signatureCompared: false,
-                          signatureFraud: false,
-                          transactionProcessed: false
-                        });
-                        setTerminalOutput(prev => [...prev, 
-                          "",
-                          "> Next customer approaching...",
-                          "Ready to process transaction"
-                        ]);
-                      }, 1000);
-                    }, 4000);
-                  }, 2000);
+                      setCurrentCustomer(generateCustomerLocal());
+                      setVerificationState({
+                        accountLookedUp: false,
+                        accountNotFound: false,
+                        signatureCompared: false,
+                        signatureFraud: false,
+                        transactionProcessed: false
+                      });
+                    }, 2000);
+                  }
                 }}
                 style={{
                   background: 'rgba(150, 0, 0, 0.8)',
