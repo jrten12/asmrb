@@ -82,6 +82,8 @@ interface GameScore {
   errorDetails: string[];
   customersCalledWithoutService: number;
   dismissalWarningGiven: boolean;
+  falseFraudAccusations: number;
+  consecutiveFalseFraud: number;
 }
 
 interface LeaderboardEntry {
@@ -118,7 +120,9 @@ function App() {
     consecutiveErrors: 0,
     errorDetails: [] as string[],
     customersCalledWithoutService: 0,
-    dismissalWarningGiven: false
+    dismissalWarningGiven: false,
+    falseFraudAccusations: 0,
+    consecutiveFalseFraud: 0
   });
   const [shiftStartTime, setShiftStartTime] = useState<number>(0);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
@@ -1344,7 +1348,102 @@ function App() {
         return;
       }
       
-      setTerminalOutput(prev => [...prev, "> " + command, "TRANSACTION REJECTED", "Customer dismissed"]);
+      // Check if this is a false fraud accusation (rejecting a legitimate customer)
+      if (!currentCustomer.isFraudulent) {
+        // Player incorrectly rejected a legitimate customer
+        setGameScore(prev => ({
+          ...prev,
+          falseFraudAccusations: prev.falseFraudAccusations + 1,
+          consecutiveFalseFraud: prev.consecutiveFalseFraud + 1,
+          errors: prev.errors + 1,
+          errorDetails: [...prev.errorDetails, "Incorrectly rejected legitimate customer"]
+        }));
+        
+        // Check for dismissal conditions (same as skipping customers)
+        const newFalseFraud = gameScore.consecutiveFalseFraud + 1;
+        if (newFalseFraud >= 3 && !gameScore.dismissalWarningGiven) {
+          // Give warning for excessive false fraud accusations
+          setGameScore(prev => ({...prev, dismissalWarningGiven: true}));
+          setManagerMessage("You've incorrectly accused 3 legitimate customers of fraud. Bank policy requires accuracy in fraud detection. One more false accusation will result in immediate termination.");
+          setShowManagerWarning(true);
+          
+          setTimeout(() => {
+            setShowManagerWarning(false);
+          }, 8000);
+          
+          setTerminalOutput(prev => [...prev, 
+            "> " + command, 
+            "========== MANAGER OVERRIDE ==========",
+            "*** WARNING: FALSE FRAUD ACCUSATION ***",
+            "LEGITIMATE CUSTOMER INCORRECTLY REJECTED",
+            "STATUS: CUSTOMER COMPLAINT FILED",
+            "MANAGER INTERVENTION REQUIRED",
+            "======================================",
+            "",
+            "CUSTOMER: \"I've banked here for years!\"",
+            "CUSTOMER: \"This is completely unacceptable!\"",
+            "CUSTOMER: \"I'm calling your manager!\""
+          ]);
+          
+        } else if (newFalseFraud >= 4) {
+          // Terminate for excessive false fraud accusations
+          setTerminalOutput(prev => [...prev, 
+            "> " + command,
+            "========== EMPLOYMENT TERMINATED ==========",
+            "*** EXCESSIVE FALSE FRAUD ACCUSATIONS ***",
+            "REASON: Incorrectly accused 4+ legitimate customers",
+            "BANK POLICY: Zero tolerance for discrimination",
+            "STATUS: Immediate termination effective",
+            "CUSTOMER COMPLAINTS: Multiple filed",
+            "==========================================",
+            "",
+            "SECURITY: Please escort this employee out",
+            "HR: Employee badge deactivated",
+            "BRANCH MANAGER: Unacceptable performance"
+          ]);
+          
+          setTimeout(() => {
+            setGamePhase('punch_out');
+          }, 5000);
+          return;
+        } else {
+          setTerminalOutput(prev => [...prev, 
+            "> " + command, 
+            "========== CUSTOMER COMPLAINT ==========",
+            "*** FALSE FRAUD ACCUSATION ***",
+            "LEGITIMATE CUSTOMER REJECTED",
+            "STATUS: Formal complaint filed",
+            "IMPACT: Customer relationship damaged",
+            "======================================",
+            "",
+            "CUSTOMER: \"This is outrageous!\"",
+            "CUSTOMER: \"I'm a legitimate account holder!\"",
+            "CUSTOMER: \"I'll be speaking to your manager!\""
+          ]);
+        }
+      } else {
+        // Correctly rejected fraudulent customer
+        setGameScore(prev => ({
+          ...prev,
+          correctTransactions: prev.correctTransactions + 1,
+          consecutiveFalseFraud: 0, // Reset false fraud streak
+          score: prev.score + 50
+        }));
+        
+        setTerminalOutput(prev => [...prev, 
+          "> " + command, 
+          "========== FRAUD PREVENTED ==========",
+          "*** SUSPICIOUS TRANSACTION BLOCKED ***",
+          "EXCELLENT FRAUD DETECTION",
+          "BANK ASSETS: Protected",
+          "CUSTOMER SAFETY: Maintained",
+          "====================================="
+        ]);
+        
+        // Trigger fraud arrest animation
+        setShowArrestAnimation(true);
+      }
+      
       playSound('reject');
       setTimeout(() => {
         setCurrentCustomer(null);
@@ -1654,7 +1753,9 @@ function App() {
       consecutiveErrors: 0, 
       errorDetails: [],
       customersCalledWithoutService: 0,
-      dismissalWarningGiven: false
+      dismissalWarningGiven: false,
+      falseFraudAccusations: 0,
+      consecutiveFalseFraud: 0
     });
     setCurrentCustomer(null);
     resetVerificationState();
