@@ -2574,31 +2574,32 @@ function App() {
       boxSizing: 'border-box'
     }}>
       
-      {/* BRIGHT VISIBLE MUSIC BUTTON */}
+      {/* MUSIC BUTTON */}
       <div
         onClick={toggleMusic}
         style={{
           position: 'fixed',
-          top: '10px',
-          right: '10px',
-          width: '80px',
-          height: '80px',
+          top: '15px',
+          right: '15px',
+          width: '50px',
+          height: '50px',
           backgroundColor: musicMuted ? '#FF0000' : '#00FF00',
-          border: '4px solid #FFFFFF',
+          border: '2px solid #FFFFFF',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '32px',
+          fontSize: '20px',
           color: '#000000',
           cursor: 'pointer',
           zIndex: 99999,
-          boxShadow: '0 0 30px #FFFFFF'
+          boxShadow: '0 0 15px rgba(255, 255, 255, 0.8)',
+          fontWeight: 'bold'
         }}
+        title={musicMuted ? "Click to turn music ON" : "Click to turn music OFF"}
       >
         {musicMuted ? '🔇' : '🎵'}
       </div>
-      
 
       
 
