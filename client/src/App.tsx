@@ -288,14 +288,8 @@ function App() {
       return newStreak;
     });
     
-    // Check if ad should be shown every 5 customers
-    setCustomersServed(prev => {
-      const newCount = prev + 1;
-      if (newCount % 5 === 0) {
-        showInterstitialAd();
-      }
-      return newCount;
-    });
+    // Track customers served
+    setCustomersServed(prev => prev + 1);
   };
 
 
@@ -1743,13 +1737,7 @@ function App() {
     });
     
     // Check if ad should be shown every 5 customers
-    setCustomersServed(prev => {
-      const newCount = prev + 1;
-      if (newCount % 5 === 0) {
-        showInterstitialAd();
-      }
-      return newCount;
-    });
+    setCustomersServed(prev => prev + 1);
   };
 
   const handleError = () => {
@@ -5150,46 +5138,7 @@ function App() {
         }
       `}</style>
 
-      {/* AdMob Ad Break Screen */}
-      {showAdBreak && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(45deg, #000000, #001100)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 5000,
-          color: '#00ff00',
-          fontFamily: 'monospace'
-        }}>
-          <div style={{
-            fontSize: '24px',
-            marginBottom: '20px',
-            textAlign: 'center'
-          }}>
-            AD BREAK
-          </div>
-          <div style={{
-            fontSize: '48px',
-            marginBottom: '20px',
-            color: '#00ff00',
-            textShadow: '0 0 10px #00ff00'
-          }}>
-            {adCountdown}
-          </div>
-          <div style={{
-            fontSize: '16px',
-            opacity: 0.7
-          }}>
-            Returning to game...
-          </div>
-        </div>
-      )}
+
 
 
 
