@@ -2658,40 +2658,32 @@ function App() {
       
 
 
-      {/* Music Control Button - Always Visible */}
+      {/* FIXED MUSIC BUTTON - ALWAYS VISIBLE */}
       <button
         onClick={toggleMusic}
         style={{
           position: 'fixed',
-          top: '10px',
-          right: '10px',
-          background: musicMuted ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 255, 0, 0.9)',
-          border: '2px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
+          top: '15px',
+          right: '15px',
+          background: musicMuted ? '#ff0000' : '#00ff00',
+          border: '3px solid #ffffff',
           borderRadius: '50%',
-          color: '#ffffff',
-          fontSize: '18px',
+          color: '#000000',
+          fontSize: '24px',
           fontWeight: 'bold',
-          padding: '10px',
+          padding: '15px',
           cursor: 'pointer',
-          boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)',
+          boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
           transition: 'all 0.3s ease',
-          width: '48px',
-          height: '48px',
+          width: '60px',
+          height: '60px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 2000,
+          zIndex: 9999,
           fontFamily: 'monospace'
         }}
-        title={musicMuted ? "Unmute background music" : "Mute background music"}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = musicMuted ? '0 0 15px rgba(255, 0, 0, 0.7)' : '0 0 15px rgba(0, 255, 0, 0.7)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = musicMuted ? '0 0 10px rgba(255, 0, 0, 0.5)' : '0 0 10px rgba(0, 255, 0, 0.5)';
-        }}
+        title={musicMuted ? "Click to turn music ON" : "Click to turn music OFF"}
       >
         {musicMuted ? '🔇' : '🎵'}
       </button>
@@ -3998,16 +3990,16 @@ function App() {
                     // Correct determination - fraudulent signature marked as invalid
                     setVerificationState(prev => ({...prev, signatureCompared: true, signatureFraud: true}));
                     setTerminalOutput(prev => [...prev, 
-                      "========== SIGNATURE REJECTED ==========",
-                      "✗ SIGNATURES DO NOT MATCH",
-                      "✗ VISUAL COMPARISON: INCONSISTENT", 
-                      "✗ HANDWRITING ANALYSIS: SUSPICIOUS",
-                      "STATUS: IDENTITY NOT CONFIRMED",
-                      "*** FRAUD DETECTED BY TELLER ***",
-                      "EXCELLENT FRAUD DETECTION SKILLS",
-                      "======================================="
+                      "========== FRAUD ALERT ==========",
+                      "✗ SIGNATURE MISMATCH DETECTED",
+                      "✗ CALLING WESTFIELD POLICE DEPT", 
+                      "✗ SUSPECT WILL BE ARRESTED",
+                      "*** EXCELLENT FRAUD DETECTION ***",
+                      "================================="
                     ]);
-                    playSound('approve'); // Correct decision gets approval sound
+                    playSound('approve');
+                    // Trigger Westfield Police Department arrest animation
+                    setShowArrestAnimation(true);
                   } else {
                     // Player marked legitimate signature as INVALID - this is an error!
                     handleTransactionError("Rejected valid signature - incorrect fraud determination");
