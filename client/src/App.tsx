@@ -2007,35 +2007,6 @@ function App() {
           </div>
         </div>
         
-        {/* Music button - bottom left */}
-        <button
-          onClick={toggleMusic}
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
-            border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
-            borderRadius: '50%',
-            color: '#ffffff',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            padding: '8px',
-            cursor: 'pointer',
-            boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
-            transition: 'all 0.2s',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-          title={musicMuted ? "Unmute music" : "Mute music"}
-        >
-          {musicMuted ? '🔇' : '🎵'}
-        </button>
-        
         {/* Logo - bottom right */}
         <img 
           src="/westridge-logo.png" 
@@ -2678,34 +2649,7 @@ function App() {
             REQUEST: {currentCustomer.transaction.type.toUpperCase()} ${currentCustomer.transaction.amount}
           </div>
           
-          {/* Music button in bottom-left of customer box */}
-          <button
-            onClick={toggleMusic}
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              background: musicMuted ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)',
-              border: '1px solid ' + (musicMuted ? '#ff0000' : '#00ff00'),
-              borderRadius: '50%',
-              color: '#ffffff',
-              fontSize: window.innerWidth < 768 ? '16px' : '14px',
-              fontWeight: 'bold',
-              padding: window.innerWidth < 768 ? '8px' : '6px',
-              cursor: 'pointer',
-              boxShadow: '0 0 5px rgba(0, 255, 0, 0.3)',
-              transition: 'all 0.2s',
-              width: window.innerWidth < 768 ? '36px' : '32px',
-              height: window.innerWidth < 768 ? '36px' : '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000
-            }}
-            title={musicMuted ? "Unmute music" : "Mute music"}
-          >
-            {musicMuted ? '🔇' : '🎵'}
-          </button>
+
         </div>
       ) : (
         <div style={{
