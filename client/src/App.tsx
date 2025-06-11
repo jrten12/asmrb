@@ -1808,7 +1808,8 @@ function App() {
         correctTransactions: newTransactionCount,
         consecutiveErrors: 0, // Reset consecutive errors on correct transaction
         customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
-        dismissalWarningGiven: false // Reset warning flag
+        dismissalWarningGiven: false, // Reset warning flag
+        consecutiveFalseFraud: 0 // Reset false fraud streak on successful transaction
       };
     });
     
