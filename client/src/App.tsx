@@ -2365,13 +2365,13 @@ function App() {
             }}>
               {new Date().toLocaleTimeString()}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '5px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginTop: '10px' }}>
               <img 
                 src="/bank-teller-1988-logo.png" 
                 alt="Bank Teller 1988"
                 style={{
-                  width: window.innerWidth < 768 ? '100px' : '120px',
-                  maxWidth: '60vw',
+                  width: window.innerWidth < 768 ? '130px' : '160px',
+                  maxWidth: '55vw',
                   height: 'auto',
                   filter: 'drop-shadow(0 0 10px #00ff00)',
                   imageRendering: 'pixelated'
@@ -2381,7 +2381,7 @@ function App() {
                 src="/westridge-logo.png" 
                 alt="Westridge Ledger Bank"
                 style={{
-                  width: window.innerWidth < 768 ? '40px' : '50px',
+                  width: window.innerWidth < 768 ? '60px' : '75px',
                   height: 'auto',
                   filter: 'drop-shadow(0 0 10px #00ff00)'
                 }}
