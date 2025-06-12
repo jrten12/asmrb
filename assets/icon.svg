@@ -1,0 +1,6 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1024" height="1024" fill="#003300"/>
+<circle cx="512" cy="512" r="400" stroke="#00ff00" stroke-width="8" fill="none"/>
+<text x="512" y="460" font-family="monospace" font-size="48" fill="#00ff00" text-anchor="middle">TELLERS</text>
+<text x="512" y="560" font-family="monospace" font-size="48" fill="#00ff00" text-anchor="middle">WINDOW</text>
+</svg>

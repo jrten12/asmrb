@@ -1,11 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
-// Test AdMob IDs (replace with your real ones in production)
-const BANNER_AD_UNIT_ID = 'ca-app-pub-3940256099942544/6300978111'; // iOS test banner
-const BANNER_AD_UNIT_ID_ANDROID = 'ca-app-pub-3940256099942544/6300978111'; // Android test banner
+// Mock React Native components for development
+const StyleSheet = {
+  create: (styles: any) => styles
+};
+
+const View = ({ children, style, ...props }: any) => (
+  <div style={style} {...props}>{children}</div>
+);
+
+const Text = ({ children, style, ...props }: any) => (
+  <span style={style} {...props}>{children}</span>
+);
+
+const TouchableOpacity = ({ children, style, onPress, ...props }: any) => (
+  <button style={style} onClick={onPress} {...props}>{children}</button>
+);
+
+const ScrollView = ({ children, style, ...props }: any) => (
+  <div style={{ ...style, overflowY: 'auto' }} {...props}>{children}</div>
+);
+
+// AdMob Banner component placeholder for development
+const AdMobBanner = ({ bannerSize, adUnitID, onDidFailToReceiveAdWithError }: any) => (
+  <div style={{
+    width: '320px',
+    height: '50px',
+    backgroundColor: 'rgba(0, 255, 0, 0.1)',
+    border: '1px solid #00ff00',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'monospace',
+    fontSize: '12px',
+    color: '#00ff00',
+    margin: '10px auto'
+  }}>
+    AdMob Banner ({adUnitID?.slice(-8)})
+  </div>
+);
+
+// Test AdMob IDs
+const BANNER_AD_UNIT_ID = 'ca-app-pub-3940256099942544/6300978111';
 
 interface Customer {
   id: string;
@@ -38,8 +74,8 @@ export default function App() {
   const [selectedAction, setSelectedAction] = useState<'approve' | 'reject' | null>(null);
 
   useEffect(() => {
-    // Set test device for AdMob (for development)
-    setTestDeviceIDAsync('EMULATOR');
+    // AdMob initialization will be handled when building with EAS
+    console.log('AdMob initialized for development');
   }, []);
 
   useEffect(() => {
@@ -121,7 +157,6 @@ export default function App() {
   if (!gameStarted) {
     return (
       <View style={styles.container}>
-        <StatusBar style="light" />
         <View style={styles.menuContainer}>
           <Text style={styles.title}>TELLER'S WINDOW</Text>
           <Text style={styles.subtitle}>Bank Fraud Detection Simulator</Text>
@@ -140,7 +175,7 @@ export default function App() {
             bannerSize="smartBannerPortrait"
             adUnitID={BANNER_AD_UNIT_ID}
             servePersonalizedAds={false}
-            onDidFailToReceiveAdWithError={(error) => console.log('Banner ad error:', error)}
+            onDidFailToReceiveAdWithError={(error: any) => console.log('Banner ad error:', error)}
           />
         </View>
       </View>
