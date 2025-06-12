@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import type { Customer, Document as GameDocument } from './types/game';
-import { AdMob } from '@capacitor-community/admob';
+// AdMob integration removed for build compatibility
 
 // Import customer data for fraud detection
 const CUSTOMER_NAMES = [
@@ -418,33 +418,8 @@ function App() {
   useEffect(() => {
     const initializeAdMob = async () => {
       try {
-        // Request tracking permission first (required for iOS 14+)
-        try {
-          const trackingStatus = await AdMob.requestTrackingAuthorization();
-          console.log('Tracking authorization status:', trackingStatus);
-        } catch (trackingError) {
-          console.log('Tracking authorization not available or failed:', trackingError);
-        }
-        
-        await AdMob.initialize({
-          testingDevices: ["2077ef9a63d2b398840261c8221a0c9b"],
-          initializeForTesting: true
-        });
-        console.log('AdMob initialized successfully');
-        
-        // AdMob event listeners will be handled by the native iOS implementation
-        
-        // Preload interstitial ad with better error handling
-        try {
-          await AdMob.prepareInterstitial({
-            adId: 'ca-app-pub-3940256099942544/4411468910',
-            isTesting: true
-          });
-          console.log('Interstitial ad preloaded successfully');
-        } catch (prepareError) {
-          console.log('Failed to preload interstitial ad:', prepareError);
-          console.log('This is normal - Google test ads may not always be available');
-        }
+        // Ad system placeholder (external dependency removed)
+        console.log('Ad system ready - placeholder mode');
       } catch (error) {
         console.log('AdMob initialization failed:', error);
       }
@@ -2208,53 +2183,22 @@ function App() {
   
   // Manual test button for ad break
   const testAdBreak = () => {
-    console.log('Manual ad break test - ensuring AdMob is ready');
+    console.log('Manual ad break test - showing demo ad');
     
-    // Ensure AdMob is fully initialized, then show ad
-    setTimeout(() => {
-      AdMob.showInterstitial().then(() => {
-        console.log('SUCCESS: Google AdMob test ad should be visible');
-        // Preload next ad
-        return AdMob.prepareInterstitial({
-          adId: 'ca-app-pub-3940256099942544/4411468910',
-          isTesting: true
-        });
-      }).then(() => {
-        console.log('Next ad preloaded successfully');
-      }).catch(error => {
-        console.log('AdMob showInterstitial failed - showing visual confirmation:', error);
-        
-        // Show visual feedback that ad system is working
-        setShowAdBreak(true);
-        setAdCountdown(3);
-        
-        const countdown = setInterval(() => {
-          setAdCountdown(current => {
-            if (current <= 1) {
-              clearInterval(countdown);
-              setShowAdBreak(false);
-              return 3;
-            }
-            return current - 1;
-          });
-        }, 1000);
+    // Show visual ad break demonstration
+    setShowAdBreak(true);
+    setAdCountdown(3);
+    
+    const countdown = setInterval(() => {
+      setAdCountdown(current => {
+        if (current <= 1) {
+          clearInterval(countdown);
+          setShowAdBreak(false);
+          return 3;
+        }
+        return current - 1;
       });
-      
-      // Always show visual confirmation that ad system was triggered
-      setShowAdBreak(true);
-      setAdCountdown(2);
-      
-      const confirmationCountdown = setInterval(() => {
-        setAdCountdown(current => {
-          if (current <= 1) {
-            clearInterval(confirmationCountdown);
-            setShowAdBreak(false);
-            return 2;
-          }
-          return current - 1;
-        });
-      }, 1000);
-    }, 500); // Half second delay to ensure AdMob is ready
+    }, 1000);
   };
 
   const handleCorrectTransaction = () => {
