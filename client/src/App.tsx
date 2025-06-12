@@ -2133,13 +2133,13 @@ function App() {
       };
     });
     
-    // Check if ad should be shown every 5 customers
+    // Check if ad should be shown every 1 customer (for testing)
     setCustomersServed(prev => {
       const newCount = prev + 1;
       console.log(`Customer count: ${newCount}`);
-      if (newCount % 5 === 0) {
+      if (newCount % 1 === 0) {
         console.log('Should show ad at customer', newCount);
-        // Show interstitial ad every 5 customers
+        // Show interstitial ad every 1 customer (testing mode)
         setShowAdBreak(true);
         setAdCountdown(5);
         
