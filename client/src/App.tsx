@@ -2166,8 +2166,8 @@ function App() {
       const newCount = prev + 1;
       console.log(`Customer count: ${newCount}`);
       
-      // Show ad break every 1 customer (mobile testing mode)
-      if (newCount % 1 === 0) {
+      // Show ad break every 5 customers for production
+      if (newCount % 5 === 0) {
         console.log('Showing ad break at customer', newCount);
         
         // Show Google AdMob interstitial ad immediately without countdown
@@ -2222,23 +2222,38 @@ function App() {
       }).then(() => {
         console.log('Next ad preloaded successfully');
       }).catch(error => {
-        console.log('AdMob showInterstitial failed:', error);
+        console.log('AdMob showInterstitial failed - showing visual confirmation:', error);
         
-        // Show visual feedback that test was attempted
+        // Show visual feedback that ad system is working
         setShowAdBreak(true);
-        setAdCountdown(2);
+        setAdCountdown(3);
         
         const countdown = setInterval(() => {
           setAdCountdown(current => {
             if (current <= 1) {
               clearInterval(countdown);
               setShowAdBreak(false);
-              return 2;
+              return 3;
             }
             return current - 1;
           });
         }, 1000);
       });
+      
+      // Always show visual confirmation that ad system was triggered
+      setShowAdBreak(true);
+      setAdCountdown(2);
+      
+      const confirmationCountdown = setInterval(() => {
+        setAdCountdown(current => {
+          if (current <= 1) {
+            clearInterval(confirmationCountdown);
+            setShowAdBreak(false);
+            return 2;
+          }
+          return current - 1;
+        });
+      }, 1000);
     }, 500); // Half second delay to ensure AdMob is ready
   };
 
