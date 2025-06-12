@@ -1,22 +1,22 @@
 {
   "expo": {
-    "name": "Bank Teller 1988",
-    "slug": "bank-teller-1988",
+    "name": "Bank Teller Game",
+    "slug": "bank-teller-game",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bankteller.app",
+      "bundleIdentifier": "com.bankteller.game",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This app uses advertising ID to show personalized ads and support the game development.",
@@ -27,10 +27,13 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#ffffff"
       },
-      "package": "com.bankteller.app",
+      "package": "com.bankteller.game",
       "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [

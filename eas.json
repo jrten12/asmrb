@@ -1,26 +1,18 @@
 {
   "cli": {
-    "version": ">= 7.8.0"
+    "version": ">= 5.9.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium"
-      }
+      "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium",
-        "cocoapods": "1.15.2"
-      }
+      "distribution": "internal"
     },
     "production": {
       "ios": {
-        "resourceClass": "m-medium",
-        "cocoapods": "1.15.2"
+        "simulator": false
       }
     }
   },
