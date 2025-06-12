@@ -995,19 +995,39 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // Always show account information - player must compare documents manually
-            const balance = Math.floor(Math.random() * 3000) + 500;
-            setAccountBalance(balance);
-            setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-            
-            setTerminalOutput(prev => [...prev, 
-              "> LOOKUP " + accountNum,
-              "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
-              "STATUS: ACTIVE CUSTOMER",
-              "BALANCE: $" + balance.toLocaleString(),
-              "BANK RECORDS NOW DISPLAYED BELOW"
-            ]);
-            playSound('approve');
+            // Check if customer is suspicious - accounts of suspicious customers should not be found
+            if (currentCustomer && currentCustomer.suspiciousLevel >= 3) {
+              // Suspicious customers have invalid accounts
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: true}));
+              
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✗✗✗ ACCOUNT NOT FOUND ✗✗✗",
+                "ERROR: NO RECORD IN SYSTEM",
+                "STATUS: INVALID ACCOUNT NUMBER",
+                "RECOMMENDATION: REJECT TRANSACTION",
+                "POTENTIAL FRAUD INDICATOR"
+              ]);
+              playSound('reject');
+            } else {
+              // Generate deterministic account balance for legitimate customers
+              let sum = 0;
+              for (let i = 0; i < accountNum.length; i++) {
+                sum += accountNum.charCodeAt(i);
+              }
+              const balance = ((sum * 123) % 5000) + 500; // $500 to $5500
+              setAccountBalance(balance);
+              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+              
+              setTerminalOutput(prev => [...prev, 
+                "> LOOKUP " + accountNum,
+                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+                "STATUS: ACTIVE CUSTOMER",
+                "BALANCE: $" + balance.toLocaleString(),
+                "BANK RECORDS NOW DISPLAYED BELOW"
+              ]);
+              playSound('approve');
+            }
           }, 800);
         }, 1200);
       }
@@ -1921,6 +1941,81 @@ function App() {
     localStorage.setItem('bankTellerLeaderboard', JSON.stringify(leaderboard));
     setGamePhase('punch_in');
     resetGame();
+  };
+
+  const generateBalance = (accountNum: string): number => {
+    // Generate deterministic balance based on account number
+    let sum = 0;
+    for (let i = 0; i < accountNum.length; i++) {
+      sum += accountNum.charCodeAt(i);
+    }
+    const balance = ((sum * 123) % 5000) + 500; // $500 to $5500
+    return balance;
+  };
+
+  const handleFraud = (reason: string) => {
+    console.log('Fraud detected:', reason);
+    
+    // Show arrest animation
+    setShowArrestAnimation(true);
+    
+    // Play fraud detection sound
+    playSound('reject');
+    
+    // Update terminal with fraud alert
+    setTerminalOutput(prev => [...prev, 
+      "🚨 FRAUD DETECTED 🚨",
+      "REASON: " + reason,
+      "CONTACTING SECURITY...",
+      "AUTHORITIES NOTIFIED",
+      "EXCELLENT DETECTIVE WORK!"
+    ]);
+    
+    // Update score for catching fraud
+    setGameScore(prev => ({
+      ...prev,
+      score: prev.score + 200, // Bonus points for catching fraud
+      correctTransactions: prev.correctTransactions + 1,
+      consecutiveErrors: 0,
+      customersCalledWithoutService: 0,
+      dismissalWarningGiven: false,
+      consecutiveFalseFraud: 0
+    }));
+    
+    // Track customer served for ad display
+    setCustomersServed(prev => {
+      const newCount = prev + 1;
+      console.log(`Customer count: ${newCount}`);
+      if (newCount % 5 === 0) {
+        console.log('Should show ad at customer', newCount);
+        setShowAdBreak(true);
+        setAdCountdown(5);
+        
+        const countdown = setInterval(() => {
+          setAdCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              setShowAdBreak(false);
+              return 5;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+      return newCount;
+    });
+    
+    // Clear customer after arrest animation
+    setTimeout(() => {
+      setShowArrestAnimation(false);
+      setCurrentCustomer(null);
+      resetVerificationState();
+      setTerminalOutput(prev => [...prev, 
+        "FRAUD SUSPECT ARRESTED",
+        "CASE CLOSED",
+        "READY FOR NEXT CUSTOMER"
+      ]);
+    }, 8000);
   };
 
   const handleCorrectTransaction = () => {
