@@ -1652,7 +1652,7 @@ function App() {
     // Manual fraud detection only - no automatic rejections
     // Player must identify fraud by comparing documents themselves
     
-    // Validate transaction amount before processing
+    // Validate transaction amounts before processing
     if (currentCustomer.transaction.type === 'wire_transfer') {
       // Get the amount from the most recent wire command
       const lastWireCommand = terminalOutput
@@ -1688,6 +1688,92 @@ function App() {
               resetVerificationState();
               setTerminalOutput(prev => [...prev, "Customer left due to processing error", "Ready for next customer"]);
             }, 3000);
+            return;
+          }
+        }
+      }
+    }
+    
+    if (currentCustomer.transaction.type === 'withdrawal') {
+      // Get the amount from the most recent withdrawal command
+      const lastWithdrawCommand = terminalOutput
+        .slice()
+        .reverse()
+        .find(line => line.includes('WITHDRAW $'));
+      
+      if (lastWithdrawCommand) {
+        const withdrawMatch = lastWithdrawCommand.match(/WITHDRAW \$([0-9,]+(?:\.[0-9]{2})?)/);
+        if (withdrawMatch) {
+          const enteredAmount = parseFloat(withdrawMatch[1].replace(/,/g, ''));
+          const expectedAmount = currentCustomer.transaction.amount;
+          
+          if (enteredAmount !== expectedAmount) {
+            // Penalize for wrong withdrawal amount
+            setGameScore(prev => ({
+              ...prev,
+              errors: prev.errors + 1,
+              errorDetails: [...prev.errorDetails, `Withdrawal amount error: entered $${enteredAmount}, expected $${expectedAmount}`]
+            }));
+            
+            setTerminalOutput(prev => [...prev, 
+              "ERROR: Withdrawal amount validation failed",
+              `Entered: $${enteredAmount.toLocaleString()}`,
+              `Expected: $${expectedAmount.toLocaleString()}`,
+              "Customer: \"That's not the right amount!\"",
+              "Customer: \"I specifically asked for $" + expectedAmount.toLocaleString() + "\"",
+              "Transaction rejected - processing error logged",
+              "Manager review required"
+            ]);
+            
+            playSound('reject');
+            setTimeout(() => {
+              setCurrentCustomer(null);
+              resetVerificationState();
+              setTerminalOutput(prev => [...prev, "Customer left frustrated", "Ready for next customer"]);
+            }, 4000);
+            return;
+          }
+        }
+      }
+    }
+    
+    if (currentCustomer.transaction.type === 'deposit') {
+      // Get the amount from the most recent deposit command
+      const lastDepositCommand = terminalOutput
+        .slice()
+        .reverse()
+        .find(line => line.includes('DEPOSIT $'));
+      
+      if (lastDepositCommand) {
+        const depositMatch = lastDepositCommand.match(/DEPOSIT \$([0-9,]+(?:\.[0-9]{2})?)/);
+        if (depositMatch) {
+          const enteredAmount = parseFloat(depositMatch[1].replace(/,/g, ''));
+          const expectedAmount = currentCustomer.transaction.amount;
+          
+          if (enteredAmount !== expectedAmount) {
+            // Penalize for wrong deposit amount
+            setGameScore(prev => ({
+              ...prev,
+              errors: prev.errors + 1,
+              errorDetails: [...prev.errorDetails, `Deposit amount error: entered $${enteredAmount}, expected $${expectedAmount}`]
+            }));
+            
+            setTerminalOutput(prev => [...prev, 
+              "ERROR: Deposit amount validation failed",
+              `Entered: $${enteredAmount.toLocaleString()}`,
+              `Expected: $${expectedAmount.toLocaleString()}`,
+              "Customer: \"I'm depositing exactly $" + expectedAmount.toLocaleString() + "\"",
+              "Customer: \"Please process the correct amount.\"",
+              "Transaction rejected - amount mismatch",
+              "Supervisor notification sent"
+            ]);
+            
+            playSound('reject');
+            setTimeout(() => {
+              setCurrentCustomer(null);
+              resetVerificationState();
+              setTerminalOutput(prev => [...prev, "Customer requested supervisor review", "Ready for next customer"]);
+            }, 4000);
             return;
           }
         }
