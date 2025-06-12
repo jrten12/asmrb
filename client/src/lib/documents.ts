@@ -271,30 +271,161 @@ export class SignatureRenderer implements DocumentRenderer {
   private renderLegitimeLetter(ctx: CanvasRenderingContext2D, char: string, x: number, y: number, width: number, height: number, slant: number, complexity: number): void {
     const halfHeight = height / 2;
     
+    // Beautiful cursive handwriting patterns
     switch (char) {
-      case 'a': case 'o': case 'e':
-        // Oval letters
-        ctx.ellipse(x + width/2 + slant, y, width * 0.6, halfHeight * 0.8, 0, 0, Math.PI * 2);
+      case 'a':
+        // Elegant 'a' with loop
+        ctx.moveTo(x + slant, y + halfHeight * 0.3);
+        ctx.bezierCurveTo(x + width * 0.2 + slant, y - halfHeight * 0.8, x + width * 0.8 + slant, y - halfHeight * 0.6, x + width + slant/2, y + halfHeight * 0.2);
+        ctx.bezierCurveTo(x + width * 0.7 + slant, y + halfHeight * 0.8, x + width * 0.3 + slant, y + halfHeight * 0.6, x + slant, y + halfHeight * 0.3);
         break;
-      case 'i': case 'l': case 't':
-        // Vertical letters
-        ctx.moveTo(x + slant, y - halfHeight);
-        ctx.lineTo(x + slant/2, y + halfHeight);
+      case 'e':
+        // Flowing 'e'
+        ctx.moveTo(x + width * 0.8 + slant, y);
+        ctx.bezierCurveTo(x + slant, y - halfHeight * 0.3, x + slant, y + halfHeight * 0.7, x + width * 0.9 + slant/2, y + halfHeight * 0.4);
         break;
-      case 'r': case 'n': case 'm':
-        // Curved letters
+      case 'o':
+        // Perfect oval 'o'
+        ctx.ellipse(x + width/2 + slant, y, width * 0.4, halfHeight * 0.6, slant * 0.1, 0, Math.PI * 2);
+        break;
+      case 'i':
+        // Elegant 'i' with dot
+        ctx.moveTo(x + slant, y + halfHeight * 0.8);
+        ctx.lineTo(x + slant/2, y - halfHeight * 0.2);
+        ctx.fillRect(x + slant/2 - 1, y - halfHeight * 0.8, 2, 2); // dot
+        break;
+      case 'l':
+        // Tall flowing 'l'
         ctx.moveTo(x + slant, y + halfHeight);
-        ctx.quadraticCurveTo(x + width/2 + slant, y - halfHeight * complexity, x + width + slant/2, y + halfHeight);
+        ctx.bezierCurveTo(x + slant, y - halfHeight * 1.2, x + width * 0.3 + slant, y - halfHeight * 1.1, x + width * 0.2 + slant/2, y - halfHeight * 0.8);
         break;
-      case 's': case 'c':
-        // S-curve letters
-        ctx.moveTo(x + width + slant, y - halfHeight);
-        ctx.bezierCurveTo(x + slant, y - halfHeight, x + slant, y + halfHeight, x + width + slant/2, y + halfHeight);
+      case 'r':
+        // Cursive 'r' with flowing connection
+        ctx.moveTo(x + slant, y + halfHeight * 0.8);
+        ctx.lineTo(x + slant/2, y - halfHeight * 0.5);
+        ctx.bezierCurveTo(x + width * 0.4 + slant, y - halfHeight * 0.3, x + width * 0.6 + slant, y, x + width * 0.8 + slant/2, y + halfHeight * 0.2);
+        break;
+      case 'n': case 'm':
+        // Rounded humps
+        const humps = char === 'm' ? 2 : 1;
+        ctx.moveTo(x + slant, y + halfHeight * 0.8);
+        ctx.lineTo(x + slant/2, y - halfHeight * 0.3);
+        for (let i = 0; i < humps; i++) {
+          const humpX = x + (width / (humps + 1)) * (i + 1) + slant/2;
+          ctx.bezierCurveTo(humpX - width * 0.1, y - halfHeight * 0.5, humpX + width * 0.1, y - halfHeight * 0.5, humpX, y + halfHeight * 0.8);
+        }
+        break;
+      case 's':
+        // Beautiful S-curve
+        ctx.moveTo(x + width * 0.8 + slant, y - halfHeight * 0.4);
+        ctx.bezierCurveTo(x + width * 0.2 + slant, y - halfHeight * 0.6, x + width * 0.2 + slant, y + halfHeight * 0.2, x + width * 0.6 + slant, y);
+        ctx.bezierCurveTo(x + width * 0.9 + slant, y + halfHeight * 0.3, x + width * 0.9 + slant, y + halfHeight * 0.8, x + width * 0.3 + slant/2, y + halfHeight * 0.6);
+        break;
+      case 'h':
+        // Tall 'h' with loop
+        ctx.moveTo(x + slant, y + halfHeight);
+        ctx.lineTo(x + slant/2, y - halfHeight * 1.2);
+        ctx.bezierCurveTo(x + width * 0.4 + slant, y - halfHeight * 0.3, x + width * 0.7 + slant, y, x + width + slant/2, y + halfHeight * 0.8);
+        break;
+      case 't':
+        // Crossed 't'
+        ctx.moveTo(x + slant, y + halfHeight * 0.8);
+        ctx.lineTo(x + slant/2, y - halfHeight * 0.8);
+        ctx.moveTo(x - width * 0.2 + slant, y - halfHeight * 0.2);
+        ctx.lineTo(x + width * 0.6 + slant, y - halfHeight * 0.2);
+        break;
+      case 'c':
+        // Open 'c'
+        ctx.moveTo(x + width * 0.8 + slant, y - halfHeight * 0.3);
+        ctx.bezierCurveTo(x + slant, y - halfHeight * 0.5, x + slant, y + halfHeight * 0.5, x + width * 0.8 + slant/2, y + halfHeight * 0.3);
+        break;
+      case 'd':
+        // 'd' with ascending stroke
+        ctx.ellipse(x + width * 0.3 + slant, y, width * 0.3, halfHeight * 0.6, 0, 0, Math.PI * 2);
+        ctx.moveTo(x + width * 0.6 + slant, y - halfHeight * 0.6);
+        ctx.lineTo(x + width * 0.6 + slant/2, y - halfHeight * 1.2);
+        break;
+      case 'g':
+        // 'g' with descender loop
+        ctx.ellipse(x + width * 0.3 + slant, y - halfHeight * 0.2, width * 0.3, halfHeight * 0.4, 0, 0, Math.PI * 2);
+        ctx.moveTo(x + width * 0.6 + slant, y);
+        ctx.bezierCurveTo(x + width * 0.8 + slant, y + halfHeight * 1.2, x + width * 0.2 + slant, y + halfHeight * 1.4, x + width * 0.4 + slant/2, y + halfHeight * 0.8);
+        break;
+      case 'f':
+        // Fancy 'f' with flourish
+        ctx.moveTo(x + width * 0.4 + slant, y + halfHeight);
+        ctx.bezierCurveTo(x + width * 0.4 + slant, y - halfHeight * 1.4, x + width * 0.8 + slant, y - halfHeight * 1.2, x + width + slant/2, y - halfHeight * 0.8);
+        ctx.moveTo(x + slant, y - halfHeight * 0.2);
+        ctx.lineTo(x + width * 0.7 + slant, y - halfHeight * 0.2);
+        break;
+      case 'j':
+        // 'j' with hook and dot
+        ctx.moveTo(x + width * 0.5 + slant, y - halfHeight * 0.8);
+        ctx.bezierCurveTo(x + width * 0.5 + slant, y + halfHeight * 1.2, x + slant, y + halfHeight * 1.4, x - width * 0.2 + slant/2, y + halfHeight * 0.8);
+        ctx.fillRect(x + width * 0.5 + slant/2 - 1, y - halfHeight, 2, 2); // dot
+        break;
+      case 'k':
+        // 'k' with diagonal strokes
+        ctx.moveTo(x + slant, y + halfHeight);
+        ctx.lineTo(x + slant/2, y - halfHeight * 1.2);
+        ctx.moveTo(x + width * 0.8 + slant, y - halfHeight * 0.5);
+        ctx.lineTo(x + width * 0.3 + slant, y);
+        ctx.lineTo(x + width + slant/2, y + halfHeight * 0.8);
+        break;
+      case 'p':
+        // 'p' with descender
+        ctx.moveTo(x + slant, y + halfHeight * 1.5);
+        ctx.lineTo(x + slant/2, y - halfHeight * 0.8);
+        ctx.bezierCurveTo(x + width * 0.8 + slant, y - halfHeight * 0.5, x + width * 0.8 + slant, y + halfHeight * 0.3, x + width * 0.2 + slant/2, y + halfHeight * 0.1);
+        break;
+      case 'q':
+        // 'q' with tail
+        ctx.ellipse(x + width * 0.3 + slant, y, width * 0.3, halfHeight * 0.6, 0, 0, Math.PI * 2);
+        ctx.moveTo(x + width * 0.6 + slant, y - halfHeight * 0.6);
+        ctx.bezierCurveTo(x + width * 0.6 + slant, y + halfHeight * 1.5, x + width + slant, y + halfHeight * 1.2, x + width * 1.2 + slant/2, y + halfHeight * 0.8);
+        break;
+      case 'v': case 'w':
+        // V-shaped letters
+        const points = char === 'w' ? 3 : 2;
+        ctx.moveTo(x + slant, y - halfHeight * 0.5);
+        for (let i = 1; i <= points; i++) {
+          const pointX = x + (width / points) * i + slant/2;
+          const pointY = i % 2 === 1 ? y + halfHeight * 0.5 : y - halfHeight * 0.5;
+          ctx.lineTo(pointX, pointY);
+        }
+        break;
+      case 'x':
+        // Crossed 'x'
+        ctx.moveTo(x + slant, y - halfHeight * 0.5);
+        ctx.lineTo(x + width + slant/2, y + halfHeight * 0.5);
+        ctx.moveTo(x + width + slant, y - halfHeight * 0.5);
+        ctx.lineTo(x + slant/2, y + halfHeight * 0.5);
+        break;
+      case 'y':
+        // 'y' with descender
+        ctx.moveTo(x + slant, y - halfHeight * 0.5);
+        ctx.lineTo(x + width * 0.5 + slant, y + halfHeight * 0.2);
+        ctx.moveTo(x + width + slant, y - halfHeight * 0.5);
+        ctx.bezierCurveTo(x + width * 0.5 + slant, y + halfHeight * 0.2, x + width * 0.3 + slant, y + halfHeight * 1.5, x + slant/2, y + halfHeight * 1.2);
+        break;
+      case 'z':
+        // Zigzag 'z'
+        ctx.moveTo(x + slant, y - halfHeight * 0.5);
+        ctx.lineTo(x + width + slant, y - halfHeight * 0.5);
+        ctx.lineTo(x + slant/2, y + halfHeight * 0.5);
+        ctx.lineTo(x + width + slant/2, y + halfHeight * 0.5);
+        break;
+      case 'b':
+        // 'b' with ascender
+        ctx.moveTo(x + slant, y + halfHeight);
+        ctx.lineTo(x + slant/2, y - halfHeight * 1.2);
+        ctx.bezierCurveTo(x + width * 0.8 + slant, y - halfHeight * 0.8, x + width * 0.8 + slant, y - halfHeight * 0.2, x + width * 0.2 + slant/2, y);
+        ctx.bezierCurveTo(x + width * 0.8 + slant, y + halfHeight * 0.2, x + width * 0.8 + slant, y + halfHeight * 0.8, x + width * 0.2 + slant/2, y + halfHeight * 0.6);
         break;
       default:
-        // Generic letter shape
-        ctx.moveTo(x + slant, y);
-        ctx.quadraticCurveTo(x + width/2 + slant, y - halfHeight * complexity, x + width + slant/2, y);
+        // Elegant default cursive stroke
+        ctx.moveTo(x + slant, y + halfHeight * 0.3);
+        ctx.bezierCurveTo(x + width * 0.3 + slant, y - halfHeight * 0.8, x + width * 0.7 + slant, y - halfHeight * 0.4, x + width + slant/2, y + halfHeight * 0.3);
     }
   }
   

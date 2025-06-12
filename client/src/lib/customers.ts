@@ -68,8 +68,8 @@ export function generateCustomer(level: number): Customer {
   
   const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
   
-  // 50% fraud rate for challenging but fair gameplay
-  const isFraud = Math.random() < 0.5;
+  // Balanced fraud rate - 35% fraud rate for fair but challenging gameplay
+  const isFraud = Math.random() < 0.35;
   const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
   
   const documents = generateDocuments(name, transaction, suspiciousLevel);
@@ -401,18 +401,25 @@ function generateSignature(name: string, isFraud: boolean = false): string {
   const firstName = nameParts[0] || '';
   const lastName = nameParts[nameParts.length - 1] || '';
   
-  // Realistic signature characteristics
+  // Enhanced realistic signature characteristics for beautiful handwriting
   const characteristics = {
-    pressure: Math.random() < 0.7 ? 'medium' : Math.random() < 0.5 ? 'heavy' : 'light',
-    speed: Math.random() < 0.6 ? 'normal' : Math.random() < 0.5 ? 'fast' : 'slow',
-    slant: Math.random() < 0.4 ? 'forward' : Math.random() < 0.3 ? 'backward' : 'upright',
-    size: Math.random() < 0.5 ? 'medium' : Math.random() < 0.5 ? 'large' : 'small',
-    loops: Math.random() < 0.7,
-    flourishes: Math.random() < 0.3,
-    legibility: Math.random() < 0.6 ? 'readable' : 'stylized'
+    pressure: Math.random() < 0.4 ? 'light' : Math.random() < 0.7 ? 'medium' : 'heavy',
+    speed: Math.random() < 0.5 ? 'flowing' : Math.random() < 0.8 ? 'normal' : 'rushed',
+    slant: Math.random() < 0.3 ? 'forward' : Math.random() < 0.2 ? 'backward' : 'upright',
+    style: Math.random() < 0.3 ? 'cursive' : Math.random() < 0.6 ? 'semi_cursive' : 'print',
+    loops: Math.random() < 0.8,
+    flourishes: Math.random() < 0.4,
+    elegance: Math.random() < 0.6 ? 'elegant' : 'simple',
+    penType: Math.random() < 0.6 ? 'ballpoint' : Math.random() < 0.8 ? 'fountain' : 'gel',
+    confidence: Math.random() < 0.7 ? 'confident' : 'hesitant'
   };
   
   if (isFraud) {
+    // Reduced fraud rate - only 30% of suspicious customers have signature fraud
+    if (Math.random() > 0.3) {
+      return createSignaturePattern(name, characteristics, 'legitimate');
+    }
+    
     // Advanced fraud patterns with realistic mismatches
     const fraudTypes = [
       'completely_different_name',
@@ -423,8 +430,8 @@ function generateSignature(name: string, isFraud: boolean = false): string {
       'trembling_forgery',
       'practiced_forgery',
       'similar_sounding_name',
-      'reversed_names',
-      'missing_middle_initial'
+      'shaky_attempt',
+      'wrong_pressure'
     ];
     
     const fraudType = fraudTypes[Math.floor(Math.random() * fraudTypes.length)];
@@ -432,22 +439,22 @@ function generateSignature(name: string, isFraud: boolean = false): string {
     switch (fraudType) {
       case 'completely_different_name':
         const randomName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-        return createSignaturePattern(randomName, characteristics, 'different_name');
+        return createSignaturePattern(randomName, { ...characteristics, confidence: 'nervous' }, 'wrong_name');
         
       case 'first_name_wrong':
         const wrongFirst = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)].split(' ')[0];
-        return createSignaturePattern(`${wrongFirst} ${lastName}`, characteristics, 'wrong_first');
+        return createSignaturePattern(`${wrongFirst} ${lastName}`, { ...characteristics, confidence: 'hesitant' }, 'wrong_first');
         
       case 'last_name_wrong':
         const wrongLast = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)].split(' ')[1] || 'Smith';
-        return createSignaturePattern(`${firstName} ${wrongLast}`, characteristics, 'wrong_last');
+        return createSignaturePattern(`${firstName} ${wrongLast}`, { ...characteristics, confidence: 'uncertain' }, 'wrong_last');
         
       case 'misspelled_signature':
         const misspelled = name.replace(/([aeiou])/gi, (match) => {
           const vowels = ['a', 'e', 'i', 'o', 'u'];
-          return Math.random() < 0.3 ? vowels[Math.floor(Math.random() * vowels.length)] : match;
+          return Math.random() < 0.4 ? vowels[Math.floor(Math.random() * vowels.length)] : match;
         });
-        return createSignaturePattern(misspelled, characteristics, 'misspelled');
+        return createSignaturePattern(misspelled, { ...characteristics, confidence: 'nervous' }, 'misspelled');
         
       case 'wrong_handwriting_style':
         const wrongStyle = {
@@ -455,7 +462,7 @@ function generateSignature(name: string, isFraud: boolean = false): string {
           pressure: characteristics.pressure === 'heavy' ? 'light' : 'heavy',
           slant: characteristics.slant === 'forward' ? 'backward' : 'forward',
           loops: !characteristics.loops,
-          size: characteristics.size === 'large' ? 'small' : 'large'
+          style: characteristics.style === 'cursive' ? 'print' : 'cursive'
         };
         return createSignaturePattern(name, wrongStyle, 'style_mismatch');
         
