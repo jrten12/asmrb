@@ -2,6 +2,35 @@ import React, { useState, useRef, useEffect } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import type { Customer, Document as GameDocument } from './types/game';
 
+// Import customer data for fraud detection
+const CUSTOMER_NAMES = [
+  'John Smith', 'Mary Johnson', 'Robert Brown', 'Patricia Davis',
+  'Michael Wilson', 'Linda Miller', 'William Moore', 'Elizabeth Taylor',
+  'David Anderson', 'Barbara Thomas', 'Richard Jackson', 'Susan White',
+  'Charles Harris', 'Jessica Martin', 'Joseph Thompson', 'Sarah Garcia',
+  'Christopher Martinez', 'Nancy Rodriguez', 'Matthew Lopez', 'Betty Lee',
+  'Anthony Gonzalez', 'Helen Clark', 'Mark Lewis', 'Sandra Robinson',
+  'Paul Walker', 'Donna Hall', 'Steven Allen', 'Carol Young',
+  'Kenneth King', 'Ruth Wright', 'Joshua Scott', 'Sharon Green',
+  'Kevin Adams', 'Michelle Baker', 'Brian Nelson', 'Lisa Hill',
+  'George Ramirez', 'Karen Campbell', 'Edward Mitchell', 'Emily Roberts',
+  'Ronald Carter', 'Kimberly Phillips', 'Timothy Evans', 'Deborah Turner'
+];
+
+const TOWNS = [
+  'Millbrook', 'Riverside', 'Fairview', 'Cedar Falls', 'Pine Ridge',
+  'Oakwood', 'Sunset Valley', 'Green Hills', 'Silver Creek', 'Maple Grove'
+];
+
+const STREET_NAMES = [
+  'Oak Street', 'Pine Avenue', 'Elm Drive', 'Cedar Lane', 'Maple Court',
+  'Birch Road', 'Willow Way', 'Cherry Street', 'Spruce Avenue', 'Ash Drive',
+  'River Road', 'Hill Street', 'Park Avenue', 'Garden Lane', 'Valley Drive',
+  'Forest Street', 'Lake Avenue', 'Spring Road', 'Sunset Boulevard', 'Dawn Street'
+];
+
+const STATE_NAME = 'Westfield';
+
 // Bill color helper functions for realistic currency appearance
 const getBillColor = (denomination: number): string => {
   const colors = {
@@ -938,34 +967,38 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // Check if entered account number matches customer's actual account
-            const customerAccountNumber = currentCustomer.transaction.accountNumber;
+            // CRITICAL FIX: Always show account information for manual fraud detection
+            // The player must compare customer documents vs bank records themselves
+            const balance = Math.floor(Math.random() * 3000) + 500;
+            setAccountBalance(balance);
+            setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
             
-            if (accountNum === customerAccountNumber) {
-              // Account number matches - show real account information
-              const balance = Math.floor(Math.random() * 3000) + 500;
-              setAccountBalance(balance);
-              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
-                "STATUS: ACTIVE CUSTOMER",
-                "BALANCE: $" + balance.toLocaleString(),
-                "BANK RECORDS NOW DISPLAYED BELOW"
-              ]);
-              playSound('approve');
-            } else {
-              // Account number doesn't match - show account not found
-              setVerificationState(prev => ({...prev, accountLookedUp: false, accountNotFound: true}));
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "✗✗✗ ACCOUNT NOT FOUND ✗✗✗",
-                "ERROR: No records match this account number",
-                "STATUS: INVALID ACCOUNT",
-                "PLEASE VERIFY ACCOUNT NUMBER WITH CUSTOMER"
-              ]);
-              playSound('reject');
-            }
+            // Generate bank record information that may or may not match customer documents
+            const bankRecordName = currentCustomer.isFraudulent ? 
+              // For fraudulent customers, show a different name in bank records
+              CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)] : 
+              currentCustomer.name;
+            
+            const bankRecordAddress = currentCustomer.isFraudulent ?
+              // For fraudulent customers, show different address in bank records  
+              `${Math.floor(Math.random() * 9999) + 1000} ${STREET_NAMES[Math.floor(Math.random() * STREET_NAMES.length)]}, ${TOWNS[Math.floor(Math.random() * TOWNS.length)]}, ${STATE_NAME} ${Math.floor(Math.random() * 90000) + 10000}` :
+              currentCustomer.documents.find(d => d.data.address)?.data.address || "123 Main St, Westfield, WF 12345";
+            
+            setBankRecord({
+              name: bankRecordName,
+              address: bankRecordAddress,
+              accountNumber: accountNum,
+              balance: balance
+            });
+            
+            setTerminalOutput(prev => [...prev, 
+              "> LOOKUP " + accountNum,
+              "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+              "STATUS: ACTIVE CUSTOMER",
+              "BALANCE: $" + balance.toLocaleString(),
+              "BANK RECORDS NOW DISPLAYED BELOW"
+            ]);
+            playSound('approve');
           }, 800);
         }, 1200);
       }
