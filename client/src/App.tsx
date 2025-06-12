@@ -385,6 +385,12 @@ function App() {
   const [waitingForInput, setWaitingForInput] = useState<string>('');
   const [commandPrefix, setCommandPrefix] = useState<string>('');
   const [accountBalance, setAccountBalance] = useState<number>(0);
+  const [bankRecord, setBankRecord] = useState<{
+    name: string;
+    address: string;
+    accountNumber: string;
+    balance: number;
+  } | null>(null);
   const [showBalanceWindow, setShowBalanceWindow] = useState(false);
   const [showFloatingInput, setShowFloatingInput] = useState(false);
   const [inputPrompt, setInputPrompt] = useState<string>('');
@@ -401,6 +407,28 @@ function App() {
   const [warningMessage, setWarningMessage] = useState('');
   const [customersServed, setCustomersServed] = useState(0);
   const [fraudTracker, setFraudTracker] = useState<boolean[]>([]);
+  
+  // Ad system states
+  const [showAdBreak, setShowAdBreak] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(5);
+  
+  // Show interstitial ad function
+  const showInterstitialAd = () => {
+    console.log('Showing interstitial ad');
+    setShowAdBreak(true);
+    setAdCountdown(5);
+    
+    const countdown = setInterval(() => {
+      setAdCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdown);
+          setShowAdBreak(false);
+          return 5;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
   const [showNumberPad, setShowNumberPad] = useState(false);
   const [numberPadPosition, setNumberPadPosition] = useState({ x: 0, y: 0 });
   const [isTerminated, setIsTerminated] = useState(false);
@@ -967,29 +995,10 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // CRITICAL FIX: Always show account information for manual fraud detection
-            // The player must compare customer documents vs bank records themselves
+            // Always show account information - player must compare documents manually
             const balance = Math.floor(Math.random() * 3000) + 500;
             setAccountBalance(balance);
             setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-            
-            // Generate bank record information that may or may not match customer documents
-            const bankRecordName = currentCustomer.isFraudulent ? 
-              // For fraudulent customers, show a different name in bank records
-              CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)] : 
-              currentCustomer.name;
-            
-            const bankRecordAddress = currentCustomer.isFraudulent ?
-              // For fraudulent customers, show different address in bank records  
-              `${Math.floor(Math.random() * 9999) + 1000} ${STREET_NAMES[Math.floor(Math.random() * STREET_NAMES.length)]}, ${TOWNS[Math.floor(Math.random() * TOWNS.length)]}, ${STATE_NAME} ${Math.floor(Math.random() * 90000) + 10000}` :
-              currentCustomer.documents.find(d => d.data.address)?.data.address || "123 Main St, Westfield, WF 12345";
-            
-            setBankRecord({
-              name: bankRecordName,
-              address: bankRecordAddress,
-              accountNumber: accountNum,
-              balance: balance
-            });
             
             setTerminalOutput(prev => [...prev, 
               "> LOOKUP " + accountNum,
@@ -1887,7 +1896,28 @@ function App() {
     });
     
     // Check if ad should be shown every 5 customers
-    setCustomersServed(prev => prev + 1);
+    setCustomersServed(prev => {
+      const newCount = prev + 1;
+      console.log(`Customer count: ${newCount}`);
+      if (newCount % 5 === 0) {
+        console.log('Should show ad at customer', newCount);
+        // Show interstitial ad every 5 customers
+        setShowAdBreak(true);
+        setAdCountdown(5);
+        
+        const countdown = setInterval(() => {
+          setAdCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              setShowAdBreak(false);
+              return 5;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+      return newCount;
+    });
   };
 
   const handleError = () => {
