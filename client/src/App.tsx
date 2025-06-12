@@ -1687,6 +1687,7 @@ function App() {
               setCurrentCustomer(null);
               resetVerificationState();
               setTerminalOutput(prev => [...prev, "Customer left due to processing error", "Ready for next customer"]);
+              triggerAdBreak();
             }, 3000);
             return;
           }
@@ -1730,6 +1731,7 @@ function App() {
               setCurrentCustomer(null);
               resetVerificationState();
               setTerminalOutput(prev => [...prev, "Customer left frustrated", "Ready for next customer"]);
+              triggerAdBreak();
             }, 4000);
             return;
           }
@@ -1773,6 +1775,7 @@ function App() {
               setCurrentCustomer(null);
               resetVerificationState();
               setTerminalOutput(prev => [...prev, "Customer requested supervisor review", "Ready for next customer"]);
+              triggerAdBreak();
             }, 4000);
             return;
           }
@@ -2115,25 +2118,8 @@ function App() {
     }, 8000);
   };
 
-  const handleCorrectTransaction = () => {
-    setGameScore(prev => {
-      const newTransactionCount = prev.correctTransactions + 1;
-      
-      // Check for badge achievement
-      checkBadgeAchievement(newTransactionCount);
-      
-      return {
-        ...prev,
-        score: prev.score + 100,
-        correctTransactions: newTransactionCount,
-        consecutiveErrors: 0, // Reset consecutive errors on correct transaction
-        customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
-        dismissalWarningGiven: false, // Reset warning flag
-        consecutiveFalseFraud: 0 // Reset false fraud streak on successful transaction
-      };
-    });
-    
-    // Check if ad should be shown every 1 customer (for testing)
+  // Function to trigger ad break after any customer interaction
+  const triggerAdBreak = () => {
     setCustomersServed(prev => {
       const newCount = prev + 1;
       console.log(`Customer count: ${newCount}`);
@@ -2156,6 +2142,28 @@ function App() {
       }
       return newCount;
     });
+  };
+
+  const handleCorrectTransaction = () => {
+    setGameScore(prev => {
+      const newTransactionCount = prev.correctTransactions + 1;
+      
+      // Check for badge achievement
+      checkBadgeAchievement(newTransactionCount);
+      
+      return {
+        ...prev,
+        score: prev.score + 100,
+        correctTransactions: newTransactionCount,
+        consecutiveErrors: 0, // Reset consecutive errors on correct transaction
+        customersCalledWithoutService: 0, // Reset dismissal counter on successful transaction
+        dismissalWarningGiven: false, // Reset warning flag
+        consecutiveFalseFraud: 0 // Reset false fraud streak on successful transaction
+      };
+    });
+    
+    // Trigger ad break after successful transaction
+    triggerAdBreak();
   };
 
   const handleError = () => {
