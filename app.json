@@ -28,17 +28,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.bankteller.app"
+      "package": "com.bankteller.app",
+      "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
     },
     "plugins": [
       [
-        "@capacitor-community/admob",
+        "react-native-google-mobile-ads",
         {
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
+          "android_app_id": "ca-app-pub-3940256099942544~3347511713",
+          "ios_app_id": "ca-app-pub-3940256099942544~1458002511"
         }
-      ],
-      "@capacitor/splash-screen"
+      ]
     ]
   }
 }
