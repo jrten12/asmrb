@@ -88,8 +88,8 @@ export function generateCustomer(level: number): Customer {
 }
 
 function generateTransaction(level: number, suspiciousLevel: number): Transaction {
-  // Include all transaction types for complete bank teller experience
-  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'inquiry', 'wire_transfer', 'transfer', 'cashiers_check', 'money_order'];
+  // Only include supported transaction types
+  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'wire_transfer'];
   const type = types[Math.floor(Math.random() * types.length)];
   
   // Realistic transaction amounts

@@ -1114,26 +1114,22 @@ function App() {
       const customerSignatureData = signatureDoc.data.signature as string;
       const name = currentCustomer.name;
       
-      // Generate stylized bank signature for display (no automatic analysis)
-      const bankSignatures: Record<string, string> = {
-        "John Smith": "𝒥𝑜𝒽𝓃 𝒮𝓂𝒾𝓉𝒽",
-        "Sarah Johnson": "𝒮𝒶𝓇𝒶𝒽 𝒥𝑜𝒽𝓃𝓈𝑜𝓃",
-        "Mike Wilson": "𝑀𝒾𝓀𝑒 𝒲𝒾𝓁𝓈𝑜𝓃",
-        "Lisa Parker": "𝐿𝒾𝓈𝒶 𝒫𝒶𝓇𝓀𝑒𝓇",
-        "David Brown": "𝒟𝒶𝓋𝒾𝒹 𝐵𝓇𝑜𝓌𝓃",
-        "Emily Davis": "𝐸𝓂𝒾𝓁𝓎 𝒟𝒶𝓋𝒾𝓈",
-        "James Wilson": "𝒥𝒶𝓂𝑒𝓈 𝒲𝒾𝓁𝓈𝑜𝓃",
-        "Jennifer Garcia": "𝒥𝑒𝓃𝓃𝒾𝒻𝑒𝓇 𝒢𝒶𝓇𝒸𝒾𝒶",
-        "Michael Johnson": "𝑀𝒾𝒸𝒽𝒶𝑒𝓁 𝒥𝑜𝒽𝓃𝓈𝑜𝓃",
-        "Ashley Martinez": "𝒜𝓈𝒽𝓁𝑒𝓎 𝑀𝒶𝓇𝓉𝒾𝓃𝑒𝓏",
-        "Christopher Lee": "𝒞𝒽𝓇𝒾𝓈𝓉𝑜𝓅𝒽𝑒𝓇 𝐿𝑒𝑒",
-        "Amanda Rodriguez": "𝒜𝓂𝒶𝓃𝒹𝒶 𝑅𝑜𝒹𝓇𝒾𝑔𝓊𝑒𝓏",
-        "Matthew Taylor": "𝑀𝒶𝓉𝓉𝒽𝑒𝓌 𝒯𝒶𝓎𝓁𝑜𝓇",
-        "Stephanie Thomas": "𝒮𝓉𝑒𝓅𝒽𝒶𝓃𝒾𝑒 𝒯𝒽𝑜𝓂𝒶𝓈",
-        "Robert Thompson": "𝑅𝑜𝒷𝑒𝓇𝓉 𝒯𝒽𝑜𝓂𝓅𝓈𝑜𝓃"
+      // Generate beautiful cursive signatures for all customers
+      const generateCursiveSignature = (name: string): string => {
+        // Convert to cursive mathematical symbols for beautiful handwriting
+        const cursiveMap: Record<string, string> = {
+          'A': '𝒜', 'B': '𝐵', 'C': '𝒞', 'D': '𝒟', 'E': '𝐸', 'F': '𝐹', 'G': '𝒢', 'H': '𝐻', 'I': '𝐼', 'J': '𝒥',
+          'K': '𝒦', 'L': '𝐿', 'M': '𝑀', 'N': '𝒩', 'O': '𝒪', 'P': '𝒫', 'Q': '𝒬', 'R': '𝑅', 'S': '𝒮', 'T': '𝒯',
+          'U': '𝒰', 'V': '𝒱', 'W': '𝒲', 'X': '𝒳', 'Y': '𝒴', 'Z': '𝒵',
+          'a': '𝒶', 'b': '𝒷', 'c': '𝒸', 'd': '𝒹', 'e': '𝑒', 'f': '𝒻', 'g': '𝑔', 'h': '𝒽', 'i': '𝒾', 'j': '𝒿',
+          'k': '𝓀', 'l': '𝓁', 'm': '𝓂', 'n': '𝓃', 'o': '𝑜', 'p': '𝓅', 'q': '𝓆', 'r': '𝓇', 's': '𝓈', 't': '𝓉',
+          'u': '𝓊', 'v': '𝓋', 'w': '𝓌', 'x': '𝓍', 'y': '𝓎', 'z': '𝓏'
+        };
+        
+        return name.split('').map(char => cursiveMap[char] || char).join('');
       };
       
-      const bankSignature = bankSignatures[name] || name;
+      const bankSignature = generateCursiveSignature(name);
       
       // Parse new signature format: "name|style_markers|signature_type"
       const signatureParts = customerSignatureData.split('|');
@@ -1144,22 +1140,8 @@ function App() {
       // Generate customer signature display based on new signature data
       let displaySignature = signatureName;
       
-      // Apply style-based display modifications
-      if (styleMarkers.includes('stylized')) {
-        displaySignature = bankSignature;
-      } else if (styleMarkers.includes('bold')) {
-        displaySignature = `**${signatureName}**`;
-      } else if (styleMarkers.includes('faint')) {
-        displaySignature = `~${signatureName}~`;
-      } else if (styleMarkers.includes('italic')) {
-        displaySignature = bankSignature;
-      } else if (styleMarkers.includes('flourished')) {
-        displaySignature = `${bankSignature}✦`;
-      } else if (styleMarkers.includes('large')) {
-        displaySignature = signatureName.toUpperCase();
-      } else if (styleMarkers.includes('small')) {
-        displaySignature = signatureName.toLowerCase();
-      }
+      // Always use beautiful cursive handwriting for all signatures
+      displaySignature = bankSignature;
       
       // Handle fraud types
       if (signatureType.includes('wrong_name') || signatureType.includes('different_name')) {
@@ -5406,6 +5388,21 @@ function App() {
           70% { opacity: 0; transform: translateX(-50%) translateY(20px); }
           80% { opacity: 1; transform: translateX(-50%) translateY(0px); }
           100% { opacity: 1; transform: translateX(-50%) translateY(0px); }
+        }
+        
+        @keyframes sparkle {
+          0% { 
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+          }
+          50% { 
+            box-shadow: 0 0 30px rgba(0, 255, 0, 1), inset 0 0 30px rgba(0, 255, 0, 0.4);
+            border-color: #88ff88;
+          }
+          100% { 
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+          }
         }
         
         @keyframes slideUp {
