@@ -418,6 +418,14 @@ function App() {
   useEffect(() => {
     const initializeAdMob = async () => {
       try {
+        // Request tracking permission first (required for iOS 14+)
+        try {
+          const trackingStatus = await AdMob.requestTrackingAuthorization();
+          console.log('Tracking authorization status:', trackingStatus);
+        } catch (trackingError) {
+          console.log('Tracking authorization not available or failed:', trackingError);
+        }
+        
         await AdMob.initialize({
           testingDevices: ["2077ef9a63d2b398840261c8221a0c9b"],
           initializeForTesting: true
@@ -2195,37 +2203,38 @@ function App() {
   
   // Manual test button for ad break
   const testAdBreak = () => {
-    console.log('Manual ad break test - attempting immediate Google AdMob display');
+    console.log('Manual ad break test - ensuring AdMob is ready');
     
-    // Try to show Google AdMob interstitial ad immediately
-    AdMob.showInterstitial().then(() => {
-      console.log('SUCCESS: Manual Google AdMob interstitial ad displayed');
-      // Preload next ad
-      return AdMob.prepareInterstitial({
-        adId: 'ca-app-pub-3940256099942544/4411468910',
-        isTesting: true
-      });
-    }).then(() => {
-      console.log('Next ad preloaded after manual test');
-    }).catch(error => {
-      console.log('ERROR: Manual AdMob test failed:', error);
-      console.log('Error details:', JSON.stringify(error));
-      
-      // Show fallback countdown if AdMob fails
-      setShowAdBreak(true);
-      setAdCountdown(3);
-      
-      const countdown = setInterval(() => {
-        setAdCountdown(current => {
-          if (current <= 1) {
-            clearInterval(countdown);
-            setShowAdBreak(false);
-            return 3;
-          }
-          return current - 1;
+    // Ensure AdMob is fully initialized, then show ad
+    setTimeout(() => {
+      AdMob.showInterstitial().then(() => {
+        console.log('SUCCESS: Google AdMob test ad should be visible');
+        // Preload next ad
+        return AdMob.prepareInterstitial({
+          adId: 'ca-app-pub-3940256099942544/4411468910',
+          isTesting: true
         });
-      }, 1000);
-    });
+      }).then(() => {
+        console.log('Next ad preloaded successfully');
+      }).catch(error => {
+        console.log('AdMob showInterstitial failed:', error);
+        
+        // Show visual feedback that test was attempted
+        setShowAdBreak(true);
+        setAdCountdown(2);
+        
+        const countdown = setInterval(() => {
+          setAdCountdown(current => {
+            if (current <= 1) {
+              clearInterval(countdown);
+              setShowAdBreak(false);
+              return 2;
+            }
+            return current - 1;
+          });
+        }, 1000);
+      });
+    }, 500); // Half second delay to ensure AdMob is ready
   };
 
   const handleCorrectTransaction = () => {
