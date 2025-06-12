@@ -2156,36 +2156,37 @@ function App() {
       // Show ad break every 1 customer (mobile testing mode)
       if (newCount % 1 === 0) {
         console.log('Showing ad break at customer', newCount);
-        setShowAdBreak(true);
-        setAdCountdown(5);
         
-        const countdown = setInterval(() => {
-          setAdCountdown(current => {
-            if (current <= 1) {
-              clearInterval(countdown);
-              setShowAdBreak(false);
-              
-              // Show actual Google AdMob interstitial ad
-              console.log('Attempting to show Google AdMob interstitial...');
-              AdMob.showInterstitial().then(() => {
-                console.log('SUCCESS: Google AdMob interstitial ad displayed');
-                // Preload next ad
-                return AdMob.prepareInterstitial({
-                  adId: 'ca-app-pub-3940256099942544/4411468910',
-                  isTesting: true
-                });
-              }).then(() => {
-                console.log('Next ad preloaded successfully');
-              }).catch(error => {
-                console.log('ERROR: Failed to show/preload AdMob interstitial:', error);
-                console.log('Error details:', JSON.stringify(error));
-              });
-              
-              return 5;
-            }
-            return current - 1;
+        // Show Google AdMob interstitial ad immediately without countdown
+        console.log('Attempting to show Google AdMob interstitial immediately...');
+        AdMob.showInterstitial().then(() => {
+          console.log('SUCCESS: Google AdMob interstitial ad displayed');
+          // Preload next ad
+          return AdMob.prepareInterstitial({
+            adId: 'ca-app-pub-3940256099942544/4411468910',
+            isTesting: true
           });
-        }, 1000);
+        }).then(() => {
+          console.log('Next ad preloaded successfully');
+        }).catch(error => {
+          console.log('ERROR: Failed to show/preload AdMob interstitial:', error);
+          console.log('Error details:', JSON.stringify(error));
+          
+          // If AdMob fails, show fallback countdown
+          setShowAdBreak(true);
+          setAdCountdown(3);
+          
+          const countdown = setInterval(() => {
+            setAdCountdown(current => {
+              if (current <= 1) {
+                clearInterval(countdown);
+                setShowAdBreak(false);
+                return 3;
+              }
+              return current - 1;
+            });
+          }, 1000);
+        });
       }
       
       return newCount;
@@ -2194,33 +2195,37 @@ function App() {
   
   // Manual test button for ad break
   const testAdBreak = () => {
-    console.log('Manual ad break test');
-    setShowAdBreak(true);
-    setAdCountdown(5);
+    console.log('Manual ad break test - attempting immediate Google AdMob display');
     
-    const countdown = setInterval(() => {
-      setAdCountdown(current => {
-        if (current <= 1) {
-          clearInterval(countdown);
-          setShowAdBreak(false);
-          
-          // Show actual Google AdMob interstitial ad
-          AdMob.showInterstitial().then(() => {
-            console.log('Google AdMob interstitial ad displayed from test button');
-            // Preload next ad
-            return AdMob.prepareInterstitial({
-              adId: 'ca-app-pub-3940256099942544/4411468910',
-              isTesting: true
-            });
-          }).catch(error => {
-            console.log('Failed to show AdMob interstitial from test button:', error);
-          });
-          
-          return 5;
-        }
-        return current - 1;
+    // Try to show Google AdMob interstitial ad immediately
+    AdMob.showInterstitial().then(() => {
+      console.log('SUCCESS: Manual Google AdMob interstitial ad displayed');
+      // Preload next ad
+      return AdMob.prepareInterstitial({
+        adId: 'ca-app-pub-3940256099942544/4411468910',
+        isTesting: true
       });
-    }, 1000);
+    }).then(() => {
+      console.log('Next ad preloaded after manual test');
+    }).catch(error => {
+      console.log('ERROR: Manual AdMob test failed:', error);
+      console.log('Error details:', JSON.stringify(error));
+      
+      // Show fallback countdown if AdMob fails
+      setShowAdBreak(true);
+      setAdCountdown(3);
+      
+      const countdown = setInterval(() => {
+        setAdCountdown(current => {
+          if (current <= 1) {
+            clearInterval(countdown);
+            setShowAdBreak(false);
+            return 3;
+          }
+          return current - 1;
+        });
+      }, 1000);
+    });
   };
 
   const handleCorrectTransaction = () => {
