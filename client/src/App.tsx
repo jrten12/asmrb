@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import type { Customer, Document as GameDocument } from './types/game';
+import { AdMob } from '@capacitor-community/admob';
 
 // Import customer data for fraud detection
 const CUSTOMER_NAMES = [
@@ -413,6 +414,30 @@ function App() {
   const [adCountdown, setAdCountdown] = useState(5);
   const [showDemoAd, setShowDemoAd] = useState(false);
   
+  // Initialize AdMob
+  useEffect(() => {
+    const initializeAdMob = async () => {
+      try {
+        await AdMob.initialize({
+          testingDevices: ["2077ef9a63d2b398840261c8221a0c9b"],
+          initializeForTesting: true
+        });
+        console.log('AdMob initialized successfully');
+        
+        // Preload interstitial ad
+        await AdMob.prepareInterstitial({
+          adId: 'ca-app-pub-3940256099942544/4411468910',
+          isTesting: true
+        });
+        console.log('Interstitial ad preloaded');
+      } catch (error) {
+        console.log('AdMob initialization failed:', error);
+      }
+    };
+    
+    initializeAdMob();
+  }, []);
+
   // Show interstitial ad function
   const showInterstitialAd = () => {
     console.log('Showing interstitial ad');
@@ -2137,6 +2162,19 @@ function App() {
             if (current <= 1) {
               clearInterval(countdown);
               setShowAdBreak(false);
+              
+              // Show actual Google AdMob interstitial ad
+              AdMob.showInterstitial().then(() => {
+                console.log('Google AdMob interstitial ad displayed');
+                // Preload next ad
+                return AdMob.prepareInterstitial({
+                  adId: 'ca-app-pub-3940256099942544/4411468910',
+                  isTesting: true
+                });
+              }).catch(error => {
+                console.log('Failed to show AdMob interstitial:', error);
+              });
+              
               return 5;
             }
             return current - 1;
@@ -2159,6 +2197,18 @@ function App() {
         if (current <= 1) {
           clearInterval(countdown);
           setShowAdBreak(false);
+          
+          // Try to show actual Google AdMob interstitial ad
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.admob) {
+            console.log('Showing Google AdMob interstitial ad');
+            window.webkit.messageHandlers.admob.postMessage({
+              action: 'showInterstitial',
+              adUnitId: 'ca-app-pub-3940256099942544/4411468910'
+            });
+          } else {
+            console.log('AdMob not available - running in web browser');
+          }
+          
           return 5;
         }
         return current - 1;
