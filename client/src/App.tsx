@@ -5456,31 +5456,54 @@ function App() {
           position: 'fixed',
           top: 0,
           left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.95)',
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.98)',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 4000,
+          zIndex: 9999,
           fontFamily: 'monospace'
         }}>
           <div style={{
-            background: 'linear-gradient(145deg, #002200, #001100)',
-            border: '3px solid #00ff00',
-            borderRadius: '12px',
-            padding: '40px',
+            backgroundColor: '#001100',
+            border: '4px solid #00ff00',
+            borderRadius: '16px',
+            padding: '60px',
             textAlign: 'center',
             color: '#00ff00',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)'
+            maxWidth: '400px',
+            boxShadow: '0 0 40px rgba(0, 255, 0, 0.5)'
           }}>
-            <div style={{ fontSize: '32px', marginBottom: '20px' }}>📺 AD BREAK 📺</div>
-            <div style={{ fontSize: '18px', marginBottom: '20px' }}>Thanks for playing Bank Teller 1988!</div>
-            <div style={{ fontSize: '48px', color: '#ffff00', textShadow: '0 0 10px #ffff00' }}>{adCountdown}</div>
-            <div style={{ fontSize: '14px', marginTop: '20px', color: '#888888' }}>Resuming in {adCountdown} seconds...</div>
+            <div style={{ 
+              fontSize: '36px', 
+              marginBottom: '24px',
+              textShadow: '0 0 15px #00ff00'
+            }}>
+              📺 AD BREAK 📺
+            </div>
+            <div style={{ 
+              fontSize: '20px', 
+              marginBottom: '32px',
+              color: '#88ff88'
+            }}>
+              Thanks for playing Bank Teller 1988!
+            </div>
+            <div style={{ 
+              fontSize: '64px', 
+              color: '#ffff00', 
+              textShadow: '0 0 20px #ffff00',
+              marginBottom: '16px',
+              fontWeight: 'bold'
+            }}>
+              {adCountdown}
+            </div>
+            <div style={{ 
+              fontSize: '16px', 
+              color: '#999999'
+            }}>
+              Resuming in {adCountdown} seconds...
+            </div>
           </div>
         </div>
       )}
