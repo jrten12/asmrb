@@ -1272,6 +1272,18 @@ function App() {
           box-sizing: border-box;
         }
       `}</style>
+      
+      {/* Banner Ad - Fixed at bottom */}
+      <div style={{
+        position: 'fixed',
+        bottom: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1000,
+        display: gamePhase === 'working' ? 'block' : 'none'
+      }}>
+        <BannerAd style={{ margin: '0 auto' }} />
+      </div>
     </div>
   );
 }

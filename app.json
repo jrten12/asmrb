@@ -21,7 +21,8 @@
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This app uses advertising ID to show personalized ads and support the game development.",
         "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
-      }
+      },
+      "googleMobileAdsAppId": "ca-app-pub-3940256099942544~1458002511"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +32,14 @@
       "package": "com.bankteller.app",
       "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
     },
-    "plugins": []
+    "plugins": [
+      [
+        "expo-ads-admob",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ]
+    ]
   }
 }
