@@ -995,39 +995,23 @@ function App() {
         setTimeout(() => {
           playSound('legacy_processing');
           setTimeout(() => {
-            // Check if customer is suspicious - accounts of suspicious customers should not be found
-            if (currentCustomer && currentCustomer.suspiciousLevel >= 3) {
-              // Suspicious customers have invalid accounts
-              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: true}));
-              
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "✗✗✗ ACCOUNT NOT FOUND ✗✗✗",
-                "ERROR: NO RECORD IN SYSTEM",
-                "STATUS: INVALID ACCOUNT NUMBER",
-                "RECOMMENDATION: REJECT TRANSACTION",
-                "POTENTIAL FRAUD INDICATOR"
-              ]);
-              playSound('reject');
-            } else {
-              // Generate deterministic account balance for legitimate customers
-              let sum = 0;
-              for (let i = 0; i < accountNum.length; i++) {
-                sum += accountNum.charCodeAt(i);
-              }
-              const balance = ((sum * 123) % 5000) + 500; // $500 to $5500
-              setAccountBalance(balance);
-              setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
-              
-              setTerminalOutput(prev => [...prev, 
-                "> LOOKUP " + accountNum,
-                "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
-                "STATUS: ACTIVE CUSTOMER",
-                "BALANCE: $" + balance.toLocaleString(),
-                "BANK RECORDS NOW DISPLAYED BELOW"
-              ]);
-              playSound('approve');
+            // Always show account information - player must manually detect fraud through document comparison
+            let sum = 0;
+            for (let i = 0; i < accountNum.length; i++) {
+              sum += accountNum.charCodeAt(i);
             }
+            const balance = ((sum * 123) % 5000) + 500; // $500 to $5500
+            setAccountBalance(balance);
+            setVerificationState(prev => ({...prev, accountLookedUp: true, accountNotFound: false}));
+            
+            setTerminalOutput(prev => [...prev, 
+              "> LOOKUP " + accountNum,
+              "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+              "STATUS: ACTIVE CUSTOMER",
+              "BALANCE: $" + balance.toLocaleString(),
+              "BANK RECORDS NOW DISPLAYED BELOW"
+            ]);
+            playSound('approve');
           }, 800);
         }, 1200);
       }
@@ -1151,29 +1135,51 @@ function App() {
       
       const bankSignature = bankSignatures[name] || name;
       
-      // Generate customer signature display based on signature data (no fraud determination)
-      let displaySignature = name;
-      if (customerSignatureData.includes('_cursive')) {
+      // Parse new signature format: "name|style_markers|signature_type"
+      const signatureParts = customerSignatureData.split('|');
+      const signatureName = signatureParts[0] || name;
+      const styleMarkers = signatureParts[1] || '';
+      const signatureType = signatureParts[2] || 'legitimate';
+      
+      // Generate customer signature display based on new signature data
+      let displaySignature = signatureName;
+      
+      // Apply style-based display modifications
+      if (styleMarkers.includes('stylized')) {
         displaySignature = bankSignature;
-      } else if (customerSignatureData.includes('_print')) {
-        displaySignature = name.toUpperCase();
-      } else if (customerSignatureData.includes('_mixed')) {
-        displaySignature = name.split(' ').map((part, i) => i === 0 ? part : part.toUpperCase()).join(' ');
-      } else if (customerSignatureData.includes('_elaborate')) {
-        displaySignature = bankSignature + "✦";
-      } else if (customerSignatureData.includes('_initials')) {
-        displaySignature = name.split(' ').map(part => part[0]).join('.');
-      } else if (customerSignatureData.includes('_wrong')) {
-        const wrongNames = ["Jane Doe", "Bob Smith", "Mary Jones"];
+      } else if (styleMarkers.includes('bold')) {
+        displaySignature = `**${signatureName}**`;
+      } else if (styleMarkers.includes('faint')) {
+        displaySignature = `~${signatureName}~`;
+      } else if (styleMarkers.includes('italic')) {
+        displaySignature = bankSignature;
+      } else if (styleMarkers.includes('flourished')) {
+        displaySignature = `${bankSignature}✦`;
+      } else if (styleMarkers.includes('large')) {
+        displaySignature = signatureName.toUpperCase();
+      } else if (styleMarkers.includes('small')) {
+        displaySignature = signatureName.toLowerCase();
+      }
+      
+      // Handle fraud types
+      if (signatureType.includes('wrong_name') || signatureType.includes('different_name')) {
+        const wrongNames = ["Jane Doe", "Bob Smith", "Mary Jones", "Alex Wilson", "Pat Davis"];
         displaySignature = wrongNames[Math.floor(Math.random() * wrongNames.length)];
-      } else if (customerSignatureData.includes('_misspelled')) {
-        displaySignature = name.replace(/[aeiou]/g, (match, offset) => 
-          offset === 0 ? match : String.fromCharCode(97 + Math.floor(Math.random() * 26))
-        );
-      } else if (customerSignatureData.includes('_partial')) {
-        displaySignature = name.split(' ')[Math.floor(Math.random() * name.split(' ').length)];
-      } else if (customerSignatureData.includes('_shaky')) {
-        displaySignature = name.split('').map(char => char + (Math.random() < 0.3 ? '~' : '')).join('');
+      } else if (signatureType.includes('misspelled')) {
+        displaySignature = signatureName.replace(/[aeiou]/g, (match, offset) => {
+          const vowels = ['a', 'e', 'i', 'o', 'u'];
+          return Math.random() < 0.4 ? vowels[Math.floor(Math.random() * vowels.length)] : match;
+        });
+      } else if (signatureType.includes('wrong_first')) {
+        const nameParts = signatureName.split(' ');
+        const wrongFirsts = ["Alex", "Chris", "Jordan", "Casey", "Taylor"];
+        displaySignature = `${wrongFirsts[Math.floor(Math.random() * wrongFirsts.length)]} ${nameParts[1] || ''}`;
+      } else if (signatureType.includes('wrong_last')) {
+        const nameParts = signatureName.split(' ');
+        const wrongLasts = ["Johnson", "Williams", "Davis", "Miller", "Wilson"];
+        displaySignature = `${nameParts[0] || ''} ${wrongLasts[Math.floor(Math.random() * wrongLasts.length)]}`;
+      } else if (signatureType.includes('trembling') || signatureType.includes('shaky')) {
+        displaySignature = signatureName.split('').map(char => char + (Math.random() < 0.3 ? '~' : '')).join('');
       }
       
       setSignatureModal({
@@ -1320,6 +1326,17 @@ function App() {
       if (!verificationState.accountLookedUp || !verificationState.signatureCompared) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Complete verification first"]);
         playSound('reject');
+        return;
+      }
+      
+      // Validate wire transfer amount matches customer's transaction
+      const enteredAmount = parseFloat(amount);
+      const expectedAmount = currentCustomer.transaction.amount;
+      
+      if (isNaN(enteredAmount) || enteredAmount !== expectedAmount) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Wire transfer amount mismatch", `Expected: $${expectedAmount.toLocaleString()}`, `Entered: $${enteredAmount || 'INVALID'}`, "WIRE TRANSFER DENIED"]);
+        playSound('reject');
+        handleError();
         return;
       }
       
@@ -1650,36 +1667,8 @@ function App() {
       return;
     }
     
-    // Check for account not found (major fraud indicator)
-    if (verificationState.accountNotFound) {
-      handleFraud("Invalid account - customer attempting to use non-existent account");
-      return;
-    }
-    
-    // Enhanced signature fraud detection based on customer's actual documents
-    const signatureDoc = currentCustomer.documents.find(d => d.type === 'signature');
-    if (signatureDoc && signatureDoc.data.signature) {
-      const signatureData = signatureDoc.data.signature as string;
-      
-      // Detect fraud based on signature characteristics
-      if (signatureData.includes('_wrong') || 
-          signatureData.includes('_misspelled') || 
-          signatureData.includes('_partial') ||
-          (currentCustomer.suspiciousLevel > 2 && signatureData.includes('_shaky'))) {
-        handleFraud("Signature does not match bank records - fraudulent signature detected");
-        return;
-      }
-    }
-    
-    // Check for document inconsistencies
-    const idDoc = currentCustomer.documents.find(d => d.type === 'id');
-    if (idDoc && currentCustomer.suspiciousLevel > 1) {
-      // Check for name mismatches in documents
-      if (idDoc.data.name !== currentCustomer.name) {
-        handleFraud("Name on ID does not match customer records - potential identity theft");
-        return;
-      }
-    }
+    // Manual fraud detection only - no automatic rejections
+    // Player must identify fraud by comparing documents themselves
     
     // Process legitimate transaction
     const transactionId = Date.now().toString().slice(-6);
