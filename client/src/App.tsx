@@ -2198,16 +2198,17 @@ function App() {
           clearInterval(countdown);
           setShowAdBreak(false);
           
-          // Try to show actual Google AdMob interstitial ad
-          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.admob) {
-            console.log('Showing Google AdMob interstitial ad');
-            window.webkit.messageHandlers.admob.postMessage({
-              action: 'showInterstitial',
-              adUnitId: 'ca-app-pub-3940256099942544/4411468910'
+          // Show actual Google AdMob interstitial ad
+          AdMob.showInterstitial().then(() => {
+            console.log('Google AdMob interstitial ad displayed from test button');
+            // Preload next ad
+            return AdMob.prepareInterstitial({
+              adId: 'ca-app-pub-3940256099942544/4411468910',
+              isTesting: true
             });
-          } else {
-            console.log('AdMob not available - running in web browser');
-          }
+          }).catch(error => {
+            console.log('Failed to show AdMob interstitial from test button:', error);
+          });
           
           return 5;
         }
