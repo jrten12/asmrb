@@ -1652,6 +1652,48 @@ function App() {
     // Manual fraud detection only - no automatic rejections
     // Player must identify fraud by comparing documents themselves
     
+    // Validate transaction amount before processing
+    if (currentCustomer.transaction.type === 'wire_transfer') {
+      // Get the amount from the most recent wire command
+      const lastWireCommand = terminalOutput
+        .slice()
+        .reverse()
+        .find(line => line.includes('WIRE $'));
+      
+      if (lastWireCommand) {
+        const wireMatch = lastWireCommand.match(/WIRE \$([0-9,]+(?:\.[0-9]{2})?)/);
+        if (wireMatch) {
+          const enteredAmount = parseFloat(wireMatch[1].replace(/,/g, ''));
+          const expectedAmount = currentCustomer.transaction.amount;
+          
+          if (enteredAmount !== expectedAmount) {
+            // Penalize for wrong wire transfer amount
+            setGameScore(prev => ({
+              ...prev,
+              errors: prev.errors + 1,
+              errorDetails: [...prev.errorDetails, `Wire transfer amount error: entered $${enteredAmount}, expected $${expectedAmount}`]
+            }));
+            
+            setTerminalOutput(prev => [...prev, 
+              "ERROR: Wire transfer amount validation failed",
+              `Entered: $${enteredAmount.toLocaleString()}`,
+              `Expected: $${expectedAmount.toLocaleString()}`,
+              "Transaction rejected - customer complaint filed",
+              "Manager notified of processing error"
+            ]);
+            
+            playSound('reject');
+            setTimeout(() => {
+              setCurrentCustomer(null);
+              resetVerificationState();
+              setTerminalOutput(prev => [...prev, "Customer left due to processing error", "Ready for next customer"]);
+            }, 3000);
+            return;
+          }
+        }
+      }
+    }
+    
     // Process legitimate transaction
     const transactionId = Date.now().toString().slice(-6);
     const timestamp = new Date().toLocaleString();
@@ -1665,9 +1707,7 @@ function App() {
     } else if (currentCustomer.transaction.type === 'deposit') {
       endingBalance = accountBalance + currentCustomer.transaction.amount;
     } else if (currentCustomer.transaction.type === 'wire_transfer') {
-      endingBalance = accountBalance - currentCustomer.transaction.amount;
-    } else if (currentCustomer.transaction.type === 'money_order') {
-      endingBalance = accountBalance - currentCustomer.transaction.amount;
+      endingBalance = accountBalance - currentCustomer.transaction.amount - 25; // Include wire fee
     }
     
     const receipt = {
