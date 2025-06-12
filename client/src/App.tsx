@@ -3044,7 +3044,7 @@ function App() {
                         })()}</div>
                         <div><strong>ACCT:</strong> {(() => {
                           if (!currentCustomer) return "N/A";
-                          if (currentCustomer.suspiciousLevel > 2) return "INVALID";
+                          if (verificationState.accountNotFound) return "INVALID";
                           return currentCustomer.transaction.accountNumber;
                         })()}</div>
                         <div><strong>DOB:</strong> {(() => {
@@ -3086,7 +3086,7 @@ function App() {
                         })()}</div>
                         <div><strong>STATUS:</strong> {(() => {
                           if (!currentCustomer) return "N/A";
-                          if (currentCustomer.suspiciousLevel > 2) return "INVALID ACCOUNT";
+                          if (verificationState.accountNotFound) return "INVALID ACCOUNT";
                           return "ACTIVE";
                         })()}</div>
                       </div>
@@ -3241,11 +3241,11 @@ function App() {
                       lineHeight: '1.6',
                       fontFamily: 'monospace'
                     }}>
-                      <div><strong>ACCOUNT:</strong> {currentCustomer.suspiciousLevel > 0 ? "INVALID" : currentCustomer.transaction.accountNumber}</div>
-                      <div><strong>TYPE:</strong> {currentCustomer.suspiciousLevel > 0 ? "NO RECORD" : "CHECKING"}</div>
-                      <div><strong>BALANCE:</strong> {currentCustomer.suspiciousLevel > 0 ? "$0.00" : `$${accountBalance.toLocaleString()}`}</div>
-                      <div><strong>STATUS:</strong> {currentCustomer.suspiciousLevel > 0 ? "INVALID ACCOUNT" : "ACTIVE"}</div>
-                      <div><strong>OPENED:</strong> {currentCustomer.suspiciousLevel > 0 ? "NO RECORD" : "2020-01-15"}</div>
+                      <div><strong>ACCOUNT:</strong> {verificationState.accountNotFound ? "INVALID" : currentCustomer.transaction.accountNumber}</div>
+                      <div><strong>TYPE:</strong> {verificationState.accountNotFound ? "NO RECORD" : "CHECKING"}</div>
+                      <div><strong>BALANCE:</strong> {verificationState.accountNotFound ? "$0.00" : `$${accountBalance.toLocaleString()}`}</div>
+                      <div><strong>STATUS:</strong> {verificationState.accountNotFound ? "INVALID ACCOUNT" : "ACTIVE"}</div>
+                      <div><strong>OPENED:</strong> {verificationState.accountNotFound ? "NO RECORD" : "2020-01-15"}</div>
                     </div>
                   </div>
                 </div>
