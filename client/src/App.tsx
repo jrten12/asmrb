@@ -1623,6 +1623,45 @@ function App() {
   const processTransaction = () => {
     if (!currentCustomer) return;
     
+    // Enhanced fraud detection before processing
+    if (!verificationState.accountLookedUp || !verificationState.signatureCompared) {
+      setTerminalOutput(prev => [...prev, "ERROR: Complete verification first", "1. LOOKUP account", "2. COMPARE SIGNATURE"]);
+      playSound('reject');
+      return;
+    }
+    
+    // Check for account not found (major fraud indicator)
+    if (verificationState.accountNotFound) {
+      handleFraud("Invalid account - customer attempting to use non-existent account");
+      return;
+    }
+    
+    // Enhanced signature fraud detection based on customer's actual documents
+    const signatureDoc = currentCustomer.documents.find(d => d.type === 'signature');
+    if (signatureDoc && signatureDoc.data.signature) {
+      const signatureData = signatureDoc.data.signature as string;
+      
+      // Detect fraud based on signature characteristics
+      if (signatureData.includes('_wrong') || 
+          signatureData.includes('_misspelled') || 
+          signatureData.includes('_partial') ||
+          (currentCustomer.suspiciousLevel > 2 && signatureData.includes('_shaky'))) {
+        handleFraud("Signature does not match bank records - fraudulent signature detected");
+        return;
+      }
+    }
+    
+    // Check for document inconsistencies
+    const idDoc = currentCustomer.documents.find(d => d.type === 'id');
+    if (idDoc && currentCustomer.suspiciousLevel > 1) {
+      // Check for name mismatches in documents
+      if (idDoc.data.name !== currentCustomer.name) {
+        handleFraud("Name on ID does not match customer records - potential identity theft");
+        return;
+      }
+    }
+    
+    // Process legitimate transaction
     const transactionId = Date.now().toString().slice(-6);
     const timestamp = new Date().toLocaleString();
     
@@ -1634,6 +1673,10 @@ function App() {
       endingBalance = accountBalance - currentCustomer.transaction.amount;
     } else if (currentCustomer.transaction.type === 'deposit') {
       endingBalance = accountBalance + currentCustomer.transaction.amount;
+    } else if (currentCustomer.transaction.type === 'wire_transfer') {
+      endingBalance = accountBalance - currentCustomer.transaction.amount;
+    } else if (currentCustomer.transaction.type === 'money_order') {
+      endingBalance = accountBalance - currentCustomer.transaction.amount;
     }
     
     const receipt = {
@@ -1645,7 +1688,7 @@ function App() {
       amount: currentCustomer.transaction.amount,
       startingBalance: startingBalance,
       endingBalance: endingBalance,
-      balance: endingBalance, // Keep for backward compatibility
+      balance: endingBalance,
       destinationAccount: currentCustomer.transaction.targetAccount
     };
     
@@ -1655,9 +1698,12 @@ function App() {
     // Terminal feedback during printing
     setTerminalOutput(prev => [...prev, 
       "PROCESSING TRANSACTION...",
+      "FRAUD CHECKS PASSED",
       "PRINTING RECEIPT...",
       "DOT MATRIX PRINTER ACTIVE"
     ]);
+    
+    playSound('dot_matrix_printer');
     
     // Simulate dot matrix printer completion and tear-off after viewing
     setTimeout(() => {
@@ -5162,6 +5208,41 @@ function App() {
           }}>
             FRAUD SUSPECT IN CUSTODY<br/>
             EXCELLENT DETECTIVE WORK, TELLER
+          </div>
+        </div>
+      )}
+
+      {/* Ad Break Overlay */}
+      {showAdBreak && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.95)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 4000,
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #002200, #001100)',
+            border: '3px solid #00ff00',
+            borderRadius: '12px',
+            padding: '40px',
+            textAlign: 'center',
+            color: '#00ff00',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            boxShadow: '0 0 30px rgba(0, 255, 0, 0.3)'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '20px' }}>📺 AD BREAK 📺</div>
+            <div style={{ fontSize: '18px', marginBottom: '20px' }}>Thanks for playing Bank Teller 1988!</div>
+            <div style={{ fontSize: '48px', color: '#ffff00', textShadow: '0 0 10px #ffff00' }}>{adCountdown}</div>
+            <div style={{ fontSize: '14px', marginTop: '20px', color: '#888888' }}>Resuming in {adCountdown} seconds...</div>
           </div>
         </div>
       )}
