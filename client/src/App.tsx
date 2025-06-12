@@ -4063,18 +4063,41 @@ function App() {
             </button>
             
             <button
-              onClick={testAdBreak}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('TEST AD button clicked - calling testAdBreak');
+                testAdBreak();
+              }}
               style={{
-                background: 'rgba(255, 140, 0, 0.8)',
-                border: '2px solid #ff8c00',
+                background: 'rgba(255, 140, 0, 0.9)',
+                border: '3px solid #ff8c00',
                 color: '#ffffff',
-                padding: '8px',
-                fontSize: '12px',
+                padding: '12px 16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 cursor: 'pointer',
-                borderRadius: '4px',
+                borderRadius: '6px',
                 fontFamily: 'monospace',
-                marginTop: '8px'
+                marginTop: '12px',
+                position: 'relative',
+                zIndex: 1000,
+                boxShadow: '0 4px 8px rgba(255, 140, 0, 0.4)',
+                transition: 'all 0.2s ease',
+                minHeight: '40px',
+                minWidth: '120px'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 140, 0, 1)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 140, 0, 0.9)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              onTouchStart={(e) => {
+                console.log('TEST AD button touched on mobile');
+                e.currentTarget.style.background = 'rgba(255, 140, 0, 1)';
               }}
             >
               🎬 TEST AD
