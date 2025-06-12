@@ -434,12 +434,17 @@ function App() {
         
         // AdMob event listeners will be handled by the native iOS implementation
         
-        // Preload interstitial ad
-        await AdMob.prepareInterstitial({
-          adId: 'ca-app-pub-3940256099942544/4411468910',
-          isTesting: true
-        });
-        console.log('Interstitial ad preloaded');
+        // Preload interstitial ad with better error handling
+        try {
+          await AdMob.prepareInterstitial({
+            adId: 'ca-app-pub-3940256099942544/4411468910',
+            isTesting: true
+          });
+          console.log('Interstitial ad preloaded successfully');
+        } catch (prepareError) {
+          console.log('Failed to preload interstitial ad:', prepareError);
+          console.log('This is normal - Google test ads may not always be available');
+        }
       } catch (error) {
         console.log('AdMob initialization failed:', error);
       }
