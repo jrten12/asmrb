@@ -411,6 +411,7 @@ function App() {
   // Ad system states
   const [showAdBreak, setShowAdBreak] = useState(false);
   const [adCountdown, setAdCountdown] = useState(5);
+  const [showDemoAd, setShowDemoAd] = useState(false);
   
   // Show interstitial ad function
   const showInterstitialAd = () => {
