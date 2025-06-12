@@ -424,6 +424,8 @@ function App() {
         });
         console.log('AdMob initialized successfully');
         
+        // AdMob event listeners will be handled by the native iOS implementation
+        
         // Preload interstitial ad
         await AdMob.prepareInterstitial({
           adId: 'ca-app-pub-3940256099942544/4411468910',
@@ -2164,15 +2166,19 @@ function App() {
               setShowAdBreak(false);
               
               // Show actual Google AdMob interstitial ad
+              console.log('Attempting to show Google AdMob interstitial...');
               AdMob.showInterstitial().then(() => {
-                console.log('Google AdMob interstitial ad displayed');
+                console.log('SUCCESS: Google AdMob interstitial ad displayed');
                 // Preload next ad
                 return AdMob.prepareInterstitial({
                   adId: 'ca-app-pub-3940256099942544/4411468910',
                   isTesting: true
                 });
+              }).then(() => {
+                console.log('Next ad preloaded successfully');
               }).catch(error => {
-                console.log('Failed to show AdMob interstitial:', error);
+                console.log('ERROR: Failed to show/preload AdMob interstitial:', error);
+                console.log('Error details:', JSON.stringify(error));
               });
               
               return 5;
