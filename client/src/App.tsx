@@ -2118,29 +2118,30 @@ function App() {
     }, 8000);
   };
 
-  // Function to trigger ad break after any customer interaction
+  // Function to trigger ad break after customer interactions
   const triggerAdBreak = () => {
     console.log('triggerAdBreak called');
     setCustomersServed(prev => {
       const newCount = prev + 1;
-      console.log(`Customer count: ${newCount}, showing ad`);
+      console.log(`Customer count: ${newCount}`);
       
-      // Show ad break immediately (testing mode)
-      setShowAdBreak(true);
-      setAdCountdown(5);
-      
-      const countdown = setInterval(() => {
-        setAdCountdown(current => {
-          console.log(`Ad countdown: ${current}`);
-          if (current <= 1) {
-            clearInterval(countdown);
-            setShowAdBreak(false);
-            console.log('Ad break ended');
-            return 5;
-          }
-          return current - 1;
-        });
-      }, 1000);
+      // Show ad break every 5 customers (normal frequency)
+      if (newCount % 5 === 0) {
+        console.log('Showing ad break at customer', newCount);
+        setShowAdBreak(true);
+        setAdCountdown(5);
+        
+        const countdown = setInterval(() => {
+          setAdCountdown(current => {
+            if (current <= 1) {
+              clearInterval(countdown);
+              setShowAdBreak(false);
+              return 5;
+            }
+            return current - 1;
+          });
+        }, 1000);
+      }
       
       return newCount;
     });
