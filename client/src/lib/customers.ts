@@ -82,13 +82,14 @@ export function generateCustomer(level: number): Customer {
     documents,
     suspiciousLevel,
     patience: 100,
-    maxPatience: 100 - (level * 5)
+    maxPatience: 100 - (level * 5),
+    isFraudulent: isFraud
   };
 }
 
 function generateTransaction(level: number, suspiciousLevel: number): Transaction {
-  // Only basic transactions with working game mechanics
-  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'inquiry'];
+  // Include all transaction types for complete bank teller experience
+  const types: Transaction['type'][] = ['deposit', 'withdrawal', 'inquiry', 'wire_transfer', 'transfer', 'cashiers_check', 'money_order'];
   const type = types[Math.floor(Math.random() * types.length)];
   
   // Realistic transaction amounts
