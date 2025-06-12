@@ -1,41 +1,29 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
-interface BannerAdComponentProps {
-  size?: BannerAdSize;
-  style?: any;
+interface BannerAdProps {
+  style?: React.CSSProperties;
 }
 
-const BannerAdComponent: React.FC<BannerAdComponentProps> = ({ 
-  size = BannerAdSize.BANNER,
-  style 
-}) => {
+const BannerAd: React.FC<BannerAdProps> = ({ style }) => {
   return (
-    <View style={[styles.container, style]}>
-      <BannerAd
-        unitId={TestIds.BANNER}
-        size={size}
-        requestOptions={{
-          requestNonPersonalizedAdsOnly: true,
-        }}
-        onAdLoaded={() => {
-          console.log('Banner ad loaded successfully');
-        }}
-        onAdFailedToLoad={(error) => {
-          console.log('Banner ad failed to load:', error);
-        }}
-      />
-    </View>
+    <div 
+      style={{
+        width: '320px',
+        height: '50px',
+        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+        border: '1px solid #00ff00',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: '#00ff00',
+        ...style
+      }}
+    >
+      AdMob Banner (Test)
+    </div>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-});
-
-export default BannerAdComponent;
+export default BannerAd;

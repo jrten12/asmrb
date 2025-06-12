@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import { getDocumentRenderer } from './lib/documents';
 import type { Customer, Document as GameDocument } from './types/game';
+import BannerAd from './components/BannerAd';
 
 declare global {
   interface Window {
