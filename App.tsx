@@ -154,11 +154,11 @@ export default function App() {
         
         {/* Banner Ad */}
         <View style={styles.adContainer}>
-          <AdMobBanner
+          <AdMobBannerAd
+            adUnitId={BANNER_AD_UNIT_ID}
             bannerSize="smartBannerPortrait"
-            adUnitID={BANNER_AD_UNIT_ID}
-            servePersonalizedAds={false}
-            onDidFailToReceiveAdWithError={(error: any) => console.log('Banner ad error:', error)}
+            testDeviceID="EMULATOR"
+            onDidFailToReceiveAdWithError={(error: string) => console.log('Banner ad error:', error)}
           />
         </View>
       </View>
@@ -181,11 +181,11 @@ export default function App() {
         
         {/* Banner Ad */}
         <View style={styles.adContainer}>
-          <AdMobBanner
+          <AdMobBannerAd
+            adUnitId={BANNER_AD_UNIT_ID}
             bannerSize="smartBannerPortrait"
-            adUnitID={BANNER_AD_UNIT_ID}
-            servePersonalizedAds={false}
-            onDidFailToReceiveAdWithError={(error: any) => console.log('Banner ad error:', error)}
+            testDeviceID="EMULATOR"
+            onDidFailToReceiveAdWithError={(error: string) => console.log('Banner ad error:', error)}
           />
         </View>
       </View>
@@ -257,11 +257,11 @@ export default function App() {
 
       {/* Banner Ad */}
       <View style={styles.adContainer}>
-        <AdMobBanner
+        <AdMobBannerAd
+          adUnitId={BANNER_AD_UNIT_ID}
           bannerSize="smartBannerPortrait"
-          adUnitID={BANNER_AD_UNIT_ID}
-          servePersonalizedAds={false}
-          onDidFailToReceiveAdWithError={(error: any) => console.log('Banner ad error:', error)}
+          testDeviceID="EMULATOR"
+          onDidFailToReceiveAdWithError={(error: string) => console.log('Banner ad error:', error)}
         />
       </View>
     </View>
