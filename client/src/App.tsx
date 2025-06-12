@@ -2120,28 +2120,48 @@ function App() {
 
   // Function to trigger ad break after any customer interaction
   const triggerAdBreak = () => {
+    console.log('triggerAdBreak called');
     setCustomersServed(prev => {
       const newCount = prev + 1;
-      console.log(`Customer count: ${newCount}`);
-      if (newCount % 1 === 0) {
-        console.log('Should show ad at customer', newCount);
-        // Show interstitial ad every 1 customer (testing mode)
-        setShowAdBreak(true);
-        setAdCountdown(5);
-        
-        const countdown = setInterval(() => {
-          setAdCountdown(prev => {
-            if (prev <= 1) {
-              clearInterval(countdown);
-              setShowAdBreak(false);
-              return 5;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      }
+      console.log(`Customer count: ${newCount}, showing ad`);
+      
+      // Show ad break immediately (testing mode)
+      setShowAdBreak(true);
+      setAdCountdown(5);
+      
+      const countdown = setInterval(() => {
+        setAdCountdown(current => {
+          console.log(`Ad countdown: ${current}`);
+          if (current <= 1) {
+            clearInterval(countdown);
+            setShowAdBreak(false);
+            console.log('Ad break ended');
+            return 5;
+          }
+          return current - 1;
+        });
+      }, 1000);
+      
       return newCount;
     });
+  };
+  
+  // Manual test button for ad break
+  const testAdBreak = () => {
+    console.log('Manual ad break test');
+    setShowAdBreak(true);
+    setAdCountdown(5);
+    
+    const countdown = setInterval(() => {
+      setAdCountdown(current => {
+        if (current <= 1) {
+          clearInterval(countdown);
+          setShowAdBreak(false);
+          return 5;
+        }
+        return current - 1;
+      });
+    }, 1000);
   };
 
   const handleCorrectTransaction = () => {
@@ -3962,6 +3982,24 @@ function App() {
               }}
             >
               CALL CUSTOMER
+            </button>
+            
+            <button
+              onClick={testAdBreak}
+              style={{
+                background: 'rgba(255, 140, 0, 0.8)',
+                border: '2px solid #ff8c00',
+                color: '#ffffff',
+                padding: '8px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                marginTop: '8px'
+              }}
+            >
+              🎬 TEST AD
             </button>
             
             {/* REPORT FRAUD Button */}
