@@ -2125,8 +2125,8 @@ function App() {
       const newCount = prev + 1;
       console.log(`Customer count: ${newCount}`);
       
-      // Show ad break every 5 customers (normal frequency)
-      if (newCount % 5 === 0) {
+      // Show ad break every 1 customer (mobile testing mode)
+      if (newCount % 1 === 0) {
         console.log('Showing ad break at customer', newCount);
         setShowAdBreak(true);
         setAdCountdown(5);
