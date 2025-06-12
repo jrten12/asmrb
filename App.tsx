@@ -21,24 +21,7 @@ const ScrollView = ({ children, style, ...props }: any) => (
   <div style={{ ...style, overflowY: 'auto' }} {...props}>{children}</div>
 );
 
-// AdMob Banner component placeholder for development
-const AdMobBanner = ({ bannerSize, adUnitID, onDidFailToReceiveAdWithError }: any) => (
-  <div style={{
-    width: '320px',
-    height: '50px',
-    backgroundColor: 'rgba(0, 255, 0, 0.1)',
-    border: '1px solid #00ff00',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'monospace',
-    fontSize: '12px',
-    color: '#00ff00',
-    margin: '10px auto'
-  }}>
-    AdMob Banner ({adUnitID?.slice(-8)})
-  </div>
-);
+import AdMobBannerAd from './components/AdMobBannerAd';
 
 // Test AdMob IDs
 const BANNER_AD_UNIT_ID = 'ca-app-pub-3940256099942544/6300978111';
@@ -185,7 +168,6 @@ export default function App() {
   if (gameState.timeRemaining <= 0) {
     return (
       <View style={styles.container}>
-        <StatusBar style="light" />
         <View style={styles.gameOverContainer}>
           <Text style={styles.gameOverTitle}>SHIFT COMPLETE</Text>
           <Text style={styles.finalScore}>Final Score: {gameState.score}</Text>
@@ -203,7 +185,7 @@ export default function App() {
             bannerSize="smartBannerPortrait"
             adUnitID={BANNER_AD_UNIT_ID}
             servePersonalizedAds={false}
-            onDidFailToReceiveAdWithError={(error) => console.log('Banner ad error:', error)}
+            onDidFailToReceiveAdWithError={(error: any) => console.log('Banner ad error:', error)}
           />
         </View>
       </View>
@@ -212,8 +194,6 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
-      
       {/* Game Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>WESTRIDGE NATIONAL BANK</Text>
@@ -281,7 +261,7 @@ export default function App() {
           bannerSize="smartBannerPortrait"
           adUnitID={BANNER_AD_UNIT_ID}
           servePersonalizedAds={false}
-          onDidFailToReceiveAdWithError={(error) => console.log('Banner ad error:', error)}
+          onDidFailToReceiveAdWithError={(error: any) => console.log('Banner ad error:', error)}
         />
       </View>
     </View>
