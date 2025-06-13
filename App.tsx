@@ -4,9 +4,6 @@ import { getDocumentRenderer } from './lib/documents';
 import type { Customer, Document as GameDocument } from './types/game';
 import AdMobBannerAd from './components/AdMobBannerAd';
 
-// Test AdMob IDs
-const BANNER_AD_UNIT_ID = 'ca-app-pub-3940256099942544/6300978111';
-
 declare global {
   interface Window {
     gameAudioContext?: AudioContext;
@@ -41,8 +38,6 @@ interface LegacyDocument {
 
 function App() {
   const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'leaderboard' | 'game_over' | 'punch_out' | 'supervisor' | 'police_arrest'>('punch_in');
-  const [screenTransition, setScreenTransition] = useState('fadeIn');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<GameDocument | null>(null);
   const [gameInitialized, setGameInitialized] = useState(false);
@@ -73,8 +68,8 @@ function App() {
     dismissalWarningGiven: false
   });
   
-  // Audio completely disabled
-  const [musicMuted, setMusicMuted] = useState(true);
+  // Background music and sound management
+  const [musicMuted, setMusicMuted] = useState(false);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   
   // Account lookup state (no automatic fraud detection)
@@ -84,63 +79,27 @@ function App() {
     signatureCompared: false
   });
 
-  // Sound effects with proper audio management
-  const activeAudios = useRef<HTMLAudioElement[]>([]);
-  
-  const stopAllAudio = () => {
-    activeAudios.current.forEach(audio => {
-      audio.pause();
-      audio.currentTime = 0;
-    });
-    activeAudios.current = [];
-  };
-
+  // Sound effects - COMPLETELY DISABLED
   const playSound = (soundType: string) => {
-    // Completely disable all audio for now to stop the printer loop
+    // Audio permanently disabled to stop printer loop
     return;
   };
 
-  // Disable all audio completely to stop printer loop
+  // Background music disabled
   useEffect(() => {
-    stopAllAudio();
+    // All audio disabled
     if (backgroundMusicRef.current) {
       backgroundMusicRef.current.pause();
       backgroundMusicRef.current.currentTime = 0;
     }
     
     return () => {
-      stopAllAudio();
       if (backgroundMusicRef.current) {
         backgroundMusicRef.current.pause();
         backgroundMusicRef.current.currentTime = 0;
       }
     };
   }, []);
-
-  // Smooth transition functions
-  const transitionToPhase = (newPhase: typeof gamePhase, animationType: string = 'fadeIn') => {
-    if (isTransitioning) return;
-    
-    setIsTransitioning(true);
-    setScreenTransition('fadeOut');
-    
-    setTimeout(() => {
-      setGamePhase(newPhase);
-      setScreenTransition(animationType);
-      setIsTransitioning(false);
-    }, 400);
-  };
-
-  const transitionWithDelay = (newPhase: typeof gamePhase, animationType: string, delay: number = 500) => {
-    setIsTransitioning(true);
-    setScreenTransition('slideOutToLeft');
-    
-    setTimeout(() => {
-      setGamePhase(newPhase);
-      setScreenTransition(animationType);
-      setIsTransitioning(false);
-    }, delay);
-  };
 
   // Generate customer with proper fraud mechanics
   const generateCustomerLocal = (): Customer => {
@@ -226,7 +185,7 @@ function App() {
       ]);
       setGameScore(prev => ({ ...prev, customersCalledWithoutService: newCount }));
       // End game - YOU'RE FIRED
-      setTimeout(() => transitionToPhase('leaderboard', 'bounceIn'), 3000);
+      setTimeout(() => setGamePhase('leaderboard'), 3000);
       return;
     }
     
@@ -239,7 +198,6 @@ function App() {
 
   // Enhanced police arrest animation
   const triggerPoliceArrest = () => {
-    transitionToPhase('police_arrest', 'zoomIn');
     setShowArrestAnimation(true);
     setArrestStage(0);
     
@@ -309,7 +267,7 @@ function App() {
     // End animation and go to game over
     setTimeout(() => {
       setShowArrestAnimation(false);
-      transitionToPhase('leaderboard', 'slideInFromRight');
+      setGamePhase('leaderboard');
     }, 10000);
   };
 
@@ -338,7 +296,7 @@ function App() {
     }));
     
     if (newConsecutiveErrors >= 3) {
-      transitionToPhase('game_over', 'zoomIn');
+      setGamePhase('game_over');
     }
   };
 
@@ -477,169 +435,283 @@ function App() {
           ""
         ]);
         
-        handleIncorrectTransaction("Rejected legitimate customer");
+        handleIncorrectTransaction("Wrongful customer rejection");
         playSound('reject');
       }
       
-      // Generate next customer after processing
+      // Generate new customer
       setTimeout(() => {
         const customer = generateCustomerLocal();
         setCurrentCustomer(customer);
         resetVerificationState();
-        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
+        setTerminalOutput(prev => [...prev, "> Next customer approaching...", "Ready to process transaction"]);
         console.log("Generated customer:", customer);
         playSound('customer_approach');
       }, 2000);
       
-    } else if (cmd === 'HELP') {
-      setTerminalOutput(prev => [...prev,
-        "> " + command,
-        "========================================",
-        "TELLER COMMANDS:",
-        "",
-        "DEPOSIT $[amount] - Process deposit",
-        "WITHDRAW $[amount] - Process withdrawal", 
-        "LOOKUP [account] - Search bank records",
-        "REJECT - Reject suspicious transaction",
-        "CLEAR - Clear terminal screen",
-        "HELP - Show this help screen",
-        "",
-        "VERIFICATION COMMANDS:",
-        "COMPARE - Compare signature manually",
-        "VERIFY - Check document details",
-        "",
-        "NOTE: You must manually detect fraud!",
-        "The system will NOT flag suspicious activity.",
-        "========================================",
-        ""
-      ]);
-      
-    } else if (cmd === 'CLEAR') {
-      setTerminalOutput([
-        "TELLER WORKSTATION v1.2",
-        "WESTRIDGE NATIONAL BANK", 
-        "Terminal cleared. Ready for commands.",
-        ""
-      ]);
-      
-    } else if (cmd === 'NEXT' || cmd === 'SKIP') {
-      handleCustomerDismissal();
-      
-    } else if (cmd.startsWith('COMPARE')) {
+    } else if (cmd.startsWith('APPROVE')) {
       if (!currentCustomer) {
         setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
         return;
       }
       
-      const signatureDoc = currentCustomer.documents.find(doc => doc.type === 'signature');
-      if (!signatureDoc) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No signature document found"]);
-        return;
+      // Check if customer has fraudulent documents
+      const hasFraudulentDocuments = currentCustomer.documents.some(doc => !doc.isValid);
+      
+      if (hasFraudulentDocuments) {
+        // MAJOR ERROR - Approved fraudulent transaction
+        const fraudCount = gameScore.fraudulentApprovals + 1;
+        
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "========================================",
+          "🚨 CRITICAL ERROR - FRAUD APPROVED 🚨",
+          "You approved fraudulent documents!",
+          "Transaction processed illegally",
+          "Bank security compromised",
+          `Fraudulent approvals: ${fraudCount}/2`,
+          "========================================",
+          ""
+        ]);
+        
+        setGameScore(prev => ({
+          ...prev,
+          fraudulentApprovals: fraudCount,
+          errors: prev.errors + 1,
+          consecutiveErrors: prev.consecutiveErrors + 1,
+          errorDetails: [...prev.errorDetails, "Approved fraudulent transaction"]
+        }));
+        
+        // Check termination conditions
+        if (fraudCount === 1) {
+          setTerminalOutput(prev => [...prev,
+            "⚠️ MANAGEMENT WARNING ⚠️",
+            "FIRST FRAUDULENT APPROVAL DETECTED",
+            "One more fraud approval = IMMEDIATE TERMINATION",
+            "Review all documents carefully",
+            ""
+          ]);
+          playSound('reject');
+        } else if (fraudCount >= 2) {
+          setTerminalOutput(prev => [...prev,
+            "🚨 IMMEDIATE TERMINATION 🚨",
+            "TWO FRAUDULENT APPROVALS DETECTED",
+            "You are terminated for criminal negligence",
+            "Fraud investigation initiated",
+            ""
+          ]);
+          
+          // Trigger police arrest sequence
+          setTimeout(() => {
+            triggerPoliceArrest();
+          }, 2000);
+          return;
+        }
+        
+      } else {
+        // Correct approval - customer was legitimate
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "========================================",
+          "TRANSACTION APPROVED - CORRECT DECISION",
+          "All documents verified as authentic",
+          "Customer served successfully",
+          "========================================",
+          ""
+        ]);
+        
+        handleCorrectTransaction();
+        playSound('cash');
       }
       
-      setVerificationState(prev => ({ ...prev, signatureCompared: true }));
-      
-      setTerminalOutput(prev => [...prev,
-        "> " + command,
-        "========================================",
-        "SIGNATURE COMPARISON ANALYSIS",
-        "",
-        `Customer Name: ${currentCustomer.name}`,
-        `Signature Data: ${signatureDoc.data.signature}`,
-        "",
-        "Manual verification required:",
-        "- Check signature consistency",
-        "- Verify against ID document", 
-        "- Look for signs of forgery",
-        "",
-        "Status: MANUAL REVIEW REQUIRED",
-        "Decision: TELLER DISCRETION",
-        "========================================",
-        ""
-      ]);
-      
-    } else if (cmd === 'FRAUD' || cmd === 'CRIMINAL') {
-      // Easter egg - if player types these, trigger police arrest
-      triggerPoliceArrest();
+      // Generate new customer
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
       
     } else {
-      setTerminalOutput(prev => [...prev, 
-        "> " + command, 
-        "Unknown command. Type HELP for available commands."
-      ]);
-    }
-    
-    playSound('typing');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (terminalInput.trim()) {
-        processCommand(terminalInput);
-        setTerminalInput('');
-      }
+      setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Unknown command"]);
     }
   };
 
   const startGame = () => {
-    setGameInitialized(true);
-    transitionToPhase('working', 'slideInFromRight');
+    setGamePhase('working');
     setCurrentCustomer(generateCustomerLocal());
+    setGameInitialized(true);
+    playSound('cash');
     
-    setTerminalOutput(prev => [...prev,
-      "",
-      "SHIFT STARTED",
-      "WORKSTATION ACTIVE", 
-      "Customer approaching teller window...",
-      ""
-    ]);
+    // Start background music when game begins
+    if (!musicMuted && backgroundMusicRef.current) {
+      backgroundMusicRef.current.play().catch(e => {
+        console.log("Music auto-play prevented:", e);
+      });
+    }
   };
 
-  const renderDocument = (doc: GameDocument, index: number) => {
-    const isSelected = selectedDocument?.id === doc.id;
+  const handleTerminalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (terminalInput.trim()) {
+      playSound('typing');
+      processCommand(terminalInput);
+      setTerminalInput('');
+    }
+  };
+
+  const handlePunchOut = () => {
+    setGamePhase('punch_out');
+    playSound('punch_clock');
     
+    // Stop background music
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
+    }
+    
+    // Calculate final score and time
+    const endTime = Date.now();
+    const totalTime = Math.floor((endTime - (Date.now() - gameScore.timeOnShift * 1000)) / 1000);
+    
+    setGameScore(prev => ({
+      ...prev,
+      timeOnShift: totalTime
+    }));
+    
+    setTerminalOutput([
+      "SHIFT COMPLETE",
+      "PUNCHING OUT...",
+      "",
+      "PERFORMANCE SUMMARY:",
+      `Transactions: ${gameScore.correctTransactions}`,
+      `Errors: ${gameScore.errors}`,
+      `Score: ${gameScore.score}`,
+      `Time on shift: ${Math.floor(totalTime / 60)}:${(totalTime % 60).toString().padStart(2, '0')}`,
+      "",
+      "Thank you for your service",
+      "Have a good day"
+    ]);
+    
+    // Auto-transition to leaderboard
+    setTimeout(() => {
+      setGamePhase('leaderboard');
+    }, 3000);
+  };
+
+  // Leaderboard functionality
+  const saveScore = (playerName: string) => {
+    const newEntry: LeaderboardEntry = {
+      name: playerName,
+      score: gameScore.score,
+      date: new Date().toLocaleDateString()
+    };
+    
+    const existingScores = JSON.parse(localStorage.getItem('tellerScores') || '[]');
+    const updatedScores = [...existingScores, newEntry]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10); // Keep top 10
+    
+    localStorage.setItem('tellerScores', JSON.stringify(updatedScores));
+  };
+
+  const getLeaderboard = (): LeaderboardEntry[] => {
+    return JSON.parse(localStorage.getItem('tellerScores') || '[]');
+  };
+
+  // Render functions
+  const renderDocument = (doc: GameDocument, index: number) => {
     return (
       <div
         key={doc.id}
-        className="document-card"
         onClick={() => setSelectedDocument(doc)}
         style={{
-          border: isSelected ? '3px solid #ffff00' : '2px solid #00ff00',
+          background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
+          border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
           borderRadius: '8px',
-          padding: '15px',
-          margin: '10px 0',
-          background: isSelected ? '#001a00' : '#000800',
+          padding: '10px',
+          margin: '5px',
           cursor: 'pointer',
+          color: '#ffffff',
           fontSize: '12px',
           fontFamily: 'monospace',
-          color: '#00ff00'
+          minHeight: '120px',
+          position: 'relative',
+          boxShadow: doc.isValid ? '0 0 10px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)'
         }}
       >
-        <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ffff00' }}>
-          {doc.type.toUpperCase()} DOCUMENT
+        {!doc.isValid && (
+          <div style={{
+            position: 'absolute',
+            top: '2px',
+            right: '2px',
+            background: '#ff4444',
+            color: '#ffffff',
+            padding: '2px 6px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 'bold'
+          }}>
+            MISMATCH
+          </div>
+        )}
+        
+        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+          {doc.type.toUpperCase()} #{index + 1}
         </div>
         
-        {Object.entries(doc.data).map(([key, value]) => (
-          <div key={key} style={{ marginBottom: '5px' }}>
-            <span style={{ color: '#cccccc' }}>{key}: </span>
-            <span style={{ color: doc.isValid ? '#00ff00' : '#ff6666' }}>
-              {String(value)}
-            </span>
+        {doc.type === 'id' && (
+          <div>
+            <div>NAME: {doc.data.name}</div>
+            <div>DOB: {doc.data.dateOfBirth}</div>
+            <div>ADDRESS: {doc.data.address}</div>
+            <div>ID#: {doc.data.idNumber}</div>
           </div>
-        ))}
+        )}
         
-        {!doc.isValid && doc.hasError && (
-          <div style={{ 
-            marginTop: '10px', 
-            padding: '5px', 
-            background: '#330000',
-            border: '1px solid #ff0000',
-            borderRadius: '4px',
-            color: '#ff6666',
-            fontSize: '10px'
+        {doc.type === 'bank_book' && (
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
+            <div>NAME: {doc.data.name}</div>
+            <div>BALANCE: ${doc.data.balance}</div>
+          </div>
+        )}
+        
+        {doc.type === 'slip' && (
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
+            <div>AMOUNT: ${doc.data.amount}</div>
+            <div>TYPE: {doc.data.type}</div>
+          </div>
+        )}
+        
+        {doc.type === 'signature' && (
+          <div>
+            <div>SIGNATURE CARD</div>
+            <div style={{ 
+              border: '1px solid #666', 
+              margin: '5px 0', 
+              padding: '5px',
+              background: '#f9f9f9',
+              color: '#333',
+              fontFamily: 'cursive',
+              fontSize: '14px'
+            }}>
+              {doc.data.signature}
+            </div>
+          </div>
+        )}
+        
+        {doc.hasError && (
+          <div style={{
+            color: '#ff4444',
+            fontSize: '10px',
+            marginTop: '5px',
+            fontWeight: 'bold'
           }}>
-            ⚠️ {doc.hasError}
+            ERROR: {doc.hasError}
           </div>
         )}
       </div>
@@ -648,36 +720,56 @@ function App() {
 
   return (
     <div style={{
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: '#0a0a0a',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       color: '#00ff00',
       fontFamily: 'monospace',
+      position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Police Arrest Animation Overlay */}
+      {/* Background music toggle */}
+      <button
+        onClick={() => setMusicMuted(!musicMuted)}
+        style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          background: musicMuted ? '#666' : '#00ff00',
+          color: musicMuted ? '#fff' : '#000',
+          border: 'none',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '12px',
+          zIndex: 1000
+        }}
+      >
+        {musicMuted ? '🔇 MUSIC OFF' : '🎵 MUSIC ON'}
+      </button>
+
+      {/* Police arrest animation overlay */}
       {showArrestAnimation && (
         <div style={{
           position: 'fixed',
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: sirenFlash ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 255, 0.3)',
-          zIndex: 9999,
+          right: 0,
+          bottom: 0,
+          background: sirenFlash ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 255, 0.3)',
+          zIndex: 999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          flexDirection: 'column'
+          transition: 'background 0.2s'
         }}>
           {policeUnits.map(unit => (
             <div
               key={unit.id}
               style={{
                 position: 'absolute',
-                left: `${unit.x}px`,
+                left: `${Math.min(Math.max(unit.x, 50), window.innerWidth - 100)}px`,
                 top: `${unit.y}px`,
-                fontSize: '24px',
+                fontSize: '40px',
                 animation: `policeMove 2s ease-in-out ${unit.delay}ms forwards`
               }}
             >
@@ -706,7 +798,7 @@ function App() {
 
       {/* Punch In Screen */}
       {gamePhase === 'punch_in' && (
-        <div className={`screen-${screenTransition}`} style={{
+        <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -733,7 +825,7 @@ function App() {
             <h2 style={{
               fontSize: '20px',
               marginBottom: '30px',
-              color: '#cccccc'
+              color: '#ffffff'
             }}>
               TELLER WORKSTATION v1.2
             </h2>
@@ -743,16 +835,14 @@ function App() {
               borderRadius: '8px',
               padding: '20px',
               marginBottom: '30px',
+              fontSize: '14px',
               textAlign: 'left'
             }}>
               {terminalOutput.map((line, index) => (
-                <div key={index} style={{ marginBottom: '2px' }}>
-                  {line}
-                </div>
+                <div key={index}>{line}</div>
               ))}
             </div>
             <button
-              className="button-pulse button-glow"
               onClick={() => {
                 playSound('punch_clock');
                 startGame();
@@ -778,33 +868,29 @@ function App() {
 
       {/* Working Phase */}
       {gamePhase === 'working' && (
-        <div className={`screen-${screenTransition}`} style={{
+        <div style={{
           display: 'flex',
           height: '100vh',
-          padding: '4px',
-          gap: '4px',
-          boxSizing: 'border-box',
-          overflow: 'hidden'
+          padding: '10px',
+          gap: '10px'
         }}>
           {/* Left Column - Terminal */}
           <div style={{
-            flex: '0 0 35%',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px',
-            minHeight: 0
+            gap: '10px'
           }}>
             {/* Terminal Output */}
-            <div className="terminal-container" style={{
+            <div style={{
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
               padding: '15px',
-              flex: '1',
+              height: '60%',
               overflow: 'auto',
-              fontSize: '11px',
-              fontFamily: 'monospace',
-              minHeight: 0
+              fontSize: '12px',
+              fontFamily: 'monospace'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ marginBottom: '2px' }}>
@@ -812,333 +898,172 @@ function App() {
                 </div>
               ))}
             </div>
-            
-            {/* Terminal Input */}
-            <div style={{
-              background: '#000000',
-              border: '2px solid #00ff00',
-              borderRadius: '8px',
-              padding: '8px',
-              flex: '0 0 auto'
-            }}>
-              <div style={{ marginBottom: '5px', fontSize: '11px' }}>
-                Command Terminal:
-              </div>
+
+            {/* Command Input */}
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
               <input
                 type="text"
                 value={terminalInput}
                 onChange={(e) => setTerminalInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type command (HELP for commands)"
+                placeholder="Enter command (DEPOSIT $500, WITHDRAW $200, LOOKUP 12345, APPROVE, REJECT)"
                 style={{
-                  width: '100%',
+                  flex: '1',
                   background: '#000000',
-                  border: '1px solid #00ff00',
+                  border: '2px solid #00ff00',
                   color: '#00ff00',
-                  padding: '6px',
-                  fontSize: '12px',
+                  padding: '10px',
+                  fontSize: '14px',
                   fontFamily: 'monospace',
                   borderRadius: '4px'
                 }}
               />
-            </div>
-            
-            {/* Account Balance Display */}
-            {verificationState.accountLookedUp && (
-              <div style={{
-                background: '#001100',
-                border: '2px solid #00ff00',
-                borderRadius: '8px',
-                padding: '10px',
-                fontSize: '11px',
-                height: '140px'
-              }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#ffff00' }}>
-                  BANK RECORDS
-                </div>
-                <div>Balance: ${accountBalance.toLocaleString()}</div>
-                <div>Status: ACTIVE</div>
-                <div>Type: CHECKING</div>
-                <div style={{ marginTop: '8px', fontSize: '9px', color: '#cccccc' }}>
-                  Compare with customer documents manually
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Center Column - Customer Information */}
-          <div style={{
-            flex: '0 0 32%',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
-            minHeight: 0
-          }}>
-            {/* Current Customer */}
-            {currentCustomer && (
-              <div className="customer-card" style={{
-                background: '#001100',
-                border: '2px solid #00ff00',
-                borderRadius: '8px',
-                padding: '8px',
-                fontSize: '10px',
-                fontFamily: 'monospace',
-                animation: 'slideInFromLeft 0.6s ease-out'
-              }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#ffff00' }}>
-                  CURRENT CUSTOMER
-                </div>
-                <div>Name: {currentCustomer.name}</div>
-                <div>Transaction: {currentCustomer.transaction.type.toUpperCase()}</div>
-                <div>Amount: ${currentCustomer.transaction.amount}</div>
-                <div>Account: {currentCustomer.transaction.accountNumber}</div>
-                <div style={{ marginTop: '8px', fontSize: '9px', color: '#cccccc' }}>
-                  Examine documents for fraud indicators
-                </div>
-                
-                <button
-                  onClick={handleCustomerDismissal}
-                  style={{
-                    marginTop: '8px',
-                    background: '#330000',
-                    border: '1px solid #ff0000',
-                    color: '#ff6666',
-                    padding: '4px 8px',
-                    fontSize: '9px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  DISMISS CUSTOMER
-                </button>
-              </div>
-            )}
-            
-            {/* Game Score */}
-            <div style={{
-              background: '#000011',
-              border: '2px solid #6666ff',
-              borderRadius: '8px',
-              padding: '10px',
-              fontSize: '10px'
-            }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#6666ff' }}>
-                PERFORMANCE
-              </div>
-              <div>Score: {gameScore.score}</div>
-              <div>Correct: {gameScore.correctTransactions}</div>
-              <div>Errors: {gameScore.errors}</div>
-              <div>Consecutive: {gameScore.consecutiveErrors}</div>
-              <div>Dismissals: {gameScore.customersCalledWithoutService}</div>
-              {gameScore.dismissalWarningGiven && (
-                <div style={{ color: '#ff6666', fontSize: '8px', marginTop: '4px' }}>
-                  ⚠️ WARNING ISSUED
-                </div>
-              )}
+              <button
+                type="submit"
+                style={{
+                  background: '#00ff00',
+                  color: '#000000',
+                  border: 'none',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontFamily: 'monospace',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                ENTER
+              </button>
+            </form>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleCustomerDismissal}
+                style={{
+                  background: 'linear-gradient(145deg, #ff6666, #cc3333)',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace'
+                }}
+              >
+                DISMISS CUSTOMER
+              </button>
+              
+              <button
+                onClick={handlePunchOut}
+                style={{
+                  background: 'linear-gradient(145deg, #666666, #444444)',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace'
+                }}
+              >
+                PUNCH OUT
+              </button>
             </div>
 
-            {/* Transaction Processing Controls */}
+            {/* Score Display */}
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.7)',
+              border: '1px solid #ffff00',
+              borderRadius: '5px',
+              padding: '10px',
+              fontSize: '12px'
+            }}>
+              <div>SCORE: {gameScore.score}</div>
+              <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
+              <div>ERRORS: {gameScore.errors}</div>
+              <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}/2</div>
+              <div>DISMISSALS: {gameScore.customersCalledWithoutService}/4</div>
+            </div>
+          </div>
+
+          {/* Right Column - Customer & Documents */}
+          <div style={{
+            flex: '1',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            {/* Customer Display */}
             {currentCustomer && (
               <div style={{
-                background: '#001100',
+                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '10px',
-                fontSize: '11px'
+                padding: '15px',
+                textAlign: 'center'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#ffff00' }}>
-                  TRANSACTION PROCESSING
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
+                  CUSTOMER: {currentCustomer.name}
+                </h3>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
                 </div>
-                
-                {/* Verification Status */}
-                <div style={{ marginBottom: '8px' }}>
-                  <div style={{ 
-                    color: verificationState.accountLookedUp ? '#00ff00' : '#666666',
-                    fontSize: '9px'
-                  }}>
-                    {verificationState.accountLookedUp ? '✓' : '○'} Account Lookup
-                  </div>
-                  <div style={{ 
-                    color: verificationState.signatureCompared ? '#00ff00' : '#666666',
-                    fontSize: '9px'
-                  }}>
-                    {verificationState.signatureCompared ? '✓' : '○'} Signature Check
-                  </div>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  AMOUNT: ${currentCustomer.transaction.amount}
                 </div>
-
-                {/* Process Transaction Button */}
-                <button
-                  className={verificationState.accountLookedUp ? 'button-glow' : ''}
-                  onClick={() => {
-                    if (currentCustomer && verificationState.accountLookedUp) {
-                      playSound('cash');
-                      const transactionCommand = currentCustomer.transaction.type === 'deposit' 
-                        ? `DEPOSIT $${currentCustomer.transaction.amount}`
-                        : `WITHDRAW $${currentCustomer.transaction.amount}`;
-                      processCommand(transactionCommand);
-                    } else {
-                      playSound('reject');
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    background: verificationState.accountLookedUp 
-                      ? 'linear-gradient(145deg, #00ff00, #008800)' 
-                      : '#333333',
-                    border: '2px solid ' + (verificationState.accountLookedUp ? '#00ff00' : '#666666'),
-                    color: verificationState.accountLookedUp ? '#000000' : '#666666',
-                    padding: '8px',
-                    fontSize: '11px',
-                    borderRadius: '4px',
-                    cursor: verificationState.accountLookedUp ? 'pointer' : 'not-allowed',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {verificationState.accountLookedUp 
-                    ? `PROCESS ${currentCustomer.transaction.type.toUpperCase()}`
-                    : 'VERIFY ACCOUNT FIRST'
-                  }
-                </button>
-
-                <button
-                  onClick={() => {
-                    playSound('reject');
-                    processCommand('REJECT');
-                  }}
-                  style={{
-                    width: '100%',
-                    background: '#330000',
-                    border: '2px solid #ff0000',
-                    color: '#ff6666',
-                    padding: '6px',
-                    fontSize: '10px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    marginTop: '6px'
-                  }}
-                >
-                  REJECT TRANSACTION
-                </button>
+                <div style={{ fontSize: '14px' }}>
+                  ACCOUNT: {currentCustomer.transaction.accountNumber}
+                </div>
               </div>
             )}
-          </div>
-          
-          {/* Right Column - Documents */}
-          <div style={{
-            flex: '0 0 33%',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            minHeight: 0
-          }}>
-            <div style={{
-              background: '#110000',
-              border: '2px solid #ffff00',
-              borderRadius: '8px',
-              padding: '10px',
-              flex: '1',
-              overflow: 'auto',
-              minHeight: 0
-            }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ffff00', fontSize: '12px' }}>
-                CUSTOMER DOCUMENTS
-              </div>
-              
-              {currentCustomer ? (
-                currentCustomer.documents.map((doc, index) => renderDocument(doc, index))
-              ) : (
-                <div style={{ textAlign: 'center', color: '#666666', marginTop: '50px', fontSize: '12px' }}>
-                  No customer present
-                </div>
-              )}
-            </div>
 
-            {/* Quick Action Buttons */}
-            {currentCustomer && (
+            {/* Account Information */}
+            {verificationState.accountLookedUp && (
               <div style={{
-                background: '#002200',
+                background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '8px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
+                padding: '15px'
               }}>
-                <div style={{ fontWeight: 'bold', color: '#00ff00', fontSize: '10px', textAlign: 'center' }}>
-                  QUICK ACTIONS
+                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
+                  BANK RECORDS
+                </h4>
+                <div>ACCOUNT STATUS: ACTIVE</div>
+                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
+                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
+              </div>
+            )}
+
+            {/* Documents */}
+            {currentCustomer && (
+              <div style={{
+                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+                border: '2px solid #ffff00',
+                borderRadius: '8px',
+                padding: '15px',
+                flex: '1',
+                overflow: 'auto'
+              }}>
+                <h4 style={{ margin: '0 0 15px 0' }}>
+                  CUSTOMER DOCUMENTS
+                </h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
+                }}>
+                  {currentCustomer.documents.map((doc, index) => 
+                    renderDocument(doc, index)
+                  )}
                 </div>
-                
-                <button
-                  onClick={() => {
-                    playSound('typing');
-                    processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`);
-                  }}
-                  style={{
-                    background: verificationState.accountLookedUp ? '#004400' : 'linear-gradient(145deg, #00aa00, #006600)',
-                    border: '1px solid #00ff00',
-                    color: '#ffffff',
-                    padding: '6px',
-                    fontSize: '9px',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
-                </button>
-
-                <button
-                  onClick={() => {
-                    playSound('typing');
-                    processCommand('COMPARE');
-                  }}
-                  style={{
-                    background: verificationState.signatureCompared ? '#004400' : 'linear-gradient(145deg, #aaaa00, #666600)',
-                    border: '1px solid #ffff00',
-                    color: '#ffffff',
-                    padding: '6px',
-                    fontSize: '9px',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {verificationState.signatureCompared ? '✓ SIGNATURE CHECKED' : 'COMPARE SIGNATURE'}
-                </button>
-
-                <button
-                  onClick={() => {
-                    playSound('typing');
-                    processCommand('HELP');
-                  }}
-                  style={{
-                    background: '#333333',
-                    border: '1px solid #666666',
-                    color: '#cccccc',
-                    padding: '4px',
-                    fontSize: '8px',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace'
-                  }}
-                >
-                  HELP
-                </button>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Leaderboard Screen */}
-      {gamePhase === 'leaderboard' && (
-        <div className={`screen-${screenTransition}`} style={{
+      {/* Punch Out Screen */}
+      {gamePhase === 'punch_out' && (
+        <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -1148,19 +1073,70 @@ function App() {
         }}>
           <div style={{
             background: 'linear-gradient(145deg, #333333, #111111)',
-            border: '3px solid #00ff00',
+            border: '3px solid #ffff00',
             borderRadius: '15px',
             padding: '40px',
             textAlign: 'center',
+            boxShadow: '0 0 30px rgba(255, 255, 0, 0.3)',
             maxWidth: '600px'
           }}>
-            <h1 style={{
-              fontSize: '28px',
-              marginBottom: '20px',
-              color: '#00ff00'
-            }}>
+            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>
               SHIFT COMPLETE
-            </h1>
+            </h2>
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '30px',
+              fontSize: '14px',
+              textAlign: 'left'
+            }}>
+              {terminalOutput.map((line, index) => (
+                <div key={index}>{line}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard */}
+      {gamePhase === 'leaderboard' && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #333333, #111111)',
+            border: '3px solid #ffff00',
+            borderRadius: '15px',
+            padding: '40px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(255, 255, 0, 0.3)',
+            maxWidth: '600px',
+            width: '100%'
+          }}>
+            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>
+              SHIFT COMPLETE
+            </h2>
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '20px',
+              fontSize: '14px'
+            }}>
+              <div>FINAL SCORE: {gameScore.score}</div>
+              <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
+              <div>ERRORS: {gameScore.errors}</div>
+              <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}</div>
+              <div>DISMISSALS: {gameScore.customersCalledWithoutService}</div>
+            </div>
             
             <div style={{
               background: '#000000',
@@ -1168,28 +1144,17 @@ function App() {
               borderRadius: '8px',
               padding: '20px',
               marginBottom: '20px',
+              fontSize: '12px',
               textAlign: 'left'
             }}>
-              <div style={{ color: '#ffff00', marginBottom: '10px', fontSize: '16px' }}>
-                FINAL PERFORMANCE REPORT
+              <div style={{ textAlign: 'center', marginBottom: '10px', fontWeight: 'bold' }}>
+                TOP SCORES
               </div>
-              <div>Total Score: {gameScore.score}</div>
-              <div>Correct Transactions: {gameScore.correctTransactions}</div>
-              <div>Total Errors: {gameScore.errors}</div>
-              <div>Customers Dismissed: {gameScore.customersCalledWithoutService}</div>
-              
-              {gameScore.errorDetails.length > 0 && (
-                <div style={{ marginTop: '15px' }}>
-                  <div style={{ color: '#ff6666', marginBottom: '5px' }}>
-                    Error Details:
-                  </div>
-                  {gameScore.errorDetails.map((error, index) => (
-                    <div key={index} style={{ fontSize: '10px', color: '#ff9999' }}>
-                      • {error}
-                    </div>
-                  ))}
+              {getLeaderboard().map((entry, index) => (
+                <div key={index} style={{ marginBottom: '5px' }}>
+                  {index + 1}. {entry.name} - {entry.score} ({entry.date})
                 </div>
-              )}
+              ))}
             </div>
             
             <button
@@ -1264,209 +1229,6 @@ function App() {
         * {
           box-sizing: border-box;
         }
-        
-        /* Transition Animations */
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
-        }
-        
-        @keyframes slideInFromLeft {
-          from { 
-            transform: translateX(-100%); 
-            opacity: 0; 
-          }
-          to { 
-            transform: translateX(0); 
-            opacity: 1; 
-          }
-        }
-        
-        @keyframes slideInFromRight {
-          from { 
-            transform: translateX(100%); 
-            opacity: 0; 
-          }
-          to { 
-            transform: translateX(0); 
-            opacity: 1; 
-          }
-        }
-        
-        @keyframes slideOutToLeft {
-          from { 
-            transform: translateX(0); 
-            opacity: 1; 
-          }
-          to { 
-            transform: translateX(-100%); 
-            opacity: 0; 
-          }
-        }
-        
-        @keyframes slideOutToRight {
-          from { 
-            transform: translateX(0); 
-            opacity: 1; 
-          }
-          to { 
-            transform: translateX(100%); 
-            opacity: 0; 
-          }
-        }
-        
-        @keyframes bounceIn {
-          0% { 
-            transform: scale(0.3) translateY(-100px); 
-            opacity: 0; 
-          }
-          50% { 
-            transform: scale(1.05) translateY(10px); 
-            opacity: 0.8; 
-          }
-          70% { 
-            transform: scale(0.9) translateY(-5px); 
-            opacity: 0.9; 
-          }
-          100% { 
-            transform: scale(1) translateY(0); 
-            opacity: 1; 
-          }
-        }
-        
-        @keyframes zoomIn {
-          from { 
-            transform: scale(0.5); 
-            opacity: 0; 
-          }
-          to { 
-            transform: scale(1); 
-            opacity: 1; 
-          }
-        }
-        
-        @keyframes zoomOut {
-          from { 
-            transform: scale(1); 
-            opacity: 1; 
-          }
-          to { 
-            transform: scale(0.5); 
-            opacity: 0; 
-          }
-        }
-        
-        @keyframes rotateIn {
-          from { 
-            transform: rotate(-180deg) scale(0.5); 
-            opacity: 0; 
-          }
-          to { 
-            transform: rotate(0deg) scale(1); 
-            opacity: 1; 
-          }
-        }
-        
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); }
-        }
-        
-        @keyframes glow {
-          0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
-          50% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 0 0 30px rgba(0, 255, 0, 0.6); }
-          100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
-        }
-        
-        /* Animation Classes */
-        .screen-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
-        
-        .screen-fadeOut {
-          animation: fadeOut 0.4s ease-in;
-        }
-        
-        .screen-slideInFromLeft {
-          animation: slideInFromLeft 0.7s ease-out;
-        }
-        
-        .screen-slideInFromRight {
-          animation: slideInFromRight 0.7s ease-out;
-        }
-        
-        .screen-slideOutToLeft {
-          animation: slideOutToLeft 0.5s ease-in;
-        }
-        
-        .screen-slideOutToRight {
-          animation: slideOutToRight 0.5s ease-in;
-        }
-        
-        .screen-bounceIn {
-          animation: bounceIn 0.8s ease-out;
-        }
-        
-        .screen-zoomIn {
-          animation: zoomIn 0.5s ease-out;
-        }
-        
-        .screen-zoomOut {
-          animation: zoomOut 0.4s ease-in;
-        }
-        
-        .screen-rotateIn {
-          animation: rotateIn 0.8s ease-out;
-        }
-        
-        .button-pulse {
-          animation: pulse 2s infinite;
-        }
-        
-        .button-glow {
-          animation: glow 2s infinite;
-        }
-        
-        /* Interactive Button Animations */
-        button:hover {
-          filter: brightness(1.2);
-          transform: translateY(-2px);
-          transition: all 0.2s ease;
-        }
-        
-        button:active {
-          transform: translateY(0px) scale(0.98);
-          transition: all 0.1s ease;
-        }
-        
-        .terminal-container {
-          transition: all 0.3s ease;
-        }
-        
-        .customer-card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .customer-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
-        }
-        
-        .document-card {
-          transition: all 0.2s ease;
-        }
-        
-        .document-card:hover {
-          transform: scale(1.02);
-          border-color: #00ff00;
-          box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
       `}</style>
       
       {/* Banner Ad - Fixed at bottom */}
@@ -1478,12 +1240,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <AdMobBannerAd 
-          adUnitId={BANNER_AD_UNIT_ID}
-          bannerSize="smartBannerPortrait"
-          testDeviceID="EMULATOR"
-          onDidFailToReceiveAdWithError={(error: string) => console.log('Banner ad error:', error)}
-        />
+        <AdMobBannerAd adUnitId="ca-app-pub-3940256099942544/6300978111" />
       </div>
     </div>
   );
