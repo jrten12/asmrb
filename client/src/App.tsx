@@ -643,6 +643,60 @@ function App() {
     }, 3000);
   };
 
+  // Process transaction function
+  const processTransaction = (action: 'approve' | 'reject') => {
+    if (!currentCustomer) return;
+
+    const isCorrectDecision = currentCustomer.isFraudulent ? action === 'reject' : action === 'approve';
+
+    if (isCorrectDecision) {
+      setGameScore(prev => ({
+        ...prev,
+        score: prev.score + 100,
+        correctTransactions: prev.correctTransactions + 1
+      }));
+      
+      setTerminalOutput(prev => [...prev, 
+        `> TRANSACTION ${action.toUpperCase()}D CORRECTLY`,
+        `> Score +100 points`,
+        `> Processing next customer...`
+      ]);
+      
+      setTimeout(() => {
+        setCurrentCustomer(generateCustomerLocal());
+        setVerificationState({
+          accountLookedUp: false,
+          signatureCompared: false
+        });
+      }, 2000);
+    } else {
+      const errorMessage = currentCustomer.isFraudulent 
+        ? "FRAUD APPROVED - SECURITY BREACH!" 
+        : "LEGITIMATE TRANSACTION REJECTED";
+      
+      setGameScore(prev => ({
+        ...prev,
+        errors: prev.errors + 1,
+        fraudulentApprovals: currentCustomer.isFraudulent ? prev.fraudulentApprovals + 1 : prev.fraudulentApprovals,
+        errorDetails: [...prev.errorDetails, errorMessage]
+      }));
+      
+      setTerminalOutput(prev => [...prev, 
+        `> ERROR: ${errorMessage}`,
+        `> Score penalty applied`,
+        `> Review procedures and continue`
+      ]);
+      
+      setTimeout(() => {
+        setCurrentCustomer(generateCustomerLocal());
+        setVerificationState({
+          accountLookedUp: false,
+          signatureCompared: false
+        });
+      }, 3000);
+    }
+  };
+
   // Leaderboard functionality
   const saveScore = (playerName: string) => {
     const newEntry: LeaderboardEntry = {
@@ -913,26 +967,30 @@ function App() {
         <div style={{
           display: 'flex',
           height: '100vh',
-          padding: '10px',
-          gap: '10px'
+          padding: '5px',
+          gap: '5px',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
         }}>
           {/* Left Column - Terminal */}
           <div style={{
-            flex: '1',
+            flex: '0 0 30%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '5px',
+            minHeight: 0
           }}>
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '15px',
-              height: '60%',
+              padding: '8px',
+              flex: '1',
               overflow: 'auto',
-              fontSize: '12px',
-              fontFamily: 'monospace'
+              fontSize: '11px',
+              fontFamily: 'monospace',
+              minHeight: 0
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ marginBottom: '2px' }}>
@@ -977,21 +1035,55 @@ function App() {
             </form>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
               <button
-                onClick={handleCustomerDismissal}
+                onClick={() => processTransaction('approve')}
+                style={{
+                  background: 'linear-gradient(145deg, #00ff00, #00cc00)',
+                  border: '2px solid #ffffff',
+                  color: '#000000',
+                  padding: '8px 12px',
+                  fontSize: '11px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold'
+                }}
+              >
+                APPROVE
+              </button>
+              
+              <button
+                onClick={() => processTransaction('reject')}
                 style={{
                   background: 'linear-gradient(145deg, #ff6666, #cc3333)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '10px 15px',
-                  fontSize: '12px',
-                  borderRadius: '5px',
+                  padding: '8px 12px',
+                  fontSize: '11px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold'
+                }}
+              >
+                REJECT
+              </button>
+              
+              <button
+                onClick={handleCustomerDismissal}
+                style={{
+                  background: 'linear-gradient(145deg, #ffff00, #cccc00)',
+                  border: '2px solid #ffffff',
+                  color: '#000000',
+                  padding: '8px 12px',
+                  fontSize: '11px',
+                  borderRadius: '4px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
               >
-                DISMISS CUSTOMER
+                DISMISS
               </button>
               
               <button
@@ -1000,9 +1092,9 @@ function App() {
                   background: 'linear-gradient(145deg, #666666, #444444)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '10px 15px',
-                  fontSize: '12px',
-                  borderRadius: '5px',
+                  padding: '8px 12px',
+                  fontSize: '11px',
+                  borderRadius: '4px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
@@ -1029,10 +1121,12 @@ function App() {
 
           {/* Right Column - Customer & Documents */}
           <div style={{
-            flex: '1',
+            flex: '0 0 70%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '5px',
+            minHeight: 0,
+            overflow: 'hidden'
           }}>
             {/* Customer Display */}
             {currentCustomer && (
@@ -1040,20 +1134,15 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '15px',
-                textAlign: 'center'
+                padding: '8px',
+                textAlign: 'center',
+                flex: '0 0 auto'
               }}>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
+                <h3 style={{ margin: '0 0 5px 0', fontSize: '12px' }}>
                   CUSTOMER: {currentCustomer.name}
                 </h3>
-                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
-                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
-                </div>
-                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
-                  AMOUNT: ${currentCustomer.transaction.amount}
-                </div>
-                <div style={{ fontSize: '14px' }}>
-                  ACCOUNT: {currentCustomer.transaction.accountNumber}
+                <div style={{ fontSize: '10px', marginBottom: '3px' }}>
+                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount} | {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
@@ -1064,14 +1153,13 @@ function App() {
                 background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '15px'
+                padding: '8px',
+                flex: '0 0 auto'
               }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
+                <h4 style={{ margin: '0 0 5px 0', color: '#00ff00', fontSize: '11px' }}>
                   BANK RECORDS
                 </h4>
-                <div>ACCOUNT STATUS: ACTIVE</div>
-                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
-                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
+                <div style={{ fontSize: '10px' }}>STATUS: ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
               </div>
             )}
 
