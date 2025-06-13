@@ -73,8 +73,8 @@ function App() {
     dismissalWarningGiven: false
   });
   
-  // Background music and sound management
-  const [musicMuted, setMusicMuted] = useState(false);
+  // Audio completely disabled
+  const [musicMuted, setMusicMuted] = useState(true);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   
   // Account lookup state (no automatic fraud detection)
@@ -96,102 +96,26 @@ function App() {
   };
 
   const playSound = (soundType: string) => {
-    try {
-      // Stop any currently playing audio first
-      stopAllAudio();
-      
-      let audio: HTMLAudioElement;
-      switch (soundType) {
-        case 'typing':
-          // Create synthetic typing sound instead of using printer audio
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-          
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.1);
-          return;
-        case 'cash':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.2;
-          break;
-        case 'reject':
-          // Create synthetic reject sound
-          const rejectContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const rejectOsc = rejectContext.createOscillator();
-          const rejectGain = rejectContext.createGain();
-          
-          rejectOsc.connect(rejectGain);
-          rejectGain.connect(rejectContext.destination);
-          
-          rejectOsc.frequency.setValueAtTime(200, rejectContext.currentTime);
-          rejectGain.gain.setValueAtTime(0.2, rejectContext.currentTime);
-          rejectGain.gain.exponentialRampToValueAtTime(0.01, rejectContext.currentTime + 0.3);
-          
-          rejectOsc.start(rejectContext.currentTime);
-          rejectOsc.stop(rejectContext.currentTime + 0.3);
-          return;
-        case 'customer_approach':
-          return; // Silent for now
-        default:
-          return;
-      }
-      
-      activeAudios.current.push(audio);
-      audio.play().then(() => {
-        // Remove from active audios when finished
-        setTimeout(() => {
-          const index = activeAudios.current.indexOf(audio);
-          if (index > -1) {
-            activeAudios.current.splice(index, 1);
-          }
-        }, 3000);
-      }).catch(e => console.log("Audio play failed:", e));
-    } catch (e) {
-      console.log("Sound error:", e);
-    }
+    // Completely disable all audio for now to stop the printer loop
+    return;
   };
 
-  // Initialize background music and stop all audio on mount
+  // Disable all audio completely to stop printer loop
   useEffect(() => {
-    // Stop all audio immediately on mount
     stopAllAudio();
-    
-    if (!musicMuted) {
-      if (!backgroundMusicRef.current) {
-        backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
-        backgroundMusicRef.current.loop = true;
-        backgroundMusicRef.current.volume = 0.15;
-      }
-      
-      backgroundMusicRef.current.addEventListener('canplaythrough', () => {
-        if (!musicMuted && backgroundMusicRef.current) {
-          backgroundMusicRef.current.play().catch(e => {
-            console.log("Auto-play prevented:", e);
-          });
-        }
-      });
-      
-      if (musicMuted && backgroundMusicRef.current) {
-        backgroundMusicRef.current.pause();
-        backgroundMusicRef.current.currentTime = 0;
-      }
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
     }
     
     return () => {
       stopAllAudio();
       if (backgroundMusicRef.current) {
         backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
       }
     };
-  }, [musicMuted]);
+  }, []);
 
   // Smooth transition functions
   const transitionToPhase = (newPhase: typeof gamePhase, animationType: string = 'fadeIn') => {
@@ -857,8 +781,8 @@ function App() {
         <div className={`screen-${screenTransition}`} style={{
           display: 'flex',
           height: '100vh',
-          padding: '8px',
-          gap: '8px',
+          padding: '4px',
+          gap: '4px',
           boxSizing: 'border-box',
           overflow: 'hidden'
         }}>
@@ -867,7 +791,7 @@ function App() {
             flex: '0 0 35%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '4px',
             minHeight: 0
           }}>
             {/* Terminal Output */}
@@ -947,7 +871,7 @@ function App() {
             flex: '0 0 32%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '4px',
             minHeight: 0
           }}>
             {/* Current Customer */}
