@@ -79,26 +79,17 @@ function App() {
     signatureCompared: false
   });
 
-  // Sound effects - COMPLETELY DISABLED
+  // Sound effects - DISABLED
   const playSound = (soundType: string) => {
-    // Audio permanently disabled to stop printer loop
     return;
   };
 
   // Background music disabled
   useEffect(() => {
-    // All audio disabled
     if (backgroundMusicRef.current) {
       backgroundMusicRef.current.pause();
       backgroundMusicRef.current.currentTime = 0;
     }
-    
-    return () => {
-      if (backgroundMusicRef.current) {
-        backgroundMusicRef.current.pause();
-        backgroundMusicRef.current.currentTime = 0;
-      }
-    };
   }, []);
 
   // Generate customer with proper fraud mechanics
@@ -385,121 +376,6 @@ function App() {
       playSound('cash');
       
       // Generate next customer after brief pause
-      setTimeout(() => {
-        const customer = generateCustomerLocal();
-        setCurrentCustomer(customer);
-        resetVerificationState();
-        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
-        console.log("Generated customer:", customer);
-        playSound('customer_approach');
-      }, 2000);
-      
-    } else if (cmd.startsWith('WIRE ')) {
-      // Handle wire transfers: WIRE $amount TO targetAccount
-      const parts = cmd.split(' ');
-      if (parts.length < 4 || parts[2] !== 'TO') {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Format should be WIRE $amount TO account"]);
-        return;
-      }
-      
-      const amount = parseFloat(parts[1].substring(1));
-      const targetAccount = parts[3];
-      
-      if (!currentCustomer) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
-        return;
-      }
-      
-      if (currentCustomer.transaction.type !== 'wire_transfer') {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer requested " + currentCustomer.transaction.type]);
-        return;
-      }
-      
-      if (amount !== currentCustomer.transaction.amount) {
-        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Amount mismatch. Customer transferring $${currentCustomer.transaction.amount}`]);
-        return;
-      }
-      
-      if (targetAccount !== currentCustomer.transaction.targetAccount) {
-        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Target account mismatch. Should be ${currentCustomer.transaction.targetAccount}`]);
-        return;
-      }
-      
-      if (amount > accountBalance) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Insufficient funds for wire transfer"]);
-        return;
-      }
-      
-      setTerminalOutput(prev => [...prev, 
-        "> " + command,
-        "========================================",
-        "PROCESSING WIRE TRANSFER",
-        `CUSTOMER: ${currentCustomer.name}`,
-        `AMOUNT: $${amount}`,
-        `FROM ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-        `TO ACCOUNT: ${targetAccount}`,
-        `RECIPIENT: ${currentCustomer.transaction.recipientName}`,
-        `ROUTING: ${currentCustomer.transaction.wireRoutingNumber}`,
-        `REMAINING BALANCE: $${(accountBalance - amount).toLocaleString()}`,
-        "STATUS: WIRE TRANSFER COMPLETE",
-        "========================================"
-      ]);
-      
-      handleCorrectTransaction();
-      playSound('cash');
-      
-      setTimeout(() => {
-        const customer = generateCustomerLocal();
-        setCurrentCustomer(customer);
-        resetVerificationState();
-        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
-        console.log("Generated customer:", customer);
-        playSound('customer_approach');
-      }, 2000);
-      
-    } else if (cmd.startsWith('CHECK ') || cmd.startsWith('MONEY_ORDER ')) {
-      // Handle cashier's checks and money orders
-      const isCheck = cmd.startsWith('CHECK ');
-      const amount = parseFloat(cmd.split(' ')[1].substring(1));
-      const transactionType = isCheck ? 'cashiers_check' : 'money_order';
-      
-      if (!currentCustomer) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
-        return;
-      }
-      
-      if (currentCustomer.transaction.type !== transactionType) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer requested " + currentCustomer.transaction.type]);
-        return;
-      }
-      
-      if (amount !== currentCustomer.transaction.amount) {
-        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Amount mismatch. Customer requesting $${currentCustomer.transaction.amount}`]);
-        return;
-      }
-      
-      if (amount > accountBalance) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Insufficient funds"]);
-        return;
-      }
-      
-      const displayName = isCheck ? "CASHIER'S CHECK" : "MONEY ORDER";
-      
-      setTerminalOutput(prev => [...prev, 
-        "> " + command,
-        "========================================",
-        `PROCESSING ${displayName}`,
-        `CUSTOMER: ${currentCustomer.name}`,
-        `AMOUNT: $${amount}`,
-        `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-        `REMAINING BALANCE: $${(accountBalance - amount).toLocaleString()}`,
-        `STATUS: ${displayName} ISSUED`,
-        "========================================"
-      ]);
-      
-      handleCorrectTransaction();
-      playSound('cash');
-      
       setTimeout(() => {
         const customer = generateCustomerLocal();
         setCurrentCustomer(customer);
@@ -959,15 +835,8 @@ function App() {
             </div>
             <button
               onClick={() => {
-                setGamePhase('working');
-                setCurrentCustomer(generateCustomerLocal());
-                setGameInitialized(true);
-                setTerminalOutput([
-                  "TELLER WORKSTATION v1.2",
-                  "WESTRIDGE NATIONAL BANK", 
-                  "SHIFT STARTED - READY FOR CUSTOMERS",
-                  ""
-                ]);
+                playSound('punch_clock');
+                startGame();
               }}
               style={{
                 background: 'linear-gradient(145deg, #ffff00, #cccc00)',
@@ -993,30 +862,26 @@ function App() {
         <div style={{
           display: 'flex',
           height: '100vh',
-          padding: '5px',
-          gap: '5px',
-          boxSizing: 'border-box',
-          overflow: 'hidden'
+          padding: '10px',
+          gap: '10px'
         }}>
           {/* Left Column - Terminal */}
           <div style={{
-            flex: '0 0 40%',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
-            minHeight: 0
+            gap: '10px'
           }}>
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '10px',
-              flex: '1',
+              padding: '15px',
+              height: '60%',
               overflow: 'auto',
-              fontSize: '11px',
-              fontFamily: 'monospace',
-              minHeight: 0
+              fontSize: '12px',
+              fontFamily: 'monospace'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ marginBottom: '2px' }}>
@@ -1113,12 +978,10 @@ function App() {
 
           {/* Right Column - Customer & Documents */}
           <div style={{
-            flex: '0 0 60%',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
-            minHeight: 0,
-            overflow: 'hidden'
+            gap: '10px'
           }}>
             {/* Customer Display */}
             {currentCustomer && (
@@ -1161,135 +1024,23 @@ function App() {
               </div>
             )}
 
-            {/* Transaction Processing Buttons */}
-            {currentCustomer && (
-              <div style={{
-                background: 'linear-gradient(145deg, #2a1a1a, #1a0a0a)',
-                border: '2px solid #ff6600',
-                borderRadius: '8px',
-                padding: '15px'
-              }}>
-                <h4 style={{ margin: '0 0 15px 0', color: '#ff6600' }}>
-                  TRANSACTION CONTROLS
-                </h4>
-                
-                <button
-                  onClick={() => processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`)}
-                  style={{
-                    width: '100%',
-                    background: verificationState.accountLookedUp ? '#004400' : 'linear-gradient(145deg, #00aa00, #006600)',
-                    border: '2px solid #00ff00',
-                    color: '#ffffff',
-                    padding: '10px',
-                    fontSize: '14px',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    marginBottom: '10px'
-                  }}
-                >
-                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
-                </button>
-
-                <button
-                  onClick={() => processCommand('COMPARE')}
-                  style={{
-                    width: '100%',
-                    background: verificationState.signatureCompared ? '#444400' : 'linear-gradient(145deg, #aaaa00, #666600)',
-                    border: '2px solid #ffff00',
-                    color: '#ffffff',
-                    padding: '10px',
-                    fontSize: '14px',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    marginBottom: '15px'
-                  }}
-                >
-                  {verificationState.signatureCompared ? '✓ SIGNATURE VERIFIED' : 'VERIFY SIGNATURE'}
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (currentCustomer.transaction.type === 'deposit') {
-                      processCommand(`DEPOSIT $${currentCustomer.transaction.amount}`);
-                    } else if (currentCustomer.transaction.type === 'withdrawal') {
-                      processCommand(`WITHDRAW $${currentCustomer.transaction.amount}`);
-                    } else if (currentCustomer.transaction.type === 'wire_transfer') {
-                      processCommand(`WIRE $${currentCustomer.transaction.amount} TO ${currentCustomer.transaction.targetAccount}`);
-                    } else if (currentCustomer.transaction.type === 'cashiers_check') {
-                      processCommand(`CHECK $${currentCustomer.transaction.amount}`);
-                    } else if (currentCustomer.transaction.type === 'money_order') {
-                      processCommand(`MONEY_ORDER $${currentCustomer.transaction.amount}`);
-                    } else {
-                      processCommand(`PROCESS ${currentCustomer.transaction.type.toUpperCase()} $${currentCustomer.transaction.amount}`);
-                    }
-                  }}
-                  disabled={!verificationState.accountLookedUp}
-                  style={{
-                    width: '100%',
-                    background: verificationState.accountLookedUp 
-                      ? 'linear-gradient(145deg, #00ff00, #00aa00)' 
-                      : '#333333',
-                    border: '3px solid #ffffff',
-                    color: verificationState.accountLookedUp ? '#000000' : '#666666',
-                    padding: '15px',
-                    fontSize: '16px',
-                    borderRadius: '8px',
-                    cursor: verificationState.accountLookedUp ? 'pointer' : 'not-allowed',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                    textShadow: verificationState.accountLookedUp ? '0 0 5px #ffffff' : 'none',
-                    boxShadow: verificationState.accountLookedUp ? '0 0 15px rgba(0, 255, 0, 0.5)' : 'none'
-                  }}
-                >
-                  {verificationState.accountLookedUp 
-                    ? `PROCESS ${currentCustomer.transaction.type.toUpperCase()}`
-                    : 'VERIFY ACCOUNT FIRST'
-                  }
-                </button>
-
-                <button
-                  onClick={() => processCommand('REJECT')}
-                  style={{
-                    width: '100%',
-                    background: 'linear-gradient(145deg, #ff0000, #aa0000)',
-                    border: '2px solid #ff6666',
-                    color: '#ffffff',
-                    padding: '10px',
-                    fontSize: '14px',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  REJECT TRANSACTION
-                </button>
-              </div>
-            )}
-
             {/* Documents */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '10px',
+                padding: '15px',
                 flex: '1',
-                overflow: 'auto',
-                minHeight: 0
+                overflow: 'auto'
               }}>
-                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>
+                <h4 style={{ margin: '0 0 15px 0' }}>
                   CUSTOMER DOCUMENTS
                 </h4>
                 <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
