@@ -56,7 +56,6 @@ function App() {
     "Ready for customer service"
   ]);
   
-  const [showKeypad, setShowKeypad] = useState(false);
   const [gameScore, setGameScore] = useState<GameScore>({
     score: 0,
     correctTransactions: 0,
@@ -644,163 +643,6 @@ function App() {
     }, 3000);
   };
 
-  // Process specific transaction types with receipt printing
-  const processDeposit = () => {
-    if (!currentCustomer || currentCustomer.transaction.type !== 'deposit') return;
-    
-    if (!verificationState.accountLookedUp) {
-      setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first"]);
-      return;
-    }
-
-    const amount = currentCustomer.transaction.amount;
-    const newBalance = accountBalance + amount;
-    
-    setTerminalOutput(prev => [...prev,
-      "========================================",
-      "           DEPOSIT RECEIPT",
-      "========================================",
-      `DATE: ${new Date().toLocaleDateString()}`,
-      `TIME: ${new Date().toLocaleTimeString()}`,
-      `CUSTOMER: ${currentCustomer.name}`,
-      `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-      `DEPOSIT AMOUNT: $${amount.toLocaleString()}`,
-      `PREVIOUS BALANCE: $${accountBalance.toLocaleString()}`,
-      `NEW BALANCE: $${newBalance.toLocaleString()}`,
-      "STATUS: TRANSACTION COMPLETE",
-      "========================================"
-    ]);
-
-    processTransaction('approve');
-    playSound('cash');
-  };
-
-  const processWithdrawal = () => {
-    if (!currentCustomer || currentCustomer.transaction.type !== 'withdrawal') return;
-    
-    if (!verificationState.accountLookedUp) {
-      setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first"]);
-      return;
-    }
-
-    const amount = currentCustomer.transaction.amount;
-    
-    if (amount > accountBalance) {
-      setTerminalOutput(prev => [...prev, "ERROR: Insufficient funds"]);
-      return;
-    }
-    
-    const newBalance = accountBalance - amount;
-    
-    setTerminalOutput(prev => [...prev,
-      "========================================",
-      "          WITHDRAWAL RECEIPT",
-      "========================================",
-      `DATE: ${new Date().toLocaleDateString()}`,
-      `TIME: ${new Date().toLocaleTimeString()}`,
-      `CUSTOMER: ${currentCustomer.name}`,
-      `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-      `WITHDRAWAL AMOUNT: $${amount.toLocaleString()}`,
-      `PREVIOUS BALANCE: $${accountBalance.toLocaleString()}`,
-      `NEW BALANCE: $${newBalance.toLocaleString()}`,
-      "STATUS: TRANSACTION COMPLETE",
-      "========================================"
-    ]);
-
-    processTransaction('approve');
-    playSound('cash');
-  };
-
-  const processWireTransfer = () => {
-    if (!currentCustomer || currentCustomer.transaction.type !== 'wire_transfer') return;
-    
-    if (!verificationState.accountLookedUp) {
-      setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first"]);
-      return;
-    }
-
-    const amount = currentCustomer.transaction.amount;
-    const fee = Math.max(25, amount * 0.003); // $25 minimum or 0.3% fee
-    const totalAmount = amount + fee;
-    
-    if (totalAmount > accountBalance) {
-      setTerminalOutput(prev => [...prev, "ERROR: Insufficient funds (including wire fee)"]);
-      return;
-    }
-    
-    const newBalance = accountBalance - totalAmount;
-    
-    setTerminalOutput(prev => [...prev,
-      "========================================",
-      "         WIRE TRANSFER RECEIPT",
-      "========================================",
-      `DATE: ${new Date().toLocaleDateString()}`,
-      `TIME: ${new Date().toLocaleTimeString()}`,
-      `FROM: ${currentCustomer.name}`,
-      `FROM ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-      `TO: ${currentCustomer.transaction.recipientName}`,
-      `TO ACCOUNT: ${currentCustomer.transaction.targetAccount}`,
-      `ROUTING: ${currentCustomer.transaction.wireRoutingNumber}`,
-      `TRANSFER AMOUNT: $${amount.toLocaleString()}`,
-      `WIRE FEE: $${fee.toFixed(2)}`,
-      `TOTAL DEDUCTED: $${totalAmount.toFixed(2)}`,
-      `NEW BALANCE: $${newBalance.toLocaleString()}`,
-      "STATUS: WIRE TRANSFER INITIATED",
-      "========================================"
-    ]);
-
-    processTransaction('approve');
-    playSound('cash');
-  };
-
-  // Generic transaction processing function
-  const processTransaction = (action: 'approve' | 'reject') => {
-    if (!currentCustomer) return;
-
-    const isCorrectDecision = currentCustomer.isFraudulent ? action === 'reject' : action === 'approve';
-
-    if (isCorrectDecision) {
-      setGameScore(prev => ({
-        ...prev,
-        score: prev.score + 100,
-        correctTransactions: prev.correctTransactions + 1
-      }));
-      
-      setTimeout(() => {
-        setCurrentCustomer(generateCustomerLocal());
-        setVerificationState({
-          accountLookedUp: false,
-          signatureCompared: false
-        });
-        setTerminalOutput(prev => [...prev, "", "> Next customer approaching..."]);
-      }, 3000);
-    } else {
-      const errorMessage = currentCustomer.isFraudulent 
-        ? "FRAUD APPROVED - SECURITY BREACH!" 
-        : "LEGITIMATE TRANSACTION REJECTED";
-      
-      setGameScore(prev => ({
-        ...prev,
-        errors: prev.errors + 1,
-        fraudulentApprovals: currentCustomer.isFraudulent ? prev.fraudulentApprovals + 1 : prev.fraudulentApprovals,
-        errorDetails: [...prev.errorDetails, errorMessage]
-      }));
-      
-      setTerminalOutput(prev => [...prev, 
-        `> ERROR: ${errorMessage}`,
-        `> Score penalty applied`
-      ]);
-      
-      setTimeout(() => {
-        setCurrentCustomer(generateCustomerLocal());
-        setVerificationState({
-          accountLookedUp: false,
-          signatureCompared: false
-        });
-      }, 3000);
-    }
-  };
-
   // Leaderboard functionality
   const saveScore = (playerName: string) => {
     const newEntry: LeaderboardEntry = {
@@ -829,16 +671,17 @@ function App() {
         onClick={() => setSelectedDocument(doc)}
         style={{
           background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-          border: doc.isValid ? '2px solid #ffff00' : '2px solid #ff4444',
-          borderRadius: '6px',
-          padding: '6px',
+          border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
+          borderRadius: '8px',
+          padding: '10px',
+          margin: '5px',
           cursor: 'pointer',
           color: '#ffffff',
-          fontSize: '10px',
+          fontSize: '12px',
           fontFamily: 'monospace',
-          minHeight: '80px',
+          minHeight: '120px',
           position: 'relative',
-          boxShadow: doc.isValid ? '0 0 8px rgba(255, 255, 0, 0.2)' : '0 0 8px rgba(255, 68, 68, 0.3)'
+          boxShadow: doc.isValid ? '0 0 10px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)'
         }}
       >
         {!doc.isValid && (
@@ -848,57 +691,57 @@ function App() {
             right: '2px',
             background: '#ff4444',
             color: '#ffffff',
-            padding: '1px 4px',
-            borderRadius: '2px',
-            fontSize: '8px',
+            padding: '2px 6px',
+            borderRadius: '3px',
+            fontSize: '10px',
             fontWeight: 'bold'
           }}>
-            ERROR
+            MISMATCH
           </div>
         )}
         
-        <div style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '9px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
           {doc.type.toUpperCase()} #{index + 1}
         </div>
         
         {doc.type === 'id' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
+          <div>
             <div>NAME: {doc.data.name}</div>
             <div>DOB: {doc.data.dateOfBirth}</div>
-            <div>ACCT: {doc.data.accountNumber}</div>
+            <div>ADDRESS: {doc.data.address}</div>
             <div>ID#: {doc.data.idNumber}</div>
           </div>
         )}
         
         {doc.type === 'bank_book' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            <div>ACCT: {doc.data.accountNumber}</div>
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
             <div>NAME: {doc.data.name}</div>
-            <div>BAL: ${doc.data.balance}</div>
+            <div>BALANCE: ${doc.data.balance}</div>
           </div>
         )}
         
         {doc.type === 'slip' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            <div>ACCT: {doc.data.accountNumber}</div>
-            <div>AMT: ${doc.data.amount}</div>
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
+            <div>AMOUNT: ${doc.data.amount}</div>
             <div>TYPE: {doc.data.type}</div>
           </div>
         )}
         
         {doc.type === 'signature' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            <div>SIGNATURE</div>
+          <div>
+            <div>SIGNATURE CARD</div>
             <div style={{ 
               border: '1px solid #666', 
-              margin: '2px 0', 
-              padding: '2px',
+              margin: '5px 0', 
+              padding: '5px',
               background: '#f9f9f9',
               color: '#333',
               fontFamily: 'cursive',
-              fontSize: '10px'
+              fontSize: '14px'
             }}>
-              {doc.data.signature?.split('|')[0] || 'Signature'}
+              {doc.data.signature}
             </div>
           </div>
         )}
@@ -906,11 +749,11 @@ function App() {
         {doc.hasError && (
           <div style={{
             color: '#ff4444',
-            fontSize: '7px',
-            marginTop: '2px',
+            fontSize: '10px',
+            marginTop: '5px',
             fontWeight: 'bold'
           }}>
-            {doc.hasError}
+            ERROR: {doc.hasError}
           </div>
         )}
       </div>
@@ -1069,613 +912,86 @@ function App() {
       {gamePhase === 'working' && (
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           height: '100vh',
-          padding: '15px',
-          gap: '15px',
-          boxSizing: 'border-box',
-          overflow: 'hidden',
-          background: 'linear-gradient(145deg, #000000, #111111)'
+          padding: '10px',
+          gap: '10px'
         }}>
-          {/* Customer Information Bar */}
-          {currentCustomer && (
-            <div style={{
-              background: 'linear-gradient(145deg, #1a1a1a, #000000)',
-              border: '3px solid #ffff00',
-              borderRadius: '15px',
-              padding: '20px',
-              textAlign: 'center',
-              flex: '0 0 auto',
-              boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)'
-            }}>
-              <h2 style={{ margin: '0 0 10px 0', fontSize: '24px', color: '#ffff00', fontFamily: 'monospace' }}>
-                CUSTOMER: {currentCustomer.name}
-              </h2>
-              <div style={{ fontSize: '18px', color: '#ffffff', fontFamily: 'monospace' }}>
-                {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount.toLocaleString()} | ACCT: {currentCustomer.transaction.accountNumber}
-              </div>
-            </div>
-          )}
-
-          {/* Main Interface Row */}
+          {/* Left Column - Terminal */}
           <div style={{
-            display: 'flex',
-            gap: '15px',
             flex: '1',
-            minHeight: 0
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
           }}>
-            {/* Bank Computer Panel */}
+            {/* Terminal Output */}
             <div style={{
-              flex: '0 0 40%',
-              background: 'linear-gradient(145deg, #0a1a0a, #001100)',
-              border: '3px solid #00ff00',
-              borderRadius: '15px',
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
               padding: '15px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-              boxShadow: '0 0 30px rgba(0, 255, 0, 0.2)'
+              height: '60%',
+              overflow: 'auto',
+              fontSize: '12px',
+              fontFamily: 'monospace'
             }}>
-              <div style={{ 
-                color: '#00ff00', 
-                fontSize: '16px', 
-                textAlign: 'center', 
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                borderBottom: '2px solid #00ff00',
-                paddingBottom: '10px'
-              }}>
-                █ BANK COMPUTER TERMINAL █
-              </div>
+              {terminalOutput.map((line, index) => (
+                <div key={index} style={{ marginBottom: '2px' }}>
+                  {line}
+                </div>
+              ))}
+            </div>
 
-              {/* Lookup Input */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input
-                  type="text"
-                  value={terminalInput}
-                  onChange={(e) => setTerminalInput(e.target.value)}
-                  placeholder="Enter account number..."
-                  style={{
-                    flex: '1',
-                    background: '#000000',
-                    border: '2px solid #00ff00',
-                    color: '#00ff00',
-                    padding: '12px',
-                    fontSize: '16px',
-                    fontFamily: 'monospace',
-                    borderRadius: '8px'
-                  }}
-                />
-                <button
-                  onClick={() => setShowKeypad(!showKeypad)}
-                  style={{
-                    background: 'linear-gradient(145deg, #333333, #222222)',
-                    border: '2px solid #00ff00',
-                    color: '#00ff00',
-                    padding: '12px 20px',
-                    fontSize: '16px',
-                    fontFamily: 'monospace',
-                    borderRadius: '8px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  KEYPAD
-                </button>
-              </div>
-
-              {/* Quick Action Buttons */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={() => {
-                    if (currentCustomer) {
-                      const accountToLookup = currentCustomer.transaction.accountNumber;
-                      setTerminalInput(accountToLookup);
-                      processCommand(`LOOKUP ${accountToLookup}`);
-                    }
-                  }}
-                  style={{
-                    background: 'linear-gradient(145deg, #0066ff, #0044cc)',
-                    border: '2px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '15px',
-                    fontSize: '14px',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    flex: 1
-                  }}
-                >
-                  LOOKUP ACCOUNT
-                </button>
-                <button
-                  onClick={() => processCommand('COMPARE SIG')}
-                  style={{
-                    background: 'linear-gradient(145deg, #ff6600, #cc4400)',
-                    border: '2px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '15px',
-                    fontSize: '14px',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    flex: 1
-                  }}
-                >
-                  CHECK SIGNATURE
-                </button>
-              </div>
-
-              {/* Bank Computer Display */}
-              {verificationState.accountLookedUp && currentCustomer && (
-                <div style={{
+            {/* Command Input */}
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
+              <input
+                type="text"
+                value={terminalInput}
+                onChange={(e) => setTerminalInput(e.target.value)}
+                placeholder="Enter command (DEPOSIT $500, WITHDRAW $200, LOOKUP 12345, APPROVE, REJECT)"
+                style={{
+                  flex: '1',
                   background: '#000000',
                   border: '2px solid #00ff00',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  flex: '1',
-                  overflow: 'auto',
-                  fontFamily: 'monospace'
-                }}>
-                  <div style={{ color: '#00ff00', fontSize: '14px', textAlign: 'center', marginBottom: '10px', fontWeight: 'bold' }}>
-                    ████ WESTRIDGE NATIONAL BANK MAINFRAME ████
-                  </div>
-                  <div style={{ fontSize: '12px', lineHeight: '1.5', color: '#ffffff' }}>
-                    <div style={{ color: '#00ff00', fontSize: '14px', marginBottom: '8px' }}>ACCOUNT LOOKUP RESULTS:</div>
-                    <div>ACCOUNT: {currentCustomer.transaction.accountNumber}</div>
-                    <div>NAME: {currentCustomer.name}</div>
-                    <div>STATUS: ACTIVE</div>
-                    <div>BALANCE: ${accountBalance.toLocaleString()}</div>
-                    <div>TYPE: CHECKING</div>
-                    <div>BRANCH: 001-WESTFIELD</div>
-                    <div>SSN: XXX-XX-{Math.floor(Math.random() * 9000) + 1000}</div>
-                    <div>OPENED: {new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}</div>
-                    <div style={{ color: '#00ff00', marginTop: '10px' }}>SIGNATURE ON FILE: ✓ VERIFIED</div>
-                    
-                    {verificationState.signatureCompared && (
-                      <div style={{ 
-                        borderTop: '1px solid #00ff00', 
-                        marginTop: '10px', 
-                        paddingTop: '10px'
-                      }}>
-                        <div style={{ color: '#ffff00', fontSize: '13px' }}>SIGNATURE ANALYSIS RESULTS:</div>
-                        <div style={{ color: currentCustomer.documents.find(d => d.type === 'signature')?.isValid ? '#00ff00' : '#ff4444' }}>
-                          {currentCustomer.documents.find(d => d.type === 'signature')?.isValid 
-                            ? "✓ SIGNATURE MATCH CONFIRMED" 
-                            : "⚠ SIGNATURE DISCREPANCY DETECTED"}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Transaction Processing Buttons */}
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button
-                  onClick={processDeposit}
-                  disabled={!currentCustomer || currentCustomer.transaction.type !== 'deposit'}
-                  style={{
-                    background: currentCustomer?.transaction.type === 'deposit' 
-                      ? 'linear-gradient(145deg, #00ff00, #00cc00)'
-                      : 'linear-gradient(145deg, #666666, #444444)',
-                    border: '2px solid #ffffff',
-                    color: currentCustomer?.transaction.type === 'deposit' ? '#000000' : '#999999',
-                    padding: '12px 20px',
-                    fontSize: '14px',
-                    borderRadius: '8px',
-                    cursor: currentCustomer?.transaction.type === 'deposit' ? 'pointer' : 'not-allowed',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    flex: '1'
-                  }}
-                >
-                  PROCESS DEPOSIT
-                </button>
-                
-                <button
-                  onClick={processWithdrawal}
-                  disabled={!currentCustomer || currentCustomer.transaction.type !== 'withdrawal'}
-                  style={{
-                    background: currentCustomer?.transaction.type === 'withdrawal' 
-                      ? 'linear-gradient(145deg, #ffaa00, #cc8800)'
-                      : 'linear-gradient(145deg, #666666, #444444)',
-                    border: '2px solid #ffffff',
-                    color: currentCustomer?.transaction.type === 'withdrawal' ? '#000000' : '#999999',
-                    padding: '12px 20px',
-                    fontSize: '14px',
-                    borderRadius: '8px',
-                    cursor: currentCustomer?.transaction.type === 'withdrawal' ? 'pointer' : 'not-allowed',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    flex: '1'
-                  }}
-                >
-                  PROCESS WITHDRAWAL
-                </button>
-                
-                <button
-                  onClick={processWireTransfer}
-                  disabled={!currentCustomer || currentCustomer.transaction.type !== 'wire_transfer'}
-                  style={{
-                    background: currentCustomer?.transaction.type === 'wire_transfer' 
-                      ? 'linear-gradient(145deg, #00aaff, #0088cc)'
-                      : 'linear-gradient(145deg, #666666, #444444)',
-                    border: '2px solid #ffffff',
-                    color: currentCustomer?.transaction.type === 'wire_transfer' ? '#000000' : '#999999',
-                    padding: '12px 20px',
-                    fontSize: '14px',
-                    borderRadius: '8px',
-                    cursor: currentCustomer?.transaction.type === 'wire_transfer' ? 'pointer' : 'not-allowed',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    flex: '1'
-                  }}
-                >
-                  PROCESS WIRE
-                </button>
-                
-                <button
-                  onClick={() => processTransaction('reject')}
-                  style={{
-                    background: 'linear-gradient(145deg, #ff6666, #cc3333)',
-                    border: '2px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '12px 20px',
-                    fontSize: '14px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    flex: '1'
-                  }}
-                >
-                  REJECT TRANSACTION
-                </button>
-              </div>
-
-              {/* Score Display */}
-              <div style={{
-                background: 'rgba(0, 0, 0, 0.8)',
-                border: '2px solid #ffff00',
-                borderRadius: '8px',
-                padding: '15px',
-                fontSize: '14px',
-                fontFamily: 'monospace'
-              }}>
-                <div style={{ color: '#ffff00', marginBottom: '5px' }}>PERFORMANCE METRICS:</div>
-                <div>SCORE: {gameScore.score}</div>
-                <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
-                <div>ERRORS: {gameScore.errors}</div>
-                <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}/2</div>
-                <div>DISMISSALS: {gameScore.customersCalledWithoutService}/4</div>
-              </div>
-            </div>
-
-            {/* Customer Documents Panel */}
-            <div style={{
-              flex: '1',
-              background: 'linear-gradient(145deg, #1a1a1a, #000000)',
-              border: '3px solid #ffff00',
-              borderRadius: '15px',
-              padding: '15px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-              boxShadow: '0 0 30px rgba(255, 255, 0, 0.2)'
-            }}>
-              <div style={{ 
-                color: '#ffff00', 
-                fontSize: '16px', 
-                textAlign: 'center', 
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                borderBottom: '2px solid #ffff00',
-                paddingBottom: '10px'
-              }}>
-                █ CUSTOMER DOCUMENTS █
-              </div>
-
-              {/* Documents Grid */}
-              {currentCustomer && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '15px',
-                  flex: '1',
-                  overflow: 'auto'
-                }}>
-                  {currentCustomer.documents.map((doc, index) => (
-                    <div
-                      key={doc.id}
-                      onClick={() => setSelectedDocument(doc)}
-                      style={{
-                        background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-                        border: doc.isValid ? '3px solid #ffff00' : '3px solid #ff4444',
-                        borderRadius: '12px',
-                        padding: '15px',
-                        cursor: 'pointer',
-                        color: '#ffffff',
-                        fontSize: '14px',
-                        fontFamily: 'monospace',
-                        minHeight: '120px',
-                        position: 'relative',
-                        boxShadow: doc.isValid ? '0 0 15px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      {!doc.isValid && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
-                          background: '#ff4444',
-                          color: '#ffffff',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '10px',
-                          fontWeight: 'bold'
-                        }}>
-                          ERROR
-                        </div>
-                      )}
-                      
-                      <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '12px', color: '#ffff00' }}>
-                        {doc.type.toUpperCase()} #{index + 1}
-                      </div>
-                      
-                      {doc.type === 'id' && (
-                        <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
-                          <div><strong>NAME:</strong> {doc.data.name}</div>
-                          <div><strong>DOB:</strong> {doc.data.dateOfBirth}</div>
-                          <div><strong>ACCOUNT:</strong> {doc.data.accountNumber}</div>
-                          <div><strong>ID#:</strong> {doc.data.idNumber}</div>
-                        </div>
-                      )}
-                      
-                      {doc.type === 'bank_book' && (
-                        <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
-                          <div><strong>ACCOUNT:</strong> {doc.data.accountNumber}</div>
-                          <div><strong>NAME:</strong> {doc.data.name}</div>
-                          <div><strong>BALANCE:</strong> ${doc.data.balance?.toLocaleString()}</div>
-                        </div>
-                      )}
-                      
-                      {doc.type === 'slip' && (
-                        <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
-                          <div><strong>ACCOUNT:</strong> {doc.data.accountNumber}</div>
-                          <div><strong>AMOUNT:</strong> ${doc.data.amount?.toLocaleString()}</div>
-                          <div><strong>TYPE:</strong> {doc.data.type}</div>
-                        </div>
-                      )}
-                      
-                      {doc.type === 'signature' && (
-                        <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
-                          <div><strong>SIGNATURE CARD</strong></div>
-                          <div style={{ 
-                            border: '2px solid #666', 
-                            margin: '8px 0', 
-                            padding: '8px',
-                            background: '#f9f9f9',
-                            color: '#333',
-                            fontFamily: 'cursive',
-                            fontSize: '14px',
-                            borderRadius: '4px'
-                          }}>
-                            {doc.data.signature?.split('|')[0] || 'Signature'}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {doc.hasError && (
-                        <div style={{
-                          color: '#ff4444',
-                          fontSize: '11px',
-                          marginTop: '8px',
-                          fontWeight: 'bold',
-                          borderTop: '1px solid #ff4444',
-                          paddingTop: '8px'
-                        }}>
-                          {doc.hasError}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={handleCustomerDismissal}
-                  style={{
-                    background: 'linear-gradient(145deg, #ffaa00, #cc8800)',
-                    border: '2px solid #ffffff',
-                    color: '#000000',
-                    padding: '15px',
-                    fontSize: '14px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    flex: 1
-                  }}
-                >
-                  DISMISS CUSTOMER
-                </button>
-                
-                <button
-                  onClick={handlePunchOut}
-                  style={{
-                    background: 'linear-gradient(145deg, #666666, #444444)',
-                    border: '2px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '15px',
-                    fontSize: '14px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
-                    flex: 1
-                  }}
-                >
-                  END SHIFT
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-            {/* Quick Access Buttons */}
-            <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
-              <button
-                onClick={() => setShowKeypad(!showKeypad)}
-                style={{
-                  background: 'linear-gradient(145deg, #333333, #222222)',
-                  border: '2px solid #00ff00',
                   color: '#00ff00',
-                  padding: '6px 12px',
-                  fontSize: '10px',
+                  padding: '10px',
+                  fontSize: '14px',
                   fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  flex: 1
+                  borderRadius: '4px'
                 }}
-              >
-                KEYPAD
-              </button>
+              />
               <button
-                onClick={() => {
-                  if (currentCustomer) {
-                    processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`);
-                  }
-                }}
+                type="submit"
                 style={{
-                  background: 'linear-gradient(145deg, #0066ff, #0044cc)',
-                  border: '2px solid #ffffff',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  fontSize: '10px',
+                  background: '#00ff00',
+                  color: '#000000',
+                  border: 'none',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  flex: 1
+                  borderRadius: '4px',
+                  cursor: 'pointer'
                 }}
               >
-                LOOKUP
+                ENTER
               </button>
-              <button
-                onClick={() => processCommand('COMPARE SIG')}
-                style={{
-                  background: 'linear-gradient(145deg, #ff6600, #cc4400)',
-                  border: '2px solid #ffffff',
-                  color: '#ffffff',
-                  padding: '6px 12px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  flex: 1
-                }}
-              >
-                CHECK SIG
-              </button>
-            </div>
+            </form>
 
-            {/* Transaction Processing Buttons */}
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <button
-                onClick={processDeposit}
-                disabled={!currentCustomer || currentCustomer.transaction.type !== 'deposit'}
-                style={{
-                  background: currentCustomer?.transaction.type === 'deposit' 
-                    ? 'linear-gradient(145deg, #00ff00, #00cc00)'
-                    : 'linear-gradient(145deg, #666666, #444444)',
-                  border: '2px solid #ffffff',
-                  color: currentCustomer?.transaction.type === 'deposit' ? '#000000' : '#999999',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  borderRadius: '3px',
-                  cursor: currentCustomer?.transaction.type === 'deposit' ? 'pointer' : 'not-allowed',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold'
-                }}
-              >
-                DEPOSIT
-              </button>
-              
-              <button
-                onClick={processWithdrawal}
-                disabled={!currentCustomer || currentCustomer.transaction.type !== 'withdrawal'}
-                style={{
-                  background: currentCustomer?.transaction.type === 'withdrawal' 
-                    ? 'linear-gradient(145deg, #ffaa00, #cc8800)'
-                    : 'linear-gradient(145deg, #666666, #444444)',
-                  border: '2px solid #ffffff',
-                  color: currentCustomer?.transaction.type === 'withdrawal' ? '#000000' : '#999999',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  borderRadius: '3px',
-                  cursor: currentCustomer?.transaction.type === 'withdrawal' ? 'pointer' : 'not-allowed',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold'
-                }}
-              >
-                WITHDRAW
-              </button>
-              
-              <button
-                onClick={processWireTransfer}
-                disabled={!currentCustomer || currentCustomer.transaction.type !== 'wire_transfer'}
-                style={{
-                  background: currentCustomer?.transaction.type === 'wire_transfer' 
-                    ? 'linear-gradient(145deg, #00aaff, #0088cc)'
-                    : 'linear-gradient(145deg, #666666, #444444)',
-                  border: '2px solid #ffffff',
-                  color: currentCustomer?.transaction.type === 'wire_transfer' ? '#000000' : '#999999',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  borderRadius: '3px',
-                  cursor: currentCustomer?.transaction.type === 'wire_transfer' ? 'pointer' : 'not-allowed',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold'
-                }}
-              >
-                WIRE
-              </button>
-              
-              <button
-                onClick={() => processTransaction('reject')}
+                onClick={handleCustomerDismissal}
                 style={{
                   background: 'linear-gradient(145deg, #ff6666, #cc3333)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold'
-                }}
-              >
-                REJECT
-              </button>
-              
-              <button
-                onClick={handleCustomerDismissal}
-                style={{
-                  background: 'linear-gradient(145deg, #ffff00, #cccc00)',
-                  border: '2px solid #ffffff',
-                  color: '#000000',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  borderRadius: '3px',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
               >
-                DISMISS
+                DISMISS CUSTOMER
               </button>
               
               <button
@@ -1684,9 +1000,9 @@ function App() {
                   background: 'linear-gradient(145deg, #666666, #444444)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  borderRadius: '3px',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
@@ -1713,12 +1029,10 @@ function App() {
 
           {/* Right Column - Customer & Documents */}
           <div style={{
-            flex: '0 0 70%',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
-            minHeight: 0,
-            overflow: 'hidden'
+            gap: '10px'
           }}>
             {/* Customer Display */}
             {currentCustomer && (
@@ -1726,60 +1040,38 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '8px',
-                textAlign: 'center',
-                flex: '0 0 auto'
+                padding: '15px',
+                textAlign: 'center'
               }}>
-                <h3 style={{ margin: '0 0 5px 0', fontSize: '12px' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
                   CUSTOMER: {currentCustomer.name}
                 </h3>
-                <div style={{ fontSize: '10px', marginBottom: '3px' }}>
-                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount} | {currentCustomer.transaction.accountNumber}
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
+                </div>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  AMOUNT: ${currentCustomer.transaction.amount}
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
 
-            {/* Bank Computer Records */}
-            {verificationState.accountLookedUp && currentCustomer && (
+            {/* Account Information */}
+            {verificationState.accountLookedUp && (
               <div style={{
-                background: 'linear-gradient(145deg, #0a1a0a, #001100)',
+                background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '8px',
-                flex: '0 0 auto',
-                fontFamily: 'monospace'
+                padding: '15px'
               }}>
-                <div style={{ color: '#00ff00', fontSize: '11px', textAlign: 'center', marginBottom: '5px', fontWeight: 'bold' }}>
-                  █ WESTRIDGE NATIONAL BANK MAINFRAME █
-                </div>
-                <div style={{ fontSize: '9px', lineHeight: '1.3' }}>
-                  <div style={{ color: '#00ff00' }}>ACCOUNT: {currentCustomer.transaction.accountNumber}</div>
-                  <div style={{ color: '#ffffff' }}>NAME: {currentCustomer.name}</div>
-                  <div style={{ color: '#ffffff' }}>STATUS: ACTIVE</div>
-                  <div style={{ color: '#ffffff' }}>BALANCE: ${accountBalance.toLocaleString()}</div>
-                  <div style={{ color: '#ffffff' }}>TYPE: CHECKING</div>
-                  <div style={{ color: '#ffffff' }}>OPENED: {new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}</div>
-                  <div style={{ color: '#ffffff' }}>BRANCH: 001-WESTFIELD</div>
-                  <div style={{ color: '#ffffff' }}>SSN: XXX-XX-{Math.floor(Math.random() * 9000) + 1000}</div>
-                  <div style={{ color: '#ffffff' }}>PHONE: (555) {Math.floor(Math.random() * 900) + 100}-{Math.floor(Math.random() * 9000) + 1000}</div>
-                  <div style={{ color: '#00ff00', marginTop: '3px' }}>SIGNATURE ON FILE: ✓</div>
-                </div>
-                
-                {verificationState.signatureCompared && (
-                  <div style={{ 
-                    borderTop: '1px solid #00ff00', 
-                    marginTop: '5px', 
-                    paddingTop: '5px',
-                    fontSize: '9px'
-                  }}>
-                    <div style={{ color: '#ffff00' }}>SIGNATURE ANALYSIS:</div>
-                    <div style={{ color: '#ffffff' }}>
-                      {currentCustomer.documents.find(d => d.type === 'signature')?.isValid 
-                        ? "✓ SIGNATURE MATCH CONFIRMED" 
-                        : "⚠ SIGNATURE DISCREPANCY DETECTED"}
-                    </div>
-                  </div>
-                )}
+                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
+                  BANK RECORDS
+                </h4>
+                <div>ACCOUNT STATUS: ACTIVE</div>
+                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
+                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
               </div>
             )}
 
@@ -1789,18 +1081,17 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '8px',
+                padding: '15px',
                 flex: '1',
-                overflow: 'auto',
-                minHeight: 0
+                overflow: 'auto'
               }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
+                <h4 style={{ margin: '0 0 15px 0' }}>
                   CUSTOMER DOCUMENTS
                 </h4>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '5px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
@@ -1982,137 +1273,6 @@ function App() {
         }
       `}</style>
       
-      {/* Floating Keypad Overlay */}
-      {showKeypad && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'linear-gradient(145deg, #1a1a1a, #000000)',
-          border: '3px solid #00ff00',
-          borderRadius: '12px',
-          padding: '20px',
-          zIndex: 2000,
-          boxShadow: '0 0 30px rgba(0, 255, 0, 0.5)'
-        }}>
-          <div style={{ 
-            color: '#00ff00', 
-            fontSize: '16px', 
-            textAlign: 'center', 
-            marginBottom: '15px',
-            fontFamily: 'monospace',
-            fontWeight: 'bold'
-          }}>
-            █ BANK COMPUTER KEYPAD █
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '15px' }}>
-            {[1,2,3,4,5,6,7,8,9,'*',0,'#'].map((key, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  if (key === '*') {
-                    setTerminalInput(prev => prev + 'LOOKUP ');
-                  } else if (key === '#') {
-                    setTerminalInput('');
-                  } else {
-                    setTerminalInput(prev => prev + key.toString());
-                  }
-                }}
-                style={{
-                  background: key === '*' || key === '#' 
-                    ? 'linear-gradient(145deg, #ff6600, #cc4400)'
-                    : 'linear-gradient(145deg, #444444, #222222)',
-                  border: '2px solid #00ff00',
-                  color: '#00ff00',
-                  padding: '15px',
-                  fontSize: '20px',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  minWidth: '60px',
-                  minHeight: '60px'
-                }}
-              >
-                {key === '*' ? 'LOOKUP' : key === '#' ? 'CLEAR' : key}
-              </button>
-            ))}
-          </div>
-          
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={() => {
-                if (terminalInput.trim()) {
-                  handleTerminalSubmit({ preventDefault: () => {} } as any);
-                }
-              }}
-              style={{
-                background: 'linear-gradient(145deg, #00ff00, #00cc00)',
-                border: '2px solid #ffffff',
-                color: '#000000',
-                padding: '12px 20px',
-                fontSize: '14px',
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                flex: 1
-              }}
-            >
-              ENTER
-            </button>
-            <button
-              onClick={() => setShowKeypad(false)}
-              style={{
-                background: 'linear-gradient(145deg, #ff3333, #cc2222)',
-                border: '2px solid #ffffff',
-                color: '#ffffff',
-                padding: '12px 20px',
-                fontSize: '14px',
-                fontFamily: 'monospace',
-                fontWeight: 'bold',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                flex: 1
-              }}
-            >
-              CLOSE
-            </button>
-          </div>
-          
-          <div style={{
-            marginTop: '15px',
-            padding: '10px',
-            background: 'rgba(0, 0, 0, 0.8)',
-            border: '1px solid #00ff00',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontFamily: 'monospace',
-            color: '#00ff00'
-          }}>
-            INPUT: {terminalInput}
-          </div>
-        </div>
-      )}
-
-      {/* Keypad Background Overlay */}
-      {showKeypad && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'rgba(0, 0, 0, 0.7)',
-            zIndex: 1999
-          }}
-          onClick={() => setShowKeypad(false)}
-        />
-      )}
-
       {/* Banner Ad - Fixed at bottom */}
       <div style={{
         position: 'fixed',
