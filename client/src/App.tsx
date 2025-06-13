@@ -56,6 +56,7 @@ function App() {
     "Ready for customer service"
   ]);
   
+  const [showKeypad, setShowKeypad] = useState(false);
   const [gameScore, setGameScore] = useState<GameScore>({
     score: 0,
     correctTransactions: 0,
@@ -1107,6 +1108,7 @@ function App() {
                 type="text"
                 value={terminalInput}
                 onChange={(e) => setTerminalInput(e.target.value)}
+                onFocus={() => setShowKeypad(true)}
                 placeholder="LOOKUP 12345, COMPARE SIG, etc."
                 style={{
                   flex: '1',
@@ -1136,93 +1138,60 @@ function App() {
               </button>
             </form>
 
-            {/* Bank Computer Keypad */}
-            <div style={{
-              background: 'linear-gradient(145deg, #1a1a1a, #0a0a0a)',
-              border: '2px solid #00ff00',
-              borderRadius: '6px',
-              padding: '8px',
-              marginTop: '5px'
-            }}>
-              <div style={{ fontSize: '10px', marginBottom: '5px', color: '#00ff00', textAlign: 'center' }}>
-                BANK COMPUTER TERMINAL
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px' }}>
-                {[1,2,3,4,5,6,7,8,9,0].map(num => (
-                  <button
-                    key={num}
-                    onClick={() => setTerminalInput(prev => prev + num.toString())}
-                    style={{
-                      background: 'linear-gradient(145deg, #333333, #222222)',
-                      border: '1px solid #00ff00',
-                      color: '#00ff00',
-                      padding: '6px',
-                      fontSize: '10px',
-                      fontFamily: 'monospace',
-                      borderRadius: '2px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {num}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setTerminalInput('')}
-                  style={{
-                    background: 'linear-gradient(145deg, #ff3333, #cc2222)',
-                    border: '1px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '6px',
-                    fontSize: '9px',
-                    fontFamily: 'monospace',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                    gridColumn: 'span 2'
-                  }}
-                >
-                  CLEAR
-                </button>
-              </div>
-              
-              {/* Quick Lookup Buttons */}
-              <div style={{ display: 'flex', gap: '3px', marginTop: '5px' }}>
-                <button
-                  onClick={() => {
-                    if (currentCustomer) {
-                      processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`);
-                    }
-                  }}
-                  style={{
-                    background: 'linear-gradient(145deg, #0066ff, #0044cc)',
-                    border: '1px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '4px 8px',
-                    fontSize: '9px',
-                    fontFamily: 'monospace',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                    flex: 1
-                  }}
-                >
-                  LOOKUP ACCT
-                </button>
-                <button
-                  onClick={() => processCommand('COMPARE SIG')}
-                  style={{
-                    background: 'linear-gradient(145deg, #ff6600, #cc4400)',
-                    border: '1px solid #ffffff',
-                    color: '#ffffff',
-                    padding: '4px 8px',
-                    fontSize: '9px',
-                    fontFamily: 'monospace',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                    flex: 1
-                  }}
-                >
-                  CHECK SIG
-                </button>
-              </div>
+            {/* Quick Access Buttons */}
+            <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+              <button
+                onClick={() => setShowKeypad(!showKeypad)}
+                style={{
+                  background: 'linear-gradient(145deg, #333333, #222222)',
+                  border: '2px solid #00ff00',
+                  color: '#00ff00',
+                  padding: '6px 12px',
+                  fontSize: '10px',
+                  fontFamily: 'monospace',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+              >
+                KEYPAD
+              </button>
+              <button
+                onClick={() => {
+                  if (currentCustomer) {
+                    processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(145deg, #0066ff, #0044cc)',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  padding: '6px 12px',
+                  fontSize: '10px',
+                  fontFamily: 'monospace',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+              >
+                LOOKUP
+              </button>
+              <button
+                onClick={() => processCommand('COMPARE SIG')}
+                style={{
+                  background: 'linear-gradient(145deg, #ff6600, #cc4400)',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  padding: '6px 12px',
+                  fontSize: '10px',
+                  fontFamily: 'monospace',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+              >
+                CHECK SIG
+              </button>
             </div>
 
             {/* Transaction Processing Buttons */}
@@ -1624,6 +1593,137 @@ function App() {
         }
       `}</style>
       
+      {/* Floating Keypad Overlay */}
+      {showKeypad && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'linear-gradient(145deg, #1a1a1a, #000000)',
+          border: '3px solid #00ff00',
+          borderRadius: '12px',
+          padding: '20px',
+          zIndex: 2000,
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.5)'
+        }}>
+          <div style={{ 
+            color: '#00ff00', 
+            fontSize: '16px', 
+            textAlign: 'center', 
+            marginBottom: '15px',
+            fontFamily: 'monospace',
+            fontWeight: 'bold'
+          }}>
+            █ BANK COMPUTER KEYPAD █
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '15px' }}>
+            {[1,2,3,4,5,6,7,8,9,'*',0,'#'].map((key, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  if (key === '*') {
+                    setTerminalInput(prev => prev + 'LOOKUP ');
+                  } else if (key === '#') {
+                    setTerminalInput('');
+                  } else {
+                    setTerminalInput(prev => prev + key.toString());
+                  }
+                }}
+                style={{
+                  background: key === '*' || key === '#' 
+                    ? 'linear-gradient(145deg, #ff6600, #cc4400)'
+                    : 'linear-gradient(145deg, #444444, #222222)',
+                  border: '2px solid #00ff00',
+                  color: '#00ff00',
+                  padding: '15px',
+                  fontSize: '20px',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  minWidth: '60px',
+                  minHeight: '60px'
+                }}
+              >
+                {key === '*' ? 'LOOKUP' : key === '#' ? 'CLEAR' : key}
+              </button>
+            ))}
+          </div>
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => {
+                if (terminalInput.trim()) {
+                  handleTerminalSubmit({ preventDefault: () => {} } as any);
+                }
+              }}
+              style={{
+                background: 'linear-gradient(145deg, #00ff00, #00cc00)',
+                border: '2px solid #ffffff',
+                color: '#000000',
+                padding: '12px 20px',
+                fontSize: '14px',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                flex: 1
+              }}
+            >
+              ENTER
+            </button>
+            <button
+              onClick={() => setShowKeypad(false)}
+              style={{
+                background: 'linear-gradient(145deg, #ff3333, #cc2222)',
+                border: '2px solid #ffffff',
+                color: '#ffffff',
+                padding: '12px 20px',
+                fontSize: '14px',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                flex: 1
+              }}
+            >
+              CLOSE
+            </button>
+          </div>
+          
+          <div style={{
+            marginTop: '15px',
+            padding: '10px',
+            background: 'rgba(0, 0, 0, 0.8)',
+            border: '1px solid #00ff00',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'monospace',
+            color: '#00ff00'
+          }}>
+            INPUT: {terminalInput}
+          </div>
+        </div>
+      )}
+
+      {/* Keypad Background Overlay */}
+      {showKeypad && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'rgba(0, 0, 0, 0.7)',
+            zIndex: 1999
+          }}
+          onClick={() => setShowKeypad(false)}
+        />
+      )}
+
       {/* Banner Ad - Fixed at bottom */}
       <div style={{
         position: 'fixed',
@@ -1633,7 +1733,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <BannerAd style={{ margin: '0 auto' }} />
+        <AdMobBannerAd adUnitId="ca-app-pub-3940256099942544/6300978111" />
       </div>
     </div>
   );
