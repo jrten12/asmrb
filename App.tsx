@@ -871,26 +871,30 @@ function App() {
         <div style={{
           display: 'flex',
           height: '100vh',
-          padding: '10px',
-          gap: '10px'
+          padding: '5px',
+          gap: '5px',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
         }}>
           {/* Left Column - Terminal */}
           <div style={{
-            flex: '1',
+            flex: '0 0 40%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '5px',
+            minHeight: 0
           }}>
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '15px',
-              height: '60%',
+              padding: '10px',
+              flex: '1',
               overflow: 'auto',
-              fontSize: '12px',
-              fontFamily: 'monospace'
+              fontSize: '11px',
+              fontFamily: 'monospace',
+              minHeight: 0
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ marginBottom: '2px' }}>
@@ -987,10 +991,12 @@ function App() {
 
           {/* Right Column - Customer & Documents */}
           <div style={{
-            flex: '1',
+            flex: '0 0 60%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '5px',
+            minHeight: 0,
+            overflow: 'hidden'
           }}>
             {/* Customer Display */}
             {currentCustomer && (
@@ -1030,6 +1036,111 @@ function App() {
                 <div>ACCOUNT STATUS: ACTIVE</div>
                 <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
                 <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
+              </div>
+            )}
+
+            {/* Transaction Processing Buttons */}
+            {currentCustomer && (
+              <div style={{
+                background: 'linear-gradient(145deg, #2a1a1a, #1a0a0a)',
+                border: '2px solid #ff6600',
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ margin: '0 0 15px 0', color: '#ff6600' }}>
+                  TRANSACTION CONTROLS
+                </h4>
+                
+                <button
+                  onClick={() => processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`)}
+                  style={{
+                    width: '100%',
+                    background: verificationState.accountLookedUp ? '#004400' : 'linear-gradient(145deg, #00aa00, #006600)',
+                    border: '2px solid #00ff00',
+                    color: '#ffffff',
+                    padding: '10px',
+                    fontSize: '14px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    marginBottom: '10px'
+                  }}
+                >
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
+                </button>
+
+                <button
+                  onClick={() => processCommand('COMPARE')}
+                  style={{
+                    width: '100%',
+                    background: verificationState.signatureCompared ? '#444400' : 'linear-gradient(145deg, #aaaa00, #666600)',
+                    border: '2px solid #ffff00',
+                    color: '#ffffff',
+                    padding: '10px',
+                    fontSize: '14px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    marginBottom: '15px'
+                  }}
+                >
+                  {verificationState.signatureCompared ? '✓ SIGNATURE VERIFIED' : 'VERIFY SIGNATURE'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (currentCustomer.transaction.type === 'deposit') {
+                      processCommand(`DEPOSIT $${currentCustomer.transaction.amount}`);
+                    } else if (currentCustomer.transaction.type === 'withdrawal') {
+                      processCommand(`WITHDRAW $${currentCustomer.transaction.amount}`);
+                    } else {
+                      processCommand(`PROCESS ${currentCustomer.transaction.type.toUpperCase()} $${currentCustomer.transaction.amount}`);
+                    }
+                  }}
+                  disabled={!verificationState.accountLookedUp}
+                  style={{
+                    width: '100%',
+                    background: verificationState.accountLookedUp 
+                      ? 'linear-gradient(145deg, #00ff00, #00aa00)' 
+                      : '#333333',
+                    border: '3px solid #ffffff',
+                    color: verificationState.accountLookedUp ? '#000000' : '#666666',
+                    padding: '15px',
+                    fontSize: '16px',
+                    borderRadius: '8px',
+                    cursor: verificationState.accountLookedUp ? 'pointer' : 'not-allowed',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    marginBottom: '10px',
+                    textShadow: verificationState.accountLookedUp ? '0 0 5px #ffffff' : 'none',
+                    boxShadow: verificationState.accountLookedUp ? '0 0 15px rgba(0, 255, 0, 0.5)' : 'none'
+                  }}
+                >
+                  {verificationState.accountLookedUp 
+                    ? `PROCESS ${currentCustomer.transaction.type.toUpperCase()}`
+                    : 'VERIFY ACCOUNT FIRST'
+                  }
+                </button>
+
+                <button
+                  onClick={() => processCommand('REJECT')}
+                  style={{
+                    width: '100%',
+                    background: 'linear-gradient(145deg, #ff0000, #aa0000)',
+                    border: '2px solid #ff6666',
+                    color: '#ffffff',
+                    padding: '10px',
+                    fontSize: '14px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  REJECT TRANSACTION
+                </button>
               </div>
             )}
 
