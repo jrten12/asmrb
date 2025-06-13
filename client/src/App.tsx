@@ -643,7 +643,116 @@ function App() {
     }, 3000);
   };
 
-  // Process transaction function
+  // Process specific transaction types with receipt printing
+  const processDeposit = () => {
+    if (!currentCustomer || currentCustomer.transaction.type !== 'deposit') return;
+    
+    if (!verificationState.accountLookedUp) {
+      setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first"]);
+      return;
+    }
+
+    const amount = currentCustomer.transaction.amount;
+    const newBalance = accountBalance + amount;
+    
+    setTerminalOutput(prev => [...prev,
+      "========================================",
+      "           DEPOSIT RECEIPT",
+      "========================================",
+      `DATE: ${new Date().toLocaleDateString()}`,
+      `TIME: ${new Date().toLocaleTimeString()}`,
+      `CUSTOMER: ${currentCustomer.name}`,
+      `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+      `DEPOSIT AMOUNT: $${amount.toLocaleString()}`,
+      `PREVIOUS BALANCE: $${accountBalance.toLocaleString()}`,
+      `NEW BALANCE: $${newBalance.toLocaleString()}`,
+      "STATUS: TRANSACTION COMPLETE",
+      "========================================"
+    ]);
+
+    processTransaction('approve');
+    playSound('cash');
+  };
+
+  const processWithdrawal = () => {
+    if (!currentCustomer || currentCustomer.transaction.type !== 'withdrawal') return;
+    
+    if (!verificationState.accountLookedUp) {
+      setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first"]);
+      return;
+    }
+
+    const amount = currentCustomer.transaction.amount;
+    
+    if (amount > accountBalance) {
+      setTerminalOutput(prev => [...prev, "ERROR: Insufficient funds"]);
+      return;
+    }
+    
+    const newBalance = accountBalance - amount;
+    
+    setTerminalOutput(prev => [...prev,
+      "========================================",
+      "          WITHDRAWAL RECEIPT",
+      "========================================",
+      `DATE: ${new Date().toLocaleDateString()}`,
+      `TIME: ${new Date().toLocaleTimeString()}`,
+      `CUSTOMER: ${currentCustomer.name}`,
+      `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+      `WITHDRAWAL AMOUNT: $${amount.toLocaleString()}`,
+      `PREVIOUS BALANCE: $${accountBalance.toLocaleString()}`,
+      `NEW BALANCE: $${newBalance.toLocaleString()}`,
+      "STATUS: TRANSACTION COMPLETE",
+      "========================================"
+    ]);
+
+    processTransaction('approve');
+    playSound('cash');
+  };
+
+  const processWireTransfer = () => {
+    if (!currentCustomer || currentCustomer.transaction.type !== 'wire_transfer') return;
+    
+    if (!verificationState.accountLookedUp) {
+      setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first"]);
+      return;
+    }
+
+    const amount = currentCustomer.transaction.amount;
+    const fee = Math.max(25, amount * 0.003); // $25 minimum or 0.3% fee
+    const totalAmount = amount + fee;
+    
+    if (totalAmount > accountBalance) {
+      setTerminalOutput(prev => [...prev, "ERROR: Insufficient funds (including wire fee)"]);
+      return;
+    }
+    
+    const newBalance = accountBalance - totalAmount;
+    
+    setTerminalOutput(prev => [...prev,
+      "========================================",
+      "         WIRE TRANSFER RECEIPT",
+      "========================================",
+      `DATE: ${new Date().toLocaleDateString()}`,
+      `TIME: ${new Date().toLocaleTimeString()}`,
+      `FROM: ${currentCustomer.name}`,
+      `FROM ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+      `TO: ${currentCustomer.transaction.recipientName}`,
+      `TO ACCOUNT: ${currentCustomer.transaction.targetAccount}`,
+      `ROUTING: ${currentCustomer.transaction.wireRoutingNumber}`,
+      `TRANSFER AMOUNT: $${amount.toLocaleString()}`,
+      `WIRE FEE: $${fee.toFixed(2)}`,
+      `TOTAL DEDUCTED: $${totalAmount.toFixed(2)}`,
+      `NEW BALANCE: $${newBalance.toLocaleString()}`,
+      "STATUS: WIRE TRANSFER INITIATED",
+      "========================================"
+    ]);
+
+    processTransaction('approve');
+    playSound('cash');
+  };
+
+  // Generic transaction processing function
   const processTransaction = (action: 'approve' | 'reject') => {
     if (!currentCustomer) return;
 
@@ -656,19 +765,14 @@ function App() {
         correctTransactions: prev.correctTransactions + 1
       }));
       
-      setTerminalOutput(prev => [...prev, 
-        `> TRANSACTION ${action.toUpperCase()}D CORRECTLY`,
-        `> Score +100 points`,
-        `> Processing next customer...`
-      ]);
-      
       setTimeout(() => {
         setCurrentCustomer(generateCustomerLocal());
         setVerificationState({
           accountLookedUp: false,
           signatureCompared: false
         });
-      }, 2000);
+        setTerminalOutput(prev => [...prev, "", "> Next customer approaching..."]);
+      }, 3000);
     } else {
       const errorMessage = currentCustomer.isFraudulent 
         ? "FRAUD APPROVED - SECURITY BREACH!" 
@@ -683,8 +787,7 @@ function App() {
       
       setTerminalOutput(prev => [...prev, 
         `> ERROR: ${errorMessage}`,
-        `> Score penalty applied`,
-        `> Review procedures and continue`
+        `> Score penalty applied`
       ]);
       
       setTimeout(() => {
@@ -999,21 +1102,21 @@ function App() {
             </div>
 
             {/* Command Input */}
-            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '5px' }}>
               <input
                 type="text"
                 value={terminalInput}
                 onChange={(e) => setTerminalInput(e.target.value)}
-                placeholder="Enter command (DEPOSIT $500, WITHDRAW $200, LOOKUP 12345, APPROVE, REJECT)"
+                placeholder="LOOKUP 12345, COMPARE SIG, etc."
                 style={{
                   flex: '1',
                   background: '#000000',
                   border: '2px solid #00ff00',
                   color: '#00ff00',
-                  padding: '10px',
-                  fontSize: '14px',
+                  padding: '6px',
+                  fontSize: '11px',
                   fontFamily: 'monospace',
-                  borderRadius: '4px'
+                  borderRadius: '3px'
                 }}
               />
               <button
@@ -1022,10 +1125,10 @@ function App() {
                   background: '#00ff00',
                   color: '#000000',
                   border: 'none',
-                  padding: '10px 20px',
-                  fontSize: '14px',
+                  padding: '6px 12px',
+                  fontSize: '11px',
                   fontFamily: 'monospace',
-                  borderRadius: '4px',
+                  borderRadius: '3px',
                   cursor: 'pointer'
                 }}
               >
@@ -1033,23 +1136,155 @@ function App() {
               </button>
             </form>
 
-            {/* Action Buttons */}
+            {/* Bank Computer Keypad */}
+            <div style={{
+              background: 'linear-gradient(145deg, #1a1a1a, #0a0a0a)',
+              border: '2px solid #00ff00',
+              borderRadius: '6px',
+              padding: '8px',
+              marginTop: '5px'
+            }}>
+              <div style={{ fontSize: '10px', marginBottom: '5px', color: '#00ff00', textAlign: 'center' }}>
+                BANK COMPUTER TERMINAL
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px' }}>
+                {[1,2,3,4,5,6,7,8,9,0].map(num => (
+                  <button
+                    key={num}
+                    onClick={() => setTerminalInput(prev => prev + num.toString())}
+                    style={{
+                      background: 'linear-gradient(145deg, #333333, #222222)',
+                      border: '1px solid #00ff00',
+                      color: '#00ff00',
+                      padding: '6px',
+                      fontSize: '10px',
+                      fontFamily: 'monospace',
+                      borderRadius: '2px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {num}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setTerminalInput('')}
+                  style={{
+                    background: 'linear-gradient(145deg, #ff3333, #cc2222)',
+                    border: '1px solid #ffffff',
+                    color: '#ffffff',
+                    padding: '6px',
+                    fontSize: '9px',
+                    fontFamily: 'monospace',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                    gridColumn: 'span 2'
+                  }}
+                >
+                  CLEAR
+                </button>
+              </div>
+              
+              {/* Quick Lookup Buttons */}
+              <div style={{ display: 'flex', gap: '3px', marginTop: '5px' }}>
+                <button
+                  onClick={() => {
+                    if (currentCustomer) {
+                      processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`);
+                    }
+                  }}
+                  style={{
+                    background: 'linear-gradient(145deg, #0066ff, #0044cc)',
+                    border: '1px solid #ffffff',
+                    color: '#ffffff',
+                    padding: '4px 8px',
+                    fontSize: '9px',
+                    fontFamily: 'monospace',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                    flex: 1
+                  }}
+                >
+                  LOOKUP ACCT
+                </button>
+                <button
+                  onClick={() => processCommand('COMPARE SIG')}
+                  style={{
+                    background: 'linear-gradient(145deg, #ff6600, #cc4400)',
+                    border: '1px solid #ffffff',
+                    color: '#ffffff',
+                    padding: '4px 8px',
+                    fontSize: '9px',
+                    fontFamily: 'monospace',
+                    borderRadius: '2px',
+                    cursor: 'pointer',
+                    flex: 1
+                  }}
+                >
+                  CHECK SIG
+                </button>
+              </div>
+            </div>
+
+            {/* Transaction Processing Buttons */}
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
               <button
-                onClick={() => processTransaction('approve')}
+                onClick={processDeposit}
+                disabled={!currentCustomer || currentCustomer.transaction.type !== 'deposit'}
                 style={{
-                  background: 'linear-gradient(145deg, #00ff00, #00cc00)',
+                  background: currentCustomer?.transaction.type === 'deposit' 
+                    ? 'linear-gradient(145deg, #00ff00, #00cc00)'
+                    : 'linear-gradient(145deg, #666666, #444444)',
                   border: '2px solid #ffffff',
-                  color: '#000000',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
+                  color: currentCustomer?.transaction.type === 'deposit' ? '#000000' : '#999999',
+                  padding: '6px 10px',
+                  fontSize: '10px',
+                  borderRadius: '3px',
+                  cursor: currentCustomer?.transaction.type === 'deposit' ? 'pointer' : 'not-allowed',
                   fontFamily: 'monospace',
                   fontWeight: 'bold'
                 }}
               >
-                APPROVE
+                DEPOSIT
+              </button>
+              
+              <button
+                onClick={processWithdrawal}
+                disabled={!currentCustomer || currentCustomer.transaction.type !== 'withdrawal'}
+                style={{
+                  background: currentCustomer?.transaction.type === 'withdrawal' 
+                    ? 'linear-gradient(145deg, #ffaa00, #cc8800)'
+                    : 'linear-gradient(145deg, #666666, #444444)',
+                  border: '2px solid #ffffff',
+                  color: currentCustomer?.transaction.type === 'withdrawal' ? '#000000' : '#999999',
+                  padding: '6px 10px',
+                  fontSize: '10px',
+                  borderRadius: '3px',
+                  cursor: currentCustomer?.transaction.type === 'withdrawal' ? 'pointer' : 'not-allowed',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold'
+                }}
+              >
+                WITHDRAW
+              </button>
+              
+              <button
+                onClick={processWireTransfer}
+                disabled={!currentCustomer || currentCustomer.transaction.type !== 'wire_transfer'}
+                style={{
+                  background: currentCustomer?.transaction.type === 'wire_transfer' 
+                    ? 'linear-gradient(145deg, #00aaff, #0088cc)'
+                    : 'linear-gradient(145deg, #666666, #444444)',
+                  border: '2px solid #ffffff',
+                  color: currentCustomer?.transaction.type === 'wire_transfer' ? '#000000' : '#999999',
+                  padding: '6px 10px',
+                  fontSize: '10px',
+                  borderRadius: '3px',
+                  cursor: currentCustomer?.transaction.type === 'wire_transfer' ? 'pointer' : 'not-allowed',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold'
+                }}
+              >
+                WIRE
               </button>
               
               <button
@@ -1058,9 +1293,9 @@ function App() {
                   background: 'linear-gradient(145deg, #ff6666, #cc3333)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
+                  padding: '6px 10px',
+                  fontSize: '10px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontFamily: 'monospace',
                   fontWeight: 'bold'
@@ -1075,9 +1310,9 @@ function App() {
                   background: 'linear-gradient(145deg, #ffff00, #cccc00)',
                   border: '2px solid #ffffff',
                   color: '#000000',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
+                  padding: '6px 10px',
+                  fontSize: '10px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
@@ -1091,9 +1326,9 @@ function App() {
                   background: 'linear-gradient(145deg, #666666, #444444)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
+                  padding: '6px 10px',
+                  fontSize: '10px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
@@ -1146,19 +1381,47 @@ function App() {
               </div>
             )}
 
-            {/* Account Information */}
-            {verificationState.accountLookedUp && (
+            {/* Bank Computer Records */}
+            {verificationState.accountLookedUp && currentCustomer && (
               <div style={{
-                background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
+                background: 'linear-gradient(145deg, #0a1a0a, #001100)',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
                 padding: '8px',
-                flex: '0 0 auto'
+                flex: '0 0 auto',
+                fontFamily: 'monospace'
               }}>
-                <h4 style={{ margin: '0 0 5px 0', color: '#00ff00', fontSize: '11px' }}>
-                  BANK RECORDS
-                </h4>
-                <div style={{ fontSize: '10px' }}>STATUS: ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
+                <div style={{ color: '#00ff00', fontSize: '11px', textAlign: 'center', marginBottom: '5px', fontWeight: 'bold' }}>
+                  █ WESTRIDGE NATIONAL BANK MAINFRAME █
+                </div>
+                <div style={{ fontSize: '9px', lineHeight: '1.3' }}>
+                  <div style={{ color: '#00ff00' }}>ACCOUNT: {currentCustomer.transaction.accountNumber}</div>
+                  <div style={{ color: '#ffffff' }}>NAME: {currentCustomer.name}</div>
+                  <div style={{ color: '#ffffff' }}>STATUS: ACTIVE</div>
+                  <div style={{ color: '#ffffff' }}>BALANCE: ${accountBalance.toLocaleString()}</div>
+                  <div style={{ color: '#ffffff' }}>TYPE: CHECKING</div>
+                  <div style={{ color: '#ffffff' }}>OPENED: {new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}</div>
+                  <div style={{ color: '#ffffff' }}>BRANCH: 001-WESTFIELD</div>
+                  <div style={{ color: '#ffffff' }}>SSN: XXX-XX-{Math.floor(Math.random() * 9000) + 1000}</div>
+                  <div style={{ color: '#ffffff' }}>PHONE: (555) {Math.floor(Math.random() * 900) + 100}-{Math.floor(Math.random() * 9000) + 1000}</div>
+                  <div style={{ color: '#00ff00', marginTop: '3px' }}>SIGNATURE ON FILE: ✓</div>
+                </div>
+                
+                {verificationState.signatureCompared && (
+                  <div style={{ 
+                    borderTop: '1px solid #00ff00', 
+                    marginTop: '5px', 
+                    paddingTop: '5px',
+                    fontSize: '9px'
+                  }}>
+                    <div style={{ color: '#ffff00' }}>SIGNATURE ANALYSIS:</div>
+                    <div style={{ color: '#ffffff' }}>
+                      {currentCustomer.documents.find(d => d.type === 'signature')?.isValid 
+                        ? "✓ SIGNATURE MATCH CONFIRMED" 
+                        : "⚠ SIGNATURE DISCREPANCY DETECTED"}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
