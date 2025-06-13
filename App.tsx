@@ -1,30 +1,35 @@
-import React, { useState, useEffect } from 'react';
-
-// Mock React Native components for development
-const StyleSheet = {
-  create: (styles: any) => styles
-};
-
-const View = ({ children, style, ...props }: any) => (
-  <div style={style} {...props}>{children}</div>
-);
-
-const Text = ({ children, style, ...props }: any) => (
-  <span style={style} {...props}>{children}</span>
-);
-
-const TouchableOpacity = ({ children, style, onPress, ...props }: any) => (
-  <button style={style} onClick={onPress} {...props}>{children}</button>
-);
-
-const ScrollView = ({ children, style, ...props }: any) => (
-  <div style={{ ...style, overflowY: 'auto' }} {...props}>{children}</div>
-);
-
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { analyzeSignature, generateCustomer } from './lib/customers';
+import { getDocumentRenderer } from './lib/documents';
+import type { Customer, Document as GameDocument } from './types/game';
 import AdMobBannerAd from './components/AdMobBannerAd';
 
 // Test AdMob IDs
 const BANNER_AD_UNIT_ID = 'ca-app-pub-3940256099942544/6300978111';
+
+declare global {
+  interface Window {
+    gameAudioContext?: AudioContext;
+  }
+}
+
+interface GameScore {
+  score: number;
+  correctTransactions: number;
+  errors: number;
+  timeOnShift: number;
+  fraudulentApprovals: number;
+  consecutiveErrors: number;
+  errorDetails: string[];
+  customersCalledWithoutService: number;
+  dismissalWarningGiven: boolean;
+}
+
+interface LeaderboardEntry {
+  name: string;
+  score: number;
+  date: string;
+}
 
 interface Customer {
   id: string;
@@ -55,6 +60,9 @@ export default function App() {
     timeRemaining: 300 // 5 minutes
   });
   const [selectedAction, setSelectedAction] = useState<'approve' | 'reject' | null>(null);
+  const [screenTransition, setScreenTransition] = useState('fadeIn');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showCustomerAnimation, setShowCustomerAnimation] = useState(false);
 
   useEffect(() => {
     // AdMob initialization will be handled when building with EAS
@@ -89,15 +97,43 @@ export default function App() {
   };
 
   const startGame = () => {
-    setGameStarted(true);
-    setCurrentCustomer(generateCustomer());
-    setGameState({
-      score: 0,
-      level: 1,
-      customersProcessed: 0,
-      fraudDetected: 0,
-      timeRemaining: 300
-    });
+    setIsTransitioning(true);
+    setScreenTransition('slideOut');
+    
+    setTimeout(() => {
+      setGameStarted(true);
+      setCurrentCustomer(generateCustomer());
+      setGameState({
+        score: 0,
+        level: 1,
+        customersProcessed: 0,
+        fraudDetected: 0,
+        timeRemaining: 300
+      });
+      setScreenTransition('slideInFromRight');
+      setIsTransitioning(false);
+    }, 500);
+  };
+
+  const transitionToGameOver = () => {
+    setIsTransitioning(true);
+    setScreenTransition('fadeOut');
+    
+    setTimeout(() => {
+      setScreenTransition('bounceIn');
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const restartGame = () => {
+    setIsTransitioning(true);
+    setScreenTransition('rotateOut');
+    
+    setTimeout(() => {
+      setGameStarted(false);
+      setScreenTransition('fadeIn');
+      setIsTransitioning(false);
+    }, 600);
   };
 
   const processTransaction = (action: 'approve' | 'reject') => {
