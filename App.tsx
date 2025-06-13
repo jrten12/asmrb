@@ -674,17 +674,16 @@ function App() {
         onClick={() => setSelectedDocument(doc)}
         style={{
           background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-          border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
-          borderRadius: '8px',
-          padding: '10px',
-          margin: '5px',
+          border: doc.isValid ? '2px solid #ffff00' : '2px solid #ff4444',
+          borderRadius: '6px',
+          padding: '6px',
           cursor: 'pointer',
           color: '#ffffff',
-          fontSize: '12px',
+          fontSize: '10px',
           fontFamily: 'monospace',
-          minHeight: '120px',
+          minHeight: '80px',
           position: 'relative',
-          boxShadow: doc.isValid ? '0 0 10px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)'
+          boxShadow: doc.isValid ? '0 0 8px rgba(255, 255, 0, 0.2)' : '0 0 8px rgba(255, 68, 68, 0.3)'
         }}
       >
         {!doc.isValid && (
@@ -694,57 +693,57 @@ function App() {
             right: '2px',
             background: '#ff4444',
             color: '#ffffff',
-            padding: '2px 6px',
-            borderRadius: '3px',
-            fontSize: '10px',
+            padding: '1px 4px',
+            borderRadius: '2px',
+            fontSize: '8px',
             fontWeight: 'bold'
           }}>
-            MISMATCH
+            ERROR
           </div>
         )}
         
-        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '9px' }}>
           {doc.type.toUpperCase()} #{index + 1}
         </div>
         
         {doc.type === 'id' && (
-          <div>
+          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
             <div>NAME: {doc.data.name}</div>
             <div>DOB: {doc.data.dateOfBirth}</div>
-            <div>ADDRESS: {doc.data.address}</div>
+            <div>ACCT: {doc.data.accountNumber}</div>
             <div>ID#: {doc.data.idNumber}</div>
           </div>
         )}
         
         {doc.type === 'bank_book' && (
-          <div>
-            <div>ACCOUNT: {doc.data.accountNumber}</div>
+          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
+            <div>ACCT: {doc.data.accountNumber}</div>
             <div>NAME: {doc.data.name}</div>
-            <div>BALANCE: ${doc.data.balance}</div>
+            <div>BAL: ${doc.data.balance}</div>
           </div>
         )}
         
         {doc.type === 'slip' && (
-          <div>
-            <div>ACCOUNT: {doc.data.accountNumber}</div>
-            <div>AMOUNT: ${doc.data.amount}</div>
+          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
+            <div>ACCT: {doc.data.accountNumber}</div>
+            <div>AMT: ${doc.data.amount}</div>
             <div>TYPE: {doc.data.type}</div>
           </div>
         )}
         
         {doc.type === 'signature' && (
-          <div>
-            <div>SIGNATURE CARD</div>
+          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
+            <div>SIGNATURE</div>
             <div style={{ 
               border: '1px solid #666', 
-              margin: '5px 0', 
-              padding: '5px',
+              margin: '2px 0', 
+              padding: '2px',
               background: '#f9f9f9',
               color: '#333',
               fontFamily: 'cursive',
-              fontSize: '14px'
+              fontSize: '10px'
             }}>
-              {doc.data.signature}
+              {doc.data.signature?.split('|')[0] || 'Signature'}
             </div>
           </div>
         )}
@@ -752,11 +751,11 @@ function App() {
         {doc.hasError && (
           <div style={{
             color: '#ff4444',
-            fontSize: '10px',
-            marginTop: '5px',
+            fontSize: '7px',
+            marginTop: '2px',
             fontWeight: 'bold'
           }}>
-            ERROR: {doc.hasError}
+            {doc.hasError}
           </div>
         )}
       </div>
@@ -1102,14 +1101,13 @@ function App() {
                 background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '15px'
+                padding: '8px',
+                flex: '0 0 auto'
               }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
+                <h4 style={{ margin: '0 0 5px 0', color: '#00ff00', fontSize: '11px' }}>
                   BANK RECORDS
                 </h4>
-                <div>ACCOUNT STATUS: ACTIVE</div>
-                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
-                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
+                <div style={{ fontSize: '10px' }}>STATUS: ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
               </div>
             )}
 
@@ -1119,17 +1117,18 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '15px',
+                padding: '8px',
                 flex: '1',
-                overflow: 'auto'
+                overflow: 'auto',
+                minHeight: 0
               }}>
-                <h4 style={{ margin: '0 0 15px 0' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
                   CUSTOMER DOCUMENTS
                 </h4>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '10px'
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '5px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
