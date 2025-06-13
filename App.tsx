@@ -819,9 +819,10 @@ function App() {
         }}>
           {/* Left Column - Terminal */}
           <div style={{
+            flex: '0 0 35%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px',
+            gap: '8px',
             minHeight: 0
           }}>
             {/* Terminal Output */}
@@ -898,9 +899,10 @@ function App() {
           
           {/* Center Column - Customer Information */}
           <div style={{
+            flex: '0 0 32%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px',
+            gap: '8px',
             minHeight: 0
           }}>
             {/* Current Customer */}
@@ -1000,11 +1002,14 @@ function App() {
                 <button
                   className={verificationState.accountLookedUp ? 'button-glow' : ''}
                   onClick={() => {
-                    if (currentCustomer) {
+                    if (currentCustomer && verificationState.accountLookedUp) {
+                      playSound('cash');
                       const transactionCommand = currentCustomer.transaction.type === 'deposit' 
                         ? `DEPOSIT $${currentCustomer.transaction.amount}`
                         : `WITHDRAW $${currentCustomer.transaction.amount}`;
                       processCommand(transactionCommand);
+                    } else {
+                      playSound('reject');
                     }
                   }}
                   style={{
@@ -1029,7 +1034,10 @@ function App() {
                 </button>
 
                 <button
-                  onClick={() => processCommand('REJECT')}
+                  onClick={() => {
+                    playSound('reject');
+                    processCommand('REJECT');
+                  }}
                   style={{
                     width: '100%',
                     background: '#330000',
@@ -1052,31 +1060,109 @@ function App() {
           
           {/* Right Column - Documents */}
           <div style={{
-            flex: '1',
+            flex: '0 0 33%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '8px',
+            minHeight: 0
           }}>
             <div style={{
               background: '#110000',
               border: '2px solid #ffff00',
               borderRadius: '8px',
-              padding: '15px',
-              height: '100%',
-              overflow: 'auto'
+              padding: '10px',
+              flex: '1',
+              overflow: 'auto',
+              minHeight: 0
             }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '15px', color: '#ffff00' }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ffff00', fontSize: '12px' }}>
                 CUSTOMER DOCUMENTS
               </div>
               
               {currentCustomer ? (
                 currentCustomer.documents.map((doc, index) => renderDocument(doc, index))
               ) : (
-                <div style={{ textAlign: 'center', color: '#666666', marginTop: '50px' }}>
+                <div style={{ textAlign: 'center', color: '#666666', marginTop: '50px', fontSize: '12px' }}>
                   No customer present
                 </div>
               )}
             </div>
+
+            {/* Quick Action Buttons */}
+            {currentCustomer && (
+              <div style={{
+                background: '#002200',
+                border: '2px solid #00ff00',
+                borderRadius: '8px',
+                padding: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ fontWeight: 'bold', color: '#00ff00', fontSize: '10px', textAlign: 'center' }}>
+                  QUICK ACTIONS
+                </div>
+                
+                <button
+                  onClick={() => {
+                    playSound('typing');
+                    processCommand(`LOOKUP ${currentCustomer.transaction.accountNumber}`);
+                  }}
+                  style={{
+                    background: verificationState.accountLookedUp ? '#004400' : 'linear-gradient(145deg, #00aa00, #006600)',
+                    border: '1px solid #00ff00',
+                    color: '#ffffff',
+                    padding: '6px',
+                    fontSize: '9px',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {verificationState.accountLookedUp ? '✓ ACCOUNT VERIFIED' : 'LOOKUP ACCOUNT'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    playSound('typing');
+                    processCommand('COMPARE');
+                  }}
+                  style={{
+                    background: verificationState.signatureCompared ? '#004400' : 'linear-gradient(145deg, #aaaa00, #666600)',
+                    border: '1px solid #ffff00',
+                    color: '#ffffff',
+                    padding: '6px',
+                    fontSize: '9px',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {verificationState.signatureCompared ? '✓ SIGNATURE CHECKED' : 'COMPARE SIGNATURE'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    playSound('typing');
+                    processCommand('HELP');
+                  }}
+                  style={{
+                    background: '#333333',
+                    border: '1px solid #666666',
+                    color: '#cccccc',
+                    padding: '4px',
+                    fontSize: '8px',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  HELP
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
