@@ -959,8 +959,15 @@ function App() {
             </div>
             <button
               onClick={() => {
-                playSound('punch_clock');
-                startGame();
+                setGamePhase('working');
+                setCurrentCustomer(generateCustomerLocal());
+                setGameInitialized(true);
+                setTerminalOutput([
+                  "TELLER WORKSTATION v1.2",
+                  "WESTRIDGE NATIONAL BANK", 
+                  "SHIFT STARTED - READY FOR CUSTOMERS",
+                  ""
+                ]);
               }}
               style={{
                 background: 'linear-gradient(145deg, #ffff00, #cccc00)',
@@ -1271,17 +1278,18 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '15px',
+                padding: '10px',
                 flex: '1',
-                overflow: 'auto'
+                overflow: 'auto',
+                minHeight: 0
               }}>
-                <h4 style={{ margin: '0 0 15px 0' }}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>
                   CUSTOMER DOCUMENTS
                 </h4>
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '10px'
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
