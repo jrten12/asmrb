@@ -84,42 +84,86 @@ function App() {
     signatureCompared: false
   });
 
-  // Sound effects
+  // Sound effects with proper audio management
+  const activeAudios = useRef<HTMLAudioElement[]>([]);
+  
+  const stopAllAudio = () => {
+    activeAudios.current.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+    activeAudios.current = [];
+  };
+
   const playSound = (soundType: string) => {
     try {
+      // Stop any currently playing audio first
+      stopAllAudio();
+      
       let audio: HTMLAudioElement;
       switch (soundType) {
         case 'typing':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.3;
-          break;
-        case 'punch_clock':
-          audio = new Audio('/punch-clock.mp3');
-          audio.volume = 0.5;
-          break;
+          // Create synthetic typing sound instead of using printer audio
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.1);
+          return;
         case 'cash':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.4;
-          break;
-        case 'reject':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.6;
-          break;
-        case 'customer_approach':
           audio = new Audio('/dot-matrix-printer.mp3');
           audio.volume = 0.2;
           break;
+        case 'reject':
+          // Create synthetic reject sound
+          const rejectContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const rejectOsc = rejectContext.createOscillator();
+          const rejectGain = rejectContext.createGain();
+          
+          rejectOsc.connect(rejectGain);
+          rejectGain.connect(rejectContext.destination);
+          
+          rejectOsc.frequency.setValueAtTime(200, rejectContext.currentTime);
+          rejectGain.gain.setValueAtTime(0.2, rejectContext.currentTime);
+          rejectGain.gain.exponentialRampToValueAtTime(0.01, rejectContext.currentTime + 0.3);
+          
+          rejectOsc.start(rejectContext.currentTime);
+          rejectOsc.stop(rejectContext.currentTime + 0.3);
+          return;
+        case 'customer_approach':
+          return; // Silent for now
         default:
           return;
       }
-      audio.play().catch(e => console.log("Audio play failed:", e));
+      
+      activeAudios.current.push(audio);
+      audio.play().then(() => {
+        // Remove from active audios when finished
+        setTimeout(() => {
+          const index = activeAudios.current.indexOf(audio);
+          if (index > -1) {
+            activeAudios.current.splice(index, 1);
+          }
+        }, 3000);
+      }).catch(e => console.log("Audio play failed:", e));
     } catch (e) {
       console.log("Sound error:", e);
     }
   };
 
-  // Initialize background music
+  // Initialize background music and stop all audio on mount
   useEffect(() => {
+    // Stop all audio immediately on mount
+    stopAllAudio();
+    
     if (!musicMuted) {
       if (!backgroundMusicRef.current) {
         backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
@@ -142,6 +186,7 @@ function App() {
     }
     
     return () => {
+      stopAllAudio();
       if (backgroundMusicRef.current) {
         backgroundMusicRef.current.pause();
       }
@@ -849,8 +894,8 @@ function App() {
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '10px',
-              height: '120px'
+              padding: '8px',
+              flex: '0 0 auto'
             }}>
               <div style={{ marginBottom: '5px', fontSize: '11px' }}>
                 Command Terminal:
@@ -911,8 +956,8 @@ function App() {
                 background: '#001100',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '12px',
-                fontSize: '12px',
+                padding: '8px',
+                fontSize: '10px',
                 fontFamily: 'monospace',
                 animation: 'slideInFromLeft 0.6s ease-out'
               }}>
