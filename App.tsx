@@ -394,6 +394,121 @@ function App() {
         playSound('customer_approach');
       }, 2000);
       
+    } else if (cmd.startsWith('WIRE ')) {
+      // Handle wire transfers: WIRE $amount TO targetAccount
+      const parts = cmd.split(' ');
+      if (parts.length < 4 || parts[2] !== 'TO') {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Format should be WIRE $amount TO account"]);
+        return;
+      }
+      
+      const amount = parseFloat(parts[1].substring(1));
+      const targetAccount = parts[3];
+      
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (currentCustomer.transaction.type !== 'wire_transfer') {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer requested " + currentCustomer.transaction.type]);
+        return;
+      }
+      
+      if (amount !== currentCustomer.transaction.amount) {
+        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Amount mismatch. Customer transferring $${currentCustomer.transaction.amount}`]);
+        return;
+      }
+      
+      if (targetAccount !== currentCustomer.transaction.targetAccount) {
+        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Target account mismatch. Should be ${currentCustomer.transaction.targetAccount}`]);
+        return;
+      }
+      
+      if (amount > accountBalance) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Insufficient funds for wire transfer"]);
+        return;
+      }
+      
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "========================================",
+        "PROCESSING WIRE TRANSFER",
+        `CUSTOMER: ${currentCustomer.name}`,
+        `AMOUNT: $${amount}`,
+        `FROM ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+        `TO ACCOUNT: ${targetAccount}`,
+        `RECIPIENT: ${currentCustomer.transaction.recipientName}`,
+        `ROUTING: ${currentCustomer.transaction.wireRoutingNumber}`,
+        `REMAINING BALANCE: $${(accountBalance - amount).toLocaleString()}`,
+        "STATUS: WIRE TRANSFER COMPLETE",
+        "========================================"
+      ]);
+      
+      handleCorrectTransaction();
+      playSound('cash');
+      
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
+      
+    } else if (cmd.startsWith('CHECK ') || cmd.startsWith('MONEY_ORDER ')) {
+      // Handle cashier's checks and money orders
+      const isCheck = cmd.startsWith('CHECK ');
+      const amount = parseFloat(cmd.split(' ')[1].substring(1));
+      const transactionType = isCheck ? 'cashiers_check' : 'money_order';
+      
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (currentCustomer.transaction.type !== transactionType) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer requested " + currentCustomer.transaction.type]);
+        return;
+      }
+      
+      if (amount !== currentCustomer.transaction.amount) {
+        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Amount mismatch. Customer requesting $${currentCustomer.transaction.amount}`]);
+        return;
+      }
+      
+      if (amount > accountBalance) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Insufficient funds"]);
+        return;
+      }
+      
+      const displayName = isCheck ? "CASHIER'S CHECK" : "MONEY ORDER";
+      
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "========================================",
+        `PROCESSING ${displayName}`,
+        `CUSTOMER: ${currentCustomer.name}`,
+        `AMOUNT: $${amount}`,
+        `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+        `REMAINING BALANCE: $${(accountBalance - amount).toLocaleString()}`,
+        `STATUS: ${displayName} ISSUED`,
+        "========================================"
+      ]);
+      
+      handleCorrectTransaction();
+      playSound('cash');
+      
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
+      
     } else if (cmd.startsWith('LOOKUP ')) {
       const accountNumber = cmd.substring(7).trim();
       lookupAccount(accountNumber);
@@ -1095,6 +1210,12 @@ function App() {
                       processCommand(`DEPOSIT $${currentCustomer.transaction.amount}`);
                     } else if (currentCustomer.transaction.type === 'withdrawal') {
                       processCommand(`WITHDRAW $${currentCustomer.transaction.amount}`);
+                    } else if (currentCustomer.transaction.type === 'wire_transfer') {
+                      processCommand(`WIRE $${currentCustomer.transaction.amount} TO ${currentCustomer.transaction.targetAccount}`);
+                    } else if (currentCustomer.transaction.type === 'cashiers_check') {
+                      processCommand(`CHECK $${currentCustomer.transaction.amount}`);
+                    } else if (currentCustomer.transaction.type === 'money_order') {
+                      processCommand(`MONEY_ORDER $${currentCustomer.transaction.amount}`);
                     } else {
                       processCommand(`PROCESS ${currentCustomer.transaction.type.toUpperCase()} $${currentCustomer.transaction.amount}`);
                     }
