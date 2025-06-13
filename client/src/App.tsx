@@ -1733,7 +1733,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <AdMobBannerAd adUnitId="ca-app-pub-3940256099942544/6300978111" />
+        <BannerAd style={{ margin: '0 auto' }} />
       </div>
     </div>
   );
