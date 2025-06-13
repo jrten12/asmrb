@@ -340,7 +340,7 @@ function App() {
     // End animation and go to game over
     setTimeout(() => {
       setShowArrestAnimation(false);
-      setGamePhase('leaderboard');
+      transitionToPhase('leaderboard', 'slideInFromRight');
     }, 10000);
   };
 
@@ -369,7 +369,7 @@ function App() {
     }));
     
     if (newConsecutiveErrors >= 3) {
-      setGamePhase('game_over');
+      transitionToPhase('game_over', 'zoomIn');
     }
   };
 
@@ -871,7 +871,7 @@ function App() {
 
       {/* Punch In Screen */}
       {gamePhase === 'punch_in' && (
-        <div style={{
+        <div className={`screen-${screenTransition}`} style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -941,7 +941,7 @@ function App() {
 
       {/* Working Phase */}
       {gamePhase === 'working' && (
-        <div style={{
+        <div className={`screen-${screenTransition}`} style={{
           display: 'flex',
           height: '100vh',
           padding: '10px',
