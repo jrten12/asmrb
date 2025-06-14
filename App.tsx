@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import { getDocumentRenderer } from './lib/documents';
 import type { Customer, Document as GameDocument } from './types/game';
-import AdMobBannerAd from './components/AdMobBannerAd';
+import BannerAd from './components/BannerAd';
 
 declare global {
   interface Window {
@@ -79,18 +79,69 @@ function App() {
     signatureCompared: false
   });
 
-  // Sound effects - DISABLED
+  // Sound effects
   const playSound = (soundType: string) => {
-    return;
+    try {
+      let audio: HTMLAudioElement;
+      switch (soundType) {
+        case 'typing':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.3;
+          break;
+        case 'punch_clock':
+          audio = new Audio('/punch-clock.mp3');
+          audio.volume = 0.5;
+          break;
+        case 'cash':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.4;
+          break;
+        case 'reject':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.6;
+          break;
+        case 'customer_approach':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.2;
+          break;
+        default:
+          return;
+      }
+      audio.play().catch(e => console.log("Audio play failed:", e));
+    } catch (e) {
+      console.log("Sound error:", e);
+    }
   };
 
-  // Background music disabled
+  // Initialize background music
   useEffect(() => {
-    if (backgroundMusicRef.current) {
-      backgroundMusicRef.current.pause();
-      backgroundMusicRef.current.currentTime = 0;
+    if (!musicMuted) {
+      if (!backgroundMusicRef.current) {
+        backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
+        backgroundMusicRef.current.loop = true;
+        backgroundMusicRef.current.volume = 0.15;
+      }
+      
+      backgroundMusicRef.current.addEventListener('canplaythrough', () => {
+        if (!musicMuted && backgroundMusicRef.current) {
+          backgroundMusicRef.current.play().catch(e => {
+            console.log("Auto-play prevented:", e);
+          });
+        }
+      });
+      
+      if (musicMuted && backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
     }
-  }, []);
+    
+    return () => {
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+      }
+    };
+  }, [musicMuted]);
 
   // Generate customer with proper fraud mechanics
   const generateCustomerLocal = (): Customer => {
@@ -612,60 +663,6 @@ function App() {
     return JSON.parse(localStorage.getItem('tellerScores') || '[]');
   };
 
-  // Process transaction function
-  const processTransaction = (action: 'approve' | 'reject') => {
-    if (!currentCustomer) return;
-
-    const isCorrectDecision = currentCustomer.isFraudulent ? action === 'reject' : action === 'approve';
-
-    if (isCorrectDecision) {
-      setGameScore(prev => ({
-        ...prev,
-        score: prev.score + 100,
-        correctTransactions: prev.correctTransactions + 1
-      }));
-      
-      setTerminalOutput(prev => [...prev, 
-        `> TRANSACTION ${action.toUpperCase()}D CORRECTLY`,
-        `> Score +100 points`,
-        `> Processing next customer...`
-      ]);
-      
-      setTimeout(() => {
-        setCurrentCustomer(generateCustomerLocal());
-        setVerificationState({
-          accountLookedUp: false,
-          signatureCompared: false
-        });
-      }, 2000);
-    } else {
-      const errorMessage = currentCustomer.isFraudulent 
-        ? "FRAUD APPROVED - SECURITY BREACH!" 
-        : "LEGITIMATE TRANSACTION REJECTED";
-      
-      setGameScore(prev => ({
-        ...prev,
-        errors: prev.errors + 1,
-        fraudulentApprovals: currentCustomer.isFraudulent ? prev.fraudulentApprovals + 1 : prev.fraudulentApprovals,
-        errorDetails: [...prev.errorDetails, errorMessage]
-      }));
-      
-      setTerminalOutput(prev => [...prev, 
-        `> ERROR: ${errorMessage}`,
-        `> Score penalty applied`,
-        `> Review procedures and continue`
-      ]);
-      
-      setTimeout(() => {
-        setCurrentCustomer(generateCustomerLocal());
-        setVerificationState({
-          accountLookedUp: false,
-          signatureCompared: false
-        });
-      }, 3000);
-    }
-  };
-
   // Render functions
   const renderDocument = (doc: GameDocument, index: number) => {
     return (
@@ -674,16 +671,17 @@ function App() {
         onClick={() => setSelectedDocument(doc)}
         style={{
           background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-          border: doc.isValid ? '2px solid #ffff00' : '2px solid #ff4444',
-          borderRadius: '6px',
-          padding: '6px',
+          border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
+          borderRadius: '8px',
+          padding: '10px',
+          margin: '5px',
           cursor: 'pointer',
           color: '#ffffff',
-          fontSize: '10px',
+          fontSize: '12px',
           fontFamily: 'monospace',
-          minHeight: '80px',
+          minHeight: '120px',
           position: 'relative',
-          boxShadow: doc.isValid ? '0 0 8px rgba(255, 255, 0, 0.2)' : '0 0 8px rgba(255, 68, 68, 0.3)'
+          boxShadow: doc.isValid ? '0 0 10px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)'
         }}
       >
         {!doc.isValid && (
@@ -693,57 +691,57 @@ function App() {
             right: '2px',
             background: '#ff4444',
             color: '#ffffff',
-            padding: '1px 4px',
-            borderRadius: '2px',
-            fontSize: '8px',
+            padding: '2px 6px',
+            borderRadius: '3px',
+            fontSize: '10px',
             fontWeight: 'bold'
           }}>
-            ERROR
+            MISMATCH
           </div>
         )}
         
-        <div style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '9px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
           {doc.type.toUpperCase()} #{index + 1}
         </div>
         
         {doc.type === 'id' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
+          <div>
             <div>NAME: {doc.data.name}</div>
             <div>DOB: {doc.data.dateOfBirth}</div>
-            <div>ACCT: {doc.data.accountNumber}</div>
+            <div>ADDRESS: {doc.data.address}</div>
             <div>ID#: {doc.data.idNumber}</div>
           </div>
         )}
         
         {doc.type === 'bank_book' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            <div>ACCT: {doc.data.accountNumber}</div>
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
             <div>NAME: {doc.data.name}</div>
-            <div>BAL: ${doc.data.balance}</div>
+            <div>BALANCE: ${doc.data.balance}</div>
           </div>
         )}
         
         {doc.type === 'slip' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            <div>ACCT: {doc.data.accountNumber}</div>
-            <div>AMT: ${doc.data.amount}</div>
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
+            <div>AMOUNT: ${doc.data.amount}</div>
             <div>TYPE: {doc.data.type}</div>
           </div>
         )}
         
         {doc.type === 'signature' && (
-          <div style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            <div>SIGNATURE</div>
+          <div>
+            <div>SIGNATURE CARD</div>
             <div style={{ 
               border: '1px solid #666', 
-              margin: '2px 0', 
-              padding: '2px',
+              margin: '5px 0', 
+              padding: '5px',
               background: '#f9f9f9',
               color: '#333',
               fontFamily: 'cursive',
-              fontSize: '10px'
+              fontSize: '14px'
             }}>
-              {doc.data.signature?.split('|')[0] || 'Signature'}
+              {doc.data.signature}
             </div>
           </div>
         )}
@@ -751,11 +749,11 @@ function App() {
         {doc.hasError && (
           <div style={{
             color: '#ff4444',
-            fontSize: '7px',
-            marginTop: '2px',
+            fontSize: '10px',
+            marginTop: '5px',
             fontWeight: 'bold'
           }}>
-            {doc.hasError}
+            ERROR: {doc.hasError}
           </div>
         )}
       </div>
@@ -915,30 +913,26 @@ function App() {
         <div style={{
           display: 'flex',
           height: '100vh',
-          padding: '5px',
-          gap: '5px',
-          boxSizing: 'border-box',
-          overflow: 'hidden'
+          padding: '10px',
+          gap: '10px'
         }}>
           {/* Left Column - Terminal */}
           <div style={{
-            flex: '0 0 30%',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
-            minHeight: 0
+            gap: '10px'
           }}>
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '8px',
-              flex: '1',
+              padding: '15px',
+              height: '60%',
               overflow: 'auto',
-              fontSize: '11px',
-              fontFamily: 'monospace',
-              minHeight: 0
+              fontSize: '12px',
+              fontFamily: 'monospace'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ marginBottom: '2px' }}>
@@ -983,55 +977,21 @@ function App() {
             </form>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <button
-                onClick={() => processTransaction('approve')}
-                style={{
-                  background: 'linear-gradient(145deg, #00ff00, #00cc00)',
-                  border: '2px solid #ffffff',
-                  color: '#000000',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold'
-                }}
-              >
-                APPROVE
-              </button>
-              
-              <button
-                onClick={() => processTransaction('reject')}
+                onClick={handleCustomerDismissal}
                 style={{
                   background: 'linear-gradient(145deg, #ff6666, #cc3333)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                  fontWeight: 'bold'
-                }}
-              >
-                REJECT
-              </button>
-              
-              <button
-                onClick={handleCustomerDismissal}
-                style={{
-                  background: 'linear-gradient(145deg, #ffff00, #cccc00)',
-                  border: '2px solid #ffffff',
-                  color: '#000000',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
               >
-                DISMISS
+                DISMISS CUSTOMER
               </button>
               
               <button
@@ -1040,9 +1000,9 @@ function App() {
                   background: 'linear-gradient(145deg, #666666, #444444)',
                   border: '2px solid #ffffff',
                   color: '#ffffff',
-                  padding: '8px 12px',
-                  fontSize: '11px',
-                  borderRadius: '4px',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
                   cursor: 'pointer',
                   fontFamily: 'monospace'
                 }}
@@ -1069,12 +1029,10 @@ function App() {
 
           {/* Right Column - Customer & Documents */}
           <div style={{
-            flex: '0 0 70%',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
-            minHeight: 0,
-            overflow: 'hidden'
+            gap: '10px'
           }}>
             {/* Customer Display */}
             {currentCustomer && (
@@ -1082,15 +1040,20 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '8px',
-                textAlign: 'center',
-                flex: '0 0 auto'
+                padding: '15px',
+                textAlign: 'center'
               }}>
-                <h3 style={{ margin: '0 0 5px 0', fontSize: '12px' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
                   CUSTOMER: {currentCustomer.name}
                 </h3>
-                <div style={{ fontSize: '10px', marginBottom: '3px' }}>
-                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount} | {currentCustomer.transaction.accountNumber}
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
+                </div>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  AMOUNT: ${currentCustomer.transaction.amount}
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
@@ -1101,13 +1064,14 @@ function App() {
                 background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '8px',
-                flex: '0 0 auto'
+                padding: '15px'
               }}>
-                <h4 style={{ margin: '0 0 5px 0', color: '#00ff00', fontSize: '11px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
                   BANK RECORDS
                 </h4>
-                <div style={{ fontSize: '10px' }}>STATUS: ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
+                <div>ACCOUNT STATUS: ACTIVE</div>
+                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
+                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
               </div>
             )}
 
@@ -1117,18 +1081,17 @@ function App() {
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
                 borderRadius: '8px',
-                padding: '8px',
+                padding: '15px',
                 flex: '1',
-                overflow: 'auto',
-                minHeight: 0
+                overflow: 'auto'
               }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
+                <h4 style={{ margin: '0 0 15px 0' }}>
                   CUSTOMER DOCUMENTS
                 </h4>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '5px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
@@ -1319,7 +1282,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <AdMobBannerAd adUnitId="ca-app-pub-3940256099942544/6300978111" />
+        <BannerAd style={{ margin: '0 auto' }} />
       </div>
     </div>
   );
