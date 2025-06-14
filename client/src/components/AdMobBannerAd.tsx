@@ -10,31 +10,44 @@ interface AdMobBannerAdProps {
 
 const AdMobBannerAd: React.FC<AdMobBannerAdProps> = ({
   adUnitId = 'ca-app-pub-3940256099942544/6300978111', // Test banner
-  bannerSize = 'smartBannerPortrait',
+  bannerSize = 'banner',
   testDeviceID,
   onAdViewDidReceiveAd,
   onDidFailToReceiveAdWithError
 }) => {
   const [adLoaded, setAdLoaded] = useState(false);
+  const [isNativeEnvironment, setIsNativeEnvironment] = useState(false);
 
   useEffect(() => {
-    // Initialize ad placeholder
+    // Check if running in native environment (EAS build)
+    const isNative = typeof window !== 'undefined' && 
+                     ((window as any).ReactNativeWebView || 
+                      (window as any).expo || 
+                      navigator.userAgent.includes('Expo'));
+    
+    setIsNativeEnvironment(isNative);
     setAdLoaded(true);
     onAdViewDidReceiveAd?.();
-    console.log('AdMob Banner configured for EAS build with unit ID:', adUnitId);
+    
+    if (isNative) {
+      console.log('Google Mobile Ads configured for native build with unit ID:', adUnitId);
+    } else {
+      console.log('AdMob Banner (web development mode) with unit ID:', adUnitId);
+    }
   }, [adUnitId, onAdViewDidReceiveAd]);
 
-  // EAS build will replace this with actual AdMobBanner component
-  // Web development shows placeholder
+  // In native builds, this will be replaced by actual Google Mobile Ads banner
+  // Web development shows styled placeholder
   return (
     <div 
       data-admob-unit-id={adUnitId}
       data-admob-size={bannerSize}
+      data-testDeviceID={testDeviceID}
       style={{
         width: '320px',
         height: '50px',
-        backgroundColor: adLoaded ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)',
-        border: `1px solid ${adLoaded ? '#00ff00' : '#ff0000'}`,
+        backgroundColor: isNativeEnvironment ? 'transparent' : (adLoaded ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)'),
+        border: isNativeEnvironment ? 'none' : `1px solid ${adLoaded ? '#00ff00' : '#ff0000'}`,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -44,7 +57,7 @@ const AdMobBannerAd: React.FC<AdMobBannerAdProps> = ({
         margin: '10px auto'
       }}
     >
-      AdMob Ready - Test ID: {adUnitId.slice(-8)}
+      {!isNativeEnvironment && `AdMob Ready - Test ID: ${adUnitId.slice(-8)}`}
     </div>
   );
 };
