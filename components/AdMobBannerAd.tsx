@@ -16,12 +16,24 @@ const AdMobBannerAd: React.FC<AdMobBannerAdProps> = ({
   onDidFailToReceiveAdWithError
 }) => {
   const [adLoaded, setAdLoaded] = useState(false);
+  const [isNative, setIsNative] = useState(false);
 
   useEffect(() => {
     const initializeAd = async () => {
       try {
-        // When building with EAS, this will initialize expo-ads-admob
-        console.log('AdMob Banner initialized with unit ID:', adUnitId);
+        // Check if running in native environment
+        const isCapacitor = !!(window as any).Capacitor;
+        setIsNative(isCapacitor);
+        
+        if (isCapacitor) {
+          // Initialize Google Mobile Ads for native deployment
+          const { BannerAd, BannerAdSize, TestIds } = await import('react-native-google-mobile-ads');
+          console.log('Google Mobile Ads initialized with unit ID:', adUnitId);
+        } else {
+          // Web development mode
+          console.log('AdMob Banner (web development mode) with unit ID:', adUnitId);
+        }
+        
         setAdLoaded(true);
         onAdViewDidReceiveAd?.();
       } catch (error) {
@@ -33,7 +45,23 @@ const AdMobBannerAd: React.FC<AdMobBannerAdProps> = ({
     initializeAd();
   }, [adUnitId, testDeviceID, onAdViewDidReceiveAd, onDidFailToReceiveAdWithError]);
 
-  // Development placeholder (replaced with actual AdMobBanner in EAS builds)
+  // Return native ad component when in Capacitor environment
+  if (isNative) {
+    return React.createElement('div', {
+      style: {
+        width: '100%',
+        height: '50px',
+        backgroundColor: 'transparent',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      },
+      'data-admob-unit-id': adUnitId,
+      'data-admob-size': bannerSize
+    });
+  }
+
+  // Web development placeholder
   return (
     <div style={{
       width: '320px',
