@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import { getDocumentRenderer } from './lib/documents';
 import type { Customer, Document as GameDocument } from './types/game';
-import BannerAd from './components/BannerAd';
+import AdMobBannerAd from './components/AdMobBannerAd';
 
 declare global {
   interface Window {
@@ -1282,7 +1282,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <BannerAd style={{ margin: '0 auto' }} />
+        <AdMobBannerAd adUnitId="ca-app-pub-3940256099942544/6300978111" />
       </div>
     </div>
   );
