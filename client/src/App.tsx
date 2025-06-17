@@ -76,6 +76,22 @@ function App() {
   const [admobInitialized, setAdmobInitialized] = useState(false);
   const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
   const [customersServed, setCustomersServed] = useState(0);
+
+  // Generate bank signature on file for comparison
+  const generateLegitimateSignature = (name: string): string => {
+    return name.split(' ').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ');
+  };
+
+  const generateFraudulentSignature = (name: string): string => {
+    // Create a different signature that doesn't match
+    const variations = [
+      name.split(' ').reverse().join(' '),
+      name.replace(/[aeiou]/gi, 'x'),
+      name.charAt(0) + name.slice(1).replace(/./g, '~'),
+      name.split('').reverse().join('').substring(0, name.length)
+    ];
+    return variations[Math.floor(Math.random() * variations.length)];
+  };
   
   // Account lookup state (no automatic fraud detection)
   const [accountBalance, setAccountBalance] = useState(0);
@@ -535,75 +551,96 @@ function App() {
         return;
       }
       
-      // Simulate 1980s computer system lookup with ASMR typing sounds
+      // Prompt user to enter account number
       setTerminalOutput(prev => [...prev, 
         "> " + command,
-        "ACCESSING BANK DATABASE...",
-        "ACCOUNT LOOKUP INITIATED...",
+        "BANK COMPUTER SYSTEM ACCESS",
+        "========================================",
+        "ENTER ACCOUNT NUMBER TO LOOKUP:",
+        "Format: LOOKUP [account-number]",
+        "",
+        `Customer provided account: ${currentCustomer.transaction.accountNumber}`,
+        "Type: LOOKUP " + currentCustomer.transaction.accountNumber,
+        "========================================",
         ""
       ]);
       
-      // Play typing sounds during lookup
-      setTimeout(() => playSound('typing'), 200);
-      setTimeout(() => playSound('typing'), 400);
-      setTimeout(() => playSound('typing'), 600);
-      
-      // Simulate database access delay
-      setTimeout(() => {
-        const accountNum = currentCustomer.transaction.accountNumber;
-        const balance = Math.floor(Math.random() * 50000) + 1000;
-        setAccountBalance(balance);
-        setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
-        
-        setTerminalOutput(prev => [...prev,
-          "========================================",
-          "BANK COMPUTER SYSTEM - ACCOUNT RECORD",
-          "========================================",
-          `ACCOUNT NUMBER: ${accountNum}`,
-          `ACCOUNT HOLDER: ${currentCustomer.name}`,
-          `CURRENT BALANCE: $${balance.toLocaleString()}`,
-          `ACCOUNT STATUS: ACTIVE`,
-          `LAST TRANSACTION: ${new Date().toLocaleDateString()}`,
-          `OVERDRAFT LIMIT: $500.00`,
-          "========================================",
-          "",
-          "RECORD RETRIEVED - COMPARE WITH DOCUMENTS",
-          ""
-        ]);
-        
-        playSound('cash'); // Success sound
-      }, 1500);
-      
     } else if (cmd.startsWith('LOOKUP ')) {
       const accountNumber = cmd.substring(7).trim();
-      // Direct account lookup with specific number
+      
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      // Simulate 1980s computer system lookup with ASMR typing sounds
       setTerminalOutput(prev => [...prev, 
         "> " + command,
-        `LOOKING UP ACCOUNT: ${accountNumber}`,
-        "SEARCHING DATABASE..."
+        `SEARCHING ACCOUNT: ${accountNumber}`,
+        "ACCESSING BANK DATABASE...",
+        "VALIDATING ACCOUNT NUMBER...",
+        ""
       ]);
       
+      // Play typing sounds during lookup simulation
+      setTimeout(() => playSound('typing'), 200);
+      setTimeout(() => playSound('typing'), 500);
+      setTimeout(() => playSound('typing'), 800);
+      setTimeout(() => playSound('typing'), 1100);
+      
+      // Simulate database access delay with authentic terminal output
       setTimeout(() => {
-        if (currentCustomer && accountNumber === currentCustomer.transaction.accountNumber) {
+        if (accountNumber === currentCustomer.transaction.accountNumber) {
+          // Correct account number entered
           const balance = Math.floor(Math.random() * 50000) + 1000;
           setAccountBalance(balance);
           setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
           
           setTerminalOutput(prev => [...prev,
-            "ACCOUNT FOUND",
-            `HOLDER: ${currentCustomer.name}`,
-            `BALANCE: $${balance.toLocaleString()}`,
-            `STATUS: ACTIVE`,
+            "ACCOUNT RECORD FOUND",
+            "========================================",
+            "WESTRIDGE NATIONAL BANK - CUSTOMER FILE",
+            "========================================",
+            `ACCOUNT NUMBER: ${accountNumber}`,
+            `ACCOUNT HOLDER: ${currentCustomer.name}`,
+            `CURRENT BALANCE: $${balance.toLocaleString()}`,
+            `ACCOUNT STATUS: ACTIVE`,
+            `ACCOUNT TYPE: CHECKING`,
+            `OPENED: ${new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString()}`,
+            `LAST TRANSACTION: ${new Date().toLocaleDateString()}`,
+            `OVERDRAFT LIMIT: $500.00`,
+            `SSN: XXX-XX-${Math.floor(Math.random() * 9000) + 1000}`,
+            "========================================",
+            "",
+            "RECORD RETRIEVED SUCCESSFULLY",
+            "Compare customer documents with bank record",
+            "Use VERIFY to check signature on file",
             ""
           ]);
+          
+          playSound('cash'); // Success sound
         } else {
+          // Wrong account number or account not found
           setTerminalOutput(prev => [...prev,
-            "ACCOUNT NOT FOUND OR MISMATCH",
-            "CHECK ACCOUNT NUMBER",
+            "ACCOUNT LOOKUP FAILED",
+            "========================================",
+            `SEARCHED ACCOUNT: ${accountNumber}`,
+            `EXPECTED ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+            "",
+            "POSSIBLE CAUSES:",
+            "• Account number mismatch",
+            "• Fraudulent documentation",
+            "• Customer error",
+            "• Account closed or suspended",
+            "========================================",
+            "",
+            "VERIFY ACCOUNT NUMBER WITH CUSTOMER",
             ""
           ]);
+          
+          playSound('reject'); // Error sound
         }
-      }, 1000);
+      }, 1800);
       
     } else if (cmd.startsWith('REJECT')) {
       if (!currentCustomer) {
@@ -740,6 +777,69 @@ function App() {
         console.log("Generated customer:", customer);
         playSound('customer_approach');
       }, 2000);
+      
+    } else if (cmd === 'VERIFY' || cmd === 'SIGNATURE') {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (!verificationState.accountLookedUp) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Must lookup account first (use LOOKUP command)"]);
+        return;
+      }
+      
+      // Simulate signature database lookup with ASMR typing
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "ACCESSING SIGNATURE DATABASE...",
+        "RETRIEVING SIGNATURE ON FILE...",
+        ""
+      ]);
+      
+      // Play typing sounds during verification
+      setTimeout(() => playSound('typing'), 300);
+      setTimeout(() => playSound('typing'), 600);
+      setTimeout(() => playSound('typing'), 900);
+      
+      // Generate bank signature on file
+      setTimeout(() => {
+        const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
+        const bankSignatureOnFile = currentCustomer.isFraudulent ? 
+          generateFraudulentSignature(currentCustomer.name) : 
+          generateLegitimateSignature(currentCustomer.name);
+        
+        setVerificationState(prev => ({ ...prev, signatureCompared: true }));
+        
+        setTerminalOutput(prev => [...prev,
+          "========================================",
+          "SIGNATURE VERIFICATION SYSTEM",
+          "========================================",
+          "",
+          "SIGNATURE ON FILE (BANK RECORDS):",
+          `"${bankSignatureOnFile}"`,
+          "",
+          "CUSTOMER SIGNATURE CARD:",
+          `"${customerSigDoc?.data.signature || 'NO SIGNATURE CARD'}"`,
+          "",
+          "COMPARE SIGNATURES FOR:",
+          "• Handwriting style",
+          "• Letter formation",
+          "• Pressure patterns",
+          "• Overall consistency",
+          "",
+          currentCustomer.isFraudulent ? 
+            "⚠️ SIGNATURES DO NOT MATCH ⚠️" : 
+            "✓ SIGNATURES APPEAR CONSISTENT",
+          "========================================",
+          "",
+          "MANUAL VERIFICATION REQUIRED",
+          "Use APPROVE or REJECT based on comparison",
+          ""
+        ]);
+        
+        playSound('cash');
+      }, 1800);
       
     } else {
       setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Unknown command"]);
