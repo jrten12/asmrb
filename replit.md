@@ -92,6 +92,9 @@ Bank Teller 1988 is a nostalgic simulation game that recreates the experience of
 - **Production Ready**: Easy configuration swap for live ads
 
 ## Changelog
+- June 17, 2025: Integrated production AdMob IDs (ca-app-pub-2744316013184797) for live monetization
+- June 17, 2025: Fixed preview loading issues and restored full game functionality 
+- June 17, 2025: Added comprehensive error handling for web and native environments
 - June 14, 2025: Fixed iOS build dependencies - replaced expo-ads-admob with react-native-google-mobile-ads
 - June 14, 2025: Resolved import issues and component file paths for successful compilation
 - June 14, 2025: Fixed version synchronization between preview and production web URL
