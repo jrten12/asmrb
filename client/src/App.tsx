@@ -72,12 +72,96 @@ function App() {
   const [musicMuted, setMusicMuted] = useState(false);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   
+  // AdMob state management
+  const [admobInitialized, setAdmobInitialized] = useState(false);
+  const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
+  const [customersServed, setCustomersServed] = useState(0);
+  
   // Account lookup state (no automatic fraud detection)
   const [accountBalance, setAccountBalance] = useState(0);
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     signatureCompared: false
   });
+
+  // AdMob interstitial ad functions with error handling
+  const loadInterstitialAd = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
+        (window.webkit.messageHandlers as any).admob.postMessage({
+          action: 'loadInterstitial',
+          adUnitId: 'ca-app-pub-2744316013184797/4741683992' // Production Interstitial Ad Unit ID
+        });
+      }
+    } catch (error) {
+      console.log('AdMob loadInterstitialAd error (web environment):', error);
+    }
+  }, []);
+
+  const showInterstitialAd = useCallback(() => {
+    try {
+      if (isInterstitialLoaded && typeof window !== 'undefined') {
+        if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
+          (window.webkit.messageHandlers as any).admob.postMessage({
+            action: 'showInterstitial'
+          });
+        }
+        setIsInterstitialLoaded(false);
+        // Load next ad
+        setTimeout(loadInterstitialAd, 1000);
+      }
+    } catch (error) {
+      console.log('AdMob showInterstitialAd error (web environment):', error);
+    }
+  }, [isInterstitialLoaded, loadInterstitialAd]);
+
+  // Initialize AdMob with error handling
+  useEffect(() => {
+    const initializeAdMob = () => {
+      try {
+        if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers) {
+          // Initialize AdMob for iOS
+          if ((window.webkit.messageHandlers as any).admob) {
+            (window.webkit.messageHandlers as any).admob.postMessage({
+              action: 'initialize',
+              appId: 'ca-app-pub-2744316013184797~4167964772', // Production App ID
+              testDeviceIds: [] // Remove test device IDs for production
+            });
+          }
+          
+          // Set up ad event listeners
+          (window as any).admobEvents = {
+            onInterstitialLoaded: () => setIsInterstitialLoaded(true),
+            onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false)
+          };
+          
+          setAdmobInitialized(true);
+        } else {
+          // Fallback for web testing
+          console.log('AdMob: Running in web environment, using test mode');
+          setAdmobInitialized(true);
+          setIsInterstitialLoaded(true);
+        }
+      } catch (error) {
+        console.log('AdMob initialization error (web environment):', error);
+        setAdmobInitialized(true);
+        setIsInterstitialLoaded(true);
+      }
+    };
+
+    initializeAdMob();
+  }, []);
+
+  // Load ads when AdMob is initialized with error handling
+  useEffect(() => {
+    if (admobInitialized) {
+      try {
+        loadInterstitialAd();
+      } catch (error) {
+        console.log('Error loading initial ad (web environment):', error);
+      }
+    }
+  }, [admobInitialized, loadInterstitialAd]);
 
   // Sound effects
   const playSound = (soundType: string) => {
@@ -324,6 +408,15 @@ function App() {
       correctTransactions: prev.correctTransactions + 1,
       consecutiveErrors: 0
     }));
+    
+    // Show interstitial ad every 5 customers served
+    setCustomersServed(prev => {
+      const newCount = prev + 1;
+      if (newCount % 5 === 0) {
+        showInterstitialAd();
+      }
+      return newCount;
+    });
   };
 
   const handleIncorrectTransaction = (errorType: string) => {
@@ -1282,7 +1375,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <BannerAd style={{ margin: '0 auto' }} />
+        <AdMobBannerAd adUnitId="ca-app-pub-2744316013184797/4741683992" />
       </div>
     </div>
   );
