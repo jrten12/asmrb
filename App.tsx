@@ -390,6 +390,15 @@ function App() {
       correctTransactions: prev.correctTransactions + 1,
       consecutiveErrors: 0
     }));
+    
+    // Show interstitial ad every 5 customers served
+    setCustomersServed(prev => {
+      const newCount = prev + 1;
+      if (newCount % 5 === 0) {
+        showInterstitialAd();
+      }
+      return newCount;
+    });
   };
 
   const handleIncorrectTransaction = (errorType: string) => {
@@ -1348,7 +1357,7 @@ function App() {
         zIndex: 1000,
         display: gamePhase === 'working' ? 'block' : 'none'
       }}>
-        <BannerAd style={{ margin: '0 auto' }} />
+        <AdMobBannerAd adUnitId="ca-app-pub-2744316013184797/4741683992" />
       </div>
     </div>
   );
