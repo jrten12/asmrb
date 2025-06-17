@@ -1261,35 +1261,40 @@ function App() {
       {gamePhase === 'working' && (
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           height: '100vh',
-          padding: '10px',
-          gap: '10px'
+          padding: '3px',
+          gap: '3px',
+          overflow: 'hidden'
         }}>
-          {/* Left Column - Terminal */}
+          {/* Terminal Section */}
           <div style={{
-            flex: '1',
+            width: '100%',
+            height: '60vh',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '3px'
           }}>
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '10px',
-              height: '50vh',
+              padding: '8px',
+              height: window.innerWidth < 768 ? '35vh' : '60vh',
               overflowY: 'auto',
-              fontSize: '11px',
+              fontSize: window.innerWidth < 768 ? '8px' : '12px',
               fontFamily: 'monospace',
-              lineHeight: '1.2',
-              wordWrap: 'break-word'
+              lineHeight: '1.1',
+              wordWrap: 'break-word',
+              whiteSpace: 'pre-wrap'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ 
                   marginBottom: '1px',
                   maxWidth: '100%',
-                  wordBreak: 'break-all'
+                  wordBreak: 'break-word',
+                  hyphens: 'auto'
                 }}>
                   {line}
                 </div>
@@ -1300,8 +1305,8 @@ function App() {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '10px',
-              marginBottom: '10px'
+              gap: window.innerWidth < 768 ? '5px' : '10px',
+              marginBottom: window.innerWidth < 768 ? '5px' : '10px'
             }}>
               <button
                 onClick={() => executeQuickCommand('lookup')}
@@ -1457,10 +1462,13 @@ function App() {
 
           {/* Right Column - Customer & Documents */}
           <div style={{
-            flex: '1',
+            flex: window.innerWidth < 768 ? 'none' : '1',
+            width: window.innerWidth < 768 ? '100%' : 'auto',
+            height: window.innerWidth < 768 ? '50vh' : 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: window.innerWidth < 768 ? '5px' : '10px',
+            overflow: 'auto'
           }}>
             {/* Customer Display */}
             {currentCustomer && (
