@@ -84,26 +84,34 @@ function App() {
     signatureCompared: false
   });
 
-  // AdMob interstitial ad functions
+  // AdMob interstitial ad functions with error handling
   const loadInterstitialAd = useCallback(() => {
-    if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
-      (window.webkit.messageHandlers as any).admob.postMessage({
-        action: 'loadInterstitial',
-        adUnitId: 'ca-app-pub-2744316013184797/4741683992' // Production Interstitial Ad Unit ID
-      });
+    try {
+      if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
+        (window.webkit.messageHandlers as any).admob.postMessage({
+          action: 'loadInterstitial',
+          adUnitId: 'ca-app-pub-2744316013184797/4741683992' // Production Interstitial Ad Unit ID
+        });
+      }
+    } catch (error) {
+      console.log('AdMob loadInterstitialAd error (web environment):', error);
     }
   }, []);
 
   const showInterstitialAd = useCallback(() => {
-    if (isInterstitialLoaded) {
-      if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
-        (window.webkit.messageHandlers as any).admob.postMessage({
-          action: 'showInterstitial'
-        });
+    try {
+      if (isInterstitialLoaded && typeof window !== 'undefined') {
+        if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
+          (window.webkit.messageHandlers as any).admob.postMessage({
+            action: 'showInterstitial'
+          });
+        }
+        setIsInterstitialLoaded(false);
+        // Load next ad
+        setTimeout(loadInterstitialAd, 1000);
       }
-      setIsInterstitialLoaded(false);
-      // Load next ad
-      setTimeout(loadInterstitialAd, 1000);
+    } catch (error) {
+      console.log('AdMob showInterstitialAd error (web environment):', error);
     }
   }, [isInterstitialLoaded, loadInterstitialAd]);
 
