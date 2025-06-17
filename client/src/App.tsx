@@ -79,18 +79,26 @@ function App() {
 
   // Generate bank signature on file for comparison
   const generateLegitimateSignature = (name: string): string => {
-    return name.split(' ').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ');
+    // Create a clean, proper signature for legitimate customers
+    return name;
   };
 
   const generateFraudulentSignature = (name: string): string => {
-    // Create a different signature that doesn't match
-    const variations = [
-      name.split(' ').reverse().join(' '),
-      name.replace(/[aeiou]/gi, 'x'),
-      name.charAt(0) + name.slice(1).replace(/./g, '~'),
-      name.split('').reverse().join('').substring(0, name.length)
-    ];
-    return variations[Math.floor(Math.random() * variations.length)];
+    // Create a signature that's similar but clearly different for fraudsters
+    const nameParts = name.split(' ');
+    if (nameParts.length >= 2) {
+      // Swap first and last names
+      return `${nameParts[1]} ${nameParts[0]}`;
+    } else {
+      // Add slight variations for single names
+      const variations = [
+        name + 'son',
+        name.slice(0, -1) + 'e',
+        name.replace(/[aeiou]/i, 'a'),
+        'J. ' + name
+      ];
+      return variations[Math.floor(Math.random() * variations.length)];
+    }
   };
   
   // Account lookup state (no automatic fraud detection)
@@ -179,7 +187,7 @@ function App() {
     }
   }, [admobInitialized, loadInterstitialAd]);
 
-  // Sound effects with authentic 1980s bank terminal sounds
+  // Sound effects using your uploaded authentic bank terminal sounds
   const playSound = (soundType: string) => {
     if (musicMuted) return;
     
@@ -187,83 +195,34 @@ function App() {
       let audio: HTMLAudioElement;
       switch (soundType) {
         case 'typing':
-          // Create typing sound effect inline
-          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.frequency.setValueAtTime(800 + Math.random() * 400, audioContext.currentTime);
-          oscillator.type = 'square';
-          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-          
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.1);
+          audio = new Audio('/typing-sound.mp3');
+          audio.volume = 0.4;
           break;
         case 'punch_clock':
           audio = new Audio('/punch-clock.mp3');
           audio.volume = 0.5;
-          audio.play().catch(() => {});
           break;
         case 'cash':
-          // Create cash register ding
-          const cashContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const cashOsc = cashContext.createOscillator();
-          const cashGain = cashContext.createGain();
-          
-          cashOsc.connect(cashGain);
-          cashGain.connect(cashContext.destination);
-          
-          cashOsc.frequency.setValueAtTime(880, cashContext.currentTime);
-          cashOsc.type = 'sine';
-          cashGain.gain.setValueAtTime(0.3, cashContext.currentTime);
-          cashGain.gain.exponentialRampToValueAtTime(0.01, cashContext.currentTime + 0.5);
-          
-          cashOsc.start(cashContext.currentTime);
-          cashOsc.stop(cashContext.currentTime + 0.5);
+          audio = new Audio('/cash-register.mp3');
+          audio.volume = 0.4;
           break;
         case 'reject':
-          // Create error buzz
-          const errorContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const errorOsc = errorContext.createOscillator();
-          const errorGain = errorContext.createGain();
-          
-          errorOsc.connect(errorGain);
-          errorGain.connect(errorContext.destination);
-          
-          errorOsc.frequency.setValueAtTime(200, errorContext.currentTime);
-          errorOsc.type = 'sawtooth';
-          errorGain.gain.setValueAtTime(0.2, errorContext.currentTime);
-          errorGain.gain.exponentialRampToValueAtTime(0.01, errorContext.currentTime + 0.3);
-          
-          errorOsc.start(errorContext.currentTime);
-          errorOsc.stop(errorContext.currentTime + 0.3);
+          audio = new Audio('/error-buzz.mp3');
+          audio.volume = 0.5;
+          break;
+        case 'customer_approach':
+          audio = new Audio('/customer-approach.mp3');
+          audio.volume = 0.3;
           break;
         default:
-          return;
+          // Fallback to dot-matrix-printer for any other sounds
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.3;
+          break;
       }
+      audio.play().catch(e => console.log("Audio play failed:", e));
     } catch (e) {
-      // Fallback to simple beep
-      try {
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = context.createOscillator();
-        const gain = context.createGain();
-        
-        osc.connect(gain);
-        gain.connect(context.destination);
-        
-        osc.frequency.value = 440;
-        osc.type = 'sine';
-        gain.gain.value = 0.1;
-        
-        osc.start();
-        osc.stop(context.currentTime + 0.1);
-      } catch (fallbackError) {
-        // Silent fallback
-      }
+      console.log("Sound error:", e);
     }
   };
 
@@ -1270,7 +1229,7 @@ function App() {
           {/* Terminal Section */}
           <div style={{
             width: '100%',
-            height: '60vh',
+            height: '45vh',
             display: 'flex',
             flexDirection: 'column',
             gap: '3px'
@@ -1281,11 +1240,11 @@ function App() {
               border: '1px solid #00ff00',
               borderRadius: '4px',
               padding: '4px',
-              height: '25vh',
+              height: '30vh',
               overflowY: 'auto',
-              fontSize: '9px',
+              fontSize: '10px',
               fontFamily: 'monospace',
-              lineHeight: '1.0',
+              lineHeight: '1.1',
               wordWrap: 'break-word',
               whiteSpace: 'pre-wrap'
             }}>
@@ -1462,50 +1421,44 @@ function App() {
           {/* Documents Section */}
           <div style={{
             width: '100%',
-            height: '40vh',
+            height: '55vh',
             display: 'flex',
             flexDirection: 'column',
-            gap: '3px',
+            gap: '5px',
             overflow: 'auto'
           }}>
-            {/* Customer Display */}
+            {/* Customer Display - Compact */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '2px solid #ffff00',
-                borderRadius: '8px',
-                padding: '15px',
-                textAlign: 'center'
+                border: '1px solid #ffff00',
+                borderRadius: '4px',
+                padding: '6px',
+                textAlign: 'center',
+                fontSize: '11px'
               }}>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
-                  CUSTOMER: {currentCustomer.name}
-                </h3>
-                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
-                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
+                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
+                  {currentCustomer.name} | {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
-                  AMOUNT: ${currentCustomer.transaction.amount}
-                </div>
-                <div style={{ fontSize: '14px' }}>
+                <div style={{ fontSize: '10px', opacity: 0.8 }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
 
-            {/* Account Information */}
+            {/* Account Information - Compact */}
             {verificationState.accountLookedUp && (
               <div style={{
                 background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
-                border: '2px solid #00ff00',
-                borderRadius: '8px',
-                padding: '15px'
+                border: '1px solid #00ff00',
+                borderRadius: '4px',
+                padding: '6px',
+                fontSize: '11px'
               }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
+                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '2px' }}>
                   BANK RECORDS
-                </h4>
-                <div>ACCOUNT STATUS: ACTIVE</div>
-                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
-                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
+                </div>
+                <div>ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
               </div>
             )}
 
