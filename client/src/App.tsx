@@ -1229,7 +1229,7 @@ function App() {
           {/* Terminal Section */}
           <div style={{
             width: '100%',
-            height: '45vh',
+            height: '65vh',
             display: 'flex',
             flexDirection: 'column',
             gap: '3px'
@@ -1240,7 +1240,7 @@ function App() {
               border: '1px solid #00ff00',
               borderRadius: '4px',
               padding: '4px',
-              height: '30vh',
+              height: '45vh',
               overflowY: 'auto',
               fontSize: '10px',
               fontFamily: 'monospace',
@@ -1421,10 +1421,10 @@ function App() {
           {/* Documents Section */}
           <div style={{
             width: '100%',
-            height: '55vh',
+            height: '35vh',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
+            gap: '3px',
             overflow: 'auto'
           }}>
             {/* Customer Display - Compact */}
@@ -1462,23 +1462,23 @@ function App() {
               </div>
             )}
 
-            {/* Documents */}
+            {/* Documents - Mobile Compact */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '2px solid #ffff00',
-                borderRadius: '8px',
-                padding: '15px',
-                flex: '1',
+                border: '1px solid #ffff00',
+                borderRadius: '4px',
+                padding: '8px',
+                maxHeight: '25vh',
                 overflow: 'auto'
               }}>
-                <h4 style={{ margin: '0 0 15px 0' }}>
+                <div style={{ margin: '0 0 5px 0', fontSize: '12px', fontWeight: 'bold' }}>
                   CUSTOMER DOCUMENTS
-                </h4>
+                </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '10px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                  gap: '5px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
