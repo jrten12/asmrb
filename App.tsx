@@ -115,29 +115,35 @@ function App() {
     }
   }, [isInterstitialLoaded, loadInterstitialAd]);
 
-  // Initialize AdMob
+  // Initialize AdMob with error handling
   useEffect(() => {
     const initializeAdMob = () => {
-      if (window.webkit && window.webkit.messageHandlers) {
-        // Initialize AdMob for iOS
-        if ((window.webkit.messageHandlers as any).admob) {
-          (window.webkit.messageHandlers as any).admob.postMessage({
-            action: 'initialize',
-            appId: 'ca-app-pub-2744316013184797~4167964772', // Production App ID
-            testDeviceIds: [] // Remove test device IDs for production
-          });
+      try {
+        if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers) {
+          // Initialize AdMob for iOS
+          if ((window.webkit.messageHandlers as any).admob) {
+            (window.webkit.messageHandlers as any).admob.postMessage({
+              action: 'initialize',
+              appId: 'ca-app-pub-2744316013184797~4167964772', // Production App ID
+              testDeviceIds: [] // Remove test device IDs for production
+            });
+          }
+          
+          // Set up ad event listeners
+          (window as any).admobEvents = {
+            onInterstitialLoaded: () => setIsInterstitialLoaded(true),
+            onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false)
+          };
+          
+          setAdmobInitialized(true);
+        } else {
+          // Fallback for web testing
+          console.log('AdMob: Running in web environment, using test mode');
+          setAdmobInitialized(true);
+          setIsInterstitialLoaded(true);
         }
-        
-        // Set up ad event listeners
-        (window as any).admobEvents = {
-          onInterstitialLoaded: () => setIsInterstitialLoaded(true),
-          onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false)
-        };
-        
-        setAdmobInitialized(true);
-      } else {
-        // Fallback for web testing
-        console.log('AdMob: Running in web environment, using test mode');
+      } catch (error) {
+        console.log('AdMob initialization error (web environment):', error);
         setAdmobInitialized(true);
         setIsInterstitialLoaded(true);
       }
@@ -146,10 +152,14 @@ function App() {
     initializeAdMob();
   }, []);
 
-  // Load ads when AdMob is initialized
+  // Load ads when AdMob is initialized with error handling
   useEffect(() => {
     if (admobInitialized) {
-      loadInterstitialAd();
+      try {
+        loadInterstitialAd();
+      } catch (error) {
+        console.log('Error loading initial ad (web environment):', error);
+      }
     }
   }, [admobInitialized, loadInterstitialAd]);
 
