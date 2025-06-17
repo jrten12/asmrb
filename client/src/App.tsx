@@ -697,6 +697,43 @@ function App() {
     }
   };
 
+  // Smart autocomplete for mobile
+  const handleInputChange = (value: string) => {
+    setTerminalInput(value);
+    
+    // Auto-complete single letter commands
+    const lowercaseValue = value.toLowerCase();
+    if (value.length === 1) {
+      switch (lowercaseValue) {
+        case 'd':
+          setTerminalInput('deposit');
+          break;
+        case 'w':
+          setTerminalInput('withdraw');
+          break;
+        case 'l':
+          setTerminalInput('lookup');
+          break;
+        case 'v':
+          setTerminalInput('verify');
+          break;
+        case 'a':
+          setTerminalInput('approve');
+          break;
+        case 'r':
+          setTerminalInput('reject');
+          break;
+      }
+    }
+  };
+
+  // Quick command buttons for mobile
+  const executeQuickCommand = (command: string) => {
+    playSound('typing');
+    processCommand(command);
+    setTerminalInput('');
+  };
+
   const handlePunchOut = () => {
     setGamePhase('punch_out');
     playSound('punch_clock');
@@ -1034,20 +1071,93 @@ function App() {
               ))}
             </div>
 
-            {/* Command Input */}
+            {/* Mobile-Friendly Command Buttons */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '10px',
+              marginBottom: '10px'
+            }}>
+              <button
+                onClick={() => executeQuickCommand('lookup')}
+                style={{
+                  background: '#0066ff',
+                  color: '#ffffff',
+                  border: '2px solid #0088ff',
+                  padding: '15px',
+                  fontSize: '16px',
+                  fontFamily: 'monospace',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                LOOKUP (L)
+              </button>
+              <button
+                onClick={() => executeQuickCommand('verify')}
+                style={{
+                  background: '#ff6600',
+                  color: '#ffffff',
+                  border: '2px solid #ff8800',
+                  padding: '15px',
+                  fontSize: '16px',
+                  fontFamily: 'monospace',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                VERIFY (V)
+              </button>
+              <button
+                onClick={() => executeQuickCommand('approve')}
+                style={{
+                  background: '#00cc00',
+                  color: '#ffffff',
+                  border: '2px solid #00ff00',
+                  padding: '15px',
+                  fontSize: '16px',
+                  fontFamily: 'monospace',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                APPROVE (A)
+              </button>
+              <button
+                onClick={() => executeQuickCommand('reject')}
+                style={{
+                  background: '#cc0000',
+                  color: '#ffffff',
+                  border: '2px solid #ff0000',
+                  padding: '15px',
+                  fontSize: '16px',
+                  fontFamily: 'monospace',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                REJECT (R)
+              </button>
+            </div>
+
+            {/* Smart Terminal Input with Autocomplete */}
             <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
               <input
                 type="text"
                 value={terminalInput}
-                onChange={(e) => setTerminalInput(e.target.value)}
-                placeholder="Enter command (DEPOSIT $500, WITHDRAW $200, LOOKUP 12345, APPROVE, REJECT)"
+                onChange={(e) => handleInputChange(e.target.value)}
+                placeholder="Type: L=lookup, V=verify, A=approve, R=reject"
                 style={{
                   flex: '1',
                   background: '#000000',
                   border: '2px solid #00ff00',
                   color: '#00ff00',
-                  padding: '10px',
-                  fontSize: '14px',
+                  padding: '12px',
+                  fontSize: '16px',
                   fontFamily: 'monospace',
                   borderRadius: '4px'
                 }}
@@ -1058,8 +1168,8 @@ function App() {
                   background: '#00ff00',
                   color: '#000000',
                   border: 'none',
-                  padding: '10px 20px',
-                  fontSize: '14px',
+                  padding: '12px 20px',
+                  fontSize: '16px',
                   fontFamily: 'monospace',
                   borderRadius: '4px',
                   cursor: 'pointer'

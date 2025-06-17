@@ -92,6 +92,8 @@ Bank Teller 1988 is a nostalgic simulation game that recreates the experience of
 - **Production Ready**: Easy configuration swap for live ads
 
 ## Changelog
+- June 17, 2025: Added mobile-friendly touch buttons and smart autocomplete for terminal commands (L=lookup, V=verify, A=approve, R=reject)
+- June 17, 2025: Enhanced mobile experience with large touch targets (15px padding, 16px font) and color-coded command buttons
 - June 17, 2025: CRITICAL FIX - Restored complete Bank Teller 1988 game functionality after preview loading issues
 - June 17, 2025: Full manual fraud detection gameplay now working (customer generation, document verification, terminal commands)
 - June 17, 2025: Canvas document rendering system operational (ID cards, signatures, bank books, transaction slips)
