@@ -107,6 +107,11 @@ function App() {
     accountLookedUp: false,
     signatureCompared: false
   });
+  
+  // Keypad state for account number entry
+  const [showKeypad, setShowKeypad] = useState(false);
+  const [keypadInput, setKeypadInput] = useState('');
+  const [keypadMode, setKeypadMode] = useState<'lookup' | 'verify'>('lookup');
 
   // AdMob interstitial ad functions with error handling
   const loadInterstitialAd = useCallback(() => {
@@ -564,16 +569,17 @@ function App() {
         return;
       }
       
-      // Prompt user to enter account number
+      // Show keypad for account number entry
+      setKeypadMode('lookup');
+      setKeypadInput('');
+      setShowKeypad(true);
+      
       setTerminalOutput(prev => [...prev, 
         "> " + command,
         "BANK COMPUTER SYSTEM ACCESS",
         "========================================",
         "ENTER ACCOUNT NUMBER TO LOOKUP:",
-        "Format: LOOKUP [account-number]",
-        "",
-        `Customer provided account: ${currentCustomer.transaction.accountNumber}`,
-        "Type: LOOKUP " + currentCustomer.transaction.accountNumber,
+        `Customer provided: ${currentCustomer.transaction.accountNumber}`,
         "========================================",
         ""
       ]);
@@ -798,9 +804,14 @@ function App() {
         return;
       }
       
-      // Simulate signature database lookup with ASMR typing
+      // VERIFY compares customer signature with bank records for fraud detection
       setTerminalOutput(prev => [...prev, 
         "> " + command,
+        "SIGNATURE VERIFICATION SYSTEM",
+        "========================================",
+        "Comparing customer signature with bank records",
+        "This helps detect forged documents and fraud",
+        "",
         "ACCESSING SIGNATURE DATABASE...",
         "RETRIEVING SIGNATURE ON FILE...",
         ""
@@ -1402,19 +1413,18 @@ function App() {
               </button>
             </div>
 
-            {/* Score Display */}
+            {/* Score Display - Compact */}
             <div style={{
               background: 'rgba(0, 0, 0, 0.7)',
               border: '1px solid #ffff00',
-              borderRadius: '5px',
-              padding: '10px',
-              fontSize: '12px'
+              borderRadius: '3px',
+              padding: '4px',
+              fontSize: '9px',
+              lineHeight: '1.1'
             }}>
               <div>SCORE: {gameScore.score}</div>
-              <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
-              <div>ERRORS: {gameScore.errors}</div>
-              <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}/2</div>
-              <div>DISMISSALS: {gameScore.customersCalledWithoutService}/4</div>
+              <div>TRANS: {gameScore.correctTransactions} | ERR: {gameScore.errors}</div>
+              <div>FRAUD: {gameScore.fraudulentApprovals}/2 | DISMISS: {gameScore.customersCalledWithoutService}/4</div>
             </div>
           </div>
 
@@ -1427,20 +1437,23 @@ function App() {
             gap: '3px',
             overflow: 'auto'
           }}>
-            {/* Customer Display - Compact */}
+            {/* Customer Display - Larger */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '1px solid #ffff00',
-                borderRadius: '4px',
-                padding: '6px',
+                border: '2px solid #ffff00',
+                borderRadius: '6px',
+                padding: '10px',
                 textAlign: 'center',
-                fontSize: '11px'
+                fontSize: '12px'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>
-                  {currentCustomer.name} | {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
+                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                  CUSTOMER: {currentCustomer.name}
                 </div>
-                <div style={{ fontSize: '10px', opacity: 0.8 }}>
+                <div style={{ marginBottom: '2px' }}>
+                  {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
+                </div>
+                <div style={{ fontSize: '11px', opacity: 0.9 }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
