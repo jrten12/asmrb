@@ -529,9 +529,81 @@ function App() {
         playSound('customer_approach');
       }, 2000);
       
+    } else if (cmd === 'LOOKUP') {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      // Simulate 1980s computer system lookup with ASMR typing sounds
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "ACCESSING BANK DATABASE...",
+        "ACCOUNT LOOKUP INITIATED...",
+        ""
+      ]);
+      
+      // Play typing sounds during lookup
+      setTimeout(() => playSound('typing'), 200);
+      setTimeout(() => playSound('typing'), 400);
+      setTimeout(() => playSound('typing'), 600);
+      
+      // Simulate database access delay
+      setTimeout(() => {
+        const accountNum = currentCustomer.transaction.accountNumber;
+        const balance = Math.floor(Math.random() * 50000) + 1000;
+        setAccountBalance(balance);
+        setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
+        
+        setTerminalOutput(prev => [...prev,
+          "========================================",
+          "BANK COMPUTER SYSTEM - ACCOUNT RECORD",
+          "========================================",
+          `ACCOUNT NUMBER: ${accountNum}`,
+          `ACCOUNT HOLDER: ${currentCustomer.name}`,
+          `CURRENT BALANCE: $${balance.toLocaleString()}`,
+          `ACCOUNT STATUS: ACTIVE`,
+          `LAST TRANSACTION: ${new Date().toLocaleDateString()}`,
+          `OVERDRAFT LIMIT: $500.00`,
+          "========================================",
+          "",
+          "RECORD RETRIEVED - COMPARE WITH DOCUMENTS",
+          ""
+        ]);
+        
+        playSound('cash'); // Success sound
+      }, 1500);
+      
     } else if (cmd.startsWith('LOOKUP ')) {
       const accountNumber = cmd.substring(7).trim();
-      lookupAccount(accountNumber);
+      // Direct account lookup with specific number
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        `LOOKING UP ACCOUNT: ${accountNumber}`,
+        "SEARCHING DATABASE..."
+      ]);
+      
+      setTimeout(() => {
+        if (currentCustomer && accountNumber === currentCustomer.transaction.accountNumber) {
+          const balance = Math.floor(Math.random() * 50000) + 1000;
+          setAccountBalance(balance);
+          setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
+          
+          setTerminalOutput(prev => [...prev,
+            "ACCOUNT FOUND",
+            `HOLDER: ${currentCustomer.name}`,
+            `BALANCE: $${balance.toLocaleString()}`,
+            `STATUS: ACTIVE`,
+            ""
+          ]);
+        } else {
+          setTerminalOutput(prev => [...prev,
+            "ACCOUNT NOT FOUND OR MISMATCH",
+            "CHECK ACCOUNT NUMBER",
+            ""
+          ]);
+        }
+      }, 1000);
       
     } else if (cmd.startsWith('REJECT')) {
       if (!currentCustomer) {
