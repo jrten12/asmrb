@@ -179,37 +179,91 @@ function App() {
     }
   }, [admobInitialized, loadInterstitialAd]);
 
-  // Sound effects
+  // Sound effects with authentic 1980s bank terminal sounds
   const playSound = (soundType: string) => {
+    if (musicMuted) return;
+    
     try {
       let audio: HTMLAudioElement;
       switch (soundType) {
         case 'typing':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.3;
+          // Create typing sound effect inline
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.setValueAtTime(800 + Math.random() * 400, audioContext.currentTime);
+          oscillator.type = 'square';
+          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.1);
           break;
         case 'punch_clock':
           audio = new Audio('/punch-clock.mp3');
           audio.volume = 0.5;
+          audio.play().catch(() => {});
           break;
         case 'cash':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.4;
+          // Create cash register ding
+          const cashContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const cashOsc = cashContext.createOscillator();
+          const cashGain = cashContext.createGain();
+          
+          cashOsc.connect(cashGain);
+          cashGain.connect(cashContext.destination);
+          
+          cashOsc.frequency.setValueAtTime(880, cashContext.currentTime);
+          cashOsc.type = 'sine';
+          cashGain.gain.setValueAtTime(0.3, cashContext.currentTime);
+          cashGain.gain.exponentialRampToValueAtTime(0.01, cashContext.currentTime + 0.5);
+          
+          cashOsc.start(cashContext.currentTime);
+          cashOsc.stop(cashContext.currentTime + 0.5);
           break;
         case 'reject':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.6;
-          break;
-        case 'customer_approach':
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.2;
+          // Create error buzz
+          const errorContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const errorOsc = errorContext.createOscillator();
+          const errorGain = errorContext.createGain();
+          
+          errorOsc.connect(errorGain);
+          errorGain.connect(errorContext.destination);
+          
+          errorOsc.frequency.setValueAtTime(200, errorContext.currentTime);
+          errorOsc.type = 'sawtooth';
+          errorGain.gain.setValueAtTime(0.2, errorContext.currentTime);
+          errorGain.gain.exponentialRampToValueAtTime(0.01, errorContext.currentTime + 0.3);
+          
+          errorOsc.start(errorContext.currentTime);
+          errorOsc.stop(errorContext.currentTime + 0.3);
           break;
         default:
           return;
       }
-      audio.play().catch(e => console.log("Audio play failed:", e));
     } catch (e) {
-      console.log("Sound error:", e);
+      // Fallback to simple beep
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        
+        osc.connect(gain);
+        gain.connect(context.destination);
+        
+        osc.frequency.value = 440;
+        osc.type = 'sine';
+        gain.gain.value = 0.1;
+        
+        osc.start();
+        osc.stop(context.currentTime + 0.1);
+      } catch (fallbackError) {
+        // Silent fallback
+      }
     }
   };
 
@@ -597,24 +651,20 @@ function App() {
           setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
           
           setTerminalOutput(prev => [...prev,
-            "ACCOUNT RECORD FOUND",
-            "========================================",
-            "WESTRIDGE NATIONAL BANK - CUSTOMER FILE",
-            "========================================",
-            `ACCOUNT NUMBER: ${accountNumber}`,
-            `ACCOUNT HOLDER: ${currentCustomer.name}`,
-            `CURRENT BALANCE: $${balance.toLocaleString()}`,
-            `ACCOUNT STATUS: ACTIVE`,
-            `ACCOUNT TYPE: CHECKING`,
-            `OPENED: ${new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString()}`,
-            `LAST TRANSACTION: ${new Date().toLocaleDateString()}`,
-            `OVERDRAFT LIMIT: $500.00`,
+            "ACCOUNT FOUND",
+            "==========================",
+            "BANK RECORD",
+            "==========================",
+            `ACCT: ${accountNumber}`,
+            `NAME: ${currentCustomer.name}`,
+            `BAL: $${balance.toLocaleString()}`,
+            `STATUS: ACTIVE`,
+            `TYPE: CHECKING`,
             `SSN: XXX-XX-${Math.floor(Math.random() * 9000) + 1000}`,
-            "========================================",
+            "==========================",
             "",
-            "RECORD RETRIEVED SUCCESSFULLY",
-            "Compare customer documents with bank record",
-            "Use VERIFY to check signature on file",
+            "RECORD OK - CHECK DOCS",
+            "Use VERIFY for signature",
             ""
           ]);
           
@@ -812,29 +862,26 @@ function App() {
         setVerificationState(prev => ({ ...prev, signatureCompared: true }));
         
         setTerminalOutput(prev => [...prev,
-          "========================================",
-          "SIGNATURE VERIFICATION SYSTEM",
-          "========================================",
+          "SIGNATURE COMPARISON",
+          "==========================",
           "",
-          "SIGNATURE ON FILE (BANK RECORDS):",
+          "BANK FILE:",
           `"${bankSignatureOnFile}"`,
           "",
-          "CUSTOMER SIGNATURE CARD:",
-          `"${customerSigDoc?.data.signature || 'NO SIGNATURE CARD'}"`,
+          "CUSTOMER CARD:",
+          `"${customerSigDoc?.data.signature || 'NO SIG CARD'}"`,
           "",
-          "COMPARE SIGNATURES FOR:",
-          "• Handwriting style",
-          "• Letter formation",
-          "• Pressure patterns",
-          "• Overall consistency",
+          "CHECK FOR:",
+          "• Style match",
+          "• Letter shape",
+          "• Consistency",
           "",
           currentCustomer.isFraudulent ? 
-            "⚠️ SIGNATURES DO NOT MATCH ⚠️" : 
-            "✓ SIGNATURES APPEAR CONSISTENT",
-          "========================================",
+            "⚠️ MISMATCH DETECTED ⚠️" : 
+            "✓ SIGNATURES MATCH",
+          "==========================",
           "",
-          "MANUAL VERIFICATION REQUIRED",
-          "Use APPROVE or REJECT based on comparison",
+          "USE APPROVE/REJECT",
           ""
         ]);
         
@@ -1230,14 +1277,20 @@ function App() {
               background: '#000000',
               border: '2px solid #00ff00',
               borderRadius: '8px',
-              padding: '15px',
-              height: '60%',
-              overflow: 'auto',
-              fontSize: '12px',
-              fontFamily: 'monospace'
+              padding: '10px',
+              height: '50vh',
+              overflowY: 'auto',
+              fontSize: '11px',
+              fontFamily: 'monospace',
+              lineHeight: '1.2',
+              wordWrap: 'break-word'
             }}>
               {terminalOutput.map((line, index) => (
-                <div key={index} style={{ marginBottom: '2px' }}>
+                <div key={index} style={{ 
+                  marginBottom: '1px',
+                  maxWidth: '100%',
+                  wordBreak: 'break-all'
+                }}>
                   {line}
                 </div>
               ))}

@@ -92,6 +92,9 @@ Bank Teller 1988 is a nostalgic simulation game that recreates the experience of
 - **Production Ready**: Easy configuration swap for live ads
 
 ## Changelog
+- June 17, 2025: Fixed terminal display to fit on mobile screens (50vh height, proper word wrapping, compact output format)
+- June 17, 2025: Restored authentic ASMR sound effects using Web Audio API (typing, cash register, error buzz)
+- June 17, 2025: Enhanced LOOKUP system to require manual account number entry with database simulation sounds
 - June 17, 2025: Added mobile-friendly touch buttons and smart autocomplete for terminal commands (L=lookup, V=verify, A=approve, R=reject)
 - June 17, 2025: Enhanced mobile experience with large touch targets (15px padding, 16px font) and color-coded command buttons
 - June 17, 2025: CRITICAL FIX - Restored complete Bank Teller 1988 game functionality after preview loading issues
