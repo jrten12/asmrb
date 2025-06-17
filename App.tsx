@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import { getDocumentRenderer } from './lib/documents';
 import type { Customer, Document as GameDocument } from './types/game';
-import BannerAd from './components/BannerAd';
+import AdMobBannerAd from './components/AdMobBannerAd';
 
 declare global {
   interface Window {
@@ -72,12 +72,78 @@ function App() {
   const [musicMuted, setMusicMuted] = useState(false);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   
+  // AdMob state management
+  const [admobInitialized, setAdmobInitialized] = useState(false);
+  const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
+  const [customersServed, setCustomersServed] = useState(0);
+  
   // Account lookup state (no automatic fraud detection)
   const [accountBalance, setAccountBalance] = useState(0);
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     signatureCompared: false
   });
+
+  // AdMob interstitial ad functions
+  const loadInterstitialAd = useCallback(() => {
+    if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
+      (window.webkit.messageHandlers as any).admob.postMessage({
+        action: 'loadInterstitial',
+        adUnitId: 'ca-app-pub-2744316013184797/4741683992' // Production Interstitial Ad Unit ID
+      });
+    }
+  }, []);
+
+  const showInterstitialAd = useCallback(() => {
+    if (isInterstitialLoaded) {
+      if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
+        (window.webkit.messageHandlers as any).admob.postMessage({
+          action: 'showInterstitial'
+        });
+      }
+      setIsInterstitialLoaded(false);
+      // Load next ad
+      setTimeout(loadInterstitialAd, 1000);
+    }
+  }, [isInterstitialLoaded, loadInterstitialAd]);
+
+  // Initialize AdMob
+  useEffect(() => {
+    const initializeAdMob = () => {
+      if (window.webkit && window.webkit.messageHandlers) {
+        // Initialize AdMob for iOS
+        if ((window.webkit.messageHandlers as any).admob) {
+          (window.webkit.messageHandlers as any).admob.postMessage({
+            action: 'initialize',
+            appId: 'ca-app-pub-2744316013184797~4167964772', // Production App ID
+            testDeviceIds: [] // Remove test device IDs for production
+          });
+        }
+        
+        // Set up ad event listeners
+        (window as any).admobEvents = {
+          onInterstitialLoaded: () => setIsInterstitialLoaded(true),
+          onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false)
+        };
+        
+        setAdmobInitialized(true);
+      } else {
+        // Fallback for web testing
+        console.log('AdMob: Running in web environment, using test mode');
+        setAdmobInitialized(true);
+        setIsInterstitialLoaded(true);
+      }
+    };
+
+    initializeAdMob();
+  }, []);
+
+  // Load ads when AdMob is initialized
+  useEffect(() => {
+    if (admobInitialized) {
+      loadInterstitialAd();
+    }
+  }, [admobInitialized, loadInterstitialAd]);
 
   // Sound effects
   const playSound = (soundType: string) => {

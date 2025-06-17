@@ -9,7 +9,7 @@ interface AdMobBannerAdProps {
 }
 
 const AdMobBannerAd: React.FC<AdMobBannerAdProps> = ({
-  adUnitId = 'ca-app-pub-3940256099942544/6300978111', // Test banner
+  adUnitId = 'ca-app-pub-2744316013184797/4741683992', // Production banner
   bannerSize = 'smartBannerPortrait',
   testDeviceID,
   onAdViewDidReceiveAd,

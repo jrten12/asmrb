@@ -20,9 +20,9 @@
       "buildNumber": "1.0.0",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This app uses advertising ID to show personalized ads and support the game development.",
-        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
+        "GADApplicationIdentifier": "ca-app-pub-2744316013184797~4167964772"
       },
-      "googleMobileAdsAppId": "ca-app-pub-3940256099942544~1458002511"
+      "googleMobileAdsAppId": "ca-app-pub-2744316013184797~4167964772"
     },
     "android": {
       "adaptiveIcon": {
@@ -39,8 +39,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+          "androidAppId": "ca-app-pub-2744316013184797~4167964772",
+          "iosAppId": "ca-app-pub-2744316013184797~4167964772"
         }
       ]
     ]
