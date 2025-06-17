@@ -1684,6 +1684,118 @@ function App() {
       }}>
         <AdMobBannerAd adUnitId="ca-app-pub-2744316013184797/4741683992" />
       </div>
+
+      {/* Popup Keypad for Account Number Entry */}
+      {showKeypad && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #1a1a1a, #2a2a2a)',
+            border: '2px solid #00ff00',
+            borderRadius: '10px',
+            padding: '20px',
+            width: '300px',
+            maxWidth: '90vw'
+          }}>
+            <div style={{
+              color: '#00ff00',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginBottom: '15px',
+              textAlign: 'center'
+            }}>
+              {keypadMode === 'lookup' ? 'ENTER ACCOUNT NUMBER' : 'VERIFY ACCOUNT'}
+            </div>
+            
+            {/* Display */}
+            <div style={{
+              background: '#000000',
+              border: '1px solid #00ff00',
+              borderRadius: '5px',
+              padding: '10px',
+              marginBottom: '15px',
+              fontSize: '18px',
+              fontFamily: 'monospace',
+              color: '#00ff00',
+              textAlign: 'center',
+              minHeight: '30px'
+            }}>
+              {keypadInput || 'Enter account number...'}
+            </div>
+
+            {/* Keypad Buttons */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '10px',
+              marginBottom: '15px'
+            }}>
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'].map((key) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    playSound('typing');
+                    if (key === '⌫') {
+                      setKeypadInput(prev => prev.slice(0, -1));
+                    } else if (key === '✓') {
+                      if (keypadInput.trim()) {
+                        processCommand(`LOOKUP ${keypadInput.trim()}`);
+                        setShowKeypad(false);
+                      }
+                    } else if (keypadInput.length < 10) {
+                      setKeypadInput(prev => prev + key);
+                    }
+                  }}
+                  style={{
+                    background: key === '✓' ? '#00aa00' : key === '⌫' ? '#aa0000' : '#333333',
+                    border: '1px solid #00ff00',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    padding: '15px',
+                    cursor: 'pointer',
+                    minHeight: '50px'
+                  }}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => {
+                setShowKeypad(false);
+                setKeypadInput('');
+              }}
+              style={{
+                background: '#aa0000',
+                border: '1px solid #ff0000',
+                borderRadius: '8px',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                padding: '10px',
+                cursor: 'pointer',
+                width: '100%'
+              }}
+            >
+              CANCEL
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
