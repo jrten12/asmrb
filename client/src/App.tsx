@@ -1278,14 +1278,14 @@ function App() {
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
-              border: '2px solid #00ff00',
-              borderRadius: '8px',
-              padding: '8px',
-              height: window.innerWidth < 768 ? '35vh' : '60vh',
+              border: '1px solid #00ff00',
+              borderRadius: '4px',
+              padding: '4px',
+              height: '25vh',
               overflowY: 'auto',
-              fontSize: window.innerWidth < 768 ? '8px' : '12px',
+              fontSize: '9px',
               fontFamily: 'monospace',
-              lineHeight: '1.1',
+              lineHeight: '1.0',
               wordWrap: 'break-word',
               whiteSpace: 'pre-wrap'
             }}>
@@ -1301,95 +1301,94 @@ function App() {
               ))}
             </div>
 
-            {/* Mobile-Friendly Command Buttons */}
+            {/* Mobile Command Buttons */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: window.innerWidth < 768 ? '5px' : '10px',
-              marginBottom: window.innerWidth < 768 ? '5px' : '10px'
+              gap: '3px'
             }}>
               <button
                 onClick={() => executeQuickCommand('lookup')}
                 style={{
                   background: '#0066ff',
                   color: '#ffffff',
-                  border: '2px solid #0088ff',
-                  padding: '15px',
-                  fontSize: '16px',
+                  border: '1px solid #0088ff',
+                  padding: '8px 4px',
+                  fontSize: '10px',
                   fontFamily: 'monospace',
-                  borderRadius: '8px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontWeight: 'bold'
                 }}
               >
-                LOOKUP (L)
+                LOOKUP
               </button>
               <button
                 onClick={() => executeQuickCommand('verify')}
                 style={{
                   background: '#ff6600',
                   color: '#ffffff',
-                  border: '2px solid #ff8800',
-                  padding: '15px',
-                  fontSize: '16px',
+                  border: '1px solid #ff8800',
+                  padding: '8px 4px',
+                  fontSize: '10px',
                   fontFamily: 'monospace',
-                  borderRadius: '8px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontWeight: 'bold'
                 }}
               >
-                VERIFY (V)
+                VERIFY
               </button>
               <button
                 onClick={() => executeQuickCommand('approve')}
                 style={{
                   background: '#00cc00',
                   color: '#ffffff',
-                  border: '2px solid #00ff00',
-                  padding: '15px',
-                  fontSize: '16px',
+                  border: '1px solid #00ff00',
+                  padding: '8px 4px',
+                  fontSize: '10px',
                   fontFamily: 'monospace',
-                  borderRadius: '8px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontWeight: 'bold'
                 }}
               >
-                APPROVE (A)
+                APPROVE
               </button>
               <button
                 onClick={() => executeQuickCommand('reject')}
                 style={{
                   background: '#cc0000',
                   color: '#ffffff',
-                  border: '2px solid #ff0000',
-                  padding: '15px',
-                  fontSize: '16px',
+                  border: '1px solid #ff0000',
+                  padding: '8px 4px',
+                  fontSize: '10px',
                   fontFamily: 'monospace',
-                  borderRadius: '8px',
+                  borderRadius: '3px',
                   cursor: 'pointer',
                   fontWeight: 'bold'
                 }}
               >
-                REJECT (R)
+                REJECT
               </button>
             </div>
 
-            {/* Smart Terminal Input with Autocomplete */}
-            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
+            {/* Terminal Input */}
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '3px' }}>
               <input
                 type="text"
                 value={terminalInput}
                 onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Type: L=lookup, V=verify, A=approve, R=reject"
+                placeholder="L=lookup, A=approve, R=reject"
                 style={{
                   flex: '1',
                   background: '#000000',
-                  border: '2px solid #00ff00',
+                  border: '1px solid #00ff00',
                   color: '#00ff00',
-                  padding: '12px',
-                  fontSize: '16px',
+                  padding: '6px',
+                  fontSize: '10px',
                   fontFamily: 'monospace',
-                  borderRadius: '4px'
+                  borderRadius: '3px'
                 }}
               />
               <button
@@ -1398,8 +1397,8 @@ function App() {
                   background: '#00ff00',
                   color: '#000000',
                   border: 'none',
-                  padding: '12px 20px',
-                  fontSize: '16px',
+                  padding: '6px 10px',
+                  fontSize: '10px',
                   fontFamily: 'monospace',
                   borderRadius: '4px',
                   cursor: 'pointer'
@@ -1460,14 +1459,13 @@ function App() {
             </div>
           </div>
 
-          {/* Right Column - Customer & Documents */}
+          {/* Documents Section */}
           <div style={{
-            flex: window.innerWidth < 768 ? 'none' : '1',
-            width: window.innerWidth < 768 ? '100%' : 'auto',
-            height: window.innerWidth < 768 ? '50vh' : 'auto',
+            width: '100%',
+            height: '40vh',
             display: 'flex',
             flexDirection: 'column',
-            gap: window.innerWidth < 768 ? '5px' : '10px',
+            gap: '3px',
             overflow: 'auto'
           }}>
             {/* Customer Display */}
