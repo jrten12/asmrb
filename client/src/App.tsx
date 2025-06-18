@@ -192,7 +192,7 @@ function App() {
     }
   }, [admobInitialized, loadInterstitialAd]);
 
-  // Sound effects using your uploaded authentic bank terminal sounds
+  // Sound effects using your authentic ASMR SFX files
   const playSound = (soundType: string) => {
     if (musicMuted) return;
     
@@ -200,28 +200,32 @@ function App() {
       let audio: HTMLAudioElement;
       switch (soundType) {
         case 'typing':
-          audio = new Audio('/typing-sound.mp3');
+          audio = new Audio('/SFX/typing-asmr.mp3');
           audio.volume = 0.4;
           break;
         case 'punch_clock':
-          audio = new Audio('/punch-clock.mp3');
+          audio = new Audio('/SFX/punch-clock.mp3');
           audio.volume = 0.5;
           break;
         case 'cash':
-          audio = new Audio('/cash-register.mp3');
+          audio = new Audio('/SFX/cash-register.mp3');
           audio.volume = 0.4;
           break;
         case 'reject':
-          audio = new Audio('/error-buzz.mp3');
+          audio = new Audio('/SFX/error-buzz.mp3');
           audio.volume = 0.5;
           break;
         case 'customer_approach':
-          audio = new Audio('/customer-approach.mp3');
+          audio = new Audio('/SFX/customer-approach.mp3');
+          audio.volume = 0.3;
+          break;
+        case 'keypad_click':
+          audio = new Audio('/SFX/keypad-click.mp3');
           audio.volume = 0.3;
           break;
         default:
           // Fallback to dot-matrix-printer for any other sounds
-          audio = new Audio('/dot-matrix-printer.mp3');
+          audio = new Audio('/SFX/dot-matrix-printer.mp3');
           audio.volume = 0.3;
           break;
       }
@@ -1691,25 +1695,53 @@ function App() {
 
       {/* Popup Keypad for Account Number Entry */}
       {showKeypad && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 2000
-        }}>
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 2000
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowKeypad(false);
+              setKeypadInput('');
+            }
+          }}
+        >
+          {/* Customer Account Number Display */}
+          <div style={{
+            position: 'absolute',
+            top: '60px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+            border: '2px solid #ffff00',
+            borderRadius: '8px',
+            padding: '15px',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: '#ffff00',
+            textAlign: 'center',
+            minWidth: '250px'
+          }}>
+            CUSTOMER ACCOUNT: {currentCustomer?.transaction.accountNumber}
+          </div>
+
           <div style={{
             background: 'linear-gradient(145deg, #1a1a1a, #2a2a2a)',
             border: '2px solid #00ff00',
             borderRadius: '10px',
             padding: '20px',
             width: '300px',
-            maxWidth: '90vw'
+            maxWidth: '90vw',
+            marginTop: '80px'
           }}>
             <div style={{
               color: '#00ff00',
@@ -1748,13 +1780,22 @@ function App() {
                 <button
                   key={key}
                   onClick={() => {
-                    playSound('typing');
+                    // Use authentic ASMR typing sounds
+                    if (key === '✓') {
+                      playSound('cash'); // Success sound for submit
+                    } else if (key === '⌫') {
+                      playSound('reject'); // Error sound for backspace
+                    } else {
+                      playSound('typing'); // Typing sound for numbers
+                    }
+                    
                     if (key === '⌫') {
                       setKeypadInput(prev => prev.slice(0, -1));
                     } else if (key === '✓') {
                       if (keypadInput.trim()) {
                         processCommand(`LOOKUP ${keypadInput.trim()}`);
                         setShowKeypad(false);
+                        setKeypadInput('');
                       }
                     } else if (keypadInput.length < 10) {
                       setKeypadInput(prev => prev + key);
@@ -1762,14 +1803,24 @@ function App() {
                   }}
                   style={{
                     background: key === '✓' ? '#00aa00' : key === '⌫' ? '#aa0000' : '#333333',
-                    border: '1px solid #00ff00',
+                    border: '2px solid #00ff00',
                     borderRadius: '8px',
                     color: '#ffffff',
-                    fontSize: '18px',
+                    fontSize: '20px',
                     fontWeight: 'bold',
-                    padding: '15px',
+                    padding: '18px',
                     cursor: 'pointer',
-                    minHeight: '50px'
+                    minHeight: '60px',
+                    transition: 'all 0.1s',
+                    userSelect: 'none'
+                  }}
+                  onTouchStart={(e) => {
+                    e.currentTarget.style.transform = 'scale(0.95)';
+                    e.currentTarget.style.background = key === '✓' ? '#00cc00' : key === '⌫' ? '#cc0000' : '#555555';
+                  }}
+                  onTouchEnd={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.background = key === '✓' ? '#00aa00' : key === '⌫' ? '#aa0000' : '#333333';
                   }}
                 >
                   {key}
