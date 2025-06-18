@@ -990,17 +990,18 @@ function App() {
         onClick={() => setSelectedDocument(doc)}
         style={{
           background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-          border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
-          borderRadius: '8px',
-          padding: '10px',
-          margin: '5px',
+          border: doc.isValid ? '3px solid #ffff00' : '4px solid #ff4444',
+          borderRadius: '12px',
+          padding: '20px',
+          margin: '8px',
           cursor: 'pointer',
           color: '#ffffff',
-          fontSize: '12px',
+          fontSize: '16px',
           fontFamily: 'monospace',
-          minHeight: '120px',
+          minHeight: '200px',
+          width: '100%',
           position: 'relative',
-          boxShadow: doc.isValid ? '0 0 10px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)'
+          boxShadow: doc.isValid ? '0 0 15px rgba(255, 255, 0, 0.5)' : '0 0 20px rgba(255, 68, 68, 0.6)'
         }}
       >
         {!doc.isValid && (
@@ -1019,48 +1020,50 @@ function App() {
           </div>
         )}
         
-        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '18px', color: '#ffff00' }}>
           {doc.type.toUpperCase()} #{index + 1}
         </div>
         
         {doc.type === 'id' && (
-          <div>
-            <div>NAME: {doc.data.name}</div>
-            <div>DOB: {doc.data.dateOfBirth}</div>
-            <div>ADDRESS: {doc.data.address}</div>
-            <div>ID#: {doc.data.idNumber}</div>
+          <div style={{ lineHeight: '1.6' }}>
+            <div style={{ fontSize: '15px', marginBottom: '6px' }}>NAME: {doc.data.name}</div>
+            <div style={{ fontSize: '14px', marginBottom: '4px' }}>DOB: {doc.data.dateOfBirth}</div>
+            <div style={{ fontSize: '14px', marginBottom: '4px' }}>ADDRESS: {doc.data.address}</div>
+            <div style={{ fontSize: '14px' }}>ID#: {doc.data.idNumber}</div>
           </div>
         )}
         
         {doc.type === 'bank_book' && (
-          <div>
-            <div>ACCOUNT: {doc.data.accountNumber}</div>
-            <div>NAME: {doc.data.name}</div>
-            <div>BALANCE: ${doc.data.balance}</div>
+          <div style={{ lineHeight: '1.6' }}>
+            <div style={{ fontSize: '15px', marginBottom: '6px' }}>ACCOUNT: {doc.data.accountNumber}</div>
+            <div style={{ fontSize: '15px', marginBottom: '6px' }}>NAME: {doc.data.name}</div>
+            <div style={{ fontSize: '15px', color: '#00ff00' }}>BALANCE: ${doc.data.balance?.toLocaleString()}</div>
           </div>
         )}
         
         {doc.type === 'slip' && (
-          <div>
-            <div>ACCOUNT: {doc.data.accountNumber}</div>
-            <div>AMOUNT: ${doc.data.amount}</div>
-            <div>TYPE: {doc.data.type}</div>
+          <div style={{ lineHeight: '1.6' }}>
+            <div style={{ fontSize: '15px', marginBottom: '6px' }}>ACCOUNT: {doc.data.accountNumber}</div>
+            <div style={{ fontSize: '15px', marginBottom: '6px', color: '#00ff00' }}>AMOUNT: ${doc.data.amount?.toLocaleString()}</div>
+            <div style={{ fontSize: '14px' }}>TYPE: {doc.data.type?.toUpperCase()}</div>
           </div>
         )}
         
         {doc.type === 'signature' && (
           <div>
-            <div>SIGNATURE CARD</div>
+            <div style={{ fontSize: '15px', marginBottom: '8px' }}>SIGNATURE CARD</div>
             <div style={{ 
-              border: '1px solid #666', 
-              margin: '5px 0', 
-              padding: '5px',
+              border: '2px solid #666', 
+              margin: '8px 0', 
+              padding: '12px',
               background: '#f9f9f9',
               color: '#333',
               fontFamily: 'cursive',
-              fontSize: '14px'
+              fontSize: '18px',
+              borderRadius: '6px',
+              textAlign: 'center'
             }}>
-              {doc.data.signature}
+              {doc.data.name}
             </div>
           </div>
         )}
@@ -1684,17 +1687,7 @@ function App() {
         }
       `}</style>
       
-      {/* Banner Ad - Fixed at bottom */}
-      <div style={{
-        position: 'fixed',
-        bottom: '10px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000,
-        display: gamePhase === 'working' ? 'block' : 'none'
-      }}>
-        <AdMobBannerAd adUnitId="ca-app-pub-2744316013184797/4741683992" />
-      </div>
+      {/* AdMob Banner Removed - Using Interstitials Every 5 Transactions Only */}
 
       {/* Popup Keypad for Account Number Entry */}
       {showKeypad && (
