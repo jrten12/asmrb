@@ -830,33 +830,39 @@ function App() {
       setTimeout(() => {
         setVerificationState(prev => ({ ...prev, signatureCompared: true }));
         
-        // Generate bank signature on file (clean name)
+        // Generate complete bank records (clean/correct data)
         const bankSignatureOnFile = generateLegitimateSignature(currentCustomer.name);
+        const bankAddress = generateAddress();
+        const bankDOB = generateDateOfBirth();
         
         setTerminalOutput(prev => [...prev,
-          "BANK RECORDS VS CUSTOMER DOCUMENTS",
+          "COMPLETE BANK RECORDS VERIFICATION",
           "==========================================",
           "",
           "BANK RECORDS ON FILE:",
           "-------------------",
           `NAME: ${currentCustomer.name}`,
           `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+          `ADDRESS: ${bankAddress}`,
+          `DOB: ${bankDOB}`,
           `SIGNATURE: "${bankSignatureOnFile}"`,
-          `ADDRESS: [Bank records confidential]`,
-          `DOB: [Bank records confidential]`,
+          `STATUS: ACTIVE`,
+          `BALANCE: $${accountBalance.toLocaleString()}`,
           "",
           "CUSTOMER PROVIDED DOCUMENTS:",
           "----------------------------",
-          "• Check ID card name vs bank name",
-          "• Check account numbers match",  
-          "• Check signature styles match",
-          "• Look for inconsistencies",
+          "• Compare ALL fields manually",
+          "• Check name spellings exactly",
+          "• Verify account numbers match",  
+          "• Check address details",
+          "• Compare date of birth",
+          "• Examine signature styles",
           "",
-          "YOU MUST MANUALLY COMPARE",
-          "No automatic fraud detection",
+          "MANUAL VERIFICATION REQUIRED",
+          "Look for ANY mismatches",
           "==========================================",
           "",
-          "EXAMINE DOCUMENTS CAREFULLY",
+          "EXAMINE DOCUMENTS vs BANK RECORDS",
           "Then use APPROVE or REJECT",
           ""
         ]);
@@ -995,8 +1001,8 @@ function App() {
         key={doc.id}
         onClick={() => setSelectedDocument(doc)}
         style={{
-          background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-          border: doc.isValid ? '4px solid #ffff00' : '5px solid #ff4444',
+          background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+          border: '4px solid #ffff00',
           borderRadius: '15px',
           padding: '25px',
           margin: '0px',
@@ -1007,26 +1013,12 @@ function App() {
           minHeight: '250px',
           width: '100%',
           position: 'relative',
-          boxShadow: doc.isValid ? '0 0 20px rgba(255, 255, 0, 0.7)' : '0 0 25px rgba(255, 68, 68, 0.8)',
+          boxShadow: '0 0 20px rgba(255, 255, 0, 0.7)',
           transform: 'scale(1)',
           transition: 'transform 0.2s'
         }}
       >
-        {!doc.isValid && (
-          <div style={{
-            position: 'absolute',
-            top: '2px',
-            right: '2px',
-            background: '#ff4444',
-            color: '#ffffff',
-            padding: '2px 6px',
-            borderRadius: '3px',
-            fontSize: '10px',
-            fontWeight: 'bold'
-          }}>
-            MISMATCH
-          </div>
-        )}
+
         
         <div style={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '18px', color: '#ffff00' }}>
           {doc.type.toUpperCase()} #{index + 1}
