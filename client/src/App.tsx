@@ -1249,7 +1249,7 @@ function App() {
           {/* Terminal Section */}
           <div style={{
             width: '100%',
-            height: '65vh',
+            height: '40vh',
             display: 'flex',
             flexDirection: 'column',
             gap: '3px'
@@ -1260,7 +1260,7 @@ function App() {
               border: '1px solid #00ff00',
               borderRadius: '4px',
               padding: '4px',
-              height: '45vh',
+              height: '28vh',
               overflowY: 'auto',
               fontSize: '10px',
               fontFamily: 'monospace',
@@ -1440,7 +1440,7 @@ function App() {
           {/* Documents Section */}
           <div style={{
             width: '100%',
-            height: '35vh',
+            height: '60vh',
             display: 'flex',
             flexDirection: 'column',
             gap: '3px',
@@ -1484,23 +1484,25 @@ function App() {
               </div>
             )}
 
-            {/* Documents - Mobile Compact */}
+            {/* Documents - Expanded for Visibility */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '1px solid #ffff00',
-                borderRadius: '4px',
-                padding: '8px',
-                maxHeight: '25vh',
-                overflow: 'auto'
+                border: '2px solid #ffff00',
+                borderRadius: '8px',
+                padding: '15px',
+                minHeight: '40vh',
+                maxHeight: '60vh',
+                overflow: 'auto',
+                flex: 1
               }}>
-                <div style={{ margin: '0 0 5px 0', fontSize: '12px', fontWeight: 'bold' }}>
-                  CUSTOMER DOCUMENTS
+                <div style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold', color: '#ffff00' }}>
+                  CUSTOMER DOCUMENTS - EXAMINE CAREFULLY
                 </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '5px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
