@@ -808,16 +808,16 @@ function App() {
         return;
       }
       
-      // VERIFY compares customer signature with bank records for fraud detection
+      // VERIFY shows all bank records vs customer documents for manual comparison
       setTerminalOutput(prev => [...prev, 
         "> " + command,
-        "SIGNATURE VERIFICATION SYSTEM",
+        "BANK VERIFICATION SYSTEM",
         "========================================",
-        "Comparing customer signature with bank records",
-        "This helps detect forged documents and fraud",
+        "Retrieving complete bank records...",
+        "Compare ALL details manually",
         "",
-        "ACCESSING SIGNATURE DATABASE...",
-        "RETRIEVING SIGNATURE ON FILE...",
+        "ACCESSING BANK DATABASE...",
+        "LOADING CUSTOMER PROFILE...",
         ""
       ]);
       
@@ -826,36 +826,38 @@ function App() {
       setTimeout(() => playSound('typing'), 600);
       setTimeout(() => playSound('typing'), 900);
       
-      // Generate bank signature on file
+      // Show complete bank records vs customer documents for manual comparison
       setTimeout(() => {
-        const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
-        const bankSignatureOnFile = currentCustomer.isFraudulent ? 
-          generateFraudulentSignature(currentCustomer.name) : 
-          generateLegitimateSignature(currentCustomer.name);
-        
         setVerificationState(prev => ({ ...prev, signatureCompared: true }));
         
+        // Generate bank signature on file (clean name)
+        const bankSignatureOnFile = generateLegitimateSignature(currentCustomer.name);
+        
         setTerminalOutput(prev => [...prev,
-          "SIGNATURE COMPARISON",
-          "==========================",
+          "BANK RECORDS VS CUSTOMER DOCUMENTS",
+          "==========================================",
           "",
-          "BANK FILE:",
-          `"${bankSignatureOnFile}"`,
+          "BANK RECORDS ON FILE:",
+          "-------------------",
+          `NAME: ${currentCustomer.name}`,
+          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+          `SIGNATURE: "${bankSignatureOnFile}"`,
+          `ADDRESS: [Bank records confidential]`,
+          `DOB: [Bank records confidential]`,
           "",
-          "CUSTOMER CARD:",
-          `"${customerSigDoc?.data.signature || 'NO SIG CARD'}"`,
+          "CUSTOMER PROVIDED DOCUMENTS:",
+          "----------------------------",
+          "• Check ID card name vs bank name",
+          "• Check account numbers match",  
+          "• Check signature styles match",
+          "• Look for inconsistencies",
           "",
-          "CHECK FOR:",
-          "• Style match",
-          "• Letter shape",
-          "• Consistency",
+          "YOU MUST MANUALLY COMPARE",
+          "No automatic fraud detection",
+          "==========================================",
           "",
-          currentCustomer.isFraudulent ? 
-            "⚠️ MISMATCH DETECTED ⚠️" : 
-            "✓ SIGNATURES MATCH",
-          "==========================",
-          "",
-          "USE APPROVE/REJECT",
+          "EXAMINE DOCUMENTS CAREFULLY",
+          "Then use APPROVE or REJECT",
           ""
         ]);
         
@@ -994,18 +996,20 @@ function App() {
         onClick={() => setSelectedDocument(doc)}
         style={{
           background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
-          border: doc.isValid ? '3px solid #ffff00' : '4px solid #ff4444',
-          borderRadius: '12px',
-          padding: '20px',
-          margin: '8px',
+          border: doc.isValid ? '4px solid #ffff00' : '5px solid #ff4444',
+          borderRadius: '15px',
+          padding: '25px',
+          margin: '0px',
           cursor: 'pointer',
           color: '#ffffff',
-          fontSize: '16px',
+          fontSize: '18px',
           fontFamily: 'monospace',
-          minHeight: '200px',
+          minHeight: '250px',
           width: '100%',
           position: 'relative',
-          boxShadow: doc.isValid ? '0 0 15px rgba(255, 255, 0, 0.5)' : '0 0 20px rgba(255, 68, 68, 0.6)'
+          boxShadow: doc.isValid ? '0 0 20px rgba(255, 255, 0, 0.7)' : '0 0 25px rgba(255, 68, 68, 0.8)',
+          transform: 'scale(1)',
+          transition: 'transform 0.2s'
         }}
       >
         {!doc.isValid && (
@@ -1508,8 +1512,9 @@ function App() {
                 </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '10px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                  gap: '15px',
+                  width: '100%'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
