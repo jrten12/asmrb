@@ -439,6 +439,26 @@ function App() {
     setVerificationState({ accountLookedUp: false, signatureCompared: false });
   };
 
+  // Helper functions for generating bank records
+  const generateAddress = () => {
+    const streets = ['Oak Street', 'Pine Avenue', 'Maple Drive', 'Cedar Lane', 'Elm Road', 'Birch Way'];
+    const cities = ['Springfield', 'Riverside', 'Franklin', 'Georgetown', 'Madison', 'Arlington'];
+    const states = ['CA', 'TX', 'NY', 'FL', 'IL', 'PA'];
+    const streetNum = Math.floor(Math.random() * 9999) + 1;
+    const street = streets[Math.floor(Math.random() * streets.length)];
+    const city = cities[Math.floor(Math.random() * cities.length)];
+    const state = states[Math.floor(Math.random() * states.length)];
+    const zip = Math.floor(Math.random() * 90000) + 10000;
+    return `${streetNum} ${street}, ${city}, ${state} ${zip}`;
+  };
+
+  const generateDateOfBirth = () => {
+    const year = Math.floor(Math.random() * 50) + 1940; // 1940-1989
+    const month = Math.floor(Math.random() * 12) + 1;
+    const day = Math.floor(Math.random() * 28) + 1;
+    return `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
+  };
+
   const handleCorrectTransaction = () => {
     setGameScore(prev => ({
       ...prev,
@@ -832,8 +852,22 @@ function App() {
         
         // Generate complete bank records (clean/correct data)
         const bankSignatureOnFile = generateLegitimateSignature(currentCustomer.name);
-        const bankAddress = generateAddress();
-        const bankDOB = generateDateOfBirth();
+        
+        // Generate consistent bank address and DOB
+        const streets = ['Oak Street', 'Pine Avenue', 'Maple Drive', 'Cedar Lane', 'Elm Road', 'Birch Way'];
+        const cities = ['Springfield', 'Riverside', 'Franklin', 'Georgetown', 'Madison', 'Arlington'];
+        const states = ['CA', 'TX', 'NY', 'FL', 'IL', 'PA'];
+        const streetNum = Math.floor(Math.random() * 9999) + 1;
+        const street = streets[Math.floor(Math.random() * streets.length)];
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        const state = states[Math.floor(Math.random() * states.length)];
+        const zip = Math.floor(Math.random() * 90000) + 10000;
+        const bankAddress = `${streetNum} ${street}, ${city}, ${state} ${zip}`;
+        
+        const year = Math.floor(Math.random() * 50) + 1940; // 1940-1989
+        const month = Math.floor(Math.random() * 12) + 1;
+        const day = Math.floor(Math.random() * 28) + 1;
+        const bankDOB = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
         
         setTerminalOutput(prev => [...prev,
           "COMPLETE BANK RECORDS VERIFICATION",
