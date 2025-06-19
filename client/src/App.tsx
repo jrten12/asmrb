@@ -204,103 +204,45 @@ function App() {
     }
   };
 
-  // Web Audio API for authentic 1980s terminal sounds
+  // Using your uploaded SFX sound files
   const playSound = (soundType: string) => {
     if (musicMuted) return;
     
     try {
-      // Initialize audio context if needed
-      if (!window.gameAudioContext) {
-        initializeAudio();
-      }
-      
-      const ctx = window.gameAudioContext;
-      if (!ctx) return;
-      
-      // Resume context if suspended
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-      
-      // Ensure audio context is running
-      if (ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
-      }
-
+      let audio: HTMLAudioElement;
       switch (soundType) {
         case 'typing':
-          // Mechanical keyboard click
-          const typingOsc = ctx.createOscillator();
-          const typingGain = ctx.createGain();
-          typingOsc.connect(typingGain);
-          typingGain.connect(ctx.destination);
-          typingOsc.frequency.setValueAtTime(800, ctx.currentTime);
-          typingGain.gain.setValueAtTime(0.25, ctx.currentTime);
-          typingGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-          typingOsc.start();
-          typingOsc.stop(ctx.currentTime + 0.1);
-          console.log('Playing typing sound');
+          audio = new Audio('/sounds/typing-asmr.mp3');
+          audio.volume = 0.4;
           break;
-          
-        case 'cash':
-          // Cash register ding
-          const cashOsc = ctx.createOscillator();
-          const cashGain = ctx.createGain();
-          cashOsc.connect(cashGain);
-          cashGain.connect(ctx.destination);
-          cashOsc.frequency.setValueAtTime(1200, ctx.currentTime);
-          cashOsc.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
-          cashGain.gain.setValueAtTime(0.4, ctx.currentTime);
-          cashGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-          cashOsc.start();
-          cashOsc.stop(ctx.currentTime + 0.3);
-          console.log('Playing cash register sound');
-          break;
-          
-        case 'reject':
-          // Error buzz
-          const rejectOsc = ctx.createOscillator();
-          const rejectGain = ctx.createGain();
-          rejectOsc.connect(rejectGain);
-          rejectGain.connect(ctx.destination);
-          rejectOsc.frequency.setValueAtTime(200, ctx.currentTime);
-          rejectOsc.type = 'sawtooth';
-          rejectGain.gain.setValueAtTime(0.3, ctx.currentTime);
-          rejectGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-          rejectOsc.start();
-          rejectOsc.stop(ctx.currentTime + 0.5);
-          console.log('Playing reject sound');
-          break;
-          
-        case 'keypad_click':
-          // High beep for keypad
-          const keypadOsc = ctx.createOscillator();
-          const keypadGain = ctx.createGain();
-          keypadOsc.connect(keypadGain);
-          keypadGain.connect(ctx.destination);
-          keypadOsc.frequency.setValueAtTime(1000, ctx.currentTime);
-          keypadGain.gain.setValueAtTime(0.12, ctx.currentTime);
-          keypadGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-          keypadOsc.start();
-          keypadOsc.stop(ctx.currentTime + 0.15);
-          break;
-          
         case 'punch_clock':
-          // Heavy mechanical sound
-          const punchOsc = ctx.createOscillator();
-          const punchGain = ctx.createGain();
-          punchOsc.connect(punchGain);
-          punchGain.connect(ctx.destination);
-          punchOsc.frequency.setValueAtTime(150, ctx.currentTime);
-          punchOsc.type = 'square';
-          punchGain.gain.setValueAtTime(0.2, ctx.currentTime);
-          punchGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-          punchOsc.start();
-          punchOsc.stop(ctx.currentTime + 0.4);
+          audio = new Audio('/sounds/punch-clock.mp3');
+          audio.volume = 0.5;
+          break;
+        case 'cash':
+          audio = new Audio('/sounds/cash-register.mp3');
+          audio.volume = 0.4;
+          break;
+        case 'reject':
+          audio = new Audio('/sounds/error-buzz.mp3');
+          audio.volume = 0.5;
+          break;
+        case 'customer_approach':
+          audio = new Audio('/sounds/customer-approach.mp3');
+          audio.volume = 0.3;
+          break;
+        case 'keypad_click':
+          audio = new Audio('/sounds/keypad-click.mp3');
+          audio.volume = 0.3;
+          break;
+        default:
+          audio = new Audio('/sounds/dot-matrix-printer.mp3');
+          audio.volume = 0.3;
           break;
       }
+      audio.play().catch(e => console.log("Audio play failed:", e));
     } catch (e) {
-      console.log("Audio context error:", e);
+      console.log("Sound error:", e);
     }
   };
 
@@ -932,70 +874,100 @@ function App() {
         const bankName = currentCustomer.name;
         const bankAccount = currentCustomer.transaction.accountNumber;
         
-        // Create realistic fraud scenarios for manual detection
-        const fraudTypes = ['address', 'dob', 'dl_number', 'id_number', 'signature'];
-        const shouldHaveMismatch = Math.random() < 0.4; // 40% chance of fraud
-        const fraudType = shouldHaveMismatch ? fraudTypes[Math.floor(Math.random() * fraudTypes.length)] : null;
+        // Create realistic fraud scenarios - 50% of customers have document mismatches
+        const shouldHaveFraud = Math.random() < 0.5;
         
-        const bankAddress = shouldHaveMismatch ? 
-          "5678 Different Street, Riverside, CA 94102" : 
-          customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+        let bankAddress: string, bankDOB: string, bankDLNumber: string, bankIDNumber: string, bankSignature: string;
+        let fraudDescription = "";
+        
+        if (shouldHaveFraud) {
+          // Create specific fraud types with mismatched data
+          const fraudType = Math.floor(Math.random() * 4);
           
-        const bankDOB = shouldHaveMismatch ? 
-          "03/22/1980" : 
-          customerIdDoc?.data.dateOfBirth || "05/15/1975";
-          
-        const bankDLNumber = shouldHaveMismatch ? 
-          "DL-XYZ789AB" : 
-          customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-          
-        const bankIDNumber = shouldHaveMismatch ? 
-          "ID123456789" : 
-          customerIdDoc?.data.idNumber || "ID987654321";
-          
-        const bankSignature = shouldHaveMismatch ? 
-          `${bankName.split(' ').map(n => n[0]).join('')}_different_style` : 
-          customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+          switch (fraudType) {
+            case 0: // Address mismatch
+              bankAddress = "789 Oak Street, Springfield, CA 90210";
+              bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+              bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+              bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+              bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+              fraudDescription = "ADDRESS MISMATCH";
+              break;
+            case 1: // Date of birth mismatch  
+              bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+              bankDOB = "12/03/1982";
+              bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+              bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+              bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+              fraudDescription = "DATE OF BIRTH MISMATCH";
+              break;
+            case 2: // License number mismatch
+              bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+              bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+              bankDLNumber = "DL-XYZ789CD";
+              bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+              bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+              fraudDescription = "LICENSE NUMBER MISMATCH";
+              break;
+            case 3: // Signature mismatch
+              bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+              bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+              bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+              bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+              bankSignature = `${bankName.split(' ').map(n => n[0]).join('')}_BANK_OFFICIAL_SIGNATURE_DIFFERENT`;
+              fraudDescription = "SIGNATURE MISMATCH";
+              break;
+          }
+        } else {
+          // Legitimate customer - all data matches
+          bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+          bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+          bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+          bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+          bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+          fraudDescription = "ALL DOCUMENTS VERIFIED";
+        }
         
         setTerminalOutput(prev => [...prev,
-          "SIGNATURE & DOCUMENT VERIFICATION",
+          "BANK VERIFICATION SYSTEM",
           "==========================================",
           "",
-          "BANK SIGNATURE ON FILE:",
-          `"${bankSignature}"`,
+          "BANK SIGNATURE:",
+          bankSignature.length > 50 ? bankSignature.substring(0, 50) + "..." : bankSignature,
           "",
-          "CUSTOMER SIGNATURE CARD:",
-          `"${customerSigDoc?.data.signature || 'NO SIGNATURE'}"`,
+          "CUSTOMER SIG:",
+          (customerSigDoc?.data.signature || 'NO SIGNATURE').length > 50 ? 
+            (customerSigDoc?.data.signature || 'NO SIGNATURE').substring(0, 50) + "..." : 
+            (customerSigDoc?.data.signature || 'NO SIGNATURE'),
           "",
-          "SIGNATURE COMPARISON:",
-          shouldHaveMismatch ? "❌ SIGNATURES DO NOT MATCH" : "✓ SIGNATURES MATCH",
+          "BANK vs CUSTOMER DATA:",
+          "----------------------",
+          `NAME: ${bankName}`,
+          `  ID: ${customerIdDoc?.data.name || 'N/A'}`,
           "",
-          "BANK RECORDS vs CUSTOMER ID:",
-          "----------------------------",
-          `BANK NAME: ${bankName}`,
-          `ID CARD:   ${customerIdDoc?.data.name || 'N/A'}`,
+          `ADDR: ${bankAddress.substring(0, 40)}...`,
+          `  ID: ${(customerIdDoc?.data.address || 'N/A').substring(0, 40)}...`,
           "",
-          `BANK ADDR: ${bankAddress}`,
-          `ID CARD:   ${customerIdDoc?.data.address || 'N/A'}`,
+          `DOB:  ${bankDOB}`,
+          `  ID: ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
           "",
-          `BANK DOB:  ${bankDOB}`,
-          `ID CARD:   ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
+          `DL#:  ${bankDLNumber}`,
+          `  ID: ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
           "",
-          `BANK DL#:  ${bankDLNumber}`,
-          `ID CARD:   ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
+          "ACCOUNT NUMBERS:",
+          "---------------",
+          `BANK:  ${bankAccount}`,
+          `SLIP:  ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
+          `BOOK:  ${customerBankDoc?.data.accountNumber || 'N/A'}`,
+          `ID:    ${customerIdDoc?.data.accountNumber || 'N/A'}`,
           "",
-          "ACCOUNT VERIFICATION:",
-          "--------------------",
-          `TRANSACTION: ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
-          `BANK BOOK:   ${customerBankDoc?.data.accountNumber || 'N/A'}`,
-          `ID CARD:     ${customerIdDoc?.data.accountNumber || 'N/A'}`,
+          `VERIFICATION RESULT: ${fraudDescription}`,
           "",
-          shouldHaveMismatch ? 
-            "⚠️  FRAUD DETECTED - DOCUMENT MISMATCH" : 
-            "✓ ALL DOCUMENTS VERIFIED",
+          shouldHaveFraud ? 
+            "⚠️  MANUAL REVIEW REQUIRED" : 
+            "✓ DOCUMENTS APPEAR VALID",
           "",
-          "MANUAL DECISION REQUIRED:",
-          "Use APPROVE or REJECT based on verification",
+          "Use APPROVE or REJECT commands",
           "==========================================",
           ""
         ]);
