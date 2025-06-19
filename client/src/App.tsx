@@ -757,22 +757,91 @@ function App() {
           setAccountBalance(balance);
           setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
           
+          // Generate bank record data for comparison with customer documents
+          const customerIdDoc = currentCustomer.documents.find(d => d.type === 'id');
+          const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
+          
+          // Create realistic fraud scenarios - 50% of customers have mismatched bank records
+          const shouldHaveFraud = Math.random() < 0.5;
+          
+          let bankName = currentCustomer.name;
+          let bankAddress: string, bankDOB: string, bankDLNumber: string, bankIDNumber: string, bankSignature: string;
+          
+          if (shouldHaveFraud) {
+            // Create specific fraud types with mismatched data
+            const fraudType = Math.floor(Math.random() * 4);
+            
+            switch (fraudType) {
+              case 0: // Address mismatch
+                bankAddress = "789 Oak Street, Springfield, CA 90210";
+                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                break;
+              case 1: // Date of birth mismatch  
+                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                bankDOB = "12/03/1982";
+                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                break;
+              case 2: // License number mismatch
+                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                bankDLNumber = "DL-XYZ789CD";
+                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                break;
+              case 3: // Signature mismatch
+                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                bankSignature = `BANK_OFFICIAL_SIG_${bankName.replace(/\s+/g, '_').toUpperCase()}_DIFFERENT_STYLE`;
+                break;
+            }
+            
+            // Mark customer as fraudulent for later processing
+            currentCustomer.isFraudulent = true;
+          } else {
+            // Legitimate customer - all data matches documents
+            bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+            bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+            bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+            bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+            bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+            currentCustomer.isFraudulent = false;
+          }
+          
           setTerminalOutput(prev => [...prev,
             "ACCOUNT FOUND",
             "==========================",
-            "BANK RECORD",
+            "BANK COMPUTER SYSTEM",
             "==========================",
-            `ACCT: ${accountNumber}`,
-            `NAME: ${currentCustomer.name}`,
-            `BAL: $${balance.toLocaleString()}`,
-            `STATUS: ACTIVE`,
-            `TYPE: CHECKING`,
-            `SSN: XXX-XX-${Math.floor(Math.random() * 9000) + 1000}`,
-            "==========================",
+            `Account Number: ${accountNumber}`,
+            `Account Status: ACTIVE`,
+            `Balance: $${balance.toLocaleString()}`,
+            `Account Type: CHECKING`,
             "",
-            "RECORD OK - CHECK DOCS",
-            "Use VERIFY for signature",
-            ""
+            "ACCOUNT HOLDER INFORMATION:",
+            "===========================",
+            `Full Name: ${bankName}`,
+            `Date of Birth: ${bankDOB}`,
+            `Address: ${bankAddress}`,
+            `ID Number: ${bankIDNumber}`,
+            `License Number: ${bankDLNumber}`,
+            "",
+            "SIGNATURE ON FILE:",
+            "==================",
+            `${bankSignature}`,
+            "",
+            "Last Transaction: 3 days ago",
+            "Account opened: 08/15/1985",
+            "",
+            "Compare above info with customer documents",
+            "Use VERIFY to cross-reference all details",
+            "============================"
           ]);
           
           playSound('cash'); // Success sound
