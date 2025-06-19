@@ -92,6 +92,9 @@ Bank Teller 1988 is a nostalgic simulation game that recreates the experience of
 - **Production Ready**: Easy configuration swap for live ads
 
 ## Changelog
+- June 18, 2025: PERMANENT FIX - Customer documents display locked at 70vh height with 320px document cards, preventing reversion to unusable compact view
+- June 18, 2025: Enhanced VERIFY command to show complete bank records (DL number, DOB, address, ID number) for manual fraud detection
+- June 18, 2025: Removed all automatic fraud indicators - system never flags fraud, player must spot mismatches manually like "Papers Please"
 - June 17, 2025: MAJOR FIX - Expanded customer documents section from 35vh to 60vh for proper document examination (critical for fraud detection gameplay)
 - June 17, 2025: Added popup numeric keypad for LOOKUP commands instead of manual typing (mobile-friendly with large touch buttons)
 - June 17, 2025: Fixed desktop/mobile version consistency with standardized viewport container (position: fixed, 100vw/100vh)

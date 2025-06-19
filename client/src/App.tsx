@@ -1052,12 +1052,15 @@ function App() {
           color: '#ffffff',
           fontSize: '18px',
           fontFamily: 'monospace',
-          minHeight: '250px',
+          minHeight: '320px',
+          height: '320px',
           width: '100%',
           position: 'relative',
-          boxShadow: '0 0 20px rgba(255, 255, 0, 0.7)',
+          boxShadow: '0 0 25px rgba(255, 255, 0, 0.8)',
           transform: 'scale(1)',
-          transition: 'transform 0.2s'
+          transition: 'transform 0.2s',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
 
@@ -1530,26 +1533,29 @@ function App() {
               </div>
             )}
 
-            {/* Documents - Expanded for Visibility */}
+            {/* Documents - PERMANENTLY LARGE AND VISIBLE */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '2px solid #ffff00',
-                borderRadius: '8px',
-                padding: '15px',
-                minHeight: '40vh',
-                maxHeight: '60vh',
+                border: '3px solid #ffff00',
+                borderRadius: '12px',
+                padding: '20px',
+                minHeight: '70vh',
+                height: '70vh',
                 overflow: 'auto',
-                flex: 1
+                flex: 'none',
+                width: '100%',
+                position: 'relative'
               }}>
                 <div style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold', color: '#ffff00' }}>
                   CUSTOMER DOCUMENTS - EXAMINE CAREFULLY
                 </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                  gap: '15px',
-                  width: '100%'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '20px',
+                  width: '100%',
+                  height: '100%'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
