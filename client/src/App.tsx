@@ -1387,8 +1387,8 @@ function App() {
       height: '100vh',
       minHeight: '100vh',
       maxHeight: '100vh',
-      background: 'linear-gradient(135deg, #2d3436 0%, #636e72 100%)',
-      color: '#ffffff',
+      background: '#f8f9fa',
+      color: '#212529',
       fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
       position: 'fixed',
       top: 0,
@@ -1560,19 +1560,19 @@ function App() {
           }}>
             {/* Terminal Output */}
             <div style={{
-              background: '#1a1a1a',
-              border: '2px solid #00ff00',
+              background: '#ffffff',
+              border: '2px solid #dee2e6',
               borderRadius: '8px',
               padding: '12px',
               height: '28vh',
               overflowY: 'auto',
               fontSize: '12px',
-              fontFamily: 'monospace',
+              fontFamily: '"Consolas", "Monaco", monospace',
               lineHeight: '1.4',
               wordWrap: 'break-word',
               whiteSpace: 'pre-wrap',
-              color: '#00ff00',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+              color: '#212529',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ 
@@ -1753,44 +1753,44 @@ function App() {
             overflow: 'auto',
             minHeight: '500px'
           }}>
-            {/* Customer Display - Larger */}
+            {/* Customer Display - Clean */}
             {currentCustomer && (
               <div style={{
-                background: '#2a2a2a',
-                border: '2px solid #ffff00',
-                borderRadius: '12px',
+                background: '#ffffff',
+                border: '2px solid #007bff',
+                borderRadius: '8px',
                 padding: '16px',
                 textAlign: 'center',
                 fontSize: '14px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#ffff00' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#007bff' }}>
                   CUSTOMER: {currentCustomer.name}
                 </div>
-                <div style={{ marginBottom: '4px', color: '#ffffff' }}>
+                <div style={{ marginBottom: '4px', color: '#212529' }}>
                   {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '12px', color: '#cccccc' }}>
+                <div style={{ fontSize: '12px', color: '#6c757d' }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
 
-            {/* Bank Computer Records - Always Visible After Lookup */}
+            {/* Bank Computer Records - Clean Design */}
             {verificationState.accountLookedUp && (
               <div style={{
-                background: '#1a3d1a',
-                border: '2px solid #00ff00',
+                background: '#e8f5e8',
+                border: '2px solid #198754',
                 borderRadius: '8px',
                 padding: '16px',
                 fontSize: '12px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                 marginBottom: '8px'
               }}>
-                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
+                <div style={{ color: '#198754', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
                   BANK COMPUTER RECORDS - COMPARE WITH CUSTOMER DOCS
                 </div>
-                <div style={{ color: '#ffffff', lineHeight: '1.4' }}>
+                <div style={{ color: '#212529', lineHeight: '1.4' }}>
                   <div><strong>Account:</strong> {currentCustomer?.transaction.accountNumber}</div>
                   <div><strong>Status:</strong> ACTIVE</div>
                   <div><strong>Balance:</strong> ${accountBalance.toLocaleString()}</div>
@@ -1802,11 +1802,12 @@ function App() {
                   <div style={{ 
                     marginTop: '8px', 
                     padding: '8px', 
-                    background: '#003300',
+                    background: '#ffffff',
+                    border: '1px solid #198754',
                     borderRadius: '4px'
                   }}>
                     <strong>Signature on File:</strong><br/>
-                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic' }}>
+                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', color: '#495057' }}>
                       {bankRecords?.signature?.split('|')[0] || `${currentCustomer?.name.split(' ').map(n => n[0]).join('')} ${currentCustomer?.name.split(' ')[1] || ''}`}
                     </span>
                   </div>
@@ -1814,20 +1815,20 @@ function App() {
               </div>
             )}
 
-            {/* Documents - CLEAN AND ORGANIZED */}
+            {/* Documents - Clean Design */}
             {currentCustomer && (
               <div style={{
-                background: '#2a2a2a',
-                border: '2px solid #ffff00',
-                borderRadius: '12px',
+                background: '#ffffff',
+                border: '2px solid #dee2e6',
+                borderRadius: '8px',
                 padding: '16px',
                 height: '38vh',
                 overflow: 'auto',
                 flex: 'none',
                 width: '100%',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
               }}>
-                <div style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: '#ffff00' }}>
+                <div style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: '#495057' }}>
                   CUSTOMER DOCUMENTS
                 </div>
                 <div style={{
@@ -1844,18 +1845,18 @@ function App() {
                            setShowDocumentPopup(true);
                          }}
                          style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #00ff00',
-                      borderRadius: '4px',
+                      background: '#f8f9fa',
+                      border: '2px solid #007bff',
+                      borderRadius: '6px',
                       padding: '8px',
                       height: '80px',
                       overflow: 'hidden',
-                      fontSize: '9px',
-                      fontFamily: 'monospace',
-                      color: '#00ff00',
+                      fontSize: '10px',
+                      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+                      color: '#212529',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                       textAlign: 'center'
                     }}>
                       <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
@@ -2218,15 +2219,15 @@ function App() {
           left: '10px',
           width: '280px',
           height: '320px',
-          background: '#2a2a2a',
-          border: '2px solid #ffff00',
+          background: '#ffffff',
+          border: '2px solid #007bff',
           borderRadius: '8px',
           padding: '12px',
-          color: '#ffffff',
-          fontFamily: 'monospace',
+          color: '#212529',
+          fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
           fontSize: '11px',
           zIndex: 1500,
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
           overflow: 'auto'
         }}>
           <div style={{
@@ -2234,10 +2235,10 @@ function App() {
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '8px',
-            borderBottom: '1px solid #ffff00',
+            borderBottom: '1px solid #007bff',
             paddingBottom: '4px'
           }}>
-            <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '10px' }}>
+            <div style={{ color: '#007bff', fontWeight: 'bold', fontSize: '11px' }}>
               {popupDocument.type.toUpperCase().replace('_', ' ')}
             </div>
             <div 
@@ -2248,8 +2249,8 @@ function App() {
               }}
               style={{
                 cursor: 'pointer',
-                color: '#ffff00',
-                fontSize: '12px',
+                color: '#dc3545',
+                fontSize: '14px',
                 fontWeight: 'bold'
               }}>
               ×
@@ -2292,21 +2293,21 @@ function App() {
             <div style={{ lineHeight: '1.5' }}>
               <div><strong>NAME:</strong> {popupDocument.data.name}</div>
               <div style={{ 
-                marginTop: '15px',
-                padding: '20px',
+                marginTop: '12px',
+                padding: '16px',
                 background: '#f8f9fa',
                 border: '2px solid #007bff',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 textAlign: 'center'
               }}>
                 <strong style={{ color: '#007bff' }}>SIGNATURE:</strong><br/>
                 <div style={{
-                  fontSize: '20px',
+                  fontSize: '16px',
                   fontFamily: 'Georgia, "Times New Roman", serif',
-                  color: '#2d3436',
-                  marginTop: '10px',
+                  color: '#212529',
+                  marginTop: '8px',
                   fontWeight: 'bold',
-                  letterSpacing: '1px',
+                  letterSpacing: '0.5px',
                   fontStyle: 'italic'
                 }}>
                   {popupDocument.data.signature?.split('|')[0] || 'NO SIGNATURE'}
