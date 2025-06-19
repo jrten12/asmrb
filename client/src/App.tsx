@@ -1832,8 +1832,8 @@ function App() {
                 </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '8px',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '6px',
                   width: '100%'
                 }}>
                   {currentCustomer.documents.map((doc, index) => (
@@ -1845,17 +1845,18 @@ function App() {
                          }}
                          style={{
                       background: '#1a1a1a',
-                      border: '2px solid #00ff00',
-                      borderRadius: '8px',
-                      padding: '12px',
-                      height: '140px',
+                      border: '1px solid #00ff00',
+                      borderRadius: '4px',
+                      padding: '8px',
+                      height: '80px',
                       overflow: 'hidden',
-                      fontSize: '11px',
+                      fontSize: '9px',
                       fontFamily: 'monospace',
                       color: '#00ff00',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                      boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                      textAlign: 'center'
                     }}>
                       <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                         {doc.type.toUpperCase().replace('_', ' ')} DOCUMENT
