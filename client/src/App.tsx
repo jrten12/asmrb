@@ -192,46 +192,97 @@ function App() {
     }
   }, [admobInitialized, loadInterstitialAd]);
 
-  // Sound effects using your authentic ASMR SFX files
+  // Web Audio API for authentic 1980s terminal sounds
   const playSound = (soundType: string) => {
     if (musicMuted) return;
     
     try {
-      let audio: HTMLAudioElement;
+      if (!window.gameAudioContext) {
+        window.gameAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      
+      const ctx = window.gameAudioContext;
+      
+      // Resume context if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        ctx.resume().then(() => {
+          // Successfully resumed, continue with sound
+        }).catch(() => {
+          console.log('Audio context resume failed - user interaction required');
+        });
+      }
+      
       switch (soundType) {
         case 'typing':
-          audio = new Audio('/SFX/typing-asmr.mp3');
-          audio.volume = 0.4;
+          // Mechanical keyboard click
+          const typingOsc = ctx.createOscillator();
+          const typingGain = ctx.createGain();
+          typingOsc.connect(typingGain);
+          typingGain.connect(ctx.destination);
+          typingOsc.frequency.setValueAtTime(800, ctx.currentTime);
+          typingGain.gain.setValueAtTime(0.15, ctx.currentTime);
+          typingGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+          typingOsc.start();
+          typingOsc.stop(ctx.currentTime + 0.1);
           break;
-        case 'punch_clock':
-          audio = new Audio('/SFX/punch-clock.mp3');
-          audio.volume = 0.5;
-          break;
+          
         case 'cash':
-          audio = new Audio('/SFX/cash-register.mp3');
-          audio.volume = 0.4;
+          // Cash register ding
+          const cashOsc = ctx.createOscillator();
+          const cashGain = ctx.createGain();
+          cashOsc.connect(cashGain);
+          cashGain.connect(ctx.destination);
+          cashOsc.frequency.setValueAtTime(1200, ctx.currentTime);
+          cashOsc.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
+          cashGain.gain.setValueAtTime(0.2, ctx.currentTime);
+          cashGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          cashOsc.start();
+          cashOsc.stop(ctx.currentTime + 0.3);
           break;
+          
         case 'reject':
-          audio = new Audio('/SFX/error-buzz.mp3');
-          audio.volume = 0.5;
+          // Error buzz
+          const rejectOsc = ctx.createOscillator();
+          const rejectGain = ctx.createGain();
+          rejectOsc.connect(rejectGain);
+          rejectGain.connect(ctx.destination);
+          rejectOsc.frequency.setValueAtTime(200, ctx.currentTime);
+          rejectOsc.type = 'sawtooth';
+          rejectGain.gain.setValueAtTime(0.15, ctx.currentTime);
+          rejectGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+          rejectOsc.start();
+          rejectOsc.stop(ctx.currentTime + 0.5);
           break;
-        case 'customer_approach':
-          audio = new Audio('/SFX/customer-approach.mp3');
-          audio.volume = 0.3;
-          break;
+          
         case 'keypad_click':
-          audio = new Audio('/SFX/keypad-click.mp3');
-          audio.volume = 0.3;
+          // High beep for keypad
+          const keypadOsc = ctx.createOscillator();
+          const keypadGain = ctx.createGain();
+          keypadOsc.connect(keypadGain);
+          keypadGain.connect(ctx.destination);
+          keypadOsc.frequency.setValueAtTime(1000, ctx.currentTime);
+          keypadGain.gain.setValueAtTime(0.12, ctx.currentTime);
+          keypadGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+          keypadOsc.start();
+          keypadOsc.stop(ctx.currentTime + 0.15);
           break;
-        default:
-          // Fallback to dot-matrix-printer for any other sounds
-          audio = new Audio('/SFX/dot-matrix-printer.mp3');
-          audio.volume = 0.3;
+          
+        case 'punch_clock':
+          // Heavy mechanical sound
+          const punchOsc = ctx.createOscillator();
+          const punchGain = ctx.createGain();
+          punchOsc.connect(punchGain);
+          punchGain.connect(ctx.destination);
+          punchOsc.frequency.setValueAtTime(150, ctx.currentTime);
+          punchOsc.type = 'square';
+          punchGain.gain.setValueAtTime(0.2, ctx.currentTime);
+          punchGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          punchOsc.start();
+          punchOsc.stop(ctx.currentTime + 0.4);
           break;
       }
-      audio.play().catch(e => console.log("Audio play failed:", e));
     } catch (e) {
-      console.log("Sound error:", e);
+      console.log("Audio context error:", e);
     }
   };
 
@@ -853,59 +904,58 @@ function App() {
         // Generate complete bank records (clean/correct data)
         const bankSignatureOnFile = generateLegitimateSignature(currentCustomer.name);
         
-        // Generate complete bank records with all details for manual comparison
-        const streets = ['Oak Street', 'Pine Avenue', 'Maple Drive', 'Cedar Lane', 'Elm Road', 'Birch Way'];
-        const cities = ['Springfield', 'Riverside', 'Franklin', 'Georgetown', 'Madison', 'Arlington'];
-        const states = ['CA', 'TX', 'NY', 'FL', 'IL', 'PA'];
-        const streetNum = Math.floor(Math.random() * 9999) + 1;
-        const street = streets[Math.floor(Math.random() * streets.length)];
-        const city = cities[Math.floor(Math.random() * cities.length)];
-        const state = states[Math.floor(Math.random() * states.length)];
-        const zip = Math.floor(Math.random() * 90000) + 10000;
-        const bankAddress = `${streetNum} ${street}, ${city}, ${state} ${zip}`;
+        // Get actual customer document data to show mismatches
+        const customerIdDoc = currentCustomer.documents.find(d => d.type === 'id');
+        const customerSlipDoc = currentCustomer.documents.find(d => d.type === 'slip');
+        const customerBankDoc = currentCustomer.documents.find(d => d.type === 'bank_book');
+        const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
         
-        const year = Math.floor(Math.random() * 50) + 1940; // 1940-1989
-        const month = Math.floor(Math.random() * 12) + 1;
-        const day = Math.floor(Math.random() * 28) + 1;
-        const bankDOB = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
-        
-        // Generate Driver's License and ID numbers for bank records
-        const bankDLNumber = `DL-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-        const bankIDNumber = Math.random().toString(36).substring(2, 11).toUpperCase();
+        // Bank records (what should be correct)
+        const bankName = currentCustomer.name;
+        const bankAccount = currentCustomer.transaction.accountNumber;
+        const bankAddress = "1234 Main Street, Springfield, CA 90210";
+        const bankDOB = "05/15/1975";
+        const bankDLNumber = "DL-ABC123XY";
+        const bankIDNumber = "ID987654321";
+        const bankSignature = `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
         
         setTerminalOutput(prev => [...prev,
-          "COMPLETE BANK RECORDS VERIFICATION",
+          "BANK RECORDS vs CUSTOMER DOCUMENTS",
           "==========================================",
           "",
-          "BANK RECORDS ON FILE:",
+          "BANK RECORDS:",
           "-------------------",
-          `NAME: ${currentCustomer.name}`,
-          `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+          `NAME: ${bankName}`,
+          `ACCOUNT: ${bankAccount}`,
           `ADDRESS: ${bankAddress}`,
           `DOB: ${bankDOB}`,
-          `ID NUMBER: ${bankIDNumber}`,
-          `DL NUMBER: ${bankDLNumber}`,
-          `SIGNATURE: "${bankSignatureOnFile}"`,
-          `STATUS: ACTIVE`,
-          `BALANCE: $${accountBalance.toLocaleString()}`,
+          `ID#: ${bankIDNumber}`,
+          `DL#: ${bankDLNumber}`,
+          `SIG: "${bankSignature}"`,
+          `STATUS: ACTIVE | BAL: $${accountBalance.toLocaleString()}`,
           "",
-          "MANUAL COMPARISON CHECKLIST:",
-          "----------------------------",
-          "• Name spelling (exact match required)",
-          "• Account numbers (all docs must match)",  
-          "• Address details (street, city, state, zip)",
-          "• Date of birth (MM/DD/YYYY format)",
-          "• ID number from driver's license",
-          "• DL number from driver's license",
-          "• Signature style and characteristics",
+          "CUSTOMER DOCUMENTS:",
+          "-------------------",
+          `ID CARD NAME: ${customerIdDoc?.data.name || 'N/A'}`,
+          `ID CARD ACCT: ${customerIdDoc?.data.accountNumber || 'N/A'}`,
+          `ID CARD ADDR: ${customerIdDoc?.data.address || 'N/A'}`,
+          `ID CARD DOB: ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
+          `ID CARD ID#: ${customerIdDoc?.data.idNumber || 'N/A'}`,
+          `ID CARD DL#: ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
           "",
-          "EXAMINE CUSTOMER DOCUMENTS NOW",
-          "Compare each field above manually",
-          "Look for ANY discrepancies",
+          `SLIP NAME: ${customerSlipDoc?.data.name || 'N/A'}`,
+          `SLIP ACCT: ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
+          `SLIP AMT: $${customerSlipDoc?.data.amount || 'N/A'}`,
+          "",
+          `BOOK NAME: ${customerBankDoc?.data.name || 'N/A'}`,
+          `BOOK ACCT: ${customerBankDoc?.data.accountNumber || 'N/A'}`,
+          "",
+          `SIGNATURE: ${customerSigDoc?.data.signature || 'N/A'}`,
+          "",
+          "COMPARE ALL FIELDS MANUALLY",
+          "Look for mismatches between bank records",
+          "and customer documents above",
           "==========================================",
-          "",
-          "Use APPROVE if all details match exactly",
-          "Use REJECT if ANY field doesn't match",
           ""
         ]);
         
@@ -1052,8 +1102,8 @@ function App() {
           color: '#ffffff',
           fontSize: '18px',
           fontFamily: 'monospace',
-          minHeight: '240px',
-          height: '240px',
+          minHeight: '180px',
+          height: '180px',
           width: '100%',
           position: 'relative',
           boxShadow: '0 0 25px rgba(255, 255, 0, 0.8)',
