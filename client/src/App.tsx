@@ -2386,44 +2386,42 @@ function App() {
                 <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
               </div>
               
-              {/* Bank Records Comparison - Always Show After Lookup */}
-              {verificationState.accountLookedUp && (
-                <div style={{
-                  padding: '16px',
-                  background: '#000000',
-                  border: '3px solid #00ff00',
-                  borderRadius: '8px',
-                  marginTop: '16px'
+              {/* Bank Records Comparison - Always Show */}
+              <div style={{
+                padding: '16px',
+                background: '#000000',
+                border: '3px solid #00ff00',
+                borderRadius: '8px',
+                marginTop: '16px'
+              }}>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  marginBottom: '12px', 
+                  textAlign: 'center', 
+                  color: '#00ff00',
+                  fontSize: '20px',
+                  textShadow: '0 0 10px #00ff00'
                 }}>
-                  <div style={{ 
-                    fontWeight: 'bold', 
-                    marginBottom: '12px', 
-                    textAlign: 'center', 
-                    color: '#00ff00',
-                    fontSize: '20px',
-                    textShadow: '0 0 10px #00ff00'
-                  }}>
-                    🏦 BANK COMPUTER RECORDS 🏦
-                  </div>
-                  <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
-                    <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
-                    <div><strong>DOB:</strong> {bankRecords?.dateOfBirth || "05/15/1975"}</div>
-                    <div><strong>ADDRESS:</strong> {bankRecords?.address || "1234 Main Street, Springfield, CA 90210"}</div>
-                    <div><strong>ID#:</strong> {bankRecords?.idNumber || "ID987654321"}</div>
-                    <div><strong>LICENSE:</strong> {bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
-                  </div>
-                  <div style={{ 
-                    marginTop: '12px', 
-                    fontSize: '14px', 
-                    textAlign: 'center',
-                    color: '#ffff00',
-                    fontWeight: 'bold',
-                    textShadow: '0 0 5px #ffff00'
-                  }}>
-                    ⚠️ COMPARE WITH CUSTOMER DOCS ABOVE ⚠️
-                  </div>
+                  🏦 BANK COMPUTER RECORDS 🏦
                 </div>
-              )}
+                <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+                  <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
+                  <div><strong>DOB:</strong> {bankRecords?.dateOfBirth || "05/15/1975"}</div>
+                  <div><strong>ADDRESS:</strong> {bankRecords?.address || "1234 Main Street, Springfield, CA 90210"}</div>
+                  <div><strong>ID#:</strong> {bankRecords?.idNumber || "ID987654321"}</div>
+                  <div><strong>LICENSE:</strong> {bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
+                </div>
+                <div style={{ 
+                  marginTop: '12px', 
+                  fontSize: '14px', 
+                  textAlign: 'center',
+                  color: '#ffff00',
+                  fontWeight: 'bold',
+                  textShadow: '0 0 5px #ffff00'
+                }}>
+                  ⚠️ COMPARE WITH CUSTOMER DOCS ABOVE ⚠️
+                </div>
+              </div>
             </div>
           )}
           
@@ -2448,43 +2446,41 @@ function App() {
                 )}
               </div>
               
-              {/* Bank Records Comparison - Always Show After Lookup */}
-              {verificationState.accountLookedUp && (
-                <div style={{
-                  padding: '16px',
-                  background: '#000000',
-                  border: '3px solid #00ff00',
-                  borderRadius: '8px',
-                  marginTop: '16px'
+              {/* Bank Records Comparison - Always Show */}
+              <div style={{
+                padding: '16px',
+                background: '#000000',
+                border: '3px solid #00ff00',
+                borderRadius: '8px',
+                marginTop: '16px'
+              }}>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  marginBottom: '12px', 
+                  textAlign: 'center', 
+                  color: '#00ff00',
+                  fontSize: '20px',
+                  textShadow: '0 0 10px #00ff00'
                 }}>
-                  <div style={{ 
-                    fontWeight: 'bold', 
-                    marginBottom: '12px', 
-                    textAlign: 'center', 
-                    color: '#00ff00',
-                    fontSize: '20px',
-                    textShadow: '0 0 10px #00ff00'
-                  }}>
-                    🏦 BANK COMPUTER RECORDS 🏦
-                  </div>
-                  <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
-                    <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
-                    <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
-                    <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
-                    <div><strong>STATUS:</strong> ACTIVE</div>
-                  </div>
-                  <div style={{ 
-                    marginTop: '12px', 
-                    fontSize: '14px', 
-                    textAlign: 'center',
-                    color: '#ffff00',
-                    fontWeight: 'bold',
-                    textShadow: '0 0 5px #ffff00'
-                  }}>
-                    ⚠️ VERIFY TRANSACTION DETAILS MATCH ⚠️
-                  </div>
+                  🏦 BANK COMPUTER RECORDS 🏦
                 </div>
-              )}
+                <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+                  <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
+                  <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
+                  <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                  <div><strong>STATUS:</strong> ACTIVE</div>
+                </div>
+                <div style={{ 
+                  marginTop: '12px', 
+                  fontSize: '14px', 
+                  textAlign: 'center',
+                  color: '#ffff00',
+                  fontWeight: 'bold',
+                  textShadow: '0 0 5px #ffff00'
+                }}>
+                  ⚠️ VERIFY TRANSACTION DETAILS MATCH ⚠️
+                </div>
+              </div>
             </div>
           )}
           
@@ -2506,43 +2502,41 @@ function App() {
                 <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
               </div>
               
-              {/* Bank Records Comparison - Always Show After Lookup */}
-              {verificationState.accountLookedUp && (
-                <div style={{
-                  padding: '16px',
-                  background: '#000000',
-                  border: '3px solid #00ff00',
-                  borderRadius: '8px',
-                  marginTop: '16px'
+              {/* Bank Records Comparison - Always Show */}
+              <div style={{
+                padding: '16px',
+                background: '#000000',
+                border: '3px solid #00ff00',
+                borderRadius: '8px',
+                marginTop: '16px'
+              }}>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  marginBottom: '12px', 
+                  textAlign: 'center', 
+                  color: '#00ff00',
+                  fontSize: '20px',
+                  textShadow: '0 0 10px #00ff00'
                 }}>
-                  <div style={{ 
-                    fontWeight: 'bold', 
-                    marginBottom: '12px', 
-                    textAlign: 'center', 
-                    color: '#00ff00',
-                    fontSize: '20px',
-                    textShadow: '0 0 10px #00ff00'
-                  }}>
-                    🏦 BANK COMPUTER RECORDS 🏦
-                  </div>
-                  <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
-                    <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
-                    <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
-                    <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
-                    <div><strong>STATUS:</strong> ACTIVE</div>
-                  </div>
-                  <div style={{ 
-                    marginTop: '12px', 
-                    fontSize: '14px', 
-                    textAlign: 'center',
-                    color: '#ffff00',
-                    fontWeight: 'bold',
-                    textShadow: '0 0 5px #ffff00'
-                  }}>
-                    ⚠️ VERIFY ACCOUNT BALANCE MATCHES ⚠️
-                  </div>
+                  🏦 BANK COMPUTER RECORDS 🏦
                 </div>
-              )}
+                <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+                  <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
+                  <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
+                  <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                  <div><strong>STATUS:</strong> ACTIVE</div>
+                </div>
+                <div style={{ 
+                  marginTop: '12px', 
+                  fontSize: '14px', 
+                  textAlign: 'center',
+                  color: '#ffff00',
+                  fontWeight: 'bold',
+                  textShadow: '0 0 5px #ffff00'
+                }}>
+                  ⚠️ VERIFY ACCOUNT BALANCE MATCHES ⚠️
+                </div>
+              </div>
             </div>
           )}
           
@@ -2572,53 +2566,51 @@ function App() {
                 </div>
               </div>
               
-              {/* Bank Signature Comparison - Always Show After Lookup */}
-              {verificationState.accountLookedUp && (
-                <div style={{
-                  marginTop: '16px',
-                  padding: '16px',
-                  background: '#000000',
-                  border: '3px solid #00ff00',
-                  borderRadius: '8px'
+              {/* Bank Signature Comparison - Always Show */}
+              <div style={{
+                marginTop: '16px',
+                padding: '16px',
+                background: '#000000',
+                border: '3px solid #00ff00',
+                borderRadius: '8px'
+              }}>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  marginBottom: '12px', 
+                  textAlign: 'center', 
+                  color: '#00ff00',
+                  fontSize: '18px',
+                  textShadow: '0 0 10px #00ff00'
                 }}>
-                  <div style={{ 
-                    fontWeight: 'bold', 
-                    marginBottom: '12px', 
-                    textAlign: 'center', 
-                    color: '#00ff00',
-                    fontSize: '18px',
-                    textShadow: '0 0 10px #00ff00'
-                  }}>
-                    🏦 BANK SIGNATURE ON FILE 🏦
-                  </div>
-                  <div style={{
-                    fontSize: '24px',
-                    fontFamily: 'Georgia, "Times New Roman", serif',
-                    color: '#00ff00',
-                    fontWeight: 'bold',
-                    letterSpacing: '2px',
-                    fontStyle: 'italic',
-                    textAlign: 'center',
-                    textShadow: '0 0 15px #00ff00',
-                    padding: '12px',
-                    border: '2px solid #00ff00',
-                    borderRadius: '6px',
-                    background: 'rgba(0, 255, 0, 0.1)'
-                  }}>
-                    {bankRecords?.signature?.replace(/\|.*$/, '') || bankRecords?.name || currentCustomer?.name || "John Doe"}
-                  </div>
-                  <div style={{ 
-                    marginTop: '12px', 
-                    fontSize: '14px', 
-                    textAlign: 'center',
-                    color: '#ffff00',
-                    fontWeight: 'bold',
-                    textShadow: '0 0 5px #ffff00'
-                  }}>
-                    ⚠️ COMPARE WITH CUSTOMER SIGNATURE ABOVE ⚠️
-                  </div>
+                  🏦 BANK SIGNATURE ON FILE 🏦
                 </div>
-              )}
+                <div style={{
+                  fontSize: '24px',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#00ff00',
+                  fontWeight: 'bold',
+                  letterSpacing: '2px',
+                  fontStyle: 'italic',
+                  textAlign: 'center',
+                  textShadow: '0 0 15px #00ff00',
+                  padding: '12px',
+                  border: '2px solid #00ff00',
+                  borderRadius: '6px',
+                  background: 'rgba(0, 255, 0, 0.1)'
+                }}>
+                  {bankRecords?.signature?.replace(/\|.*$/, '') || bankRecords?.name || currentCustomer?.name || "John Doe"}
+                </div>
+                <div style={{ 
+                  marginTop: '12px', 
+                  fontSize: '14px', 
+                  textAlign: 'center',
+                  color: '#ffff00',
+                  fontWeight: 'bold',
+                  textShadow: '0 0 5px #ffff00'
+                }}>
+                  ⚠️ COMPARE WITH CUSTOMER SIGNATURE ABOVE ⚠️
+                </div>
+              </div>
             </div>
           )}
           
