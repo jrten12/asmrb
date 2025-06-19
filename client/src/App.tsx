@@ -1601,19 +1601,21 @@ function App() {
           }}>
             {/* Terminal Output */}
             <div style={{
-              background: '#1a1a1a',
-              border: '2px solid #3498db',
+              background: '#000000',
+              border: '3px solid #00ff00',
               borderRadius: '8px',
-              padding: '16px',
+              padding: '20px',
               height: '28vh',
               overflowY: 'auto',
-              fontSize: '13px',
-              fontFamily: '"SF Mono", "Monaco", "Cascadia Code", monospace',
-              lineHeight: '1.5',
+              fontSize: '16px',
+              fontFamily: '"Arial", "Helvetica", sans-serif',
+              fontWeight: 'bold',
+              lineHeight: '1.6',
               wordWrap: 'break-word',
               whiteSpace: 'pre-wrap',
-              color: '#ecf0f1',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+              color: '#00ff00',
+              textShadow: '0 0 5px #00ff00',
+              boxShadow: '0 0 20px rgba(0, 255, 0, 0.5)'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ 
@@ -1879,7 +1881,7 @@ function App() {
                 width: '100%',
                 boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)'
               }}>
-                <div style={{ margin: '0 0 14px 0', fontSize: '15px', fontWeight: 'bold', color: '#f39c12' }}>
+                <div style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 'bold', color: '#ffffff', textShadow: '0 0 10px #f39c12' }}>
                   CUSTOMER DOCUMENTS
                 </div>
                 <div style={{
@@ -1896,19 +1898,21 @@ function App() {
                            setShowDocumentPopup(true);
                          }}
                          style={{
-                      background: 'linear-gradient(145deg, #8e44ad, #9b59b6)',
-                      border: '2px solid #e74c3c',
+                      background: '#000000',
+                      border: '3px solid #00ff00',
                       borderRadius: '8px',
-                      padding: '10px',
-                      height: '85px',
+                      padding: '12px',
+                      height: '100px',
                       overflow: 'hidden',
-                      fontSize: '11px',
-                      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                      color: '#ffffff',
+                      fontSize: '14px',
+                      fontFamily: '"Arial", "Helvetica", sans-serif',
+                      fontWeight: 'bold',
+                      color: '#00ff00',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 4px 12px rgba(142, 68, 173, 0.4)',
-                      textAlign: 'center'
+                      boxShadow: '0 0 15px rgba(0, 255, 0, 0.6)',
+                      textAlign: 'center',
+                      textShadow: '0 0 8px #00ff00'
                     }}>
                       <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                         {doc.type.toUpperCase().replace('_', ' ')} DOCUMENT
@@ -2285,15 +2289,18 @@ function App() {
             borderRadius: '12px',
             padding: '16px',
             color: '#ffffff',
-            fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-            fontSize: '14px',
+            fontFamily: '"Arial", "Helvetica", sans-serif',
+            fontSize: '18px',
+            fontWeight: 'bold',
             zIndex: 1500,
             boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)',
             overflow: 'auto',
             cursor: isDragging ? 'grabbing' : 'grab',
-            userSelect: 'none'
+            userSelect: 'none',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.9)'
           }}
           onMouseDown={(e) => {
+            e.preventDefault();
             setIsDragging(true);
             setDragOffset({
               x: e.clientX - popupPosition.x,
@@ -2301,6 +2308,7 @@ function App() {
             });
           }}
           onTouchStart={(e) => {
+            e.preventDefault();
             const touch = e.touches[0];
             setIsDragging(true);
             setDragOffset({
@@ -2308,6 +2316,27 @@ function App() {
               y: touch.clientY - popupPosition.y
             });
           }}
+          onMouseMove={(e) => {
+            if (isDragging) {
+              e.preventDefault();
+              setPopupPosition({
+                x: Math.max(0, Math.min(window.innerWidth - 320, e.clientX - dragOffset.x)),
+                y: Math.max(0, Math.min(window.innerHeight - 450, e.clientY - dragOffset.y))
+              });
+            }
+          }}
+          onTouchMove={(e) => {
+            if (isDragging) {
+              e.preventDefault();
+              const touch = e.touches[0];
+              setPopupPosition({
+                x: Math.max(0, Math.min(window.innerWidth - 320, touch.clientX - dragOffset.x)),
+                y: Math.max(0, Math.min(window.innerHeight - 450, touch.clientY - dragOffset.y))
+              });
+            }
+          }}
+          onMouseUp={() => setIsDragging(false)}
+          onTouchEnd={() => setIsDragging(false)}
 >
           <div style={{
             display: 'flex',
@@ -2356,30 +2385,41 @@ function App() {
                 <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
               </div>
               
-              {/* Bank Records Comparison */}
-              {verificationState.accountLookedUp && bankRecords && (
+              {/* Bank Records Comparison - Always Show After Lookup */}
+              {verificationState.accountLookedUp && (
                 <div style={{
-                  padding: '12px',
-                  background: 'linear-gradient(145deg, #10ac84, #00a085)',
-                  border: '2px solid #00ff88',
-                  borderRadius: '8px'
+                  padding: '16px',
+                  background: '#000000',
+                  border: '3px solid #00ff00',
+                  borderRadius: '8px',
+                  marginTop: '16px'
                 }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'center', color: '#ffffff' }}>
-                    BANK RECORDS - COMPARE ABOVE
-                  </div>
-                  <div><strong>NAME:</strong> {bankRecords.name || currentCustomer?.name}</div>
-                  <div><strong>DOB:</strong> {bankRecords.dateOfBirth || "05/15/1975"}</div>
-                  <div><strong>ADDRESS:</strong> {bankRecords.address || "1234 Main Street, Springfield, CA 90210"}</div>
-                  <div><strong>ID#:</strong> {bankRecords.idNumber || "ID987654321"}</div>
-                  <div><strong>LICENSE:</strong> {bankRecords.licenseNumber || "DL-ABC123XY"}</div>
                   <div style={{ 
-                    marginTop: '8px', 
-                    fontSize: '12px', 
-                    textAlign: 'center',
-                    color: '#ffffff',
-                    fontStyle: 'italic'
+                    fontWeight: 'bold', 
+                    marginBottom: '12px', 
+                    textAlign: 'center', 
+                    color: '#00ff00',
+                    fontSize: '20px',
+                    textShadow: '0 0 10px #00ff00'
                   }}>
-                    Look for mismatches - fraud uses wrong info
+                    🏦 BANK COMPUTER RECORDS 🏦
+                  </div>
+                  <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+                    <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
+                    <div><strong>DOB:</strong> {bankRecords?.dateOfBirth || "05/15/1975"}</div>
+                    <div><strong>ADDRESS:</strong> {bankRecords?.address || "1234 Main Street, Springfield, CA 90210"}</div>
+                    <div><strong>ID#:</strong> {bankRecords?.idNumber || "ID987654321"}</div>
+                    <div><strong>LICENSE:</strong> {bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
+                  </div>
+                  <div style={{ 
+                    marginTop: '12px', 
+                    fontSize: '14px', 
+                    textAlign: 'center',
+                    color: '#ffff00',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px #ffff00'
+                  }}>
+                    ⚠️ COMPARE WITH CUSTOMER DOCS ABOVE ⚠️
                   </div>
                 </div>
               )}
@@ -2433,37 +2473,50 @@ function App() {
                 </div>
               </div>
               
-              {/* Bank Records Comparison */}
-              {verificationState.accountLookedUp && bankRecords && (
+              {/* Bank Signature Comparison - Always Show After Lookup */}
+              {verificationState.accountLookedUp && (
                 <div style={{
                   marginTop: '16px',
-                  padding: '12px',
-                  background: 'linear-gradient(145deg, #10ac84, #00a085)',
-                  border: '2px solid #00ff88',
+                  padding: '16px',
+                  background: '#000000',
+                  border: '3px solid #00ff00',
                   borderRadius: '8px'
                 }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'center', color: '#ffffff' }}>
-                    BANK SIGNATURE ON FILE:
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '12px', 
+                    textAlign: 'center', 
+                    color: '#00ff00',
+                    fontSize: '18px',
+                    textShadow: '0 0 10px #00ff00'
+                  }}>
+                    🏦 BANK SIGNATURE ON FILE 🏦
                   </div>
                   <div style={{
-                    fontSize: '18px',
+                    fontSize: '24px',
                     fontFamily: 'Georgia, "Times New Roman", serif',
-                    color: '#ffffff',
+                    color: '#00ff00',
                     fontWeight: 'bold',
-                    letterSpacing: '1px',
+                    letterSpacing: '2px',
                     fontStyle: 'italic',
                     textAlign: 'center',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                    textShadow: '0 0 15px #00ff00',
+                    padding: '12px',
+                    border: '2px solid #00ff00',
+                    borderRadius: '6px',
+                    background: 'rgba(0, 255, 0, 0.1)'
                   }}>
-                    {bankRecords.signature?.replace(/\|.*$/, '') || bankRecords.name || currentCustomer?.name}
+                    {bankRecords?.signature?.replace(/\|.*$/, '') || bankRecords?.name || currentCustomer?.name || "John Doe"}
                   </div>
                   <div style={{ 
-                    marginTop: '8px', 
-                    fontSize: '12px', 
+                    marginTop: '12px', 
+                    fontSize: '14px', 
                     textAlign: 'center',
-                    color: '#ffffff'
+                    color: '#ffff00',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px #ffff00'
                   }}>
-                    Compare signatures for fraud detection
+                    ⚠️ COMPARE WITH CUSTOMER SIGNATURE ABOVE ⚠️
                   </div>
                 </div>
               )}
