@@ -1394,9 +1394,9 @@ function App() {
       height: '100vh',
       minHeight: '100vh',
       maxHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-      color: '#00ff00',
-      fontFamily: 'monospace',
+      background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+      color: '#212529',
+      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
       position: 'fixed',
       top: 0,
       left: 0,
@@ -1412,14 +1412,15 @@ function App() {
           position: 'fixed',
           top: '10px',
           right: '10px',
-          background: musicMuted ? '#666' : '#00ff00',
-          color: musicMuted ? '#fff' : '#000',
+          background: musicMuted ? '#6c757d' : '#0d6efd',
+          color: '#ffffff',
           border: 'none',
           padding: '8px 12px',
-          borderRadius: '4px',
+          borderRadius: '8px',
           cursor: 'pointer',
           fontSize: '12px',
-          zIndex: 1000
+          zIndex: 1000,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}
       >
         {musicMuted ? '🔇 MUSIC OFF' : '🎵 MUSIC ON'}
