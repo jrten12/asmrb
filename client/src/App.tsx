@@ -1763,55 +1763,62 @@ function App() {
             {/* Customer Display - Larger */}
             {currentCustomer && (
               <div style={{
-                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '2px solid #ffff00',
-                borderRadius: '6px',
-                padding: '10px',
+                background: '#ffffff',
+                border: '2px solid #007bff',
+                borderRadius: '12px',
+                padding: '16px',
                 textAlign: 'center',
-                fontSize: '12px'
+                fontSize: '14px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#007bff' }}>
                   CUSTOMER: {currentCustomer.name}
                 </div>
-                <div style={{ marginBottom: '2px' }}>
+                <div style={{ marginBottom: '4px', color: '#212529' }}>
                   {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '11px', opacity: 0.9 }}>
+                <div style={{ fontSize: '12px', color: '#6c757d' }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
 
-            {/* Account Information - Compact */}
+            {/* Account Information - Modern */}
             {verificationState.accountLookedUp && (
               <div style={{
-                background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
-                border: '1px solid #00ff00',
-                borderRadius: '4px',
-                padding: '6px',
-                fontSize: '11px'
+                background: '#e8f5e8',
+                border: '2px solid #198754',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '12px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
               }}>
-                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '2px' }}>
-                  BANK RECORDS
+                <div style={{ color: '#198754', fontWeight: 'bold', marginBottom: '6px' }}>
+                  🏦 BANK COMPUTER RECORDS
                 </div>
-                <div>ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
+                <div style={{ color: '#212529' }}>
+                  <strong>Status:</strong> ACTIVE | <strong>Balance:</strong> ${accountBalance.toLocaleString()}
+                  <br/>
+                  <strong>Account Holder:</strong> {currentCustomer?.name}
+                </div>
               </div>
             )}
 
-            {/* Documents - COMPACT AND ORGANIZED */}
+            {/* Documents - CLEAN AND ORGANIZED */}
             {currentCustomer && (
               <div style={{
-                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '2px solid #ffff00',
-                borderRadius: '8px',
-                padding: '12px',
+                background: '#ffffff',
+                border: '2px solid #dee2e6',
+                borderRadius: '12px',
+                padding: '16px',
                 height: '38vh',
                 overflow: 'auto',
                 flex: 'none',
-                width: '100%'
+                width: '100%',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
               }}>
-                <div style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: 'bold', color: '#ffff00' }}>
-                  CUSTOMER DOCUMENTS
+                <div style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: '#007bff' }}>
+                  📄 CUSTOMER DOCUMENTS
                 </div>
                 <div style={{
                   display: 'grid',
@@ -1827,17 +1834,18 @@ function App() {
                            setShowDocumentPopup(true);
                          }}
                          style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #00ff00',
-                      borderRadius: '4px',
-                      padding: '6px',
-                      height: '120px',
+                      background: '#f8f9fa',
+                      border: '2px solid #007bff',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      height: '140px',
                       overflow: 'hidden',
-                      fontSize: '9px',
-                      fontFamily: 'monospace',
-                      color: '#00ff00',
+                      fontSize: '11px',
+                      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+                      color: '#212529',
                       cursor: 'pointer',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                     }}>
                       <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                         {doc.type.toUpperCase().replace('_', ' ')} DOCUMENT
