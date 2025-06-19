@@ -222,6 +222,11 @@ function App() {
         ctx.resume();
       }
       
+      // Ensure audio context is running
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
       switch (soundType) {
         case 'typing':
           // Mechanical keyboard click
@@ -230,10 +235,11 @@ function App() {
           typingOsc.connect(typingGain);
           typingGain.connect(ctx.destination);
           typingOsc.frequency.setValueAtTime(800, ctx.currentTime);
-          typingGain.gain.setValueAtTime(0.15, ctx.currentTime);
+          typingGain.gain.setValueAtTime(0.25, ctx.currentTime);
           typingGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
           typingOsc.start();
           typingOsc.stop(ctx.currentTime + 0.1);
+          console.log('Playing typing sound');
           break;
           
         case 'cash':
@@ -244,10 +250,11 @@ function App() {
           cashGain.connect(ctx.destination);
           cashOsc.frequency.setValueAtTime(1200, ctx.currentTime);
           cashOsc.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
-          cashGain.gain.setValueAtTime(0.2, ctx.currentTime);
+          cashGain.gain.setValueAtTime(0.4, ctx.currentTime);
           cashGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
           cashOsc.start();
           cashOsc.stop(ctx.currentTime + 0.3);
+          console.log('Playing cash register sound');
           break;
           
         case 'reject':
@@ -258,10 +265,11 @@ function App() {
           rejectGain.connect(ctx.destination);
           rejectOsc.frequency.setValueAtTime(200, ctx.currentTime);
           rejectOsc.type = 'sawtooth';
-          rejectGain.gain.setValueAtTime(0.15, ctx.currentTime);
+          rejectGain.gain.setValueAtTime(0.3, ctx.currentTime);
           rejectGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
           rejectOsc.start();
           rejectOsc.stop(ctx.currentTime + 0.5);
+          console.log('Playing reject sound');
           break;
           
         case 'keypad_click':
@@ -920,51 +928,74 @@ function App() {
         const customerBankDoc = currentCustomer.documents.find(d => d.type === 'bank_book');
         const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
         
-        // Bank records (what should be correct)
+        // Bank records (what should be correct) - generate real comparison data
         const bankName = currentCustomer.name;
         const bankAccount = currentCustomer.transaction.accountNumber;
-        const bankAddress = "1234 Main Street, Springfield, CA 90210";
-        const bankDOB = "05/15/1975";
-        const bankDLNumber = "DL-ABC123XY";
-        const bankIDNumber = "ID987654321";
-        const bankSignature = `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+        
+        // Create realistic fraud scenarios for manual detection
+        const fraudTypes = ['address', 'dob', 'dl_number', 'id_number', 'signature'];
+        const shouldHaveMismatch = Math.random() < 0.4; // 40% chance of fraud
+        const fraudType = shouldHaveMismatch ? fraudTypes[Math.floor(Math.random() * fraudTypes.length)] : null;
+        
+        const bankAddress = shouldHaveMismatch ? 
+          "5678 Different Street, Riverside, CA 94102" : 
+          customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+          
+        const bankDOB = shouldHaveMismatch ? 
+          "03/22/1980" : 
+          customerIdDoc?.data.dateOfBirth || "05/15/1975";
+          
+        const bankDLNumber = shouldHaveMismatch ? 
+          "DL-XYZ789AB" : 
+          customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+          
+        const bankIDNumber = shouldHaveMismatch ? 
+          "ID123456789" : 
+          customerIdDoc?.data.idNumber || "ID987654321";
+          
+        const bankSignature = shouldHaveMismatch ? 
+          `${bankName.split(' ').map(n => n[0]).join('')}_different_style` : 
+          customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
         
         setTerminalOutput(prev => [...prev,
-          "BANK RECORDS vs CUSTOMER DOCUMENTS",
+          "SIGNATURE & DOCUMENT VERIFICATION",
           "==========================================",
           "",
-          "BANK RECORDS:",
-          "-------------------",
-          `NAME: ${bankName}`,
-          `ACCOUNT: ${bankAccount}`,
-          `ADDRESS: ${bankAddress}`,
-          `DOB: ${bankDOB}`,
-          `ID#: ${bankIDNumber}`,
-          `DL#: ${bankDLNumber}`,
-          `SIG: "${bankSignature}"`,
-          `STATUS: ACTIVE | BAL: $${accountBalance.toLocaleString()}`,
+          "BANK SIGNATURE ON FILE:",
+          `"${bankSignature}"`,
           "",
-          "CUSTOMER DOCUMENTS:",
-          "-------------------",
-          `ID CARD NAME: ${customerIdDoc?.data.name || 'N/A'}`,
-          `ID CARD ACCT: ${customerIdDoc?.data.accountNumber || 'N/A'}`,
-          `ID CARD ADDR: ${customerIdDoc?.data.address || 'N/A'}`,
-          `ID CARD DOB: ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
-          `ID CARD ID#: ${customerIdDoc?.data.idNumber || 'N/A'}`,
-          `ID CARD DL#: ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
+          "CUSTOMER SIGNATURE CARD:",
+          `"${customerSigDoc?.data.signature || 'NO SIGNATURE'}"`,
           "",
-          `SLIP NAME: ${customerSlipDoc?.data.name || 'N/A'}`,
-          `SLIP ACCT: ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
-          `SLIP AMT: $${customerSlipDoc?.data.amount || 'N/A'}`,
+          "SIGNATURE COMPARISON:",
+          shouldHaveMismatch ? "❌ SIGNATURES DO NOT MATCH" : "✓ SIGNATURES MATCH",
           "",
-          `BOOK NAME: ${customerBankDoc?.data.name || 'N/A'}`,
-          `BOOK ACCT: ${customerBankDoc?.data.accountNumber || 'N/A'}`,
+          "BANK RECORDS vs CUSTOMER ID:",
+          "----------------------------",
+          `BANK NAME: ${bankName}`,
+          `ID CARD:   ${customerIdDoc?.data.name || 'N/A'}`,
           "",
-          `SIGNATURE: ${customerSigDoc?.data.signature || 'N/A'}`,
+          `BANK ADDR: ${bankAddress}`,
+          `ID CARD:   ${customerIdDoc?.data.address || 'N/A'}`,
           "",
-          "COMPARE ALL FIELDS MANUALLY",
-          "Look for mismatches between bank records",
-          "and customer documents above",
+          `BANK DOB:  ${bankDOB}`,
+          `ID CARD:   ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
+          "",
+          `BANK DL#:  ${bankDLNumber}`,
+          `ID CARD:   ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
+          "",
+          "ACCOUNT VERIFICATION:",
+          "--------------------",
+          `TRANSACTION: ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
+          `BANK BOOK:   ${customerBankDoc?.data.accountNumber || 'N/A'}`,
+          `ID CARD:     ${customerIdDoc?.data.accountNumber || 'N/A'}`,
+          "",
+          shouldHaveMismatch ? 
+            "⚠️  FRAUD DETECTED - DOCUMENT MISMATCH" : 
+            "✓ ALL DOCUMENTS VERIFIED",
+          "",
+          "MANUAL DECISION REQUIRED:",
+          "Use APPROVE or REJECT based on verification",
           "==========================================",
           ""
         ]);
