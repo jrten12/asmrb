@@ -672,7 +672,11 @@ function App() {
     return (
       <div
         key={doc.id}
-        onClick={() => setSelectedDocument(doc)}
+        onClick={() => {
+          setSelectedPopupDocument(doc);
+          setPopupPosition({ x: 50, y: 50 });
+          playSound('paper');
+        }}
         style={{
           background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
           border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
@@ -1105,6 +1109,202 @@ function App() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Draggable Document Popup with Bank Computer Records */}
+      {selectedPopupDocument && (
+        <div style={{
+          position: 'fixed',
+          left: `${popupPosition.x}px`,
+          top: `${popupPosition.y}px`,
+          width: '350px',
+          height: '550px',
+          background: 'linear-gradient(145deg, #001100, #002200)',
+          border: '3px solid #00ff00',
+          borderRadius: '8px',
+          padding: '15px',
+          zIndex: 1000,
+          boxShadow: '0 0 30px rgba(0, 255, 0, 0.5)',
+          cursor: isDraggingPopup ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          overflowY: 'auto'
+        }}
+        onMouseDown={(e) => {
+          setIsDraggingPopup(true);
+          setDragOffset({
+            x: e.clientX - popupPosition.x,
+            y: e.clientY - popupPosition.y
+          });
+        }}
+        onTouchStart={(e) => {
+          const touch = e.touches[0];
+          setIsDraggingPopup(true);
+          setDragOffset({
+            x: touch.clientX - popupPosition.x,
+            y: touch.clientY - popupPosition.y
+          });
+        }}
+        >
+          {/* Popup Header */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px',
+            borderBottom: '2px solid #00ff00',
+            paddingBottom: '10px'
+          }}>
+            <div style={{ 
+              color: '#00ff00', 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              textShadow: '0 0 10px #00ff00'
+            }}>
+              {selectedPopupDocument.type === 'id' ? '🆔 ID CARD' : 
+               selectedPopupDocument.type === 'slip' ? '📝 TRANSACTION SLIP' : 
+               selectedPopupDocument.type === 'bank_book' ? '📖 BANK BOOK' : 
+               selectedPopupDocument.type === 'signature' ? '✍️ SIGNATURE' : '📄 DOCUMENT'}
+            </div>
+            <button
+              onClick={() => setSelectedPopupDocument(null)}
+              style={{
+                background: '#ff0000',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '5px 10px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Bank Computer Records Section */}
+          <div style={{
+            background: 'rgba(0, 80, 0, 0.6)',
+            border: '2px solid #00ff00',
+            borderRadius: '6px',
+            padding: '12px',
+            marginBottom: '15px'
+          }}>
+            <div style={{
+              color: '#00ff00',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: '10px',
+              textShadow: '0 0 10px #00ff00'
+            }}>
+              🏦 BANK COMPUTER RECORDS 🏦
+            </div>
+            <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+              <div><strong>NAME:</strong> {currentCustomer?.name || "John Doe"}</div>
+              <div><strong>DOB:</strong> 05/15/1975</div>
+              <div><strong>ADDRESS:</strong> 1234 Main Street, Springfield, CA 90210</div>
+              <div><strong>ID#:</strong> ID987654321</div>
+              <div><strong>LICENSE:</strong> DL-ABC123XY</div>
+            </div>
+            <div style={{ 
+              marginTop: '12px', 
+              padding: '8px',
+              background: 'rgba(0, 100, 0, 0.3)',
+              borderRadius: '4px',
+              fontSize: '14px',
+              color: '#ffffff'
+            }}>
+              <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
+              <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+              <div><strong>STATUS:</strong> ACTIVE</div>
+            </div>
+          </div>
+
+          {/* Document Details Section */}
+          <div style={{
+            background: 'rgba(80, 80, 0, 0.6)',
+            border: '2px solid #ffff00',
+            borderRadius: '6px',
+            padding: '12px'
+          }}>
+            <div style={{
+              color: '#ffff00',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: '10px'
+            }}>
+              📄 CUSTOMER DOCUMENT
+            </div>
+            <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+              {Object.entries(selectedPopupDocument.data).map(([key, value]) => (
+                <div key={key} style={{ 
+                  marginBottom: '8px',
+                  padding: '6px',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: '4px'
+                }}>
+                  <div style={{ color: '#00dddd', fontSize: '12px', fontWeight: 'bold' }}>
+                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                  </div>
+                  <div style={{ color: '#ffffff', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                    {String(value)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Fraud Detection Instructions */}
+          <div style={{
+            marginTop: '15px',
+            padding: '10px',
+            background: 'rgba(100, 0, 100, 0.4)',
+            border: '2px solid #ff00ff',
+            borderRadius: '6px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '14px', color: '#ff00ff', fontWeight: 'bold' }}>
+              🔍 COMPARE FOR FRAUD DETECTION
+            </div>
+            <div style={{ fontSize: '12px', color: '#cccccc', marginTop: '5px' }}>
+              Look for mismatches between bank records and customer documents
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mouse/Touch handlers for popup dragging */}
+      {isDraggingPopup && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999,
+            cursor: 'grabbing'
+          }}
+          onMouseMove={(e) => {
+            setPopupPosition({
+              x: e.clientX - dragOffset.x,
+              y: e.clientY - dragOffset.y
+            });
+          }}
+          onMouseUp={() => setIsDraggingPopup(false)}
+          onTouchMove={(e) => {
+            if (e.touches.length > 0) {
+              const touch = e.touches[0];
+              setPopupPosition({
+                x: touch.clientX - dragOffset.x,
+                y: touch.clientY - dragOffset.y
+              });
+            }
+          }}
+          onTouchEnd={() => setIsDraggingPopup(false)}
+        />
       )}
 
       {/* Punch Out Screen */}
