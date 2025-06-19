@@ -2114,10 +2114,10 @@ function App() {
       {showDocumentPopup && popupDocument && (
         <div style={{
           position: 'fixed',
-          top: '15%',
-          right: '20px',
-          width: '300px',
-          height: '350px',
+          top: '10%',
+          right: '10px',
+          width: '280px',
+          height: '320px',
           background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
           border: '2px solid #ffff00',
           borderRadius: '8px',
@@ -2214,8 +2214,35 @@ function App() {
             fontSize: '9px',
             color: '#ffff00'
           }}>
-            Use VERIFY to compare with bank records
+            Compare with bank records below
           </div>
+          
+          <button
+            onClick={() => {
+              playSound('paper_shuffle');
+              if (!currentCustomer) {
+                playSound('reject');
+                setTerminalOutput(prev => [...prev, "ERROR: No customer present"]);
+                return;
+              }
+              handleVerifyCommand();
+            }}
+            style={{
+              marginTop: '8px',
+              background: '#444400',
+              color: '#ffffff',
+              border: '1px solid #ffff00',
+              padding: '8px 12px',
+              fontSize: '10px',
+              fontFamily: 'monospace',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              width: '100%'
+            }}
+          >
+            VERIFY DOCUMENTS
+          </button>
         </div>
       )}
     </div>
