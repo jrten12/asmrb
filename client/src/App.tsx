@@ -192,24 +192,34 @@ function App() {
     }
   }, [admobInitialized, loadInterstitialAd]);
 
+  // Initialize audio context on first user interaction
+  const initializeAudio = () => {
+    if (!window.gameAudioContext) {
+      try {
+        window.gameAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        console.log('Audio context initialized');
+      } catch (e) {
+        console.log('Audio context creation failed:', e);
+      }
+    }
+  };
+
   // Web Audio API for authentic 1980s terminal sounds
   const playSound = (soundType: string) => {
     if (musicMuted) return;
     
     try {
+      // Initialize audio context if needed
       if (!window.gameAudioContext) {
-        window.gameAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        initializeAudio();
       }
       
       const ctx = window.gameAudioContext;
+      if (!ctx) return;
       
-      // Resume context if suspended (browser autoplay policy)
+      // Resume context if suspended
       if (ctx.state === 'suspended') {
-        ctx.resume().then(() => {
-          // Successfully resumed, continue with sound
-        }).catch(() => {
-          console.log('Audio context resume failed - user interaction required');
-        });
+        ctx.resume();
       }
       
       switch (soundType) {
@@ -1102,8 +1112,8 @@ function App() {
           color: '#ffffff',
           fontSize: '18px',
           fontFamily: 'monospace',
-          minHeight: '180px',
-          height: '180px',
+          minHeight: '140px',
+          height: '140px',
           width: '100%',
           position: 'relative',
           boxShadow: '0 0 25px rgba(255, 255, 0, 0.8)',
@@ -1590,8 +1600,8 @@ function App() {
                 border: '3px solid #ffff00',
                 borderRadius: '12px',
                 padding: '20px',
-                minHeight: '70vh',
-                height: '70vh',
+                minHeight: '45vh',
+                height: '45vh',
                 overflow: 'auto',
                 flex: 'none',
                 width: '100%',
