@@ -2342,12 +2342,12 @@ function App() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '8px',
-            borderBottom: '1px solid #007bff',
-            paddingBottom: '4px'
+            marginBottom: '12px',
+            borderBottom: '2px solid #e74c3c',
+            paddingBottom: '8px'
           }}>
-            <div style={{ color: '#007bff', fontWeight: 'bold', fontSize: '11px' }}>
-              {popupDocument.type.toUpperCase().replace('_', ' ')}
+            <div style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '16px', textShadow: '0 0 10px #ffffff' }}>
+              {popupDocument.type.toUpperCase().replace('_', ' ')} DOCUMENT
             </div>
             <div 
               onClick={() => {
@@ -2357,11 +2357,12 @@ function App() {
               }}
               style={{
                 cursor: 'pointer',
-                color: '#dc3545',
-                fontSize: '14px',
-                fontWeight: 'bold'
+                color: '#ff0000',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                textShadow: '0 0 5px #ff0000'
               }}>
-              ×
+              ✕
             </div>
           </div>
           
