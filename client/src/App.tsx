@@ -2209,34 +2209,34 @@ function App() {
         </div>
       )}
 
-      {/* Small Document Popup Viewer */}
+      {/* Compact Document Popup Viewer */}
       {showDocumentPopup && popupDocument && (
         <div style={{
           position: 'fixed',
-          top: '10%',
+          top: '15%',
           left: '10px',
-          width: '320px',
-          height: '400px',
+          width: '280px',
+          height: '320px',
           background: '#2a2a2a',
           border: '2px solid #ffff00',
-          borderRadius: '12px',
-          padding: '20px',
+          borderRadius: '8px',
+          padding: '12px',
           color: '#ffffff',
           fontFamily: 'monospace',
-          fontSize: '12px',
+          fontSize: '11px',
           zIndex: 1500,
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)',
           overflow: 'auto'
         }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '10px',
+            marginBottom: '8px',
             borderBottom: '1px solid #ffff00',
-            paddingBottom: '6px'
+            paddingBottom: '4px'
           }}>
-            <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '11px' }}>
+            <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '10px' }}>
               {popupDocument.type.toUpperCase().replace('_', ' ')}
             </div>
             <div 
@@ -2248,7 +2248,7 @@ function App() {
               style={{
                 cursor: 'pointer',
                 color: '#ffff00',
-                fontSize: '14px',
+                fontSize: '12px',
                 fontWeight: 'bold'
               }}>
               ×
