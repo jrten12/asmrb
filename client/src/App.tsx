@@ -117,6 +117,47 @@ function App() {
   // Document popup state
   const [popupDocument, setPopupDocument] = useState<GameDocument | null>(null);
   const [showDocumentPopup, setShowDocumentPopup] = useState(false);
+  const [popupPosition, setPopupPosition] = useState({ x: 10, y: 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  // Add global mouse/touch move listeners for dragging
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        setPopupPosition({
+          x: Math.max(0, Math.min(window.innerWidth - 320, e.clientX - dragOffset.x)),
+          y: Math.max(0, Math.min(window.innerHeight - 450, e.clientY - dragOffset.y))
+        });
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging && e.touches[0]) {
+        const touch = e.touches[0];
+        setPopupPosition({
+          x: Math.max(0, Math.min(window.innerWidth - 320, touch.clientX - dragOffset.x)),
+          y: Math.max(0, Math.min(window.innerHeight - 450, touch.clientY - dragOffset.y))
+        });
+      }
+    };
+
+    const handleEnd = () => setIsDragging(false);
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchend', handleEnd);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchend', handleEnd);
+    };
+  }, [isDragging, dragOffset]);
 
   // AdMob interstitial ad functions with error handling
   const loadInterstitialAd = useCallback(() => {
@@ -2230,25 +2271,44 @@ function App() {
         </div>
       )}
 
-      {/* Compact Document Popup Viewer */}
+      {/* Draggable Document Popup Viewer with Bank Records Comparison */}
       {showDocumentPopup && popupDocument && (
-        <div style={{
-          position: 'fixed',
-          top: '15%',
-          left: '10px',
-          width: '280px',
-          height: '320px',
-          background: 'linear-gradient(145deg, #2c3e50, #34495e)',
-          border: '3px solid #e74c3c',
-          borderRadius: '12px',
-          padding: '16px',
-          color: '#ffffff',
-          fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-          fontSize: '14px',
-          zIndex: 1500,
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)',
-          overflow: 'auto'
-        }}>
+        <div 
+          style={{
+            position: 'fixed',
+            top: `${popupPosition.y}px`,
+            left: `${popupPosition.x}px`,
+            width: '320px',
+            height: '450px',
+            background: 'linear-gradient(145deg, #2c3e50, #34495e)',
+            border: '3px solid #e74c3c',
+            borderRadius: '12px',
+            padding: '16px',
+            color: '#ffffff',
+            fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+            fontSize: '14px',
+            zIndex: 1500,
+            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)',
+            overflow: 'auto',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none'
+          }}
+          onMouseDown={(e) => {
+            setIsDragging(true);
+            setDragOffset({
+              x: e.clientX - popupPosition.x,
+              y: e.clientY - popupPosition.y
+            });
+          }}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            setIsDragging(true);
+            setDragOffset({
+              x: touch.clientX - popupPosition.x,
+              y: touch.clientY - popupPosition.y
+            });
+          }}
+>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -2277,13 +2337,52 @@ function App() {
           </div>
           
           {popupDocument.type === 'id' && (
-            <div style={{ lineHeight: '1.3' }}>
-              <div><strong>NAME:</strong> {popupDocument.data.name}</div>
-              <div><strong>DOB:</strong> {popupDocument.data.dateOfBirth}</div>
-              <div><strong>ADDRESS:</strong> {popupDocument.data.address}</div>
-              <div><strong>ID#:</strong> {popupDocument.data.idNumber}</div>
-              <div><strong>LICENSE:</strong> {popupDocument.data.licenseNumber}</div>
-              <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+            <div style={{ lineHeight: '1.4' }}>
+              <div style={{ 
+                background: 'linear-gradient(145deg, #9b59b6, #8e44ad)',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '12px',
+                border: '2px solid #f39c12'
+              }}>
+                <div style={{ fontWeight: 'bold', color: '#f39c12', marginBottom: '8px', textAlign: 'center' }}>
+                  CUSTOMER ID CARD
+                </div>
+                <div><strong>NAME:</strong> {popupDocument.data.name}</div>
+                <div><strong>DOB:</strong> {popupDocument.data.dateOfBirth}</div>
+                <div><strong>ADDRESS:</strong> {popupDocument.data.address}</div>
+                <div><strong>ID#:</strong> {popupDocument.data.idNumber}</div>
+                <div><strong>LICENSE:</strong> {popupDocument.data.licenseNumber}</div>
+                <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+              </div>
+              
+              {/* Bank Records Comparison */}
+              {verificationState.accountLookedUp && bankRecords && (
+                <div style={{
+                  padding: '12px',
+                  background: 'linear-gradient(145deg, #10ac84, #00a085)',
+                  border: '2px solid #00ff88',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'center', color: '#ffffff' }}>
+                    BANK RECORDS - COMPARE ABOVE
+                  </div>
+                  <div><strong>NAME:</strong> {bankRecords.name || currentCustomer?.name}</div>
+                  <div><strong>DOB:</strong> {bankRecords.dateOfBirth || "05/15/1975"}</div>
+                  <div><strong>ADDRESS:</strong> {bankRecords.address || "1234 Main Street, Springfield, CA 90210"}</div>
+                  <div><strong>ID#:</strong> {bankRecords.idNumber || "ID987654321"}</div>
+                  <div><strong>LICENSE:</strong> {bankRecords.licenseNumber || "DL-ABC123XY"}</div>
+                  <div style={{ 
+                    marginTop: '8px', 
+                    fontSize: '12px', 
+                    textAlign: 'center',
+                    color: '#ffffff',
+                    fontStyle: 'italic'
+                  }}>
+                    Look for mismatches - fraud uses wrong info
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
@@ -2310,7 +2409,7 @@ function App() {
           
           {popupDocument.type === 'signature' && (
             <div style={{ lineHeight: '1.5' }}>
-              <div><strong>NAME:</strong> {popupDocument.data.name}</div>
+              <div><strong>CUSTOMER SIGNATURE:</strong> {popupDocument.data.name}</div>
               <div style={{ 
                 marginTop: '12px',
                 padding: '16px',
@@ -2319,7 +2418,7 @@ function App() {
                 borderRadius: '8px',
                 textAlign: 'center'
               }}>
-                <strong style={{ color: '#f39c12' }}>SIGNATURE:</strong><br/>
+                <strong style={{ color: '#f39c12' }}>CUSTOMER SIGNATURE:</strong><br/>
                 <div style={{
                   fontSize: '18px',
                   fontFamily: 'Georgia, "Times New Roman", serif',
@@ -2333,6 +2432,41 @@ function App() {
                   {popupDocument.data.signature?.replace(/\|.*$/, '') || popupDocument.data.name || 'NO SIGNATURE'}
                 </div>
               </div>
+              
+              {/* Bank Records Comparison */}
+              {verificationState.accountLookedUp && bankRecords && (
+                <div style={{
+                  marginTop: '16px',
+                  padding: '12px',
+                  background: 'linear-gradient(145deg, #10ac84, #00a085)',
+                  border: '2px solid #00ff88',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'center', color: '#ffffff' }}>
+                    BANK SIGNATURE ON FILE:
+                  </div>
+                  <div style={{
+                    fontSize: '18px',
+                    fontFamily: 'Georgia, "Times New Roman", serif',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    letterSpacing: '1px',
+                    fontStyle: 'italic',
+                    textAlign: 'center',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                  }}>
+                    {bankRecords.signature?.replace(/\|.*$/, '') || bankRecords.name || currentCustomer?.name}
+                  </div>
+                  <div style={{ 
+                    marginTop: '8px', 
+                    fontSize: '12px', 
+                    textAlign: 'center',
+                    color: '#ffffff'
+                  }}>
+                    Compare signatures for fraud detection
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
