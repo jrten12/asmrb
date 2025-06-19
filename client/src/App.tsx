@@ -204,45 +204,75 @@ function App() {
     }
   };
 
-  // Using your uploaded SFX sound files
+  // Working Web Audio API for authentic 1980s sounds
   const playSound = (soundType: string) => {
     if (musicMuted) return;
     
     try {
-      let audio: HTMLAudioElement;
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Resume context if suspended
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
       switch (soundType) {
         case 'typing':
-          audio = new Audio('/sounds/typing-asmr.mp3');
-          audio.volume = 0.4;
+          // Mechanical keyboard click
+          const typingOsc = audioContext.createOscillator();
+          const typingGain = audioContext.createGain();
+          typingOsc.connect(typingGain);
+          typingGain.connect(audioContext.destination);
+          typingOsc.frequency.setValueAtTime(800, audioContext.currentTime);
+          typingGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+          typingGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+          typingOsc.start();
+          typingOsc.stop(audioContext.currentTime + 0.1);
           break;
-        case 'punch_clock':
-          audio = new Audio('/sounds/punch-clock.mp3');
-          audio.volume = 0.5;
-          break;
+          
         case 'cash':
-          audio = new Audio('/sounds/cash-register.mp3');
-          audio.volume = 0.4;
+          // Cash register ding
+          const cashOsc = audioContext.createOscillator();
+          const cashGain = audioContext.createGain();
+          cashOsc.connect(cashGain);
+          cashGain.connect(audioContext.destination);
+          cashOsc.frequency.setValueAtTime(1200, audioContext.currentTime);
+          cashOsc.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
+          cashGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+          cashGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+          cashOsc.start();
+          cashOsc.stop(audioContext.currentTime + 0.3);
           break;
+          
         case 'reject':
-          audio = new Audio('/sounds/error-buzz.mp3');
-          audio.volume = 0.5;
+          // Error buzz
+          const rejectOsc = audioContext.createOscillator();
+          const rejectGain = audioContext.createGain();
+          rejectOsc.connect(rejectGain);
+          rejectGain.connect(audioContext.destination);
+          rejectOsc.frequency.setValueAtTime(200, audioContext.currentTime);
+          rejectOsc.type = 'sawtooth';
+          rejectGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+          rejectGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+          rejectOsc.start();
+          rejectOsc.stop(audioContext.currentTime + 0.5);
           break;
-        case 'customer_approach':
-          audio = new Audio('/sounds/customer-approach.mp3');
-          audio.volume = 0.3;
-          break;
+          
         case 'keypad_click':
-          audio = new Audio('/sounds/keypad-click.mp3');
-          audio.volume = 0.3;
-          break;
-        default:
-          audio = new Audio('/sounds/dot-matrix-printer.mp3');
-          audio.volume = 0.3;
+          // High beep for keypad
+          const keypadOsc = audioContext.createOscillator();
+          const keypadGain = audioContext.createGain();
+          keypadOsc.connect(keypadGain);
+          keypadGain.connect(audioContext.destination);
+          keypadOsc.frequency.setValueAtTime(1000, audioContext.currentTime);
+          keypadGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+          keypadGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+          keypadOsc.start();
+          keypadOsc.stop(audioContext.currentTime + 0.15);
           break;
       }
-      audio.play().catch(e => console.log("Audio play failed:", e));
     } catch (e) {
-      console.log("Sound error:", e);
+      console.log("Audio context error:", e);
     }
   };
 
@@ -877,6 +907,30 @@ function App() {
         // Create realistic fraud scenarios - 50% of customers have document mismatches
         const shouldHaveFraud = Math.random() < 0.5;
         
+        // Store fraud status for transaction processing
+        const isFraudulent = shouldHaveFraud;
+        
+        // Mark customer as fraudulent in the customer object
+        if (isFraudulent) {
+          currentCustomer.isFraudulent = true;
+          // Mark specific documents as invalid
+          const fraudType = Math.floor(Math.random() * 4);
+          switch (fraudType) {
+            case 0:
+            case 1:
+            case 2:
+              // Mark ID card as invalid for address/DOB/license mismatches
+              const idDoc = currentCustomer.documents.find(d => d.type === 'id');
+              if (idDoc) idDoc.isValid = false;
+              break;
+            case 3:
+              // Mark signature as invalid for signature mismatch
+              const sigDoc = currentCustomer.documents.find(d => d.type === 'signature');
+              if (sigDoc) sigDoc.isValid = false;
+              break;
+          }
+        }
+        
         let bankAddress: string, bankDOB: string, bankDLNumber: string, bankIDNumber: string, bankSignature: string;
         let fraudDescription = "";
         
@@ -891,7 +945,7 @@ function App() {
               bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
               bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
               bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-              fraudDescription = "ADDRESS MISMATCH";
+              fraudDescription = "ADDRESS MISMATCH DETECTED";
               break;
             case 1: // Date of birth mismatch  
               bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
@@ -899,7 +953,7 @@ function App() {
               bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
               bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
               bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-              fraudDescription = "DATE OF BIRTH MISMATCH";
+              fraudDescription = "DATE OF BIRTH MISMATCH DETECTED";
               break;
             case 2: // License number mismatch
               bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
@@ -907,15 +961,15 @@ function App() {
               bankDLNumber = "DL-XYZ789CD";
               bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
               bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-              fraudDescription = "LICENSE NUMBER MISMATCH";
+              fraudDescription = "LICENSE NUMBER MISMATCH DETECTED";
               break;
             case 3: // Signature mismatch
               bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
               bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
               bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
               bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-              bankSignature = `${bankName.split(' ').map(n => n[0]).join('')}_BANK_OFFICIAL_SIGNATURE_DIFFERENT`;
-              fraudDescription = "SIGNATURE MISMATCH";
+              bankSignature = `BANK_OFFICIAL_SIG_${bankName.replace(/\s+/g, '_').toUpperCase()}_DIFFERENT_STYLE`;
+              fraudDescription = "SIGNATURE MISMATCH DETECTED";
               break;
           }
         } else {
@@ -925,7 +979,7 @@ function App() {
           bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
           bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
           bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-          fraudDescription = "ALL DOCUMENTS VERIFIED";
+          fraudDescription = "ALL DOCUMENTS VERIFIED - LEGITIMATE";
         }
         
         setTerminalOutput(prev => [...prev,
@@ -1596,33 +1650,42 @@ function App() {
               </div>
             )}
 
-            {/* Documents - PERMANENTLY LARGE AND VISIBLE */}
+            {/* Documents - COMPACT AND ORGANIZED */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '3px solid #ffff00',
-                borderRadius: '12px',
-                padding: '20px',
-                minHeight: '45vh',
-                height: '45vh',
+                border: '2px solid #ffff00',
+                borderRadius: '8px',
+                padding: '12px',
+                height: '38vh',
                 overflow: 'auto',
                 flex: 'none',
-                width: '100%',
-                position: 'relative'
+                width: '100%'
               }}>
-                <div style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold', color: '#ffff00' }}>
-                  CUSTOMER DOCUMENTS - EXAMINE CAREFULLY
+                <div style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: 'bold', color: '#ffff00' }}>
+                  CUSTOMER DOCUMENTS
                 </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                  gap: '20px',
-                  width: '100%',
-                  height: '100%'
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '8px',
+                  width: '100%'
                 }}>
-                  {currentCustomer.documents.map((doc, index) => 
-                    renderDocument(doc, index)
-                  )}
+                  {currentCustomer.documents.map((doc, index) => (
+                    <div key={doc.id} style={{
+                      background: '#1a1a1a',
+                      border: '1px solid #00ff00',
+                      borderRadius: '4px',
+                      padding: '6px',
+                      height: '120px',
+                      overflow: 'hidden',
+                      fontSize: '9px',
+                      fontFamily: 'monospace',
+                      color: '#00ff00'
+                    }}>
+                      {renderDocument(doc, index)}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
