@@ -1567,17 +1567,19 @@ function App() {
           }}>
             {/* Terminal Output */}
             <div style={{
-              background: '#000000',
-              border: '1px solid #00ff00',
-              borderRadius: '4px',
-              padding: '4px',
+              background: '#ffffff',
+              border: '2px solid #dee2e6',
+              borderRadius: '8px',
+              padding: '12px',
               height: '28vh',
               overflowY: 'auto',
-              fontSize: '10px',
-              fontFamily: 'monospace',
-              lineHeight: '1.1',
+              fontSize: '12px',
+              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+              lineHeight: '1.4',
               wordWrap: 'break-word',
-              whiteSpace: 'pre-wrap'
+              whiteSpace: 'pre-wrap',
+              color: '#212529',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ 
@@ -2195,17 +2197,17 @@ function App() {
           position: 'fixed',
           top: '10%',
           right: '10px',
-          width: '280px',
-          height: '320px',
-          background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-          border: '2px solid #ffff00',
-          borderRadius: '8px',
-          padding: '15px',
-          color: '#ffffff',
-          fontFamily: 'monospace',
-          fontSize: '10px',
+          width: '320px',
+          height: '400px',
+          background: '#ffffff',
+          border: '2px solid #dee2e6',
+          borderRadius: '12px',
+          padding: '20px',
+          color: '#212529',
+          fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+          fontSize: '12px',
           zIndex: 1500,
-          boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
+          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
           overflow: 'auto'
         }}>
           <div style={{
@@ -2268,32 +2270,43 @@ function App() {
           )}
           
           {popupDocument.type === 'signature' && (
-            <div style={{ lineHeight: '1.3' }}>
+            <div style={{ lineHeight: '1.5' }}>
               <div><strong>NAME:</strong> {popupDocument.data.name}</div>
               <div style={{ 
-                marginTop: '8px',
-                padding: '12px',
-                background: '#ffffff',
-                color: '#000000',
-                borderRadius: '4px',
-                textAlign: 'center',
-                fontSize: '14px',
-                fontFamily: 'cursive'
+                marginTop: '15px',
+                padding: '20px',
+                background: '#f8f9fa',
+                border: '2px solid #007bff',
+                borderRadius: '8px',
+                textAlign: 'center'
               }}>
-                {popupDocument.data.signature}
+                <strong style={{ color: '#007bff' }}>SIGNATURE:</strong><br/>
+                <div style={{
+                  fontSize: '20px',
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#2d3436',
+                  marginTop: '10px',
+                  fontWeight: 'bold',
+                  letterSpacing: '1px',
+                  fontStyle: 'italic'
+                }}>
+                  {popupDocument.data.signature?.split('|')[0] || 'NO SIGNATURE'}
+                </div>
               </div>
             </div>
           )}
           
           <div style={{
-            marginTop: '12px',
-            padding: '6px',
-            background: 'rgba(255, 255, 0, 0.1)',
-            borderRadius: '4px',
-            fontSize: '9px',
-            color: '#ffff00'
+            marginTop: '15px',
+            padding: '10px',
+            background: '#e7f3ff',
+            border: '1px solid #007bff',
+            borderRadius: '6px',
+            fontSize: '11px',
+            color: '#0056b3',
+            textAlign: 'center'
           }}>
-            Compare with bank records below
+            💡 Compare with bank computer records
           </div>
           
           <button
