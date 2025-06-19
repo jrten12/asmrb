@@ -2282,8 +2282,8 @@ function App() {
             position: 'fixed',
             top: `${popupPosition.y}px`,
             left: `${popupPosition.x}px`,
-            width: '320px',
-            height: '450px',
+            width: '350px',
+            height: '550px',
             background: 'linear-gradient(145deg, #2c3e50, #34495e)',
             border: '3px solid #e74c3c',
             borderRadius: '12px',
@@ -2427,23 +2427,121 @@ function App() {
           )}
           
           {popupDocument.type === 'slip' && (
-            <div style={{ lineHeight: '1.3' }}>
-              <div><strong>CUSTOMER:</strong> {popupDocument.data.name}</div>
-              <div><strong>TYPE:</strong> {popupDocument.data.type?.toUpperCase()}</div>
-              <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
-              <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
-              {popupDocument.data.targetAccount && (
-                <div><strong>TARGET:</strong> {popupDocument.data.targetAccount}</div>
+            <div style={{ lineHeight: '1.4' }}>
+              <div style={{ 
+                background: 'linear-gradient(145deg, #9b59b6, #8e44ad)',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '12px',
+                border: '2px solid #f39c12'
+              }}>
+                <div style={{ fontWeight: 'bold', color: '#f39c12', marginBottom: '8px', textAlign: 'center' }}>
+                  TRANSACTION SLIP
+                </div>
+                <div><strong>CUSTOMER:</strong> {popupDocument.data.name}</div>
+                <div><strong>TYPE:</strong> {popupDocument.data.type?.toUpperCase()}</div>
+                <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
+                <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+                {popupDocument.data.targetAccount && (
+                  <div><strong>TARGET:</strong> {popupDocument.data.targetAccount}</div>
+                )}
+              </div>
+              
+              {/* Bank Records Comparison - Always Show After Lookup */}
+              {verificationState.accountLookedUp && (
+                <div style={{
+                  padding: '16px',
+                  background: '#000000',
+                  border: '3px solid #00ff00',
+                  borderRadius: '8px',
+                  marginTop: '16px'
+                }}>
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '12px', 
+                    textAlign: 'center', 
+                    color: '#00ff00',
+                    fontSize: '20px',
+                    textShadow: '0 0 10px #00ff00'
+                  }}>
+                    🏦 BANK COMPUTER RECORDS 🏦
+                  </div>
+                  <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+                    <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
+                    <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
+                    <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                    <div><strong>STATUS:</strong> ACTIVE</div>
+                  </div>
+                  <div style={{ 
+                    marginTop: '12px', 
+                    fontSize: '14px', 
+                    textAlign: 'center',
+                    color: '#ffff00',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px #ffff00'
+                  }}>
+                    ⚠️ VERIFY TRANSACTION DETAILS MATCH ⚠️
+                  </div>
+                </div>
               )}
             </div>
           )}
           
           {popupDocument.type === 'bank_book' && (
-            <div style={{ lineHeight: '1.3' }}>
-              <div><strong>HOLDER:</strong> {popupDocument.data.name}</div>
-              <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
-              <div><strong>BALANCE:</strong> ${popupDocument.data.balance}</div>
-              <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
+            <div style={{ lineHeight: '1.4' }}>
+              <div style={{ 
+                background: 'linear-gradient(145deg, #9b59b6, #8e44ad)',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '12px',
+                border: '2px solid #f39c12'
+              }}>
+                <div style={{ fontWeight: 'bold', color: '#f39c12', marginBottom: '8px', textAlign: 'center' }}>
+                  CUSTOMER BANK BOOK
+                </div>
+                <div><strong>HOLDER:</strong> {popupDocument.data.name}</div>
+                <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+                <div><strong>BALANCE:</strong> ${popupDocument.data.balance}</div>
+                <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
+              </div>
+              
+              {/* Bank Records Comparison - Always Show After Lookup */}
+              {verificationState.accountLookedUp && (
+                <div style={{
+                  padding: '16px',
+                  background: '#000000',
+                  border: '3px solid #00ff00',
+                  borderRadius: '8px',
+                  marginTop: '16px'
+                }}>
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '12px', 
+                    textAlign: 'center', 
+                    color: '#00ff00',
+                    fontSize: '20px',
+                    textShadow: '0 0 10px #00ff00'
+                  }}>
+                    🏦 BANK COMPUTER RECORDS 🏦
+                  </div>
+                  <div style={{ color: '#00ff00', fontSize: '16px', lineHeight: '1.6' }}>
+                    <div><strong>NAME:</strong> {bankRecords?.name || currentCustomer?.name || "John Doe"}</div>
+                    <div><strong>ACCOUNT:</strong> {currentCustomer?.transaction.accountNumber}</div>
+                    <div><strong>BALANCE:</strong> ${accountBalance.toLocaleString()}</div>
+                    <div><strong>STATUS:</strong> ACTIVE</div>
+                  </div>
+                  <div style={{ 
+                    marginTop: '12px', 
+                    fontSize: '14px', 
+                    textAlign: 'center',
+                    color: '#ffff00',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px #ffff00'
+                  }}>
+                    ⚠️ VERIFY ACCOUNT BALANCE MATCHES ⚠️
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
