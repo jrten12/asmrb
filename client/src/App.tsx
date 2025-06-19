@@ -39,6 +39,7 @@ interface LegacyDocument {
 function App() {
   const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'leaderboard' | 'game_over' | 'punch_out' | 'supervisor' | 'police_arrest'>('punch_in');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
+  const [bankRecords, setBankRecords] = useState<any>(null);
   const [viewedDocument, setViewedDocument] = useState<GameDocument | null>(null);
   const [gameInitialized, setGameInitialized] = useState(false);
   const [terminalInput, setTerminalInput] = useState('');
@@ -757,7 +758,7 @@ function App() {
           setAccountBalance(balance);
           setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
           
-          // Generate bank record data for comparison with customer documents
+          // Generate bank record data for comparison
           const customerIdDoc = currentCustomer.documents.find(d => d.type === 'id');
           const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
           
@@ -765,7 +766,11 @@ function App() {
           const shouldHaveFraud = Math.random() < 0.5;
           
           let bankName = currentCustomer.name;
-          let bankAddress: string, bankDOB: string, bankDLNumber: string, bankIDNumber: string, bankSignature: string;
+          let bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+          let bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+          let bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+          let bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+          let bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
           
           if (shouldHaveFraud) {
             // Create specific fraud types with mismatched data
@@ -774,45 +779,33 @@ function App() {
             switch (fraudType) {
               case 0: // Address mismatch
                 bankAddress = "789 Oak Street, Springfield, CA 90210";
-                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
                 break;
               case 1: // Date of birth mismatch  
-                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
                 bankDOB = "12/03/1982";
-                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
                 break;
               case 2: // License number mismatch
-                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
                 bankDLNumber = "DL-XYZ789CD";
-                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
                 break;
               case 3: // Signature mismatch
-                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                bankSignature = `BANK_OFFICIAL_SIG_${bankName.replace(/\s+/g, '_').toUpperCase()}_DIFFERENT_STYLE`;
+                bankSignature = `${bankName.replace(/\s+/g, '')}_BANK_OFFICIAL`;
                 break;
             }
             
             // Mark customer as fraudulent for later processing
             currentCustomer.isFraudulent = true;
           } else {
-            // Legitimate customer - all data matches documents
-            bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-            bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-            bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-            bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-            bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
             currentCustomer.isFraudulent = false;
           }
+          
+          // Store bank records in state
+          setBankRecords({
+            name: bankName,
+            address: bankAddress,
+            dateOfBirth: bankDOB,
+            licenseNumber: bankDLNumber,
+            idNumber: bankIDNumber,
+            signature: bankSignature
+          });
           
           setTerminalOutput(prev => [...prev,
             "ACCOUNT FOUND",
@@ -1783,23 +1776,40 @@ function App() {
               </div>
             )}
 
-            {/* Account Information - Modern */}
+            {/* Bank Computer Records - Always Visible After Lookup */}
             {verificationState.accountLookedUp && (
               <div style={{
                 background: '#1a3d1a',
                 border: '2px solid #00ff00',
                 borderRadius: '8px',
-                padding: '12px',
+                padding: '16px',
                 fontSize: '12px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                marginBottom: '8px'
               }}>
-                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '6px' }}>
-                  BANK COMPUTER RECORDS
+                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
+                  BANK COMPUTER RECORDS - COMPARE WITH CUSTOMER DOCS
                 </div>
-                <div style={{ color: '#ffffff' }}>
-                  <strong>Status:</strong> ACTIVE | <strong>Balance:</strong> ${accountBalance.toLocaleString()}
-                  <br/>
-                  <strong>Account Holder:</strong> {currentCustomer?.name}
+                <div style={{ color: '#ffffff', lineHeight: '1.4' }}>
+                  <div><strong>Account:</strong> {currentCustomer?.transaction.accountNumber}</div>
+                  <div><strong>Status:</strong> ACTIVE</div>
+                  <div><strong>Balance:</strong> ${accountBalance.toLocaleString()}</div>
+                  <div><strong>Name:</strong> {currentCustomer?.bankRecords?.name || currentCustomer?.name}</div>
+                  <div><strong>Address:</strong> {currentCustomer?.bankRecords?.address || "1234 Main Street, Springfield, CA 90210"}</div>
+                  <div><strong>DOB:</strong> {currentCustomer?.bankRecords?.dateOfBirth || "05/15/1975"}</div>
+                  <div><strong>ID Number:</strong> {currentCustomer?.bankRecords?.idNumber || "ID987654321"}</div>
+                  <div><strong>License:</strong> {currentCustomer?.bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
+                  <div style={{ 
+                    marginTop: '8px', 
+                    padding: '8px', 
+                    background: '#003300',
+                    borderRadius: '4px'
+                  }}>
+                    <strong>Signature on File:</strong><br/>
+                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic' }}>
+                      {currentCustomer?.bankRecords?.signature?.split('|')[0] || `${currentCustomer?.name.split(' ').map(n => n[0]).join('')} ${currentCustomer?.name.split(' ')[1] || ''}`}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
