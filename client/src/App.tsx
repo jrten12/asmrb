@@ -1778,19 +1778,27 @@ function App() {
               </div>
             )}
 
-            {/* Bank Computer Records - Vibrant Design */}
+            {/* Bank Computer Records - Vibrant Design with Glow */}
             {verificationState.accountLookedUp && (
               <div style={{
                 background: 'linear-gradient(145deg, #10ac84, #00a085)',
                 border: '3px solid #00ff88',
                 borderRadius: '12px',
-                padding: '18px',
-                fontSize: '13px',
-                boxShadow: '0 8px 25px rgba(0, 255, 136, 0.3)',
-                marginBottom: '10px'
+                padding: '20px',
+                fontSize: '15px',
+                boxShadow: '0 0 30px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.4)',
+                marginBottom: '12px',
+                animation: 'accountGlow 2s ease-in-out infinite alternate'
               }}>
-                <div style={{ color: '#ffffff', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
-                  BANK COMPUTER RECORDS - COMPARE WITH CUSTOMER DOCS
+                <div style={{ 
+                  color: '#ffffff', 
+                  fontWeight: 'bold', 
+                  marginBottom: '12px', 
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  textShadow: '0 0 10px rgba(255, 255, 255, 0.8)'
+                }}>
+                  ✅ ACCOUNT VERIFIED - COMPARE WITH CUSTOMER DOCS ✅
                 </div>
                 <div style={{ color: '#ffffff', lineHeight: '1.5' }}>
                   <div><strong>Account:</strong> {currentCustomer?.transaction.accountNumber}</div>
@@ -2040,11 +2048,20 @@ function App() {
         }
         
         button:hover {
-          filter: brightness(1.1);
+          opacity: 0.9;
         }
         
         button:active {
           transform: scale(0.98);
+        }
+
+        @keyframes accountGlow {
+          0% { 
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.4);
+          }
+          100% { 
+            box-shadow: 0 0 40px rgba(0, 255, 136, 1), 0 0 80px rgba(0, 255, 136, 0.6);
+          }
         }
         
         * {
@@ -2227,7 +2244,7 @@ function App() {
           padding: '16px',
           color: '#ffffff',
           fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-          fontSize: '12px',
+          fontSize: '14px',
           zIndex: 1500,
           boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)',
           overflow: 'auto'
@@ -2304,15 +2321,16 @@ function App() {
               }}>
                 <strong style={{ color: '#f39c12' }}>SIGNATURE:</strong><br/>
                 <div style={{
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontFamily: 'Georgia, "Times New Roman", serif',
                   color: '#ffffff',
-                  marginTop: '8px',
+                  marginTop: '10px',
                   fontWeight: 'bold',
-                  letterSpacing: '0.5px',
-                  fontStyle: 'italic'
+                  letterSpacing: '1px',
+                  fontStyle: 'italic',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
                 }}>
-                  {popupDocument.data.signature?.split('|')[0] || 'NO SIGNATURE'}
+                  {popupDocument.data.signature?.replace(/\|.*$/, '') || popupDocument.data.name || 'NO SIGNATURE'}
                 </div>
               </div>
             </div>
