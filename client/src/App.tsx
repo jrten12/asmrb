@@ -126,8 +126,8 @@ function App() {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         setPopupPosition({
-          x: Math.max(0, Math.min(window.innerWidth - 320, e.clientX - dragOffset.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 450, e.clientY - dragOffset.y))
+          x: Math.max(0, Math.min(window.innerWidth - 350, e.clientX - dragOffset.x)),
+          y: Math.max(0, Math.min(window.innerHeight - 550, e.clientY - dragOffset.y))
         });
       }
     };
@@ -136,8 +136,8 @@ function App() {
       if (isDragging && e.touches[0]) {
         const touch = e.touches[0];
         setPopupPosition({
-          x: Math.max(0, Math.min(window.innerWidth - 320, touch.clientX - dragOffset.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 450, touch.clientY - dragOffset.y))
+          x: Math.max(0, Math.min(window.innerWidth - 350, touch.clientX - dragOffset.x)),
+          y: Math.max(0, Math.min(window.innerHeight - 550, touch.clientY - dragOffset.y))
         });
       }
     };
