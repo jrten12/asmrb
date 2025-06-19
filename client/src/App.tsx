@@ -39,7 +39,7 @@ interface LegacyDocument {
 function App() {
   const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'leaderboard' | 'game_over' | 'punch_out' | 'supervisor' | 'police_arrest'>('punch_in');
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<GameDocument | null>(null);
+  const [viewedDocument, setViewedDocument] = useState<GameDocument | null>(null);
   const [gameInitialized, setGameInitialized] = useState(false);
   const [terminalInput, setTerminalInput] = useState('');
   const [showArrestAnimation, setShowArrestAnimation] = useState(false);
@@ -112,6 +112,10 @@ function App() {
   const [showKeypad, setShowKeypad] = useState(false);
   const [keypadInput, setKeypadInput] = useState('');
   const [keypadMode, setKeypadMode] = useState<'lookup' | 'verify'>('lookup');
+  
+  // Document popup state
+  const [popupDocument, setPopupDocument] = useState<GameDocument | null>(null);
+  const [showDocumentPopup, setShowDocumentPopup] = useState(false);
 
   // AdMob interstitial ad functions with error handling
   const loadInterstitialAd = useCallback(() => {
@@ -218,57 +222,121 @@ function App() {
 
       switch (soundType) {
         case 'typing':
-          // Mechanical keyboard click
+          // Authentic mechanical keyboard ASMR click
           const typingOsc = audioContext.createOscillator();
           const typingGain = audioContext.createGain();
-          typingOsc.connect(typingGain);
+          const typingFilter = audioContext.createBiquadFilter();
+          typingOsc.connect(typingFilter);
+          typingFilter.connect(typingGain);
           typingGain.connect(audioContext.destination);
-          typingOsc.frequency.setValueAtTime(800, audioContext.currentTime);
-          typingGain.gain.setValueAtTime(0.3, audioContext.currentTime);
-          typingGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+          typingOsc.frequency.setValueAtTime(900, audioContext.currentTime);
+          typingFilter.frequency.setValueAtTime(1200, audioContext.currentTime);
+          typingFilter.type = 'bandpass';
+          typingGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+          typingGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
           typingOsc.start();
-          typingOsc.stop(audioContext.currentTime + 0.1);
+          typingOsc.stop(audioContext.currentTime + 0.08);
           break;
           
         case 'cash':
-          // Cash register ding
-          const cashOsc = audioContext.createOscillator();
+          // Cash register ka-ching with bell resonance
+          const cashOsc1 = audioContext.createOscillator();
+          const cashOsc2 = audioContext.createOscillator();
           const cashGain = audioContext.createGain();
-          cashOsc.connect(cashGain);
+          cashOsc1.connect(cashGain);
+          cashOsc2.connect(cashGain);
           cashGain.connect(audioContext.destination);
-          cashOsc.frequency.setValueAtTime(1200, audioContext.currentTime);
-          cashOsc.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
-          cashGain.gain.setValueAtTime(0.5, audioContext.currentTime);
-          cashGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-          cashOsc.start();
-          cashOsc.stop(audioContext.currentTime + 0.3);
+          cashOsc1.frequency.setValueAtTime(1200, audioContext.currentTime);
+          cashOsc2.frequency.setValueAtTime(800, audioContext.currentTime);
+          cashOsc1.frequency.setValueAtTime(900, audioContext.currentTime + 0.1);
+          cashGain.gain.setValueAtTime(0.6, audioContext.currentTime);
+          cashGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+          cashOsc1.start();
+          cashOsc2.start();
+          cashOsc1.stop(audioContext.currentTime + 0.4);
+          cashOsc2.stop(audioContext.currentTime + 0.4);
           break;
           
         case 'reject':
-          // Error buzz
+          // Error buzz with harsh sawtooth
           const rejectOsc = audioContext.createOscillator();
           const rejectGain = audioContext.createGain();
-          rejectOsc.connect(rejectGain);
+          const rejectFilter = audioContext.createBiquadFilter();
+          rejectOsc.connect(rejectFilter);
+          rejectFilter.connect(rejectGain);
           rejectGain.connect(audioContext.destination);
-          rejectOsc.frequency.setValueAtTime(200, audioContext.currentTime);
+          rejectOsc.frequency.setValueAtTime(180, audioContext.currentTime);
           rejectOsc.type = 'sawtooth';
-          rejectGain.gain.setValueAtTime(0.4, audioContext.currentTime);
-          rejectGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+          rejectFilter.frequency.setValueAtTime(400, audioContext.currentTime);
+          rejectFilter.type = 'lowpass';
+          rejectGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+          rejectGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
           rejectOsc.start();
-          rejectOsc.stop(audioContext.currentTime + 0.5);
+          rejectOsc.stop(audioContext.currentTime + 0.6);
           break;
           
         case 'keypad_click':
-          // High beep for keypad
+          // High-pitched keypad beep
           const keypadOsc = audioContext.createOscillator();
           const keypadGain = audioContext.createGain();
           keypadOsc.connect(keypadGain);
           keypadGain.connect(audioContext.destination);
           keypadOsc.frequency.setValueAtTime(1000, audioContext.currentTime);
-          keypadGain.gain.setValueAtTime(0.2, audioContext.currentTime);
-          keypadGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+          keypadGain.gain.setValueAtTime(0.25, audioContext.currentTime);
+          keypadGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.12);
           keypadOsc.start();
-          keypadOsc.stop(audioContext.currentTime + 0.15);
+          keypadOsc.stop(audioContext.currentTime + 0.12);
+          break;
+          
+        case 'paper_shuffle':
+          // Paper document shuffling sound
+          const paperOsc = audioContext.createOscillator();
+          const paperGain = audioContext.createGain();
+          const paperFilter = audioContext.createBiquadFilter();
+          paperOsc.connect(paperFilter);
+          paperFilter.connect(paperGain);
+          paperGain.connect(audioContext.destination);
+          paperOsc.frequency.setValueAtTime(2000, audioContext.currentTime);
+          paperOsc.type = 'square';
+          paperFilter.frequency.setValueAtTime(3000, audioContext.currentTime);
+          paperFilter.type = 'highpass';
+          paperGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+          paperGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+          paperOsc.start();
+          paperOsc.stop(audioContext.currentTime + 0.2);
+          break;
+          
+        case 'stamp':
+          // Rubber stamp thunk
+          const stampOsc = audioContext.createOscillator();
+          const stampGain = audioContext.createGain();
+          const stampFilter = audioContext.createBiquadFilter();
+          stampOsc.connect(stampFilter);
+          stampFilter.connect(stampGain);
+          stampGain.connect(audioContext.destination);
+          stampOsc.frequency.setValueAtTime(120, audioContext.currentTime);
+          stampOsc.type = 'square';
+          stampFilter.frequency.setValueAtTime(300, audioContext.currentTime);
+          stampFilter.type = 'lowpass';
+          stampGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+          stampGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+          stampOsc.start();
+          stampOsc.stop(audioContext.currentTime + 0.3);
+          break;
+          
+        case 'drawer':
+          // Cash drawer opening sound
+          const drawerOsc = audioContext.createOscillator();
+          const drawerGain = audioContext.createGain();
+          drawerOsc.connect(drawerGain);
+          drawerGain.connect(audioContext.destination);
+          drawerOsc.frequency.setValueAtTime(80, audioContext.currentTime);
+          drawerOsc.frequency.setValueAtTime(120, audioContext.currentTime + 0.2);
+          drawerOsc.type = 'square';
+          drawerGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+          drawerGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+          drawerOsc.start();
+          drawerOsc.stop(audioContext.currentTime + 0.5);
           break;
       }
     } catch (e) {
@@ -1153,7 +1221,11 @@ function App() {
     return (
       <div
         key={doc.id}
-        onClick={() => setSelectedDocument(doc)}
+        onClick={() => {
+          playSound('paper_shuffle');
+          setPopupDocument(doc);
+          setShowDocumentPopup(true);
+        }}
         style={{
           background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
           border: '4px solid #ffff00',
