@@ -1659,34 +1659,36 @@ function App() {
             </div>
 
             {/* Terminal Input */}
-            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '3px' }}>
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '6px' }}>
               <input
                 type="text"
                 value={terminalInput}
                 onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="L=lookup, A=approve, R=reject"
+                placeholder="Type commands: LOOKUP, VERIFY, APPROVE, REJECT"
                 style={{
                   flex: '1',
-                  background: '#000000',
-                  border: '1px solid #00ff00',
-                  color: '#00ff00',
-                  padding: '6px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '3px'
+                  background: 'linear-gradient(145deg, #34495e, #2c3e50)',
+                  border: '2px solid #3498db',
+                  color: '#ecf0f1',
+                  padding: '10px',
+                  fontSize: '12px',
+                  fontFamily: '"SF Mono", "Monaco", monospace',
+                  borderRadius: '6px',
+                  outline: 'none'
                 }}
               />
               <button
                 type="submit"
                 style={{
-                  background: '#00ff00',
-                  color: '#000000',
-                  border: 'none',
-                  padding: '6px 10px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  background: 'linear-gradient(145deg, #27ae60, #2ecc71)',
+                  color: '#ffffff',
+                  border: '2px solid #27ae60',
+                  padding: '10px 16px',
+                  fontSize: '12px',
+                  fontFamily: '"Segoe UI", sans-serif',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
                 }}
               >
                 ENTER
@@ -1753,25 +1755,25 @@ function App() {
             overflow: 'auto',
             minHeight: '500px'
           }}>
-            {/* Customer Display - Vibrant */}
+            {/* Customer Display - Compact & Vibrant */}
             {currentCustomer && (
               <div style={{
-                background: 'linear-gradient(145deg, #ff6b6b, #ee5a52)',
-                border: '3px solid #ff3838',
-                borderRadius: '12px',
-                padding: '20px',
+                background: 'linear-gradient(145deg, #e67e22, #d35400)',
+                border: '2px solid #f39c12',
+                borderRadius: '8px',
+                padding: '12px',
                 textAlign: 'center',
-                fontSize: '15px',
-                boxShadow: '0 8px 25px rgba(255, 56, 56, 0.4)'
+                fontSize: '12px',
+                boxShadow: '0 4px 15px rgba(230, 126, 34, 0.4)'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ffffff' }}>
-                  CUSTOMER: {currentCustomer.name}
+                <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#ffffff' }}>
+                  {currentCustomer.name}
                 </div>
-                <div style={{ marginBottom: '6px', color: '#ffffff' }}>
-                  {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
+                <div style={{ marginBottom: '4px', color: '#ffffff', fontSize: '11px' }}>
+                  {currentCustomer.transaction.type.toUpperCase()} ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '13px', color: '#ffeeee' }}>
-                  ACCOUNT: {currentCustomer.transaction.accountNumber}
+                <div style={{ fontSize: '10px', color: '#ffeaa7' }}>
+                  ACC: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
@@ -1845,18 +1847,18 @@ function App() {
                            setShowDocumentPopup(true);
                          }}
                          style={{
-                      background: '#f8f9fa',
-                      border: '2px solid #007bff',
-                      borderRadius: '6px',
-                      padding: '8px',
-                      height: '80px',
+                      background: 'linear-gradient(145deg, #8e44ad, #9b59b6)',
+                      border: '2px solid #e74c3c',
+                      borderRadius: '8px',
+                      padding: '10px',
+                      height: '85px',
                       overflow: 'hidden',
-                      fontSize: '10px',
+                      fontSize: '11px',
                       fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                      color: '#212529',
+                      color: '#ffffff',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      boxShadow: '0 4px 12px rgba(142, 68, 173, 0.4)',
                       textAlign: 'center'
                     }}>
                       <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
@@ -2219,15 +2221,15 @@ function App() {
           left: '10px',
           width: '280px',
           height: '320px',
-          background: '#ffffff',
-          border: '2px solid #007bff',
-          borderRadius: '8px',
-          padding: '12px',
-          color: '#212529',
+          background: 'linear-gradient(145deg, #2c3e50, #34495e)',
+          border: '3px solid #e74c3c',
+          borderRadius: '12px',
+          padding: '16px',
+          color: '#ffffff',
           fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-          fontSize: '11px',
+          fontSize: '12px',
           zIndex: 1500,
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)',
           overflow: 'auto'
         }}>
           <div style={{
@@ -2295,16 +2297,16 @@ function App() {
               <div style={{ 
                 marginTop: '12px',
                 padding: '16px',
-                background: '#f8f9fa',
-                border: '2px solid #007bff',
-                borderRadius: '6px',
+                background: 'linear-gradient(145deg, #9b59b6, #8e44ad)',
+                border: '2px solid #f39c12',
+                borderRadius: '8px',
                 textAlign: 'center'
               }}>
-                <strong style={{ color: '#007bff' }}>SIGNATURE:</strong><br/>
+                <strong style={{ color: '#f39c12' }}>SIGNATURE:</strong><br/>
                 <div style={{
                   fontSize: '16px',
                   fontFamily: 'Georgia, "Times New Roman", serif',
-                  color: '#212529',
+                  color: '#ffffff',
                   marginTop: '8px',
                   fontWeight: 'bold',
                   letterSpacing: '0.5px',
