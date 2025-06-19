@@ -68,11 +68,8 @@ export function generateCustomer(level: number): Customer {
   
   const transaction = generateTransaction(level, 0); // Initial transaction without fraud consideration
   
-  // Balanced fraud rate - 35% fraud rate for fair but challenging gameplay
-  const isFraud = Math.random() < 0.35;
-  const suspiciousLevel = isFraud ? Math.floor(Math.random() * 4) + 1 : 0;
-  
-  const documents = generateDocuments(name, transaction, suspiciousLevel);
+  // Generate completely legitimate customer - NO automatic fraud detection
+  const documents = generateDocuments(name, transaction, 0);
   
   return {
     id,
@@ -80,10 +77,10 @@ export function generateCustomer(level: number): Customer {
     sprite: `customer_${Math.floor(Math.random() * 6) + 1}`,
     transaction,
     documents,
-    suspiciousLevel,
+    suspiciousLevel: 0,
     patience: 100,
     maxPatience: 100 - (level * 5),
-    isFraudulent: isFraud
+    isFraudulent: false
   };
 }
 
@@ -236,8 +233,8 @@ export function generateDocuments(customerName: string, transaction: Transaction
       idNumber: idNumber,
       licenseNumber: licenseNumber
     },
-    isValid: !hasIdError,
-    hasError: hasIdError ? errorType : undefined
+    isValid: true,
+    hasError: undefined
   });
   
   // Transaction Slip - apply amount mismatch fraud
