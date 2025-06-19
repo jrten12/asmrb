@@ -1394,8 +1394,8 @@ function App() {
       height: '100vh',
       minHeight: '100vh',
       maxHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-      color: '#212529',
+      background: 'linear-gradient(135deg, #2d3436 0%, #636e72 100%)',
+      color: '#ffffff',
       fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
       position: 'fixed',
       top: 0,
@@ -1567,19 +1567,19 @@ function App() {
           }}>
             {/* Terminal Output */}
             <div style={{
-              background: '#ffffff',
-              border: '2px solid #dee2e6',
+              background: '#1a1a1a',
+              border: '2px solid #00ff00',
               borderRadius: '8px',
               padding: '12px',
               height: '28vh',
               overflowY: 'auto',
               fontSize: '12px',
-              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+              fontFamily: 'monospace',
               lineHeight: '1.4',
               wordWrap: 'break-word',
               whiteSpace: 'pre-wrap',
-              color: '#212529',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+              color: '#00ff00',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ 
@@ -1763,21 +1763,21 @@ function App() {
             {/* Customer Display - Larger */}
             {currentCustomer && (
               <div style={{
-                background: '#ffffff',
-                border: '2px solid #007bff',
+                background: '#2a2a2a',
+                border: '2px solid #ffff00',
                 borderRadius: '12px',
                 padding: '16px',
                 textAlign: 'center',
                 fontSize: '14px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#007bff' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#ffff00' }}>
                   CUSTOMER: {currentCustomer.name}
                 </div>
-                <div style={{ marginBottom: '4px', color: '#212529' }}>
+                <div style={{ marginBottom: '4px', color: '#ffffff' }}>
                   {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                <div style={{ fontSize: '12px', color: '#cccccc' }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
@@ -1786,17 +1786,17 @@ function App() {
             {/* Account Information - Modern */}
             {verificationState.accountLookedUp && (
               <div style={{
-                background: '#e8f5e8',
-                border: '2px solid #198754',
+                background: '#1a3d1a',
+                border: '2px solid #00ff00',
                 borderRadius: '8px',
                 padding: '12px',
                 fontSize: '12px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
               }}>
-                <div style={{ color: '#198754', fontWeight: 'bold', marginBottom: '6px' }}>
-                  🏦 BANK COMPUTER RECORDS
+                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '6px' }}>
+                  BANK COMPUTER RECORDS
                 </div>
-                <div style={{ color: '#212529' }}>
+                <div style={{ color: '#ffffff' }}>
                   <strong>Status:</strong> ACTIVE | <strong>Balance:</strong> ${accountBalance.toLocaleString()}
                   <br/>
                   <strong>Account Holder:</strong> {currentCustomer?.name}
@@ -1807,18 +1807,18 @@ function App() {
             {/* Documents - CLEAN AND ORGANIZED */}
             {currentCustomer && (
               <div style={{
-                background: '#ffffff',
-                border: '2px solid #dee2e6',
+                background: '#2a2a2a',
+                border: '2px solid #ffff00',
                 borderRadius: '12px',
                 padding: '16px',
                 height: '38vh',
                 overflow: 'auto',
                 flex: 'none',
                 width: '100%',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
               }}>
-                <div style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: '#007bff' }}>
-                  📄 CUSTOMER DOCUMENTS
+                <div style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: '#ffff00' }}>
+                  CUSTOMER DOCUMENTS
                 </div>
                 <div style={{
                   display: 'grid',
@@ -1834,18 +1834,18 @@ function App() {
                            setShowDocumentPopup(true);
                          }}
                          style={{
-                      background: '#f8f9fa',
-                      border: '2px solid #007bff',
+                      background: '#1a1a1a',
+                      border: '2px solid #00ff00',
                       borderRadius: '8px',
                       padding: '12px',
                       height: '140px',
                       overflow: 'hidden',
                       fontSize: '11px',
-                      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                      color: '#212529',
+                      fontFamily: 'monospace',
+                      color: '#00ff00',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
                     }}>
                       <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                         {doc.type.toUpperCase().replace('_', ' ')} DOCUMENT
@@ -2207,15 +2207,15 @@ function App() {
           right: '10px',
           width: '320px',
           height: '400px',
-          background: '#ffffff',
-          border: '2px solid #dee2e6',
+          background: '#2a2a2a',
+          border: '2px solid #ffff00',
           borderRadius: '12px',
           padding: '20px',
-          color: '#212529',
-          fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+          color: '#ffffff',
+          fontFamily: 'monospace',
           fontSize: '12px',
           zIndex: 1500,
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
           overflow: 'auto'
         }}>
           <div style={{
