@@ -213,13 +213,22 @@ function App() {
     if (musicMuted) return;
     
     try {
+      // Create new audio context each time for better compatibility
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
-      // Resume context if suspended
-      if (audioContext.state === 'suspended') {
-        audioContext.resume();
-      }
+      // Force resume context
+      audioContext.resume().then(() => {
+        createSound(audioContext, soundType);
+      }).catch(() => {
+        createSound(audioContext, soundType);
+      });
+    } catch (e) {
+      console.log("Audio context error:", e);
+    }
+  };
 
+  const createSound = (audioContext: AudioContext, soundType: string) => {
+    try {
       switch (soundType) {
         case 'typing':
           // Authentic mechanical keyboard ASMR click
@@ -340,7 +349,7 @@ function App() {
           break;
       }
     } catch (e) {
-      console.log("Audio context error:", e);
+      console.log("Sound creation error:", e);
     }
   };
 
@@ -2220,12 +2229,124 @@ function App() {
           <button
             onClick={() => {
               playSound('paper_shuffle');
+              playSound('typing');
               if (!currentCustomer) {
                 playSound('reject');
                 setTerminalOutput(prev => [...prev, "ERROR: No customer present"]);
                 return;
               }
-              handleVerifyCommand();
+              // VERIFY command implementation
+              if (!verificationState.accountLookedUp) {
+                playSound('reject');
+                setTerminalOutput(prev => [...prev, "ERROR: Must lookup account first (use LOOKUP command)"]);
+                return;
+              }
+              
+              const customerIdDoc = currentCustomer.documents.find(d => d.type === 'id');
+              const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
+              const customerSlipDoc = currentCustomer.documents.find(d => d.type === 'slip');
+              const customerBankDoc = currentCustomer.documents.find(d => d.type === 'bank_book');
+              
+              const bankName = currentCustomer.name;
+              const bankAccount = currentCustomer.transaction.accountNumber;
+              
+              // Create realistic fraud scenarios - 50% of customers have document mismatches
+              const shouldHaveFraud = Math.random() < 0.5;
+              
+              let bankAddress: string, bankDOB: string, bankDLNumber: string, bankIDNumber: string, bankSignature: string;
+              let fraudDescription = "";
+              
+              if (shouldHaveFraud) {
+                // Create specific fraud types with mismatched data
+                const fraudType = Math.floor(Math.random() * 4);
+                
+                switch (fraudType) {
+                  case 0: // Address mismatch
+                    bankAddress = "789 Oak Street, Springfield, CA 90210";
+                    bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                    bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                    bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                    fraudDescription = "ADDRESS MISMATCH DETECTED";
+                    break;
+                  case 1: // Date of birth mismatch  
+                    bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                    bankDOB = "12/03/1982";
+                    bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                    bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                    fraudDescription = "DATE OF BIRTH MISMATCH DETECTED";
+                    break;
+                  case 2: // License number mismatch
+                    bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                    bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                    bankDLNumber = "DL-XYZ789CD";
+                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                    bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                    fraudDescription = "LICENSE NUMBER MISMATCH DETECTED";
+                    break;
+                  case 3: // Signature mismatch
+                    bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                    bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                    bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                    bankSignature = `BANK_OFFICIAL_SIG_${bankName.replace(/\s+/g, '_').toUpperCase()}_DIFFERENT_STYLE`;
+                    fraudDescription = "SIGNATURE MISMATCH DETECTED";
+                    break;
+                }
+                
+                // Mark customer as fraudulent
+                currentCustomer.isFraudulent = true;
+                const fraudDoc = currentCustomer.documents.find(d => d.type === (fraudType === 3 ? 'signature' : 'id'));
+                if (fraudDoc) fraudDoc.isValid = false;
+              } else {
+                // Legitimate customer - all data matches
+                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
+                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
+                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
+                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
+                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
+                fraudDescription = "ALL DOCUMENTS VERIFIED - LEGITIMATE";
+              }
+              
+              setTerminalOutput(prev => [...prev,
+                "BANK VERIFICATION SYSTEM",
+                "==========================================",
+                "",
+                "SIGNATURE COMPARISON:",
+                "--------------------",
+                `BANK: ${bankSignature}`,
+                `CUST: ${customerSigDoc?.data.signature || 'NO SIGNATURE'}`,
+                "",
+                "IDENTITY VERIFICATION:",
+                "----------------------",
+                `NAME: ${bankName} | ${customerIdDoc?.data.name || 'N/A'}`,
+                `DOB:  ${bankDOB} | ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
+                `DL#:  ${bankDLNumber} | ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
+                `ID#:  ${bankIDNumber} | ${customerIdDoc?.data.idNumber || 'N/A'}`,
+                "",
+                "ADDRESS VERIFICATION:",
+                "---------------------",
+                `BANK: ${bankAddress}`,
+                `ID:   ${customerIdDoc?.data.address || 'N/A'}`,
+                "",
+                "ACCOUNT VERIFICATION:",
+                "---------------------",
+                `BANK: ${bankAccount}`,
+                `SLIP: ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
+                `BOOK: ${customerBankDoc?.data.accountNumber || 'N/A'}`,
+                `ID:   ${customerIdDoc?.data.accountNumber || 'N/A'}`,
+                "",
+                `STATUS: ${fraudDescription}`,
+                "",
+                shouldHaveFraud ? 
+                  "⚠️  DOCUMENTS DO NOT MATCH - REVIEW REQUIRED" : 
+                  "✓ ALL DOCUMENTS VERIFIED",
+                "",
+                "Use APPROVE or REJECT to process transaction",
+                "==========================================",
+                ""
+              ]);
             }}
             style={{
               marginTop: '8px',
