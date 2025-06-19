@@ -1794,11 +1794,11 @@ function App() {
                   <div><strong>Account:</strong> {currentCustomer?.transaction.accountNumber}</div>
                   <div><strong>Status:</strong> ACTIVE</div>
                   <div><strong>Balance:</strong> ${accountBalance.toLocaleString()}</div>
-                  <div><strong>Name:</strong> {currentCustomer?.bankRecords?.name || currentCustomer?.name}</div>
-                  <div><strong>Address:</strong> {currentCustomer?.bankRecords?.address || "1234 Main Street, Springfield, CA 90210"}</div>
-                  <div><strong>DOB:</strong> {currentCustomer?.bankRecords?.dateOfBirth || "05/15/1975"}</div>
-                  <div><strong>ID Number:</strong> {currentCustomer?.bankRecords?.idNumber || "ID987654321"}</div>
-                  <div><strong>License:</strong> {currentCustomer?.bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
+                  <div><strong>Name:</strong> {bankRecords?.name || currentCustomer?.name}</div>
+                  <div><strong>Address:</strong> {bankRecords?.address || "1234 Main Street, Springfield, CA 90210"}</div>
+                  <div><strong>DOB:</strong> {bankRecords?.dateOfBirth || "05/15/1975"}</div>
+                  <div><strong>ID Number:</strong> {bankRecords?.idNumber || "ID987654321"}</div>
+                  <div><strong>License:</strong> {bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
                   <div style={{ 
                     marginTop: '8px', 
                     padding: '8px', 
@@ -1807,7 +1807,7 @@ function App() {
                   }}>
                     <strong>Signature on File:</strong><br/>
                     <span style={{ fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic' }}>
-                      {currentCustomer?.bankRecords?.signature?.split('|')[0] || `${currentCustomer?.name.split(' ').map(n => n[0]).join('')} ${currentCustomer?.name.split(' ')[1] || ''}`}
+                      {bankRecords?.signature?.split('|')[0] || `${currentCustomer?.name.split(' ').map(n => n[0]).join('')} ${currentCustomer?.name.split(' ')[1] || ''}`}
                     </span>
                   </div>
                 </div>
@@ -2214,7 +2214,7 @@ function App() {
         <div style={{
           position: 'fixed',
           top: '10%',
-          right: '10px',
+          left: '10px',
           width: '320px',
           height: '400px',
           background: '#2a2a2a',
@@ -2343,111 +2343,86 @@ function App() {
                 return;
               }
               
+              if (!bankRecords) {
+                playSound('reject');
+                setTerminalOutput(prev => [...prev, "ERROR: Bank records not available"]);
+                return;
+              }
+              
               const customerIdDoc = currentCustomer.documents.find(d => d.type === 'id');
               const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
               const customerSlipDoc = currentCustomer.documents.find(d => d.type === 'slip');
               const customerBankDoc = currentCustomer.documents.find(d => d.type === 'bank_book');
               
-              const bankName = currentCustomer.name;
-              const bankAccount = currentCustomer.transaction.accountNumber;
+              // Compare bank records with customer documents
+              const mismatches: string[] = [];
               
-              // Create realistic fraud scenarios - 50% of customers have document mismatches
-              const shouldHaveFraud = Math.random() < 0.5;
-              
-              let bankAddress: string, bankDOB: string, bankDLNumber: string, bankIDNumber: string, bankSignature: string;
-              let fraudDescription = "";
-              
-              if (shouldHaveFraud) {
-                // Create specific fraud types with mismatched data
-                const fraudType = Math.floor(Math.random() * 4);
-                
-                switch (fraudType) {
-                  case 0: // Address mismatch
-                    bankAddress = "789 Oak Street, Springfield, CA 90210";
-                    bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-                    bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                    bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-                    fraudDescription = "ADDRESS MISMATCH DETECTED";
-                    break;
-                  case 1: // Date of birth mismatch  
-                    bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-                    bankDOB = "12/03/1982";
-                    bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                    bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-                    fraudDescription = "DATE OF BIRTH MISMATCH DETECTED";
-                    break;
-                  case 2: // License number mismatch
-                    bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-                    bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-                    bankDLNumber = "DL-XYZ789CD";
-                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                    bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-                    fraudDescription = "LICENSE NUMBER MISMATCH DETECTED";
-                    break;
-                  case 3: // Signature mismatch
-                    bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-                    bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-                    bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                    bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                    bankSignature = `BANK_OFFICIAL_SIG_${bankName.replace(/\s+/g, '_').toUpperCase()}_DIFFERENT_STYLE`;
-                    fraudDescription = "SIGNATURE MISMATCH DETECTED";
-                    break;
-                }
-                
-                // Mark customer as fraudulent
-                currentCustomer.isFraudulent = true;
-                const fraudDoc = currentCustomer.documents.find(d => d.type === (fraudType === 3 ? 'signature' : 'id'));
-                if (fraudDoc) fraudDoc.isValid = false;
-              } else {
-                // Legitimate customer - all data matches
-                bankAddress = customerIdDoc?.data.address || "1234 Main Street, Springfield, CA 90210";
-                bankDOB = customerIdDoc?.data.dateOfBirth || "05/15/1975";
-                bankDLNumber = customerIdDoc?.data.licenseNumber || "DL-ABC123XY";
-                bankIDNumber = customerIdDoc?.data.idNumber || "ID987654321";
-                bankSignature = customerSigDoc?.data.signature || `${bankName.split(' ').map(n => n[0]).join('')}_clean_signature`;
-                fraudDescription = "ALL DOCUMENTS VERIFIED - LEGITIMATE";
+              // Check name
+              if (bankRecords.name !== customerIdDoc?.data.name) {
+                mismatches.push("NAME MISMATCH");
               }
               
+              // Check address
+              if (bankRecords.address !== customerIdDoc?.data.address) {
+                mismatches.push("ADDRESS MISMATCH");
+              }
+              
+              // Check date of birth
+              if (bankRecords.dateOfBirth !== customerIdDoc?.data.dateOfBirth) {
+                mismatches.push("DATE OF BIRTH MISMATCH");
+              }
+              
+              // Check license number
+              if (bankRecords.licenseNumber !== customerIdDoc?.data.licenseNumber) {
+                mismatches.push("LICENSE NUMBER MISMATCH");
+              }
+              
+              // Check ID number
+              if (bankRecords.idNumber !== customerIdDoc?.data.idNumber) {
+                mismatches.push("ID NUMBER MISMATCH");
+              }
+              
+              // Check signature
+              const bankSig = bankRecords.signature?.split('|')[0] || '';
+              const custSig = customerSigDoc?.data.signature?.split('|')[0] || '';
+              if (bankSig !== custSig) {
+                mismatches.push("SIGNATURE MISMATCH");
+              }
+              
+              const hasFraud = mismatches.length > 0;
+              
               setTerminalOutput(prev => [...prev,
-                "BANK VERIFICATION SYSTEM",
+                "DOCUMENT VERIFICATION RESULTS",
                 "==========================================",
+                "",
+                "COMPARISON ANALYSIS:",
+                "--------------------",
+                `NAME: ${bankRecords.name} | ${customerIdDoc?.data.name || 'N/A'}`,
+                `DOB:  ${bankRecords.dateOfBirth} | ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
+                `ADDR: ${bankRecords.address}`,
+                `      ${customerIdDoc?.data.address || 'N/A'}`,
+                `DL#:  ${bankRecords.licenseNumber} | ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
+                `ID#:  ${bankRecords.idNumber} | ${customerIdDoc?.data.idNumber || 'N/A'}`,
                 "",
                 "SIGNATURE COMPARISON:",
                 "--------------------",
-                `BANK: ${bankSignature}`,
-                `CUST: ${customerSigDoc?.data.signature || 'NO SIGNATURE'}`,
+                `BANK: ${bankSig}`,
+                `CUST: ${custSig}`,
                 "",
-                "IDENTITY VERIFICATION:",
-                "----------------------",
-                `NAME: ${bankName} | ${customerIdDoc?.data.name || 'N/A'}`,
-                `DOB:  ${bankDOB} | ${customerIdDoc?.data.dateOfBirth || 'N/A'}`,
-                `DL#:  ${bankDLNumber} | ${customerIdDoc?.data.licenseNumber || 'N/A'}`,
-                `ID#:  ${bankIDNumber} | ${customerIdDoc?.data.idNumber || 'N/A'}`,
+                hasFraud ? "FRAUD INDICATORS DETECTED:" : "VERIFICATION STATUS:",
+                hasFraud ? "=========================" : "==================",
+                ...(hasFraud ? mismatches.map(m => `⚠️  ${m}`) : ["✓ ALL DOCUMENTS VERIFIED"]),
                 "",
-                "ADDRESS VERIFICATION:",
-                "---------------------",
-                `BANK: ${bankAddress}`,
-                `ID:   ${customerIdDoc?.data.address || 'N/A'}`,
+                hasFraud ? 
+                  "🚨 TRANSACTION SHOULD BE REJECTED" : 
+                  "✅ TRANSACTION CAN BE APPROVED",
                 "",
-                "ACCOUNT VERIFICATION:",
-                "---------------------",
-                `BANK: ${bankAccount}`,
-                `SLIP: ${customerSlipDoc?.data.accountNumber || 'N/A'}`,
-                `BOOK: ${customerBankDoc?.data.accountNumber || 'N/A'}`,
-                `ID:   ${customerIdDoc?.data.accountNumber || 'N/A'}`,
-                "",
-                `STATUS: ${fraudDescription}`,
-                "",
-                shouldHaveFraud ? 
-                  "⚠️  DOCUMENTS DO NOT MATCH - REVIEW REQUIRED" : 
-                  "✓ ALL DOCUMENTS VERIFIED",
-                "",
-                "Use APPROVE or REJECT to process transaction",
+                "Use APPROVE or REJECT to process",
                 "==========================================",
                 ""
               ]);
+              
+              playSound('typing');
             }}
             style={{
               marginTop: '8px',
