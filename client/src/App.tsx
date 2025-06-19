@@ -853,7 +853,7 @@ function App() {
         // Generate complete bank records (clean/correct data)
         const bankSignatureOnFile = generateLegitimateSignature(currentCustomer.name);
         
-        // Generate consistent bank address and DOB
+        // Generate complete bank records with all details for manual comparison
         const streets = ['Oak Street', 'Pine Avenue', 'Maple Drive', 'Cedar Lane', 'Elm Road', 'Birch Way'];
         const cities = ['Springfield', 'Riverside', 'Franklin', 'Georgetown', 'Madison', 'Arlington'];
         const states = ['CA', 'TX', 'NY', 'FL', 'IL', 'PA'];
@@ -869,6 +869,10 @@ function App() {
         const day = Math.floor(Math.random() * 28) + 1;
         const bankDOB = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
         
+        // Generate Driver's License and ID numbers for bank records
+        const bankDLNumber = `DL-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        const bankIDNumber = Math.random().toString(36).substring(2, 11).toUpperCase();
+        
         setTerminalOutput(prev => [...prev,
           "COMPLETE BANK RECORDS VERIFICATION",
           "==========================================",
@@ -879,25 +883,29 @@ function App() {
           `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
           `ADDRESS: ${bankAddress}`,
           `DOB: ${bankDOB}`,
+          `ID NUMBER: ${bankIDNumber}`,
+          `DL NUMBER: ${bankDLNumber}`,
           `SIGNATURE: "${bankSignatureOnFile}"`,
           `STATUS: ACTIVE`,
           `BALANCE: $${accountBalance.toLocaleString()}`,
           "",
-          "CUSTOMER PROVIDED DOCUMENTS:",
+          "MANUAL COMPARISON CHECKLIST:",
           "----------------------------",
-          "• Compare ALL fields manually",
-          "• Check name spellings exactly",
-          "• Verify account numbers match",  
-          "• Check address details",
-          "• Compare date of birth",
-          "• Examine signature styles",
+          "• Name spelling (exact match required)",
+          "• Account numbers (all docs must match)",  
+          "• Address details (street, city, state, zip)",
+          "• Date of birth (MM/DD/YYYY format)",
+          "• ID number from driver's license",
+          "• DL number from driver's license",
+          "• Signature style and characteristics",
           "",
-          "MANUAL VERIFICATION REQUIRED",
-          "Look for ANY mismatches",
+          "EXAMINE CUSTOMER DOCUMENTS NOW",
+          "Compare each field above manually",
+          "Look for ANY discrepancies",
           "==========================================",
           "",
-          "EXAMINE DOCUMENTS vs BANK RECORDS",
-          "Then use APPROVE or REJECT",
+          "Use APPROVE if all details match exactly",
+          "Use REJECT if ANY field doesn't match",
           ""
         ]);
         
@@ -1474,14 +1482,15 @@ function App() {
             </div>
           </div>
 
-          {/* Documents Section */}
+          {/* Documents Section - LARGE AND VISIBLE */}
           <div style={{
             width: '100%',
-            height: '60vh',
+            height: '70vh',
             display: 'flex',
             flexDirection: 'column',
-            gap: '3px',
-            overflow: 'auto'
+            gap: '8px',
+            overflow: 'auto',
+            minHeight: '500px'
           }}>
             {/* Customer Display - Larger */}
             {currentCustomer && (
