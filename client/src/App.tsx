@@ -1387,8 +1387,8 @@ function App() {
       height: '100vh',
       minHeight: '100vh',
       maxHeight: '100vh',
-      background: '#f8f9fa',
-      color: '#212529',
+      background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+      color: '#ffffff',
       fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
       position: 'fixed',
       top: 0,
@@ -1560,19 +1560,19 @@ function App() {
           }}>
             {/* Terminal Output */}
             <div style={{
-              background: '#ffffff',
-              border: '2px solid #dee2e6',
+              background: '#1a1a1a',
+              border: '2px solid #3498db',
               borderRadius: '8px',
-              padding: '12px',
+              padding: '16px',
               height: '28vh',
               overflowY: 'auto',
-              fontSize: '12px',
-              fontFamily: '"Consolas", "Monaco", monospace',
-              lineHeight: '1.4',
+              fontSize: '13px',
+              fontFamily: '"SF Mono", "Monaco", "Cascadia Code", monospace',
+              lineHeight: '1.5',
               wordWrap: 'break-word',
               whiteSpace: 'pre-wrap',
-              color: '#212529',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+              color: '#ecf0f1',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
             }}>
               {terminalOutput.map((line, index) => (
                 <div key={index} style={{ 
@@ -1753,44 +1753,44 @@ function App() {
             overflow: 'auto',
             minHeight: '500px'
           }}>
-            {/* Customer Display - Clean */}
+            {/* Customer Display - Vibrant */}
             {currentCustomer && (
               <div style={{
-                background: '#ffffff',
-                border: '2px solid #007bff',
-                borderRadius: '8px',
-                padding: '16px',
+                background: 'linear-gradient(145deg, #ff6b6b, #ee5a52)',
+                border: '3px solid #ff3838',
+                borderRadius: '12px',
+                padding: '20px',
                 textAlign: 'center',
-                fontSize: '14px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                fontSize: '15px',
+                boxShadow: '0 8px 25px rgba(255, 56, 56, 0.4)'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#007bff' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#ffffff' }}>
                   CUSTOMER: {currentCustomer.name}
                 </div>
-                <div style={{ marginBottom: '4px', color: '#212529' }}>
+                <div style={{ marginBottom: '6px', color: '#ffffff' }}>
                   {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                <div style={{ fontSize: '13px', color: '#ffeeee' }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
 
-            {/* Bank Computer Records - Clean Design */}
+            {/* Bank Computer Records - Vibrant Design */}
             {verificationState.accountLookedUp && (
               <div style={{
-                background: '#e8f5e8',
-                border: '2px solid #198754',
-                borderRadius: '8px',
-                padding: '16px',
-                fontSize: '12px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                marginBottom: '8px'
+                background: 'linear-gradient(145deg, #10ac84, #00a085)',
+                border: '3px solid #00ff88',
+                borderRadius: '12px',
+                padding: '18px',
+                fontSize: '13px',
+                boxShadow: '0 8px 25px rgba(0, 255, 136, 0.3)',
+                marginBottom: '10px'
               }}>
-                <div style={{ color: '#198754', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>
+                <div style={{ color: '#ffffff', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
                   BANK COMPUTER RECORDS - COMPARE WITH CUSTOMER DOCS
                 </div>
-                <div style={{ color: '#212529', lineHeight: '1.4' }}>
+                <div style={{ color: '#ffffff', lineHeight: '1.5' }}>
                   <div><strong>Account:</strong> {currentCustomer?.transaction.accountNumber}</div>
                   <div><strong>Status:</strong> ACTIVE</div>
                   <div><strong>Balance:</strong> ${accountBalance.toLocaleString()}</div>
@@ -1800,14 +1800,14 @@ function App() {
                   <div><strong>ID Number:</strong> {bankRecords?.idNumber || "ID987654321"}</div>
                   <div><strong>License:</strong> {bankRecords?.licenseNumber || "DL-ABC123XY"}</div>
                   <div style={{ 
-                    marginTop: '8px', 
-                    padding: '8px', 
-                    background: '#ffffff',
-                    border: '1px solid #198754',
-                    borderRadius: '4px'
+                    marginTop: '10px', 
+                    padding: '12px', 
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: '2px solid #00ff88',
+                    borderRadius: '8px'
                   }}>
                     <strong>Signature on File:</strong><br/>
-                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', color: '#495057' }}>
+                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '15px', fontStyle: 'italic', color: '#ffffff' }}>
                       {bankRecords?.signature?.split('|')[0] || `${currentCustomer?.name.split(' ').map(n => n[0]).join('')} ${currentCustomer?.name.split(' ')[1] || ''}`}
                     </span>
                   </div>
@@ -1818,17 +1818,17 @@ function App() {
             {/* Documents - Clean Design */}
             {currentCustomer && (
               <div style={{
-                background: '#ffffff',
-                border: '2px solid #dee2e6',
-                borderRadius: '8px',
-                padding: '16px',
+                background: 'linear-gradient(145deg, #2c3e50, #34495e)',
+                border: '2px solid #f39c12',
+                borderRadius: '10px',
+                padding: '18px',
                 height: '38vh',
                 overflow: 'auto',
                 flex: 'none',
                 width: '100%',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)'
               }}>
-                <div style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 'bold', color: '#495057' }}>
+                <div style={{ margin: '0 0 14px 0', fontSize: '15px', fontWeight: 'bold', color: '#f39c12' }}>
                   CUSTOMER DOCUMENTS
                 </div>
                 <div style={{
