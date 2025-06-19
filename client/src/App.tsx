@@ -1739,7 +1739,13 @@ function App() {
                   width: '100%'
                 }}>
                   {currentCustomer.documents.map((doc, index) => (
-                    <div key={doc.id} style={{
+                    <div key={doc.id} 
+                         onClick={() => {
+                           playSound('paper_shuffle');
+                           setPopupDocument(doc);
+                           setShowDocumentPopup(true);
+                         }}
+                         style={{
                       background: '#1a1a1a',
                       border: '1px solid #00ff00',
                       borderRadius: '4px',
@@ -1748,9 +1754,22 @@ function App() {
                       overflow: 'hidden',
                       fontSize: '9px',
                       fontFamily: 'monospace',
-                      color: '#00ff00'
+                      color: '#00ff00',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
                     }}>
-                      {renderDocument(doc, index)}
+                      <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                        {doc.type.toUpperCase().replace('_', ' ')} DOCUMENT
+                      </div>
+                      <div style={{ fontSize: '8px', opacity: 0.8 }}>
+                        Click to examine in detail
+                      </div>
+                      <div style={{ marginTop: '4px', fontSize: '7px' }}>
+                        {doc.type === 'id' && `ID: ${doc.data.name}`}
+                        {doc.type === 'slip' && `SLIP: $${doc.data.amount}`}
+                        {doc.type === 'bank_book' && `BOOK: ${doc.data.accountNumber}`}
+                        {doc.type === 'signature' && `SIG: ${doc.data.name}`}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1871,7 +1890,7 @@ function App() {
                   dismissalWarningGiven: false
                 });
                 setCurrentCustomer(null);
-                setSelectedDocument(null);
+                setViewedDocument(null);
                 setGameInitialized(false);
                 setTerminalOutput([
                   "TELLER WORKSTATION v1.2",
