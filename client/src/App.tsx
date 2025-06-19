@@ -2109,6 +2109,115 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Small Document Popup Viewer */}
+      {showDocumentPopup && popupDocument && (
+        <div style={{
+          position: 'fixed',
+          top: '15%',
+          right: '20px',
+          width: '300px',
+          height: '350px',
+          background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+          border: '2px solid #ffff00',
+          borderRadius: '8px',
+          padding: '15px',
+          color: '#ffffff',
+          fontFamily: 'monospace',
+          fontSize: '10px',
+          zIndex: 1500,
+          boxShadow: '0 0 20px rgba(255, 255, 0, 0.3)',
+          overflow: 'auto'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '10px',
+            borderBottom: '1px solid #ffff00',
+            paddingBottom: '6px'
+          }}>
+            <div style={{ color: '#ffff00', fontWeight: 'bold', fontSize: '11px' }}>
+              {popupDocument.type.toUpperCase().replace('_', ' ')}
+            </div>
+            <div 
+              onClick={() => {
+                playSound('paper_shuffle');
+                setShowDocumentPopup(false);
+                setPopupDocument(null);
+              }}
+              style={{
+                cursor: 'pointer',
+                color: '#ffff00',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}>
+              ×
+            </div>
+          </div>
+          
+          {popupDocument.type === 'id' && (
+            <div style={{ lineHeight: '1.3' }}>
+              <div><strong>NAME:</strong> {popupDocument.data.name}</div>
+              <div><strong>DOB:</strong> {popupDocument.data.dateOfBirth}</div>
+              <div><strong>ADDRESS:</strong> {popupDocument.data.address}</div>
+              <div><strong>ID#:</strong> {popupDocument.data.idNumber}</div>
+              <div><strong>LICENSE:</strong> {popupDocument.data.licenseNumber}</div>
+              <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+            </div>
+          )}
+          
+          {popupDocument.type === 'slip' && (
+            <div style={{ lineHeight: '1.3' }}>
+              <div><strong>CUSTOMER:</strong> {popupDocument.data.name}</div>
+              <div><strong>TYPE:</strong> {popupDocument.data.type?.toUpperCase()}</div>
+              <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
+              <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+              {popupDocument.data.targetAccount && (
+                <div><strong>TARGET:</strong> {popupDocument.data.targetAccount}</div>
+              )}
+            </div>
+          )}
+          
+          {popupDocument.type === 'bank_book' && (
+            <div style={{ lineHeight: '1.3' }}>
+              <div><strong>HOLDER:</strong> {popupDocument.data.name}</div>
+              <div><strong>ACCOUNT:</strong> {popupDocument.data.accountNumber}</div>
+              <div><strong>BALANCE:</strong> ${popupDocument.data.balance}</div>
+              <div><strong>AMOUNT:</strong> ${popupDocument.data.amount}</div>
+            </div>
+          )}
+          
+          {popupDocument.type === 'signature' && (
+            <div style={{ lineHeight: '1.3' }}>
+              <div><strong>NAME:</strong> {popupDocument.data.name}</div>
+              <div style={{ 
+                marginTop: '8px',
+                padding: '12px',
+                background: '#ffffff',
+                color: '#000000',
+                borderRadius: '4px',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontFamily: 'cursive'
+              }}>
+                {popupDocument.data.signature}
+              </div>
+            </div>
+          )}
+          
+          <div style={{
+            marginTop: '12px',
+            padding: '6px',
+            background: 'rgba(255, 255, 0, 0.1)',
+            borderRadius: '4px',
+            fontSize: '9px',
+            color: '#ffff00'
+          }}>
+            Use VERIFY to compare with bank records
+          </div>
+        </div>
+      )}
     </div>
   );
 }
