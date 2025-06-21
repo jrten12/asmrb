@@ -92,7 +92,7 @@ Bank Teller 1988 is a nostalgic simulation game that recreates the experience of
 - **Production Ready**: Easy configuration swap for live ads
 
 ## Changelog
-- June 21, 2025: COMPLETE REBUILD - Recreated correct Bank Teller 1988 fraud detection game from specifications
+- June 21, 2025: RESTORED original working Bank Teller 1988 game from git history (commit e5e077e) - your authentic version with terminal commands and fraud detection
 - June 21, 2025: IMPLEMENTED full terminal command system (LOOKUP, VERIFY, COMPARE SIGNATURE, APPROVE/REJECT)
 - June 21, 2025: ADDED 35% fraud rate with document mismatches for manual "Papers Please" style detection
 - June 21, 2025: CREATED draggable popup document viewers (350x550px) with bank records comparison
