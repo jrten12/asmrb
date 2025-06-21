@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './index.css';
 
-console.log('BANK TELLER 1988 - CORRECT VERSION LOADING');
+console.log('BANK TELLER 1988 - LOADING');
 
-// Game interfaces
 interface Customer {
   id: string;
   name: string;
@@ -23,7 +22,7 @@ interface Transaction {
   recipientName?: string;
 }
 
-interface Document {
+interface GameDocument {
   id: string;
   type: 'id' | 'signature' | 'bank_book' | 'slip';
   data: Record<string, any>;
@@ -51,12 +50,11 @@ interface GameState {
 }
 
 interface PopupDocument {
-  document: Document;
+  document: GameDocument;
   position: { x: number; y: number };
   id: string;
 }
 
-// Sound management
 class AudioManager {
   private audioContext: AudioContext | null = null;
   
@@ -75,33 +73,36 @@ class AudioManager {
   playSound(type: 'typing' | 'paper' | 'stamp' | 'error' | 'cash' | 'keypad') {
     if (!this.audioContext) return;
     
-    const oscillator = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
-    
-    const frequencies = {
-      typing: 800,
-      paper: 200,
-      stamp: 150,
-      error: 300,
-      cash: 400,
-      keypad: 600
-    };
-    
-    oscillator.frequency.value = frequencies[type];
-    oscillator.type = 'square';
-    
-    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
-    
-    oscillator.start();
-    oscillator.stop(this.audioContext.currentTime + 0.1);
+    try {
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      
+      const frequencies = {
+        typing: 800,
+        paper: 200,
+        stamp: 150,
+        error: 300,
+        cash: 400,
+        keypad: 600
+      };
+      
+      oscillator.frequency.value = frequencies[type];
+      oscillator.type = 'square';
+      
+      gainNode.gain.setValueAtTime(0.05, this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+      
+      oscillator.start();
+      oscillator.stop(this.audioContext.currentTime + 0.1);
+    } catch (e) {
+      console.log('Audio play failed');
+    }
   }
 }
 
-// Customer and document generation
 function generateCustomer(level: number): Customer {
   const names = [
     'Sarah Williams', 'John Davis', 'Maria Rodriguez', 'Robert Johnson', 
@@ -117,9 +118,8 @@ function generateCustomer(level: number): Customer {
 
   const name = names[Math.floor(Math.random() * names.length)];
   const accountNumber = Math.floor(Math.random() * 900000000 + 100000000).toString();
-  const isFraudulent = Math.random() < 0.35; // 35% fraud rate
+  const isFraudulent = Math.random() < 0.35;
   
-  // Generate bank records (what's in the system)
   const bankRecords: BankRecord = {
     name: name,
     dateOfBirth: '1985-03-15',
@@ -129,7 +129,6 @@ function generateCustomer(level: number): Customer {
     signature: generateSignature(name, false)
   };
 
-  // Generate transaction
   const transactionTypes: Transaction['type'][] = ['deposit', 'withdrawal', 'wire_transfer', 'money_order', 'cashiers_check'];
   const transaction: Transaction = {
     type: transactionTypes[Math.floor(Math.random() * transactionTypes.length)],
@@ -141,8 +140,7 @@ function generateCustomer(level: number): Customer {
     })
   };
 
-  // Generate documents with potential fraud
-  const documents: Document[] = [
+  const documents: GameDocument[] = [
     {
       id: 'id-1',
       type: 'id',
@@ -204,7 +202,6 @@ function generateSignature(name: string, isFraud: boolean): string {
   ).join(' ');
   
   if (isFraud) {
-    // Make signature look different - shaky, different style
     return baseSignature.split('').map(char => 
       Math.random() > 0.7 ? char.toUpperCase() : char
     ).join('');
@@ -249,14 +246,12 @@ export default function App() {
   const audioManager = useRef(new AudioManager());
   const terminalRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll terminal
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, [terminalOutput]);
 
-  // Timer for customer patience and game time
   useEffect(() => {
     if (gameState.phase === 'working') {
       const timer = setInterval(() => {
@@ -270,7 +265,6 @@ export default function App() {
             };
             
             if (updatedCustomer.patience === 0) {
-              // Customer leaves due to timeout
               addTerminalOutput('Customer left due to timeout. -10 points.');
               return {
                 ...newState,
@@ -382,7 +376,6 @@ export default function App() {
       audioManager.current.playSound('stamp');
       
       if (gameState.currentCustomer.isFraudulent) {
-        // Player approved fraud - this is bad
         const newFraudApprovals = gameState.fraudulentApprovals + 1;
         addTerminalOutput('TRANSACTION APPROVED');
         addTerminalOutput('⚠️ WARNING: Fraudulent transaction approved!');
@@ -408,7 +401,6 @@ export default function App() {
           errors: prev.errors + 1
         }));
       } else {
-        // Correctly approved legitimate transaction
         addTerminalOutput('TRANSACTION APPROVED');
         addTerminalOutput('+25 points - Legitimate transaction processed.');
         setGameState(prev => ({
@@ -430,7 +422,6 @@ export default function App() {
       audioManager.current.playSound('error');
       
       if (gameState.currentCustomer.isFraudulent) {
-        // Correctly rejected fraudulent transaction
         addTerminalOutput('TRANSACTION REJECTED');
         addTerminalOutput('+50 points - Fraud successfully detected!');
         setGameState(prev => ({
@@ -441,7 +432,6 @@ export default function App() {
           currentCustomer: null
         }));
       } else {
-        // Incorrectly rejected legitimate transaction
         addTerminalOutput('TRANSACTION REJECTED');
         addTerminalOutput('⚠️ WARNING: Legitimate transaction rejected.');
         addTerminalOutput('-15 points - Customer complaint filed.');
@@ -487,7 +477,7 @@ export default function App() {
     }
   };
 
-  const openDocumentPopup = (document: Document) => {
+  const openDocumentPopup = (document: GameDocument) => {
     audioManager.current.playSound('paper');
     
     const popup: PopupDocument = {
@@ -537,7 +527,7 @@ export default function App() {
     setDragState(null);
   };
 
-  const renderDocument = (doc: Document) => {
+  const renderDocument = (doc: GameDocument) => {
     switch (doc.type) {
       case 'id':
         return (
@@ -658,7 +648,6 @@ export default function App() {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      {/* Header */}
       <div className="bg-gray-900 border-b-2 border-green-400 p-2">
         <div className="flex justify-between items-center">
           <div className="text-lg font-bold">WESTRIDGE NATIONAL BANK - TELLER TERMINAL</div>
@@ -672,9 +661,7 @@ export default function App() {
       </div>
 
       <div className="flex-1 flex">
-        {/* Main Terminal */}
         <div className="flex-1 flex flex-col">
-          {/* Terminal Output */}
           <div 
             ref={terminalRef}
             className="flex-1 bg-black p-4 overflow-y-auto text-sm leading-relaxed"
@@ -687,7 +674,6 @@ export default function App() {
             ))}
           </div>
 
-          {/* Terminal Input */}
           <div className="bg-gray-900 border-t-2 border-green-400 p-4">
             <form onSubmit={handleTerminalSubmit} className="flex gap-2">
               <span className="text-green-300">{'>'}</span>
@@ -701,7 +687,6 @@ export default function App() {
               />
             </form>
             
-            {/* Command Buttons */}
             <div className="mt-2 flex flex-wrap gap-2">
               <button
                 onClick={() => setTerminalInput('LOOKUP ')}
@@ -743,12 +728,10 @@ export default function App() {
           </div>
         </div>
 
-        {/* Customer Documents */}
         {gameState.currentCustomer && (
           <div className="w-80 bg-gray-900 border-l-2 border-green-400 p-4">
             <h3 className="text-lg font-bold mb-4 text-green-300">CUSTOMER DOCUMENTS</h3>
             
-            {/* Customer Info */}
             <div className="mb-4 p-3 bg-gray-800 rounded border border-green-400">
               <div className="text-sm">
                 <div><strong>Customer:</strong> {gameState.currentCustomer.name}</div>
@@ -769,7 +752,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Documents Grid */}
             <div 
               className="grid grid-cols-2 gap-2 overflow-y-auto"
               style={{ height: '38vh' }}
@@ -794,7 +776,6 @@ export default function App() {
         )}
       </div>
 
-      {/* Bank Records Panel */}
       {showBankRecords && gameState.currentCustomer && (
         <div className="fixed top-20 right-4 w-80 bg-blue-900 border-2 border-blue-400 rounded p-4 z-50">
           <div className="flex justify-between items-center mb-3">
@@ -822,7 +803,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Document Popups */}
       {popupDocuments.map((popup) => (
         <div
           key={popup.id}
@@ -834,7 +814,6 @@ export default function App() {
             height: '550px'
           }}
         >
-          {/* Popup Header */}
           <div
             className="bg-gray-200 p-2 cursor-move flex justify-between items-center border-b"
             onMouseDown={(e) => handleMouseDown(e, popup.id)}
@@ -850,12 +829,10 @@ export default function App() {
             </button>
           </div>
 
-          {/* Popup Content */}
           <div className="p-4 overflow-y-auto" style={{ height: 'calc(100% - 120px)' }}>
             {renderDocument(popup.document)}
           </div>
 
-          {/* Bank Records in Popup */}
           {gameState.currentCustomer && (
             <div className="border-t bg-blue-50 p-3">
               <h5 className="font-bold text-blue-800 text-sm mb-2">BANK RECORDS</h5>
