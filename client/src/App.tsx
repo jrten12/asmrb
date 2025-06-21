@@ -1,284 +1,1278 @@
-import React, { useState, useEffect } from 'react';
-import AdMobBannerAd from '../../components/AdMobBannerAd';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
+import { getDocumentRenderer } from './lib/documents';
+import type { Customer, Document as GameDocument } from './types/game';
 
-console.log('TELLER\'S WINDOW - ORIGINAL VERSION RESTORED');
-
-interface Document {
-  type: string;
-  name?: string;
-  id?: string;
-  account?: string;
-  amount?: number;
-  type_doc?: string;
-  valid: boolean;
-  error?: string;
-}
-
-interface Customer {
-  name: string;
-  transaction: {
-    type: string;
-    amount: number;
-  };
-  documents: Document[];
-}
-
-interface GameState {
-  phase: 'intro' | 'playing';
-  score: number;
-  level: number;
-  mistakes: number;
-  time: number;
-  currentCustomer: Customer | null;
-  selectedDocument: number | null;
-}
-
-const customers: Customer[] = [
-  {
-    name: 'John Smith',
-    transaction: { type: 'DEPOSIT', amount: 500 },
-    documents: [
-      { type: 'ID CARD', name: 'John Smith', id: '12345', valid: true },
-      { type: 'BANK BOOK', name: 'John Smith', account: '987654321', valid: true },
-      { type: 'SLIP', type_doc: 'DEPOSIT', amount: 500, valid: true },
-      { type: 'SIGNATURE', name: 'John Smith', valid: true }
-    ]
-  },
-  {
-    name: 'Mary Johnson',
-    transaction: { type: 'WITHDRAWAL', amount: 200 },
-    documents: [
-      { type: 'ID CARD', name: 'Mary Johnson', id: '54321', valid: true },
-      { type: 'BANK BOOK', name: 'Mary Johnson', account: '123456789', valid: true },
-      { type: 'SLIP', type_doc: 'WITHDRAWAL', amount: 250, valid: false, error: 'Amount mismatch' },
-      { type: 'SIGNATURE', name: 'Mary Johnson', valid: false, error: 'Signature invalid' }
-    ]
-  },
-  {
-    name: 'Robert Wilson',
-    transaction: { type: 'WIRE TRANSFER', amount: 1000 },
-    documents: [
-      { type: 'ID CARD', name: 'Robert Wilson', id: '98765', valid: true },
-      { type: 'BANK BOOK', name: 'Robert Wilson', account: '555666777', valid: true },
-      { type: 'SLIP', type_doc: 'WIRE TRANSFER', amount: 1000, valid: true },
-      { type: 'SIGNATURE', name: 'Robert Wilson', valid: true }
-    ]
-  },
-  {
-    name: 'Lisa Brown',
-    transaction: { type: 'DEPOSIT', amount: 750 },
-    documents: [
-      { type: 'ID CARD', name: 'Lisa Brown', id: '11111', valid: false, error: 'Expired ID' },
-      { type: 'BANK BOOK', name: 'Lisa Brown', account: '888999000', valid: true },
-      { type: 'SLIP', type_doc: 'DEPOSIT', amount: 750, valid: true },
-      { type: 'SIGNATURE', name: 'Lisa Brown', valid: false, error: 'Signature mismatch' }
-    ]
-  },
-  {
-    name: 'Michael Davis',
-    transaction: { type: 'WITHDRAWAL', amount: 300 },
-    documents: [
-      { type: 'ID CARD', name: 'Michael Davis', id: '22222', valid: true },
-      { type: 'BANK BOOK', name: 'Michael Davis', account: '111222333', valid: false, error: 'Account frozen' },
-      { type: 'SLIP', type_doc: 'WITHDRAWAL', amount: 350, valid: false, error: 'Amount exceeds limit' },
-      { type: 'SIGNATURE', name: 'Michael Davis', valid: true }
-    ]
+declare global {
+  interface Window {
+    gameAudioContext?: AudioContext;
   }
-];
+}
 
-export default function App() {
-  const [gameState, setGameState] = useState<GameState>({
-    phase: 'intro',
+interface GameScore {
+  score: number;
+  correctTransactions: number;
+  errors: number;
+  timeOnShift: number;
+  fraudulentApprovals: number;
+  consecutiveErrors: number;
+  errorDetails: string[];
+  customersCalledWithoutService: number;
+  dismissalWarningGiven: boolean;
+}
+
+interface LeaderboardEntry {
+  name: string;
+  score: number;
+  date: string;
+}
+
+interface LegacyDocument {
+  type: string;
+  title: string;
+  data: Record<string, string | number>;
+  isValid?: boolean;
+  hasError?: string;
+}
+
+function App() {
+  const [gamePhase, setGamePhase] = useState<'punch_in' | 'working' | 'leaderboard' | 'game_over' | 'punch_out' | 'supervisor' | 'police_arrest'>('punch_in');
+  const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<GameDocument | null>(null);
+  const [gameInitialized, setGameInitialized] = useState(false);
+  const [terminalInput, setTerminalInput] = useState('');
+  const [showArrestAnimation, setShowArrestAnimation] = useState(false);
+  const [arrestStage, setArrestStage] = useState(0);
+  const [policeUnits, setPoliceUnits] = useState<Array<{id: number, x: number, y: number, delay: number}>>([]);
+  const [sirenFlash, setSirenFlash] = useState(false);
+  const [terminalOutput, setTerminalOutput] = useState([
+    "TELLER WORKSTATION v1.2",
+    "WESTRIDGE NATIONAL BANK",
+    "PUNCH IN TO BEGIN SHIFT",
+    "",
+    "TELLER AUTHENTICATION: APPROVED",
+    "",
+    "Ready for customer service"
+  ]);
+  
+  const [gameScore, setGameScore] = useState<GameScore>({
     score: 0,
-    level: 1,
-    mistakes: 0,
-    time: 480, // 8 hours in minutes
-    currentCustomer: null,
-    selectedDocument: null
+    correctTransactions: 0,
+    errors: 0,
+    timeOnShift: 0,
+    fraudulentApprovals: 0,
+    consecutiveErrors: 0,
+    errorDetails: [],
+    customersCalledWithoutService: 0,
+    dismissalWarningGiven: false
+  });
+  
+  // Background music and sound management
+  const [musicMuted, setMusicMuted] = useState(false);
+  const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Account lookup state (no automatic fraud detection)
+  const [accountBalance, setAccountBalance] = useState(0);
+  const [verificationState, setVerificationState] = useState({
+    accountLookedUp: false,
+    signatureCompared: false
   });
 
+  // Sound effects
+  const playSound = (soundType: string) => {
+    try {
+      let audio: HTMLAudioElement;
+      switch (soundType) {
+        case 'typing':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.3;
+          break;
+        case 'punch_clock':
+          audio = new Audio('/punch-clock.mp3');
+          audio.volume = 0.5;
+          break;
+        case 'cash':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.4;
+          break;
+        case 'reject':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.6;
+          break;
+        case 'customer_approach':
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.2;
+          break;
+        default:
+          return;
+      }
+      audio.play().catch(e => console.log("Audio play failed:", e));
+    } catch (e) {
+      console.log("Sound error:", e);
+    }
+  };
+
+  // Initialize background music
+  useEffect(() => {
+    if (!musicMuted) {
+      if (!backgroundMusicRef.current) {
+        backgroundMusicRef.current = new Audio('/The Currency Hypnosis.mp3');
+        backgroundMusicRef.current.loop = true;
+        backgroundMusicRef.current.volume = 0.15;
+      }
+      
+      backgroundMusicRef.current.addEventListener('canplaythrough', () => {
+        if (!musicMuted && backgroundMusicRef.current) {
+          backgroundMusicRef.current.play().catch(e => {
+            console.log("Auto-play prevented:", e);
+          });
+        }
+      });
+      
+      if (musicMuted && backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
+    }
+    
+    return () => {
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+      }
+    };
+  }, [musicMuted]);
+
+  // Generate customer with proper fraud mechanics
+  const generateCustomerLocal = (): Customer => {
+    const customer = generateCustomer(1);
+    console.log("Generated customer:", customer);
+    return customer;
+  };
+
+  // Account lookup function - NEVER automatically flags fraud
+  const lookupAccount = (accountNumber: string) => {
+    if (!currentCustomer) return;
+    
+    setTerminalOutput(prev => [...prev, 
+      `> LOOKUP ${accountNumber}`,
+      "Searching bank records...",
+      "Accessing customer database..."
+    ]);
+    
+    // Always return valid account information - player must compare manually
+    const balance = Math.floor(Math.random() * 50000) + 1000;
+    setAccountBalance(balance);
+    setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
+    
+    setTimeout(() => {
+      setTerminalOutput(prev => [...prev, 
+        "✓✓✓ ACCOUNT VERIFIED - RECORD FOUND ✓✓✓",
+        "STATUS: ACTIVE CUSTOMER",
+        `BALANCE: $${balance.toLocaleString()}`,
+        "BANK RECORDS NOW DISPLAYED BELOW"
+      ]);
+      playSound('cash');
+    }, 1500);
+  };
+
+  // Handle customer dismissal without service
+  const handleCustomerDismissal = () => {
+    if (!currentCustomer) return;
+    
+    const currentCount = gameScore.customersCalledWithoutService;
+    const newCount = currentCount + 1;
+    console.log("DISMISSAL DEBUG: Current count:", currentCount, "New count will be:", newCount, "Warning already given:", gameScore.dismissalWarningGiven);
+    
+    // Always clear customer and generate new one first
+    setCurrentCustomer(null);
+    setVerificationState({ accountLookedUp: false, signatureCompared: false });
+    
+    // Handle warning at exactly 2nd dismissal - WARNING ONLY, GAME CONTINUES
+    if (newCount === 2 && !gameScore.dismissalWarningGiven) {
+      setTerminalOutput(prev => [...prev,
+        "",
+        "⚠️ SUPERVISOR ALERT ⚠️",
+        "WARNING: Customer service protocol violation",
+        "You have dismissed 2 customers without service", 
+        "This is your FIRST WARNING",
+        "Two more dismissals will result in termination",
+        "Please serve all customers properly",
+        ""
+      ]);
+      playSound('reject');
+      setGameScore(prev => ({ 
+        ...prev, 
+        customersCalledWithoutService: newCount, 
+        dismissalWarningGiven: true 
+      }));
+      // Continue game with new customer - this is just a warning
+      setTimeout(() => {
+        setCurrentCustomer(generateCustomerLocal());
+      }, 2000);
+      return;
+    }
+    
+    // Handle FINAL TERMINATION at exactly 4th dismissal - FIRED
+    if (newCount === 4 && gameScore.dismissalWarningGiven) {
+      setTerminalOutput(prev => [...prev,
+        "",
+        "🚨 YOU ARE FIRED 🚨",
+        "FINAL TERMINATION: Excessive customer dismissals",
+        "You have dismissed 4 customers without service",
+        "You ignored the management warning",
+        "You are terminated immediately",
+        "Please collect your belongings and leave",
+        ""
+      ]);
+      setGameScore(prev => ({ ...prev, customersCalledWithoutService: newCount }));
+      // End game - YOU'RE FIRED
+      setTimeout(() => setGamePhase('leaderboard'), 3000);
+      return;
+    }
+    
+    // Regular dismissal - just update count and continue
+    setGameScore(prev => ({ ...prev, customersCalledWithoutService: newCount }));
+    setTimeout(() => {
+      setCurrentCustomer(generateCustomerLocal());
+    }, 1000);
+  };
+
+  // Enhanced police arrest animation
+  const triggerPoliceArrest = () => {
+    setShowArrestAnimation(true);
+    setArrestStage(0);
+    
+    // Create multiple police units
+    const units = [
+      { id: 1, x: -100, y: 50, delay: 0 },
+      { id: 2, x: window.innerWidth + 100, y: 50, delay: 500 },
+      { id: 3, x: -100, y: window.innerHeight - 150, delay: 1000 },
+      { id: 4, x: window.innerWidth + 100, y: window.innerHeight - 150, delay: 1500 }
+    ];
+    setPoliceUnits(units);
+    
+    // Start siren flash effect
+    setSirenFlash(true);
+    const flashInterval = setInterval(() => {
+      setSirenFlash(prev => !prev);
+    }, 200);
+    
+    // Stage 1: Police units converge
+    setTimeout(() => {
+      setArrestStage(1);
+      setTerminalOutput(prev => [...prev,
+        "",
+        "🚨 POLICE ALERT 🚨",
+        "MULTIPLE UNITS RESPONDING",
+        "SUSPECT DETAINED FOR QUESTIONING"
+      ]);
+    }, 2000);
+    
+    // Stage 2: Dramatic arrest sequence
+    setTimeout(() => {
+      setArrestStage(2);
+      setTerminalOutput(prev => [...prev,
+        "",
+        "🚔 ARREST IN PROGRESS 🚔",
+        "FRAUD INVESTIGATION UNIT ACTIVATED",
+        "HANDCUFFS APPLIED - SUSPECT SECURED"
+      ]);
+    }, 4000);
+    
+    // Stage 3: Radio dispatch
+    setTimeout(() => {
+      setArrestStage(3);
+      setTerminalOutput(prev => [...prev,
+        "",
+        "📻 DISPATCH: Unit 247 to Central",
+        "📻 Suspect in custody for bank fraud",
+        "📻 Requesting transport to county jail",
+        "📻 Investigation ongoing - Case #FR-2024-891"
+      ]);
+    }, 6000);
+    
+    // Stage 4: Final transport
+    setTimeout(() => {
+      setArrestStage(4);
+      clearInterval(flashInterval);
+      setSirenFlash(false);
+      setTerminalOutput(prev => [...prev,
+        "",
+        "🚨 CASE CLOSED 🚨",
+        "FRAUD CONVICTION: 5-10 YEARS FEDERAL PRISON",
+        "YOUR CRIMINAL CAREER IS OVER",
+        ""
+      ]);
+    }, 8000);
+    
+    // End animation and go to game over
+    setTimeout(() => {
+      setShowArrestAnimation(false);
+      setGamePhase('leaderboard');
+    }, 10000);
+  };
+
+  const resetVerificationState = () => {
+    setVerificationState({ accountLookedUp: false, signatureCompared: false });
+  };
+
+  const handleCorrectTransaction = () => {
+    setGameScore(prev => ({
+      ...prev,
+      score: prev.score + 100,
+      correctTransactions: prev.correctTransactions + 1,
+      consecutiveErrors: 0
+    }));
+  };
+
+  const handleIncorrectTransaction = (errorType: string) => {
+    const newErrors = gameScore.errors + 1;
+    const newConsecutiveErrors = gameScore.consecutiveErrors + 1;
+    
+    setGameScore(prev => ({
+      ...prev,
+      errors: newErrors,
+      consecutiveErrors: newConsecutiveErrors,
+      errorDetails: [...prev.errorDetails, errorType]
+    }));
+    
+    if (newConsecutiveErrors >= 3) {
+      setGamePhase('game_over');
+    }
+  };
+
+  // Command processing system
+  const processCommand = (command: string) => {
+    const cmd = command.toUpperCase().trim();
+    
+    if (cmd.startsWith('DEPOSIT $')) {
+      const amount = parseFloat(cmd.substring(9));
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (currentCustomer.transaction.type !== 'deposit') {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer requested " + currentCustomer.transaction.type]);
+        return;
+      }
+      
+      if (amount !== currentCustomer.transaction.amount) {
+        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Amount mismatch. Customer depositing $${currentCustomer.transaction.amount}`]);
+        return;
+      }
+      
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "========================================",
+        "PROCESSING DEPOSIT TRANSACTION",
+        `CUSTOMER: ${currentCustomer.name}`,
+        `AMOUNT: $${amount}`,
+        `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+        `NEW BALANCE: $${(accountBalance + amount).toLocaleString()}`,
+        "STATUS: TRANSACTION COMPLETE",
+        "========================================"
+      ]);
+      
+      handleCorrectTransaction();
+      playSound('cash');
+      
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
+      
+    } else if (cmd.startsWith('WITHDRAW $')) {
+      const amount = parseFloat(cmd.substring(10));
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      if (currentCustomer.transaction.type !== 'withdrawal') {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Customer requested " + currentCustomer.transaction.type]);
+        return;
+      }
+      
+      if (amount !== currentCustomer.transaction.amount) {
+        setTerminalOutput(prev => [...prev, "> " + command, `ERROR: Amount mismatch. Customer withdrawing $${currentCustomer.transaction.amount}`]);
+        return;
+      }
+      
+      const withdrawAmount = currentCustomer.transaction.amount;
+      if (withdrawAmount > accountBalance) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Insufficient funds"]);
+        return;
+      }
+      
+      setTerminalOutput(prev => [...prev, 
+        "> " + command,
+        "========================================",
+        "PROCESSING WITHDRAWAL TRANSACTION",
+        `CUSTOMER: ${currentCustomer.name}`,
+        `AMOUNT: $${amount}`,
+        `ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
+        `REMAINING BALANCE: $${(accountBalance - withdrawAmount).toLocaleString()}`,
+        "STATUS: TRANSACTION COMPLETE",
+        "========================================"
+      ]);
+      
+      // Complete withdrawal transaction immediately
+      handleCorrectTransaction();
+      playSound('cash');
+      
+      // Generate next customer after brief pause
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "", "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
+      
+    } else if (cmd.startsWith('LOOKUP ')) {
+      const accountNumber = cmd.substring(7).trim();
+      lookupAccount(accountNumber);
+      
+    } else if (cmd.startsWith('REJECT')) {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      // Check if customer has fraudulent documents
+      const hasFraudulentDocuments = currentCustomer.documents.some(doc => !doc.isValid);
+      
+      if (hasFraudulentDocuments) {
+        // Correct rejection - customer was actually fraudulent
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "========================================",
+          "TRANSACTION REJECTED - CORRECT DECISION",
+          "Fraudulent documents detected",
+          "Customer escorted from premises",
+          "Security incident reported",
+          "========================================",
+          ""
+        ]);
+        
+        handleCorrectTransaction();
+        playSound('cash');
+      } else {
+        // Incorrect rejection - customer was legitimate
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "========================================",
+          "TRANSACTION REJECTED - ERROR!",
+          "Customer was legitimate",
+          "Incident reported to supervisor",
+          "Customer service violation recorded",
+          "========================================",
+          ""
+        ]);
+        
+        handleIncorrectTransaction("Wrongful customer rejection");
+        playSound('reject');
+      }
+      
+      // Generate new customer
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
+      
+    } else if (cmd.startsWith('APPROVE')) {
+      if (!currentCustomer) {
+        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
+        return;
+      }
+      
+      // Check if customer has fraudulent documents
+      const hasFraudulentDocuments = currentCustomer.documents.some(doc => !doc.isValid);
+      
+      if (hasFraudulentDocuments) {
+        // MAJOR ERROR - Approved fraudulent transaction
+        const fraudCount = gameScore.fraudulentApprovals + 1;
+        
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "========================================",
+          "🚨 CRITICAL ERROR - FRAUD APPROVED 🚨",
+          "You approved fraudulent documents!",
+          "Transaction processed illegally",
+          "Bank security compromised",
+          `Fraudulent approvals: ${fraudCount}/2`,
+          "========================================",
+          ""
+        ]);
+        
+        setGameScore(prev => ({
+          ...prev,
+          fraudulentApprovals: fraudCount,
+          errors: prev.errors + 1,
+          consecutiveErrors: prev.consecutiveErrors + 1,
+          errorDetails: [...prev.errorDetails, "Approved fraudulent transaction"]
+        }));
+        
+        // Check termination conditions
+        if (fraudCount === 1) {
+          setTerminalOutput(prev => [...prev,
+            "⚠️ MANAGEMENT WARNING ⚠️",
+            "FIRST FRAUDULENT APPROVAL DETECTED",
+            "One more fraud approval = IMMEDIATE TERMINATION",
+            "Review all documents carefully",
+            ""
+          ]);
+          playSound('reject');
+        } else if (fraudCount >= 2) {
+          setTerminalOutput(prev => [...prev,
+            "🚨 IMMEDIATE TERMINATION 🚨",
+            "TWO FRAUDULENT APPROVALS DETECTED",
+            "You are terminated for criminal negligence",
+            "Fraud investigation initiated",
+            ""
+          ]);
+          
+          // Trigger police arrest sequence
+          setTimeout(() => {
+            triggerPoliceArrest();
+          }, 2000);
+          return;
+        }
+        
+      } else {
+        // Correct approval - customer was legitimate
+        setTerminalOutput(prev => [...prev, 
+          "> " + command,
+          "========================================",
+          "TRANSACTION APPROVED - CORRECT DECISION",
+          "All documents verified as authentic",
+          "Customer served successfully",
+          "========================================",
+          ""
+        ]);
+        
+        handleCorrectTransaction();
+        playSound('cash');
+      }
+      
+      // Generate new customer
+      setTimeout(() => {
+        const customer = generateCustomerLocal();
+        setCurrentCustomer(customer);
+        resetVerificationState();
+        setTerminalOutput(prev => [...prev, "> Next customer approaching...", "Ready to process transaction"]);
+        console.log("Generated customer:", customer);
+        playSound('customer_approach');
+      }, 2000);
+      
+    } else {
+      setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Unknown command"]);
+    }
+  };
+
   const startGame = () => {
-    console.log('Starting game...');
-    setGameState(prev => ({
-      ...prev,
-      phase: 'playing'
-    }));
-    loadCustomer();
-  };
-
-  const loadCustomer = () => {
-    const customer = customers[Math.floor(Math.random() * customers.length)];
-    setGameState(prev => ({
-      ...prev,
-      currentCustomer: customer,
-      selectedDocument: null
-    }));
-  };
-
-  const selectDocument = (index: number) => {
-    console.log('Document selected:', index);
-    setGameState(prev => ({
-      ...prev,
-      selectedDocument: index
-    }));
-  };
-
-  const processTransaction = () => {
-    console.log('Processing transaction...');
-    if (!gameState.currentCustomer) return;
-
-    const customer = gameState.currentCustomer;
-    const hasErrors = customer.documents.some(doc => !doc.valid);
-
-    if (hasErrors) {
-      setGameState(prev => ({
-        ...prev,
-        mistakes: prev.mistakes + 1,
-        score: prev.score - 50
-      }));
-      alert('MISTAKE! Transaction had errors but was processed!');
-    } else {
-      setGameState(prev => ({
-        ...prev,
-        score: prev.score + 100
-      }));
-      alert('SUCCESS! Transaction processed correctly!');
+    setGamePhase('working');
+    setCurrentCustomer(generateCustomerLocal());
+    setGameInitialized(true);
+    playSound('cash');
+    
+    // Start background music when game begins
+    if (!musicMuted && backgroundMusicRef.current) {
+      backgroundMusicRef.current.play().catch(e => {
+        console.log("Music auto-play prevented:", e);
+      });
     }
-
-    setTimeout(loadCustomer, 1500);
   };
 
-  const rejectTransaction = () => {
-    console.log('Rejecting transaction...');
-    if (!gameState.currentCustomer) return;
-
-    const customer = gameState.currentCustomer;
-    const hasErrors = customer.documents.some(doc => !doc.valid);
-
-    if (hasErrors) {
-      setGameState(prev => ({
-        ...prev,
-        score: prev.score + 150
-      }));
-      alert('GOOD CATCH! Fraudulent transaction rejected!');
-    } else {
-      setGameState(prev => ({
-        ...prev,
-        mistakes: prev.mistakes + 1,
-        score: prev.score - 25
-      }));
-      alert('MISTAKE! Valid transaction was rejected!');
+  const handleTerminalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (terminalInput.trim()) {
+      playSound('typing');
+      processCommand(terminalInput);
+      setTerminalInput('');
     }
-
-    setTimeout(loadCustomer, 1500);
   };
 
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  const handlePunchOut = () => {
+    setGamePhase('punch_out');
+    playSound('punch_clock');
+    
+    // Stop background music
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
+    }
+    
+    // Calculate final score and time
+    const endTime = Date.now();
+    const totalTime = Math.floor((endTime - (Date.now() - gameScore.timeOnShift * 1000)) / 1000);
+    
+    setGameScore(prev => ({
+      ...prev,
+      timeOnShift: totalTime
+    }));
+    
+    setTerminalOutput([
+      "SHIFT COMPLETE",
+      "PUNCHING OUT...",
+      "",
+      "PERFORMANCE SUMMARY:",
+      `Transactions: ${gameScore.correctTransactions}`,
+      `Errors: ${gameScore.errors}`,
+      `Score: ${gameScore.score}`,
+      `Time on shift: ${Math.floor(totalTime / 60)}:${(totalTime % 60).toString().padStart(2, '0')}`,
+      "",
+      "Thank you for your service",
+      "Have a good day"
+    ]);
+    
+    // Auto-transition to leaderboard
+    setTimeout(() => {
+      setGamePhase('leaderboard');
+    }, 3000);
   };
 
-  // Intro screen
-  if (gameState.phase === 'intro') {
+  // Leaderboard functionality
+  const saveScore = (playerName: string) => {
+    const newEntry: LeaderboardEntry = {
+      name: playerName,
+      score: gameScore.score,
+      date: new Date().toLocaleDateString()
+    };
+    
+    const existingScores = JSON.parse(localStorage.getItem('tellerScores') || '[]');
+    const updatedScores = [...existingScores, newEntry]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10); // Keep top 10
+    
+    localStorage.setItem('tellerScores', JSON.stringify(updatedScores));
+  };
+
+  const getLeaderboard = (): LeaderboardEntry[] => {
+    return JSON.parse(localStorage.getItem('tellerScores') || '[]');
+  };
+
+  // Render functions
+  const renderDocument = (doc: GameDocument, index: number) => {
     return (
-      <div className="min-h-screen bg-green-950 text-green-400 font-mono flex items-center justify-center p-5">
-        <div className="text-center border-2 border-green-400 bg-green-400/10 p-10 rounded-lg max-w-2xl w-full">
-          <h1 className="text-5xl mb-5 shadow-green-400" style={{ textShadow: '0 0 10px #00ff00' }}>
-            TELLER'S WINDOW
-          </h1>
-          <p className="text-2xl mb-8 text-green-300">1980s Bank Simulation</p>
-          <button 
-            onClick={startGame}
-            className="text-xl bg-green-400 text-black border-none py-5 px-10 cursor-pointer font-mono rounded transition-all duration-300 hover:bg-green-300 hover:scale-105 min-h-15 min-w-50"
-          >
-            TAP TO START SHIFT
-          </button>
-          <div className="mt-8 text-sm text-yellow-400 leading-relaxed">
-            <p>You are a bank teller in 1980.</p>
-            <p>Process customer transactions by examining documents.</p>
-            <p>Check for errors and catch fraudulent requests!</p>
+      <div
+        key={doc.id}
+        onClick={() => setSelectedDocument(doc)}
+        style={{
+          background: doc.isValid ? 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' : 'linear-gradient(145deg, #3a1a1a, #2a0a0a)',
+          border: doc.isValid ? '2px solid #ffff00' : '3px solid #ff4444',
+          borderRadius: '8px',
+          padding: '10px',
+          margin: '5px',
+          cursor: 'pointer',
+          color: '#ffffff',
+          fontSize: '12px',
+          fontFamily: 'monospace',
+          minHeight: '120px',
+          position: 'relative',
+          boxShadow: doc.isValid ? '0 0 10px rgba(255, 255, 0, 0.3)' : '0 0 15px rgba(255, 68, 68, 0.4)'
+        }}
+      >
+        {!doc.isValid && (
+          <div style={{
+            position: 'absolute',
+            top: '2px',
+            right: '2px',
+            background: '#ff4444',
+            color: '#ffffff',
+            padding: '2px 6px',
+            borderRadius: '3px',
+            fontSize: '10px',
+            fontWeight: 'bold'
+          }}>
+            MISMATCH
           </div>
-          <AdMobBannerAd />
+        )}
+        
+        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+          {doc.type.toUpperCase()} #{index + 1}
         </div>
+        
+        {doc.type === 'id' && (
+          <div>
+            <div>NAME: {doc.data.name}</div>
+            <div>DOB: {doc.data.dateOfBirth}</div>
+            <div>ADDRESS: {doc.data.address}</div>
+            <div>ID#: {doc.data.idNumber}</div>
+          </div>
+        )}
+        
+        {doc.type === 'bank_book' && (
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
+            <div>NAME: {doc.data.name}</div>
+            <div>BALANCE: ${doc.data.balance}</div>
+          </div>
+        )}
+        
+        {doc.type === 'slip' && (
+          <div>
+            <div>ACCOUNT: {doc.data.accountNumber}</div>
+            <div>AMOUNT: ${doc.data.amount}</div>
+            <div>TYPE: {doc.data.type}</div>
+          </div>
+        )}
+        
+        {doc.type === 'signature' && (
+          <div>
+            <div>SIGNATURE CARD</div>
+            <div style={{ 
+              border: '1px solid #666', 
+              margin: '5px 0', 
+              padding: '5px',
+              background: '#f9f9f9',
+              color: '#333',
+              fontFamily: 'cursive',
+              fontSize: '14px'
+            }}>
+              {doc.data.signature}
+            </div>
+          </div>
+        )}
+        
+        {doc.hasError && (
+          <div style={{
+            color: '#ff4444',
+            fontSize: '10px',
+            marginTop: '5px',
+            fontWeight: 'bold'
+          }}>
+            ERROR: {doc.hasError}
+          </div>
+        )}
       </div>
     );
-  }
+  };
 
-  // Game screen
   return (
-    <div className="min-h-screen bg-green-950 text-green-400 font-mono flex flex-col">
-      {/* HUD */}
-      <div className="bg-black/80 border-b-2 border-green-400 p-4 flex justify-between items-center flex-wrap">
-        <div>
-          <div>SCORE: {gameState.score}</div>
-          <div>LEVEL: {gameState.level}</div>
-        </div>
-        <div>
-          <div>TIME: {formatTime(gameState.time)}</div>
-          <div>MISTAKES: {gameState.mistakes}/5</div>
-        </div>
-      </div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+      color: '#00ff00',
+      fontFamily: 'monospace',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background music toggle */}
+      <button
+        onClick={() => setMusicMuted(!musicMuted)}
+        style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          background: musicMuted ? '#666' : '#00ff00',
+          color: musicMuted ? '#fff' : '#000',
+          border: 'none',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '12px',
+          zIndex: 1000
+        }}
+      >
+        {musicMuted ? '🔇 MUSIC OFF' : '🎵 MUSIC ON'}
+      </button>
 
-      {/* Customer Area */}
-      {gameState.currentCustomer && (
-        <div className="p-5 border-b-2 border-green-400 bg-green-900/30">
-          <h3>CUSTOMER: {gameState.currentCustomer.name}</h3>
-          <p>
-            REQUEST: {gameState.currentCustomer.transaction.type} ${gameState.currentCustomer.transaction.amount}
-          </p>
+      {/* Police arrest animation overlay */}
+      {showArrestAnimation && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: sirenFlash ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 255, 0.3)',
+          zIndex: 999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background 0.2s'
+        }}>
+          {policeUnits.map(unit => (
+            <div
+              key={unit.id}
+              style={{
+                position: 'absolute',
+                left: `${Math.min(Math.max(unit.x, 50), window.innerWidth - 100)}px`,
+                top: `${unit.y}px`,
+                fontSize: '40px',
+                animation: `policeMove 2s ease-in-out ${unit.delay}ms forwards`
+              }}
+            >
+              🚔
+            </div>
+          ))}
+          
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.9)',
+            color: '#ff0000',
+            padding: '40px',
+            borderRadius: '10px',
+            textAlign: 'center',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            border: '3px solid #ff0000'
+          }}>
+            {arrestStage === 0 && "🚨 POLICE RESPONDING 🚨"}
+            {arrestStage === 1 && "🚨 MULTIPLE UNITS ON SCENE 🚨"}
+            {arrestStage === 2 && "🚔 ARREST IN PROGRESS 🚔"}
+            {arrestStage === 3 && "📻 DISPATCH COMMUNICATIONS 📻"}
+            {arrestStage === 4 && "🚨 SUSPECT IN CUSTODY 🚨"}
+          </div>
         </div>
       )}
 
-      {/* Documents Area */}
-      <div className="flex-1 p-5 overflow-y-auto">
-        <h3 className="mb-4">EXAMINE DOCUMENTS</h3>
-        
-        {gameState.currentCustomer && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-            {gameState.currentCustomer.documents.map((doc, index) => (
-              <div
-                key={index}
-                onClick={() => selectDocument(index)}
-                className={`border-2 p-4 cursor-pointer transition-all duration-300 min-h-30 ${
-                  !doc.valid 
-                    ? 'border-red-500 bg-red-500/10' 
-                    : 'border-green-400 bg-green-400/10'
-                } ${
-                  gameState.selectedDocument === index 
-                    ? 'bg-yellow-400/20 border-yellow-400' 
-                    : ''
-                } hover:bg-yellow-400/20 hover:border-yellow-400 active:scale-95`}
-              >
-                <h4 className="text-lg font-bold mb-2">{doc.type}</h4>
-                <p>Name: {doc.name || doc.type_doc || 'N/A'}</p>
-                <p>Details: {doc.id || doc.account || doc.amount || 'Various'}</p>
-                {doc.error && (
-                  <p className="text-red-400 mt-2">ERROR: {doc.error}</p>
-                )}
-              </div>
-            ))}
+      {/* Punch In Screen */}
+      {gamePhase === 'punch_in' && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #333333, #111111)',
+            border: '3px solid #ffff00',
+            borderRadius: '15px',
+            padding: '40px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(255, 255, 0, 0.3)',
+            maxWidth: '600px'
+          }}>
+            <h1 style={{
+              fontSize: '28px',
+              marginBottom: '20px',
+              textShadow: '0 0 10px #ffff00'
+            }}>
+              WESTRIDGE NATIONAL BANK
+            </h1>
+            <h2 style={{
+              fontSize: '20px',
+              marginBottom: '30px',
+              color: '#ffffff'
+            }}>
+              TELLER WORKSTATION v1.2
+            </h2>
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '30px',
+              fontSize: '14px',
+              textAlign: 'left'
+            }}>
+              {terminalOutput.map((line, index) => (
+                <div key={index}>{line}</div>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                playSound('punch_clock');
+                startGame();
+              }}
+              style={{
+                background: 'linear-gradient(145deg, #ffff00, #cccc00)',
+                border: '3px solid #ffffff',
+                color: '#000000',
+                padding: '20px 40px',
+                fontSize: '20px',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                textShadow: 'none'
+              }}
+            >
+              PUNCH IN
+            </button>
           </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-4">
-          <button
-            onClick={processTransaction}
-            className="flex-1 py-5 text-xl font-mono border-2 border-green-400 bg-green-400 text-black cursor-pointer transition-all duration-300 hover:bg-green-300 active:scale-95"
-          >
-            PROCESS
-          </button>
-          <button
-            onClick={rejectTransaction}
-            className="flex-1 py-5 text-xl font-mono border-2 border-red-500 bg-red-500 text-white cursor-pointer transition-all duration-300 hover:bg-red-400 active:scale-95"
-          >
-            REJECT
-          </button>
         </div>
-      </div>
+      )}
 
-      <AdMobBannerAd />
+      {/* Working Phase */}
+      {gamePhase === 'working' && (
+        <div style={{
+          display: 'flex',
+          height: '100vh',
+          padding: '10px',
+          gap: '10px'
+        }}>
+          {/* Left Column - Terminal */}
+          <div style={{
+            flex: '1',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            {/* Terminal Output */}
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '15px',
+              height: '60%',
+              overflow: 'auto',
+              fontSize: '12px',
+              fontFamily: 'monospace'
+            }}>
+              {terminalOutput.map((line, index) => (
+                <div key={index} style={{ marginBottom: '2px' }}>
+                  {line}
+                </div>
+              ))}
+            </div>
+
+            {/* Command Input */}
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
+              <input
+                type="text"
+                value={terminalInput}
+                onChange={(e) => setTerminalInput(e.target.value)}
+                placeholder="Enter command (DEPOSIT $500, WITHDRAW $200, LOOKUP 12345, APPROVE, REJECT)"
+                style={{
+                  flex: '1',
+                  background: '#000000',
+                  border: '2px solid #00ff00',
+                  color: '#00ff00',
+                  padding: '10px',
+                  fontSize: '14px',
+                  fontFamily: 'monospace',
+                  borderRadius: '4px'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  background: '#00ff00',
+                  color: '#000000',
+                  border: 'none',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontFamily: 'monospace',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                ENTER
+              </button>
+            </form>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleCustomerDismissal}
+                style={{
+                  background: 'linear-gradient(145deg, #ff6666, #cc3333)',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace'
+                }}
+              >
+                DISMISS CUSTOMER
+              </button>
+              
+              <button
+                onClick={handlePunchOut}
+                style={{
+                  background: 'linear-gradient(145deg, #666666, #444444)',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  padding: '10px 15px',
+                  fontSize: '12px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontFamily: 'monospace'
+                }}
+              >
+                PUNCH OUT
+              </button>
+            </div>
+
+            {/* Score Display */}
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.7)',
+              border: '1px solid #ffff00',
+              borderRadius: '5px',
+              padding: '10px',
+              fontSize: '12px'
+            }}>
+              <div>SCORE: {gameScore.score}</div>
+              <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
+              <div>ERRORS: {gameScore.errors}</div>
+              <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}/2</div>
+              <div>DISMISSALS: {gameScore.customersCalledWithoutService}/4</div>
+            </div>
+          </div>
+
+          {/* Right Column - Customer & Documents */}
+          <div style={{
+            flex: '1',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            {/* Customer Display */}
+            {currentCustomer && (
+              <div style={{
+                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+                border: '2px solid #ffff00',
+                borderRadius: '8px',
+                padding: '15px',
+                textAlign: 'center'
+              }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
+                  CUSTOMER: {currentCustomer.name}
+                </h3>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
+                </div>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  AMOUNT: ${currentCustomer.transaction.amount}
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  ACCOUNT: {currentCustomer.transaction.accountNumber}
+                </div>
+              </div>
+            )}
+
+            {/* Account Information */}
+            {verificationState.accountLookedUp && (
+              <div style={{
+                background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
+                border: '2px solid #00ff00',
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
+                  BANK RECORDS
+                </h4>
+                <div>ACCOUNT STATUS: ACTIVE</div>
+                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
+                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
+              </div>
+            )}
+
+            {/* Documents */}
+            {currentCustomer && (
+              <div style={{
+                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+                border: '2px solid #ffff00',
+                borderRadius: '8px',
+                padding: '15px',
+                flex: '1',
+                overflow: 'auto'
+              }}>
+                <h4 style={{ margin: '0 0 15px 0' }}>
+                  CUSTOMER DOCUMENTS
+                </h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
+                }}>
+                  {currentCustomer.documents.map((doc, index) => 
+                    renderDocument(doc, index)
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Punch Out Screen */}
+      {gamePhase === 'punch_out' && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #333333, #111111)',
+            border: '3px solid #ffff00',
+            borderRadius: '15px',
+            padding: '40px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(255, 255, 0, 0.3)',
+            maxWidth: '600px'
+          }}>
+            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>
+              SHIFT COMPLETE
+            </h2>
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '30px',
+              fontSize: '14px',
+              textAlign: 'left'
+            }}>
+              {terminalOutput.map((line, index) => (
+                <div key={index}>{line}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard */}
+      {gamePhase === 'leaderboard' && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #333333, #111111)',
+            border: '3px solid #ffff00',
+            borderRadius: '15px',
+            padding: '40px',
+            textAlign: 'center',
+            boxShadow: '0 0 30px rgba(255, 255, 0, 0.3)',
+            maxWidth: '600px',
+            width: '100%'
+          }}>
+            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>
+              SHIFT COMPLETE
+            </h2>
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '20px',
+              fontSize: '14px'
+            }}>
+              <div>FINAL SCORE: {gameScore.score}</div>
+              <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
+              <div>ERRORS: {gameScore.errors}</div>
+              <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}</div>
+              <div>DISMISSALS: {gameScore.customersCalledWithoutService}</div>
+            </div>
+            
+            <div style={{
+              background: '#000000',
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '20px',
+              fontSize: '12px',
+              textAlign: 'left'
+            }}>
+              <div style={{ textAlign: 'center', marginBottom: '10px', fontWeight: 'bold' }}>
+                TOP SCORES
+              </div>
+              {getLeaderboard().map((entry, index) => (
+                <div key={index} style={{ marginBottom: '5px' }}>
+                  {index + 1}. {entry.name} - {entry.score} ({entry.date})
+                </div>
+              ))}
+            </div>
+            
+            <button
+              onClick={() => {
+                setGamePhase('punch_in');
+                setGameScore({
+                  score: 0,
+                  correctTransactions: 0,
+                  errors: 0,
+                  timeOnShift: 0,
+                  fraudulentApprovals: 0,
+                  consecutiveErrors: 0,
+                  errorDetails: [],
+                  customersCalledWithoutService: 0,
+                  dismissalWarningGiven: false
+                });
+                setCurrentCustomer(null);
+                setSelectedDocument(null);
+                setGameInitialized(false);
+                setTerminalOutput([
+                  "TELLER WORKSTATION v1.2",
+                  "WESTRIDGE NATIONAL BANK",
+                  "PUNCH IN TO BEGIN SHIFT",
+                  "",
+                  "TELLER AUTHENTICATION: APPROVED",
+                  "",
+                  "Ready for customer service"
+                ]);
+              }}
+              style={{
+                background: 'linear-gradient(145deg, #666666, #444444)',
+                border: '3px solid #888888',
+                color: '#ffffff',
+                padding: '15px 30px',
+                fontSize: '18px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontFamily: 'monospace'
+              }}
+            >
+              NEW SHIFT
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes policeMove {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(0); }
+        }
+        
+        body {
+          margin: 0;
+          padding: 0;
+          overflow-x: hidden;
+        }
+        
+        input:focus {
+          outline: none;
+          box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        button:hover {
+          filter: brightness(1.1);
+        }
+        
+        button:active {
+          transform: scale(0.98);
+        }
+        
+        * {
+          box-sizing: border-box;
+        }
+      `}</style>
     </div>
   );
 }
+
+export default App;

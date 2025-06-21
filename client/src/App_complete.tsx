@@ -2,10 +2,23 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { analyzeSignature, generateCustomer, generateDocuments } from './lib/customers';
 import { getDocumentRenderer } from './lib/documents';
 import type { Customer, Document as GameDocument } from './types/game';
-import AdMobBannerAd from './components/AdMobBannerAd';
 
 declare global {
   interface Window {
+    webkit?: {
+      messageHandlers?: {
+        admob?: {
+          postMessage: (message: any) => void;
+        };
+      };
+    };
+    admobEvents?: {
+      onInterstitialLoaded: () => void;
+      onInterstitialFailedToLoad: () => void;
+      onRewardedAdLoaded: () => void;
+      onRewardedAdFailedToLoad: () => void;
+      onRewardedAdRewarded: () => void;
+    };
     gameAudioContext?: AudioContext;
   }
 }
@@ -72,158 +85,40 @@ function App() {
   const [musicMuted, setMusicMuted] = useState(false);
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   
-  // AdMob state management
-  const [admobInitialized, setAdmobInitialized] = useState(false);
-  const [isInterstitialLoaded, setIsInterstitialLoaded] = useState(false);
-  const [customersServed, setCustomersServed] = useState(0);
-
-  // Generate bank signature on file for comparison
-  const generateLegitimateSignature = (name: string): string => {
-    // Create a clean, proper signature for legitimate customers
-    return name;
-  };
-
-  const generateFraudulentSignature = (name: string): string => {
-    // Create a signature that's similar but clearly different for fraudsters
-    const nameParts = name.split(' ');
-    if (nameParts.length >= 2) {
-      // Swap first and last names
-      return `${nameParts[1]} ${nameParts[0]}`;
-    } else {
-      // Add slight variations for single names
-      const variations = [
-        name + 'son',
-        name.slice(0, -1) + 'e',
-        name.replace(/[aeiou]/i, 'a'),
-        'J. ' + name
-      ];
-      return variations[Math.floor(Math.random() * variations.length)];
-    }
-  };
-  
   // Account lookup state (no automatic fraud detection)
   const [accountBalance, setAccountBalance] = useState(0);
   const [verificationState, setVerificationState] = useState({
     accountLookedUp: false,
     signatureCompared: false
   });
-  
-  // Keypad state for account number entry
-  const [showKeypad, setShowKeypad] = useState(false);
-  const [keypadInput, setKeypadInput] = useState('');
-  const [keypadMode, setKeypadMode] = useState<'lookup' | 'verify'>('lookup');
 
-  // AdMob interstitial ad functions with error handling
-  const loadInterstitialAd = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
-        (window.webkit.messageHandlers as any).admob.postMessage({
-          action: 'loadInterstitial',
-          adUnitId: 'ca-app-pub-2744316013184797/4741683992' // Production Interstitial Ad Unit ID
-        });
-      }
-    } catch (error) {
-      console.log('AdMob loadInterstitialAd error (web environment):', error);
-    }
-  }, []);
-
-  const showInterstitialAd = useCallback(() => {
-    try {
-      if (isInterstitialLoaded && typeof window !== 'undefined') {
-        if (window.webkit && window.webkit.messageHandlers && (window.webkit.messageHandlers as any).admob) {
-          (window.webkit.messageHandlers as any).admob.postMessage({
-            action: 'showInterstitial'
-          });
-        }
-        setIsInterstitialLoaded(false);
-        // Load next ad
-        setTimeout(loadInterstitialAd, 1000);
-      }
-    } catch (error) {
-      console.log('AdMob showInterstitialAd error (web environment):', error);
-    }
-  }, [isInterstitialLoaded, loadInterstitialAd]);
-
-  // Initialize AdMob with error handling
-  useEffect(() => {
-    const initializeAdMob = () => {
-      try {
-        if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers) {
-          // Initialize AdMob for iOS
-          if ((window.webkit.messageHandlers as any).admob) {
-            (window.webkit.messageHandlers as any).admob.postMessage({
-              action: 'initialize',
-              appId: 'ca-app-pub-2744316013184797~4167964772', // Production App ID
-              testDeviceIds: [] // Remove test device IDs for production
-            });
-          }
-          
-          // Set up ad event listeners
-          (window as any).admobEvents = {
-            onInterstitialLoaded: () => setIsInterstitialLoaded(true),
-            onInterstitialFailedToLoad: () => setIsInterstitialLoaded(false)
-          };
-          
-          setAdmobInitialized(true);
-        } else {
-          // Fallback for web testing
-          console.log('AdMob: Running in web environment, using test mode');
-          setAdmobInitialized(true);
-          setIsInterstitialLoaded(true);
-        }
-      } catch (error) {
-        console.log('AdMob initialization error (web environment):', error);
-        setAdmobInitialized(true);
-        setIsInterstitialLoaded(true);
-      }
-    };
-
-    initializeAdMob();
-  }, []);
-
-  // Load ads when AdMob is initialized with error handling
-  useEffect(() => {
-    if (admobInitialized) {
-      try {
-        loadInterstitialAd();
-      } catch (error) {
-        console.log('Error loading initial ad (web environment):', error);
-      }
-    }
-  }, [admobInitialized, loadInterstitialAd]);
-
-  // Sound effects using your uploaded authentic bank terminal sounds
+  // Sound effects
   const playSound = (soundType: string) => {
-    if (musicMuted) return;
-    
     try {
       let audio: HTMLAudioElement;
       switch (soundType) {
         case 'typing':
-          audio = new Audio('/typing-sound.mp3');
-          audio.volume = 0.4;
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.3;
           break;
         case 'punch_clock':
           audio = new Audio('/punch-clock.mp3');
           audio.volume = 0.5;
           break;
         case 'cash':
-          audio = new Audio('/cash-register.mp3');
+          audio = new Audio('/dot-matrix-printer.mp3');
           audio.volume = 0.4;
           break;
         case 'reject':
-          audio = new Audio('/error-buzz.mp3');
-          audio.volume = 0.5;
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.6;
           break;
         case 'customer_approach':
-          audio = new Audio('/customer-approach.mp3');
-          audio.volume = 0.3;
+          audio = new Audio('/dot-matrix-printer.mp3');
+          audio.volume = 0.2;
           break;
         default:
-          // Fallback to dot-matrix-printer for any other sounds
-          audio = new Audio('/dot-matrix-printer.mp3');
-          audio.volume = 0.3;
-          break;
+          return;
       }
       audio.play().catch(e => console.log("Audio play failed:", e));
     } catch (e) {
@@ -442,15 +337,6 @@ function App() {
       correctTransactions: prev.correctTransactions + 1,
       consecutiveErrors: 0
     }));
-    
-    // Show interstitial ad every 5 customers served
-    setCustomersServed(prev => {
-      const newCount = prev + 1;
-      if (newCount % 5 === 0) {
-        showInterstitialAd();
-      }
-      return newCount;
-    });
   };
 
   const handleIncorrectTransaction = (errorType: string) => {
@@ -563,99 +449,9 @@ function App() {
         playSound('customer_approach');
       }, 2000);
       
-    } else if (cmd === 'LOOKUP') {
-      if (!currentCustomer) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
-        return;
-      }
-      
-      // Show keypad for account number entry
-      setKeypadMode('lookup');
-      setKeypadInput('');
-      setShowKeypad(true);
-      
-      setTerminalOutput(prev => [...prev, 
-        "> " + command,
-        "BANK COMPUTER SYSTEM ACCESS",
-        "========================================",
-        "ENTER ACCOUNT NUMBER TO LOOKUP:",
-        `Customer provided: ${currentCustomer.transaction.accountNumber}`,
-        "========================================",
-        ""
-      ]);
-      
     } else if (cmd.startsWith('LOOKUP ')) {
       const accountNumber = cmd.substring(7).trim();
-      
-      if (!currentCustomer) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
-        return;
-      }
-      
-      // Simulate 1980s computer system lookup with ASMR typing sounds
-      setTerminalOutput(prev => [...prev, 
-        "> " + command,
-        `SEARCHING ACCOUNT: ${accountNumber}`,
-        "ACCESSING BANK DATABASE...",
-        "VALIDATING ACCOUNT NUMBER...",
-        ""
-      ]);
-      
-      // Play typing sounds during lookup simulation
-      setTimeout(() => playSound('typing'), 200);
-      setTimeout(() => playSound('typing'), 500);
-      setTimeout(() => playSound('typing'), 800);
-      setTimeout(() => playSound('typing'), 1100);
-      
-      // Simulate database access delay with authentic terminal output
-      setTimeout(() => {
-        if (accountNumber === currentCustomer.transaction.accountNumber) {
-          // Correct account number entered
-          const balance = Math.floor(Math.random() * 50000) + 1000;
-          setAccountBalance(balance);
-          setVerificationState(prev => ({ ...prev, accountLookedUp: true }));
-          
-          setTerminalOutput(prev => [...prev,
-            "ACCOUNT FOUND",
-            "==========================",
-            "BANK RECORD",
-            "==========================",
-            `ACCT: ${accountNumber}`,
-            `NAME: ${currentCustomer.name}`,
-            `BAL: $${balance.toLocaleString()}`,
-            `STATUS: ACTIVE`,
-            `TYPE: CHECKING`,
-            `SSN: XXX-XX-${Math.floor(Math.random() * 9000) + 1000}`,
-            "==========================",
-            "",
-            "RECORD OK - CHECK DOCS",
-            "Use VERIFY for signature",
-            ""
-          ]);
-          
-          playSound('cash'); // Success sound
-        } else {
-          // Wrong account number or account not found
-          setTerminalOutput(prev => [...prev,
-            "ACCOUNT LOOKUP FAILED",
-            "========================================",
-            `SEARCHED ACCOUNT: ${accountNumber}`,
-            `EXPECTED ACCOUNT: ${currentCustomer.transaction.accountNumber}`,
-            "",
-            "POSSIBLE CAUSES:",
-            "• Account number mismatch",
-            "• Fraudulent documentation",
-            "• Customer error",
-            "• Account closed or suspended",
-            "========================================",
-            "",
-            "VERIFY ACCOUNT NUMBER WITH CUSTOMER",
-            ""
-          ]);
-          
-          playSound('reject'); // Error sound
-        }
-      }, 1800);
+      lookupAccount(accountNumber);
       
     } else if (cmd.startsWith('REJECT')) {
       if (!currentCustomer) {
@@ -793,71 +589,6 @@ function App() {
         playSound('customer_approach');
       }, 2000);
       
-    } else if (cmd === 'VERIFY' || cmd === 'SIGNATURE') {
-      if (!currentCustomer) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: No customer present"]);
-        return;
-      }
-      
-      if (!verificationState.accountLookedUp) {
-        setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Must lookup account first (use LOOKUP command)"]);
-        return;
-      }
-      
-      // VERIFY compares customer signature with bank records for fraud detection
-      setTerminalOutput(prev => [...prev, 
-        "> " + command,
-        "SIGNATURE VERIFICATION SYSTEM",
-        "========================================",
-        "Comparing customer signature with bank records",
-        "This helps detect forged documents and fraud",
-        "",
-        "ACCESSING SIGNATURE DATABASE...",
-        "RETRIEVING SIGNATURE ON FILE...",
-        ""
-      ]);
-      
-      // Play typing sounds during verification
-      setTimeout(() => playSound('typing'), 300);
-      setTimeout(() => playSound('typing'), 600);
-      setTimeout(() => playSound('typing'), 900);
-      
-      // Generate bank signature on file
-      setTimeout(() => {
-        const customerSigDoc = currentCustomer.documents.find(d => d.type === 'signature');
-        const bankSignatureOnFile = currentCustomer.isFraudulent ? 
-          generateFraudulentSignature(currentCustomer.name) : 
-          generateLegitimateSignature(currentCustomer.name);
-        
-        setVerificationState(prev => ({ ...prev, signatureCompared: true }));
-        
-        setTerminalOutput(prev => [...prev,
-          "SIGNATURE COMPARISON",
-          "==========================",
-          "",
-          "BANK FILE:",
-          `"${bankSignatureOnFile}"`,
-          "",
-          "CUSTOMER CARD:",
-          `"${customerSigDoc?.data.signature || 'NO SIG CARD'}"`,
-          "",
-          "CHECK FOR:",
-          "• Style match",
-          "• Letter shape",
-          "• Consistency",
-          "",
-          currentCustomer.isFraudulent ? 
-            "⚠️ MISMATCH DETECTED ⚠️" : 
-            "✓ SIGNATURES MATCH",
-          "==========================",
-          "",
-          "USE APPROVE/REJECT",
-          ""
-        ]);
-        
-        playSound('cash');
-      }, 1800);
-      
     } else {
       setTerminalOutput(prev => [...prev, "> " + command, "ERROR: Unknown command"]);
     }
@@ -884,43 +615,6 @@ function App() {
       processCommand(terminalInput);
       setTerminalInput('');
     }
-  };
-
-  // Smart autocomplete for mobile
-  const handleInputChange = (value: string) => {
-    setTerminalInput(value);
-    
-    // Auto-complete single letter commands
-    const lowercaseValue = value.toLowerCase();
-    if (value.length === 1) {
-      switch (lowercaseValue) {
-        case 'd':
-          setTerminalInput('deposit');
-          break;
-        case 'w':
-          setTerminalInput('withdraw');
-          break;
-        case 'l':
-          setTerminalInput('lookup');
-          break;
-        case 'v':
-          setTerminalInput('verify');
-          break;
-        case 'a':
-          setTerminalInput('approve');
-          break;
-        case 'r':
-          setTerminalInput('reject');
-          break;
-      }
-    }
-  };
-
-  // Quick command buttons for mobile
-  const executeQuickCommand = (command: string) => {
-    playSound('typing');
-    processCommand(command);
-    setTerminalInput('');
   };
 
   const handlePunchOut = () => {
@@ -1081,19 +775,12 @@ function App() {
 
   return (
     <div style={{
-      height: '100vh',
       minHeight: '100vh',
-      maxHeight: '100vh',
       background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
       color: '#00ff00',
       fontFamily: 'monospace',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      overflow: 'hidden',
-      width: '100vw'
+      position: 'relative',
+      overflow: 'hidden'
     }}>
       {/* Background music toggle */}
       <button
@@ -1238,136 +925,51 @@ function App() {
       {gamePhase === 'working' && (
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           height: '100vh',
-          padding: '3px',
-          gap: '3px',
-          overflow: 'hidden',
-          minHeight: '100vh',
-          maxHeight: '100vh'
+          padding: '10px',
+          gap: '10px'
         }}>
-          {/* Terminal Section */}
+          {/* Left Column - Terminal */}
           <div style={{
-            width: '100%',
-            height: '65vh',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '3px'
+            gap: '10px'
           }}>
             {/* Terminal Output */}
             <div style={{
               background: '#000000',
-              border: '1px solid #00ff00',
-              borderRadius: '4px',
-              padding: '4px',
-              height: '45vh',
-              overflowY: 'auto',
-              fontSize: '10px',
-              fontFamily: 'monospace',
-              lineHeight: '1.1',
-              wordWrap: 'break-word',
-              whiteSpace: 'pre-wrap'
+              border: '2px solid #00ff00',
+              borderRadius: '8px',
+              padding: '15px',
+              height: '60%',
+              overflow: 'auto',
+              fontSize: '12px',
+              fontFamily: 'monospace'
             }}>
               {terminalOutput.map((line, index) => (
-                <div key={index} style={{ 
-                  marginBottom: '1px',
-                  maxWidth: '100%',
-                  wordBreak: 'break-word',
-                  hyphens: 'auto'
-                }}>
+                <div key={index} style={{ marginBottom: '2px' }}>
                   {line}
                 </div>
               ))}
             </div>
 
-            {/* Mobile Command Buttons */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '3px'
-            }}>
-              <button
-                onClick={() => executeQuickCommand('lookup')}
-                style={{
-                  background: '#0066ff',
-                  color: '#ffffff',
-                  border: '1px solid #0088ff',
-                  padding: '8px 4px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                LOOKUP
-              </button>
-              <button
-                onClick={() => executeQuickCommand('verify')}
-                style={{
-                  background: '#ff6600',
-                  color: '#ffffff',
-                  border: '1px solid #ff8800',
-                  padding: '8px 4px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                VERIFY
-              </button>
-              <button
-                onClick={() => executeQuickCommand('approve')}
-                style={{
-                  background: '#00cc00',
-                  color: '#ffffff',
-                  border: '1px solid #00ff00',
-                  padding: '8px 4px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                APPROVE
-              </button>
-              <button
-                onClick={() => executeQuickCommand('reject')}
-                style={{
-                  background: '#cc0000',
-                  color: '#ffffff',
-                  border: '1px solid #ff0000',
-                  padding: '8px 4px',
-                  fontSize: '10px',
-                  fontFamily: 'monospace',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                REJECT
-              </button>
-            </div>
-
-            {/* Terminal Input */}
-            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '3px' }}>
+            {/* Command Input */}
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '10px' }}>
               <input
                 type="text"
                 value={terminalInput}
-                onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="L=lookup, A=approve, R=reject"
+                onChange={(e) => setTerminalInput(e.target.value)}
+                placeholder="Enter command (DEPOSIT $500, WITHDRAW $200, LOOKUP 12345, APPROVE, REJECT)"
                 style={{
                   flex: '1',
                   background: '#000000',
-                  border: '1px solid #00ff00',
+                  border: '2px solid #00ff00',
                   color: '#00ff00',
-                  padding: '6px',
-                  fontSize: '10px',
+                  padding: '10px',
+                  fontSize: '14px',
                   fontFamily: 'monospace',
-                  borderRadius: '3px'
+                  borderRadius: '4px'
                 }}
               />
               <button
@@ -1376,8 +978,8 @@ function App() {
                   background: '#00ff00',
                   color: '#000000',
                   border: 'none',
-                  padding: '6px 10px',
-                  fontSize: '10px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   fontFamily: 'monospace',
                   borderRadius: '4px',
                   cursor: 'pointer'
@@ -1422,85 +1024,87 @@ function App() {
               </button>
             </div>
 
-            {/* Score Display - Compact */}
+            {/* Score Display */}
             <div style={{
               background: 'rgba(0, 0, 0, 0.7)',
               border: '1px solid #ffff00',
-              borderRadius: '3px',
-              padding: '4px',
-              fontSize: '9px',
-              lineHeight: '1.1'
+              borderRadius: '5px',
+              padding: '10px',
+              fontSize: '12px'
             }}>
               <div>SCORE: {gameScore.score}</div>
-              <div>TRANS: {gameScore.correctTransactions} | ERR: {gameScore.errors}</div>
-              <div>FRAUD: {gameScore.fraudulentApprovals}/2 | DISMISS: {gameScore.customersCalledWithoutService}/4</div>
+              <div>TRANSACTIONS: {gameScore.correctTransactions}</div>
+              <div>ERRORS: {gameScore.errors}</div>
+              <div>FRAUD APPROVALS: {gameScore.fraudulentApprovals}/2</div>
+              <div>DISMISSALS: {gameScore.customersCalledWithoutService}/4</div>
             </div>
           </div>
 
-          {/* Documents Section */}
+          {/* Right Column - Customer & Documents */}
           <div style={{
-            width: '100%',
-            height: '35vh',
+            flex: '1',
             display: 'flex',
             flexDirection: 'column',
-            gap: '3px',
-            overflow: 'auto'
+            gap: '10px'
           }}>
-            {/* Customer Display - Larger */}
+            {/* Customer Display */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
                 border: '2px solid #ffff00',
-                borderRadius: '6px',
-                padding: '10px',
-                textAlign: 'center',
-                fontSize: '12px'
+                borderRadius: '8px',
+                padding: '15px',
+                textAlign: 'center'
               }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>
                   CUSTOMER: {currentCustomer.name}
+                </h3>
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  TRANSACTION: {currentCustomer.transaction.type.toUpperCase()}
                 </div>
-                <div style={{ marginBottom: '2px' }}>
-                  {currentCustomer.transaction.type.toUpperCase()} | ${currentCustomer.transaction.amount}
+                <div style={{ fontSize: '14px', marginBottom: '10px' }}>
+                  AMOUNT: ${currentCustomer.transaction.amount}
                 </div>
-                <div style={{ fontSize: '11px', opacity: 0.9 }}>
+                <div style={{ fontSize: '14px' }}>
                   ACCOUNT: {currentCustomer.transaction.accountNumber}
                 </div>
               </div>
             )}
 
-            {/* Account Information - Compact */}
+            {/* Account Information */}
             {verificationState.accountLookedUp && (
               <div style={{
                 background: 'linear-gradient(145deg, #1a2a1a, #0a1a0a)',
-                border: '1px solid #00ff00',
-                borderRadius: '4px',
-                padding: '6px',
-                fontSize: '11px'
+                border: '2px solid #00ff00',
+                borderRadius: '8px',
+                padding: '15px'
               }}>
-                <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '2px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#00ff00' }}>
                   BANK RECORDS
-                </div>
-                <div>ACTIVE | BALANCE: ${accountBalance.toLocaleString()} | HOLDER: {currentCustomer?.name}</div>
+                </h4>
+                <div>ACCOUNT STATUS: ACTIVE</div>
+                <div>CURRENT BALANCE: ${accountBalance.toLocaleString()}</div>
+                <div>ACCOUNT HOLDER: {currentCustomer?.name}</div>
               </div>
             )}
 
-            {/* Documents - Mobile Compact */}
+            {/* Documents */}
             {currentCustomer && (
               <div style={{
                 background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                border: '1px solid #ffff00',
-                borderRadius: '4px',
-                padding: '8px',
-                maxHeight: '25vh',
+                border: '2px solid #ffff00',
+                borderRadius: '8px',
+                padding: '15px',
+                flex: '1',
                 overflow: 'auto'
               }}>
-                <div style={{ margin: '0 0 5px 0', fontSize: '12px', fontWeight: 'bold' }}>
+                <h4 style={{ margin: '0 0 15px 0' }}>
                   CUSTOMER DOCUMENTS
-                </div>
+                </h4>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '5px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '10px'
                 }}>
                   {currentCustomer.documents.map((doc, index) => 
                     renderDocument(doc, index)
@@ -1681,130 +1285,6 @@ function App() {
           box-sizing: border-box;
         }
       `}</style>
-      
-      {/* Banner Ad - Fixed at bottom */}
-      <div style={{
-        position: 'fixed',
-        bottom: '10px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000,
-        display: gamePhase === 'working' ? 'block' : 'none'
-      }}>
-        <AdMobBannerAd adUnitId="ca-app-pub-2744316013184797/4741683992" />
-      </div>
-
-      {/* Popup Keypad for Account Number Entry */}
-      {showKeypad && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 2000
-        }}>
-          <div style={{
-            background: 'linear-gradient(145deg, #1a1a1a, #2a2a2a)',
-            border: '2px solid #00ff00',
-            borderRadius: '10px',
-            padding: '20px',
-            width: '300px',
-            maxWidth: '90vw'
-          }}>
-            <div style={{
-              color: '#00ff00',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              marginBottom: '15px',
-              textAlign: 'center'
-            }}>
-              {keypadMode === 'lookup' ? 'ENTER ACCOUNT NUMBER' : 'VERIFY ACCOUNT'}
-            </div>
-            
-            {/* Display */}
-            <div style={{
-              background: '#000000',
-              border: '1px solid #00ff00',
-              borderRadius: '5px',
-              padding: '10px',
-              marginBottom: '15px',
-              fontSize: '18px',
-              fontFamily: 'monospace',
-              color: '#00ff00',
-              textAlign: 'center',
-              minHeight: '30px'
-            }}>
-              {keypadInput || 'Enter account number...'}
-            </div>
-
-            {/* Keypad Buttons */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '10px',
-              marginBottom: '15px'
-            }}>
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'].map((key) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    playSound('typing');
-                    if (key === '⌫') {
-                      setKeypadInput(prev => prev.slice(0, -1));
-                    } else if (key === '✓') {
-                      if (keypadInput.trim()) {
-                        processCommand(`LOOKUP ${keypadInput.trim()}`);
-                        setShowKeypad(false);
-                      }
-                    } else if (keypadInput.length < 10) {
-                      setKeypadInput(prev => prev + key);
-                    }
-                  }}
-                  style={{
-                    background: key === '✓' ? '#00aa00' : key === '⌫' ? '#aa0000' : '#333333',
-                    border: '1px solid #00ff00',
-                    borderRadius: '8px',
-                    color: '#ffffff',
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    padding: '15px',
-                    cursor: 'pointer',
-                    minHeight: '50px'
-                  }}
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
-
-            {/* Cancel Button */}
-            <button
-              onClick={() => {
-                setShowKeypad(false);
-                setKeypadInput('');
-              }}
-              style={{
-                background: '#aa0000',
-                border: '1px solid #ff0000',
-                borderRadius: '8px',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                padding: '10px',
-                cursor: 'pointer',
-                width: '100%'
-              }}
-            >
-              CANCEL
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

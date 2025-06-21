@@ -8,14 +8,6 @@ export interface Customer {
   patience: number;
   maxPatience: number;
   isFraudulent: boolean;
-  bankRecords?: {
-    name: string;
-    address: string;
-    dateOfBirth: string;
-    licenseNumber: string;
-    idNumber: string;
-    signature: string;
-  };
 }
 
 export interface Transaction {
