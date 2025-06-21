@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import './index.css';
 
-console.log('BANK TELLER 1988 - LOADING');
+console.log('BANK TELLER 1988 - CLEAN VERSION LOADING');
 
-interface Customer {
+interface BankCustomer {
   id: string;
   name: string;
-  transaction: Transaction;
-  documents: Document[];
+  transaction: BankTransaction;
+  documents: BankDocument[];
   bankRecords: BankRecord;
   isFraudulent: boolean;
   patience: number;
   maxPatience: number;
 }
 
-interface Transaction {
+interface BankTransaction {
   type: 'deposit' | 'withdrawal' | 'wire_transfer' | 'money_order' | 'cashiers_check';
   amount: number;
   accountNumber: string;
@@ -22,7 +21,7 @@ interface Transaction {
   recipientName?: string;
 }
 
-interface GameDocument {
+interface BankDocument {
   id: string;
   type: 'id' | 'signature' | 'bank_book' | 'slip';
   data: Record<string, any>;
@@ -39,7 +38,7 @@ interface BankRecord {
 
 interface GameState {
   phase: 'intro' | 'working' | 'ended';
-  currentCustomer: Customer | null;
+  currentCustomer: BankCustomer | null;
   score: number;
   completedTransactions: number;
   fraudulentApprovals: number;
@@ -50,7 +49,7 @@ interface GameState {
 }
 
 interface PopupDocument {
-  document: GameDocument;
+  document: BankDocument;
   position: { x: number; y: number };
   id: string;
 }
@@ -59,10 +58,6 @@ class AudioManager {
   private audioContext: AudioContext | null = null;
   
   constructor() {
-    this.initAudio();
-  }
-
-  private initAudio() {
     try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     } catch (e) {
@@ -103,7 +98,7 @@ class AudioManager {
   }
 }
 
-function generateCustomer(level: number): Customer {
+function generateCustomer(level: number): BankCustomer {
   const names = [
     'Sarah Williams', 'John Davis', 'Maria Rodriguez', 'Robert Johnson', 
     'Jennifer Brown', 'Michael Wilson', 'Lisa Anderson', 'David Martinez'
@@ -129,8 +124,8 @@ function generateCustomer(level: number): Customer {
     signature: generateSignature(name, false)
   };
 
-  const transactionTypes: Transaction['type'][] = ['deposit', 'withdrawal', 'wire_transfer', 'money_order', 'cashiers_check'];
-  const transaction: Transaction = {
+  const transactionTypes: BankTransaction['type'][] = ['deposit', 'withdrawal', 'wire_transfer', 'money_order', 'cashiers_check'];
+  const transaction: BankTransaction = {
     type: transactionTypes[Math.floor(Math.random() * transactionTypes.length)],
     amount: Math.floor(Math.random() * 5000 + 100),
     accountNumber: accountNumber,
@@ -140,7 +135,7 @@ function generateCustomer(level: number): Customer {
     })
   };
 
-  const documents: GameDocument[] = [
+  const documents: BankDocument[] = [
     {
       id: 'id-1',
       type: 'id',
@@ -477,7 +472,7 @@ export default function App() {
     }
   };
 
-  const openDocumentPopup = (document: GameDocument) => {
+  const openDocumentPopup = (document: BankDocument) => {
     audioManager.current.playSound('paper');
     
     const popup: PopupDocument = {
@@ -527,7 +522,7 @@ export default function App() {
     setDragState(null);
   };
 
-  const renderDocument = (doc: GameDocument) => {
+  const renderDocument = (doc: BankDocument) => {
     switch (doc.type) {
       case 'id':
         return (
@@ -574,38 +569,78 @@ export default function App() {
 
   if (gameState.phase === 'intro') {
     return (
-      <div className="min-h-screen bg-black text-green-400 font-mono flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center max-w-2xl p-8">
-            <h1 className="text-4xl font-bold mb-8 text-green-300">
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: 'black', 
+        color: '#00ff00', 
+        fontFamily: 'monospace',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <div style={{ 
+          flex: 1, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: '800px', padding: '32px' }}>
+            <h1 style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              marginBottom: '32px', 
+              color: '#00cc00' 
+            }}>
               🏦 BANK TELLER 1988 🏦
             </h1>
-            <div className="text-left bg-gray-900 p-6 rounded border-2 border-green-400">
-              <h2 className="text-xl font-bold mb-4 text-center">WESTRIDGE NATIONAL BANK</h2>
-              <p className="mb-4">
+            <div style={{ 
+              textAlign: 'left', 
+              backgroundColor: '#1a1a1a', 
+              padding: '24px', 
+              borderRadius: '8px', 
+              border: '2px solid #00ff00' 
+            }}>
+              <h2 style={{ 
+                fontSize: '20px', 
+                fontWeight: 'bold', 
+                marginBottom: '16px', 
+                textAlign: 'center' 
+              }}>
+                WESTRIDGE NATIONAL BANK
+              </h2>
+              <p style={{ marginBottom: '16px' }}>
                 Welcome to your first day as a bank teller. Your job is to process customer 
                 transactions while detecting fraudulent documents and suspicious activity.
               </p>
-              <p className="mb-4">
+              <p style={{ marginBottom: '16px' }}>
                 <strong>CRITICAL:</strong> The system will NEVER automatically flag fraud. 
                 You must manually examine all documents and compare them with bank records.
               </p>
-              <div className="mb-4">
+              <div style={{ marginBottom: '16px' }}>
                 <strong>Key Commands:</strong>
-                <ul className="list-disc list-inside mt-2 text-sm">
+                <ul style={{ marginTop: '8px', fontSize: '14px' }}>
                   <li>LOOKUP [account] - Access customer bank records</li>
                   <li>VERIFY [field] [value] - Check specific information</li>
                   <li>COMPARE SIGNATURE - Review signature authenticity</li>
                   <li>APPROVE/REJECT - Make your decision</li>
                 </ul>
               </div>
-              <p className="text-yellow-400 font-bold">
+              <p style={{ color: '#ffff00', fontWeight: 'bold' }}>
                 Remember: 2 fraudulent approvals = TERMINATION
               </p>
             </div>
             <button 
               onClick={() => processCommand('PUNCH IN')}
-              className="mt-6 px-8 py-3 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition-colors"
+              style={{
+                marginTop: '24px',
+                padding: '12px 32px',
+                backgroundColor: '#00aa00',
+                color: 'white',
+                fontWeight: 'bold',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
             >
               BEGIN SHIFT
             </button>
@@ -617,12 +652,40 @@ export default function App() {
 
   if (gameState.phase === 'ended') {
     return (
-      <div className="min-h-screen bg-black text-green-400 font-mono flex flex-col items-center justify-center">
-        <div className="text-center max-w-2xl p-8">
-          <h1 className="text-4xl font-bold mb-8 text-red-400">SHIFT ENDED</h1>
-          <div className="bg-gray-900 p-6 rounded border-2 border-red-400 mb-6">
-            <h2 className="text-xl font-bold mb-4">FINAL PERFORMANCE REPORT</h2>
-            <div className="text-left">
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: 'black', 
+        color: '#00ff00', 
+        fontFamily: 'monospace',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: '800px', padding: '32px' }}>
+          <h1 style={{ 
+            fontSize: '36px', 
+            fontWeight: 'bold', 
+            marginBottom: '32px', 
+            color: '#ff0000' 
+          }}>
+            SHIFT ENDED
+          </h1>
+          <div style={{ 
+            backgroundColor: '#1a1a1a', 
+            padding: '24px', 
+            borderRadius: '8px', 
+            border: '2px solid #ff0000',
+            marginBottom: '24px'
+          }}>
+            <h2 style={{ 
+              fontSize: '20px', 
+              fontWeight: 'bold', 
+              marginBottom: '16px' 
+            }}>
+              FINAL PERFORMANCE REPORT
+            </h2>
+            <div style={{ textAlign: 'left' }}>
               <div>Score: {gameState.score}</div>
               <div>Transactions Processed: {gameState.completedTransactions}</div>
               <div>Fraud Correctly Detected: {gameState.correctRejections}</div>
@@ -633,7 +696,16 @@ export default function App() {
           </div>
           <button 
             onClick={() => window.location.reload()}
-            className="px-8 py-3 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition-colors"
+            style={{
+              padding: '12px 32px',
+              backgroundColor: '#00aa00',
+              color: 'white',
+              fontWeight: 'bold',
+              borderRadius: '4px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
           >
             TRY AGAIN
           </button>
@@ -644,14 +716,31 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-screen bg-black text-green-400 font-mono flex flex-col"
+      style={{ 
+        minHeight: '100vh', 
+        backgroundColor: 'black', 
+        color: '#00ff00', 
+        fontFamily: 'monospace',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      <div className="bg-gray-900 border-b-2 border-green-400 p-2">
-        <div className="flex justify-between items-center">
-          <div className="text-lg font-bold">WESTRIDGE NATIONAL BANK - TELLER TERMINAL</div>
-          <div className="flex gap-6 text-sm">
+      <div style={{ 
+        backgroundColor: '#1a1a1a', 
+        borderBottom: '2px solid #00ff00', 
+        padding: '8px' 
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center' 
+        }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+            WESTRIDGE NATIONAL BANK - TELLER TERMINAL
+          </div>
+          <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
             <div>Score: {gameState.score}</div>
             <div>Transactions: {gameState.completedTransactions}</div>
             <div>Fraud Approvals: {gameState.fraudulentApprovals}/2</div>
@@ -660,67 +749,132 @@ export default function App() {
         </div>
       </div>
 
-      <div className="flex-1 flex">
-        <div className="flex-1 flex flex-col">
+      <div style={{ flex: 1, display: 'flex' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div 
             ref={terminalRef}
-            className="flex-1 bg-black p-4 overflow-y-auto text-sm leading-relaxed"
-            style={{ height: '60vh' }}
+            style={{ 
+              flex: 1, 
+              backgroundColor: 'black', 
+              padding: '16px', 
+              overflowY: 'auto',
+              fontSize: '14px',
+              lineHeight: '1.5',
+              height: '60vh'
+            }}
           >
             {terminalOutput.map((line, index) => (
-              <div key={index} className="mb-1">
+              <div key={index} style={{ marginBottom: '4px' }}>
                 {line}
               </div>
             ))}
           </div>
 
-          <div className="bg-gray-900 border-t-2 border-green-400 p-4">
-            <form onSubmit={handleTerminalSubmit} className="flex gap-2">
-              <span className="text-green-300">{'>'}</span>
+          <div style={{ 
+            backgroundColor: '#1a1a1a', 
+            borderTop: '2px solid #00ff00', 
+            padding: '16px' 
+          }}>
+            <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', gap: '8px' }}>
+              <span style={{ color: '#00cc00' }}>{'>'}</span>
               <input
                 type="text"
                 value={terminalInput}
                 onChange={(e) => setTerminalInput(e.target.value)}
-                className="flex-1 bg-black text-green-400 border border-green-400 px-2 py-1 focus:outline-none focus:border-green-300"
+                style={{
+                  flex: 1,
+                  backgroundColor: 'black',
+                  color: '#00ff00',
+                  border: '1px solid #00ff00',
+                  padding: '4px 8px',
+                  fontFamily: 'monospace'
+                }}
                 placeholder="Enter command..."
                 autoFocus
               />
             </form>
             
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div style={{ 
+              marginTop: '8px', 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: '8px' 
+            }}>
               <button
                 onClick={() => setTerminalInput('LOOKUP ')}
-                className="px-3 py-1 bg-gray-700 text-green-400 text-xs rounded hover:bg-gray-600 transition-colors"
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#333',
+                  color: '#00ff00',
+                  fontSize: '12px',
+                  border: '1px solid #00ff00',
+                  cursor: 'pointer'
+                }}
               >
                 LOOKUP
               </button>
               <button
                 onClick={() => setTerminalInput('VERIFY ')}
-                className="px-3 py-1 bg-gray-700 text-green-400 text-xs rounded hover:bg-gray-600 transition-colors"
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#333',
+                  color: '#00ff00',
+                  fontSize: '12px',
+                  border: '1px solid #00ff00',
+                  cursor: 'pointer'
+                }}
               >
                 VERIFY
               </button>
               <button
                 onClick={() => processCommand('COMPARE SIGNATURE')}
-                className="px-3 py-1 bg-gray-700 text-green-400 text-xs rounded hover:bg-gray-600 transition-colors"
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#333',
+                  color: '#00ff00',
+                  fontSize: '12px',
+                  border: '1px solid #00ff00',
+                  cursor: 'pointer'
+                }}
               >
                 COMPARE SIG
               </button>
               <button
                 onClick={() => processCommand('APPROVE')}
-                className="px-3 py-1 bg-green-700 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#006600',
+                  color: 'white',
+                  fontSize: '12px',
+                  border: '1px solid #00ff00',
+                  cursor: 'pointer'
+                }}
               >
                 APPROVE
               </button>
               <button
                 onClick={() => processCommand('REJECT')}
-                className="px-3 py-1 bg-red-700 text-white text-xs rounded hover:bg-red-600 transition-colors"
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#cc0000',
+                  color: 'white',
+                  fontSize: '12px',
+                  border: '1px solid #00ff00',
+                  cursor: 'pointer'
+                }}
               >
                 REJECT
               </button>
               <button
                 onClick={() => processCommand('NEXT')}
-                className="px-3 py-1 bg-blue-700 text-white text-xs rounded hover:bg-blue-600 transition-colors"
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#0066cc',
+                  color: 'white',
+                  fontSize: '12px',
+                  border: '1px solid #00ff00',
+                  cursor: 'pointer'
+                }}
               >
                 NEXT
               </button>
@@ -729,44 +883,89 @@ export default function App() {
         </div>
 
         {gameState.currentCustomer && (
-          <div className="w-80 bg-gray-900 border-l-2 border-green-400 p-4">
-            <h3 className="text-lg font-bold mb-4 text-green-300">CUSTOMER DOCUMENTS</h3>
+          <div style={{ 
+            width: '320px', 
+            backgroundColor: '#1a1a1a', 
+            borderLeft: '2px solid #00ff00', 
+            padding: '16px' 
+          }}>
+            <h3 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              marginBottom: '16px', 
+              color: '#00cc00' 
+            }}>
+              CUSTOMER DOCUMENTS
+            </h3>
             
-            <div className="mb-4 p-3 bg-gray-800 rounded border border-green-400">
-              <div className="text-sm">
+            <div style={{ 
+              marginBottom: '16px', 
+              padding: '12px', 
+              backgroundColor: '#333', 
+              borderRadius: '4px',
+              border: '1px solid #00ff00'
+            }}>
+              <div style={{ fontSize: '14px' }}>
                 <div><strong>Customer:</strong> {gameState.currentCustomer.name}</div>
                 <div><strong>Transaction:</strong> {gameState.currentCustomer.transaction.type.toUpperCase()}</div>
                 <div><strong>Amount:</strong> ${gameState.currentCustomer.transaction.amount}</div>
                 <div><strong>Account:</strong> {gameState.currentCustomer.transaction.accountNumber}</div>
-                <div className="mt-2">
-                  <div className="text-xs text-yellow-400">
+                <div style={{ marginTop: '8px' }}>
+                  <div style={{ fontSize: '12px', color: '#ffff00' }}>
                     Patience: {gameState.currentCustomer.patience}%
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                  <div style={{ 
+                    width: '100%', 
+                    backgroundColor: '#666', 
+                    borderRadius: '2px',
+                    height: '8px',
+                    marginTop: '4px'
+                  }}>
                     <div 
-                      className="bg-yellow-400 h-2 rounded-full transition-all duration-1000"
-                      style={{ width: `${gameState.currentCustomer.patience}%` }}
-                    ></div>
+                      style={{ 
+                        backgroundColor: '#ffff00', 
+                        height: '8px', 
+                        borderRadius: '2px',
+                        transition: 'width 1s',
+                        width: `${gameState.currentCustomer.patience}%`
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div 
-              className="grid grid-cols-2 gap-2 overflow-y-auto"
-              style={{ height: '38vh' }}
-            >
-              {gameState.currentCustomer.documents.map((doc) => (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr', 
+              gap: '8px',
+              overflowY: 'auto',
+              height: '38vh'
+            }}>
+              {gameState.currentCustomer.documents.map((doc: BankDocument) => (
                 <button
                   key={doc.id}
                   onClick={() => openDocumentPopup(doc)}
-                  className="p-3 bg-gray-800 border border-green-400 rounded hover:bg-gray-700 transition-colors text-left text-xs"
-                  style={{ minHeight: '120px' }}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: '#333',
+                    border: '1px solid #00ff00',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '12px',
+                    minHeight: '120px',
+                    color: '#00ff00'
+                  }}
                 >
-                  <div className="font-bold text-green-300 mb-2">
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    color: '#00cc00', 
+                    marginBottom: '8px' 
+                  }}>
                     {doc.type.toUpperCase().replace('_', ' ')}
                   </div>
-                  <div className="text-gray-300">
+                  <div style={{ color: '#ccc' }}>
                     Click to examine
                   </div>
                 </button>
@@ -777,25 +976,58 @@ export default function App() {
       </div>
 
       {showBankRecords && gameState.currentCustomer && (
-        <div className="fixed top-20 right-4 w-80 bg-blue-900 border-2 border-blue-400 rounded p-4 z-50">
-          <div className="flex justify-between items-center mb-3">
-            <h4 className="font-bold text-blue-200">BANK COMPUTER RECORDS</h4>
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '16px',
+          width: '320px',
+          backgroundColor: '#003366',
+          border: '2px solid #0066cc',
+          borderRadius: '4px',
+          padding: '16px',
+          zIndex: 50
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '12px' 
+          }}>
+            <h4 style={{ fontWeight: 'bold', color: '#66ccff' }}>
+              BANK COMPUTER RECORDS
+            </h4>
             <button
               onClick={() => setShowBankRecords(false)}
-              className="text-blue-200 hover:text-white"
+              style={{
+                color: '#66ccff',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
             >
               ✕
             </button>
           </div>
-          <div className="text-sm text-blue-100">
+          <div style={{ fontSize: '14px', color: '#ccddff' }}>
             <div><strong>Name:</strong> {gameState.currentCustomer.bankRecords.name}</div>
             <div><strong>DOB:</strong> {gameState.currentCustomer.bankRecords.dateOfBirth}</div>
             <div><strong>Address:</strong> {gameState.currentCustomer.bankRecords.address}</div>
             <div><strong>License:</strong> {gameState.currentCustomer.bankRecords.licenseNumber}</div>
             <div><strong>Account:</strong> {gameState.currentCustomer.bankRecords.accountNumber}</div>
-            <div className="mt-2 p-2 bg-blue-800 rounded">
+            <div style={{ 
+              marginTop: '8px', 
+              padding: '8px', 
+              backgroundColor: '#002244', 
+              borderRadius: '4px' 
+            }}>
               <strong>Bank Signature:</strong>
-              <div className="mt-1 text-white" style={{ fontFamily: 'cursive', fontSize: '16px' }}>
+              <div style={{ 
+                marginTop: '4px', 
+                color: 'white', 
+                fontFamily: 'cursive', 
+                fontSize: '16px' 
+              }}>
                 {gameState.currentCustomer.bankRecords.signature}
               </div>
             </div>
@@ -806,42 +1038,81 @@ export default function App() {
       {popupDocuments.map((popup) => (
         <div
           key={popup.id}
-          className="fixed bg-white text-black border-2 border-gray-400 rounded shadow-lg z-40"
           style={{
+            position: 'fixed',
             left: popup.position.x,
             top: popup.position.y,
             width: '350px',
-            height: '550px'
+            height: '550px',
+            backgroundColor: 'white',
+            color: 'black',
+            border: '2px solid #666',
+            borderRadius: '4px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+            zIndex: 40
           }}
         >
           <div
-            className="bg-gray-200 p-2 cursor-move flex justify-between items-center border-b"
+            style={{
+              backgroundColor: '#ddd',
+              padding: '8px',
+              cursor: 'move',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottom: '1px solid #ccc'
+            }}
             onMouseDown={(e) => handleMouseDown(e, popup.id)}
           >
-            <span className="font-bold text-sm">
+            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
               DOCUMENT: {popup.document.type.toUpperCase()}
             </span>
             <button
               onClick={() => closeDocumentPopup(popup.id)}
-              className="text-gray-600 hover:text-black font-bold"
+              style={{
+                color: '#666',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
             >
               ✕
             </button>
           </div>
 
-          <div className="p-4 overflow-y-auto" style={{ height: 'calc(100% - 120px)' }}>
+          <div style={{ 
+            padding: '16px', 
+            overflowY: 'auto', 
+            height: 'calc(100% - 120px)' 
+          }}>
             {renderDocument(popup.document)}
           </div>
 
           {gameState.currentCustomer && (
-            <div className="border-t bg-blue-50 p-3">
-              <h5 className="font-bold text-blue-800 text-sm mb-2">BANK RECORDS</h5>
-              <div className="text-xs text-blue-700">
+            <div style={{ 
+              borderTop: '1px solid #ccc', 
+              backgroundColor: '#f0f8ff', 
+              padding: '12px' 
+            }}>
+              <h5 style={{ 
+                fontWeight: 'bold', 
+                color: '#003366', 
+                fontSize: '14px', 
+                marginBottom: '8px' 
+              }}>
+                BANK RECORDS
+              </h5>
+              <div style={{ fontSize: '12px', color: '#004488' }}>
                 <div>Name: {gameState.currentCustomer.bankRecords.name}</div>
                 <div>DOB: {gameState.currentCustomer.bankRecords.dateOfBirth}</div>
                 <div>License: {gameState.currentCustomer.bankRecords.licenseNumber}</div>
                 {popup.document.type === 'signature' && (
-                  <div className="mt-1 p-1 bg-blue-100">
+                  <div style={{ 
+                    marginTop: '4px', 
+                    padding: '4px', 
+                    backgroundColor: '#e6f3ff' 
+                  }}>
                     <em style={{ fontFamily: 'cursive' }}>
                       {gameState.currentCustomer.bankRecords.signature}
                     </em>
