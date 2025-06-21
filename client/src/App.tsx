@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './index.css';
 
+console.log('BANK TELLER 1988 - CORRECT VERSION LOADING');
+
 // Game interfaces
 interface Customer {
   id: string;
