@@ -14,13 +14,21 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "privacy": "public",
+    "description": "A nostalgic 1980s bank teller simulation game featuring document verification, fraud detection, and authentic retro computing experience.",
+    "keywords": ["game", "simulation", "retro", "1980s", "bank", "teller", "fraud", "detection"],
+    "category": "GAMES",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.bankteller.app",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This app uses advertising ID to show personalized ads and support the game development.",
-        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
+        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -28,7 +36,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.bankteller.app"
+      "package": "com.bankteller.app",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "plugins": [
       [
@@ -39,6 +52,11 @@
         }
       ],
       "@capacitor/splash-screen"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    }
   }
 }
