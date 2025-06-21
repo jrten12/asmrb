@@ -92,6 +92,14 @@ Bank Teller 1988 is a nostalgic simulation game that recreates the experience of
 - **Production Ready**: Easy configuration swap for live ads
 
 ## Changelog
+- June 21, 2025: COMPLETE REBUILD - Recreated correct Bank Teller 1988 fraud detection game from specifications
+- June 21, 2025: IMPLEMENTED full terminal command system (LOOKUP, VERIFY, COMPARE SIGNATURE, APPROVE/REJECT)
+- June 21, 2025: ADDED 35% fraud rate with document mismatches for manual "Papers Please" style detection
+- June 21, 2025: CREATED draggable popup document viewers (350x550px) with bank records comparison
+- June 21, 2025: RESTORED customer patience system with visual timer and timeout consequences
+- June 21, 2025: IMPLEMENTED fraud termination system (2 fraudulent approvals = game over)
+- June 21, 2025: ADDED comprehensive ASMR sound system using Web Audio API
+- June 21, 2025: BUILT mobile-friendly interface with command shortcut buttons
 - June 19, 2025: ENHANCED popups to 350x550px draggable windows with touch/finger support
 - June 19, 2025: ADDED bank computer records display in ALL document popups for easy fraud comparison
 - June 19, 2025: REMOVED all CRT effects and scanlines for crisp, readable interface
